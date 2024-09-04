@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\Jhow\\Desktop\\ERP - Angular\\SmartClinicAngular\\WebApiSmartClinic\\WebApiSmartClinic\\WebApiSmartClinic.csproj": {}
+    "C:\\Users\\Jhow\\Desktop\\ERP - Angular\\WebApiSmartClinic\\WebApiSmartClinic\\WebApiSmartClinic.csproj": {}
   },
   "projects": {
-    "C:\\Users\\Jhow\\Desktop\\ERP - Angular\\SmartClinicAngular\\WebApiSmartClinic\\WebApiSmartClinic\\WebApiSmartClinic.csproj": {
+    "C:\\Users\\Jhow\\Desktop\\ERP - Angular\\WebApiSmartClinic\\WebApiSmartClinic\\WebApiSmartClinic.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\Jhow\\Desktop\\ERP - Angular\\SmartClinicAngular\\WebApiSmartClinic\\WebApiSmartClinic\\WebApiSmartClinic.csproj",
+        "projectUniqueName": "C:\\Users\\Jhow\\Desktop\\ERP - Angular\\WebApiSmartClinic\\WebApiSmartClinic\\WebApiSmartClinic.csproj",
         "projectName": "WebApiSmartClinic",
-        "projectPath": "C:\\Users\\Jhow\\Desktop\\ERP - Angular\\SmartClinicAngular\\WebApiSmartClinic\\WebApiSmartClinic\\WebApiSmartClinic.csproj",
+        "projectPath": "C:\\Users\\Jhow\\Desktop\\ERP - Angular\\WebApiSmartClinic\\WebApiSmartClinic\\WebApiSmartClinic.csproj",
         "packagesPath": "C:\\Users\\Jhow\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\Jhow\\Desktop\\ERP - Angular\\SmartClinicAngular\\WebApiSmartClinic\\WebApiSmartClinic\\obj\\",
+        "outputPath": "C:\\Users\\Jhow\\Desktop\\ERP - Angular\\WebApiSmartClinic\\WebApiSmartClinic\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\Jhow\\AppData\\Roaming\\NuGet\\NuGet.Config",

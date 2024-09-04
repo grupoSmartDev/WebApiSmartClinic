@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "EvBf5QDZFdLb6pLgtp4F4Hxrtw+CaVqd9azyxjoOlzO9YZOkSv1htOODT+V0k+IOD2edCR3vczYdYJpnAJIlFA==",
+  "dgSpecHash": "9WiTxu8myLNbuONmUd2SN6uWLkGDufYLW7xLkk6P4ycBPoPlIgqGTbExeBSQGzGxIFfz8ePRM7a7IpM0ywyQdw==",
   "success": true,
-  "projectFilePath": "C:\\Users\\Jhow\\Desktop\\ERP - Angular\\SmartClinicAngular\\WebApiSmartClinic\\WebApiSmartClinic\\WebApiSmartClinic.csproj",
+  "projectFilePath": "C:\\Users\\Jhow\\Desktop\\ERP - Angular\\WebApiSmartClinic\\WebApiSmartClinic\\WebApiSmartClinic.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\Jhow\\.nuget\\packages\\azure.core\\1.35.0\\azure.core.1.35.0.nupkg.sha512",
     "C:\\Users\\Jhow\\.nuget\\packages\\azure.identity\\1.10.3\\azure.identity.1.10.3.nupkg.sha512",

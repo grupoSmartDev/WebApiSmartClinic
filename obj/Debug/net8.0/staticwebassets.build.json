@@ -1,0 +1,11 @@
+{
+  "Version": 1,
+  "Hash": "FtTxZeDNDa3e3cbnp/AklykKhAFgVeP3XZEIGfA2kCw=",
+  "Source": "WebApiSmartClinic",
+  "BasePath": "_content/WebApiSmartClinic",
+  "Mode": "Default",
+  "ManifestType": "Build",
+  "ReferencedProjectsConfiguration": [],
+  "DiscoveryPatterns": [],
+  "Assets": []
+}

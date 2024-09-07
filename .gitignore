@@ -609,3 +609,8 @@ FodyWeavers.xsd
 /.vs/WebApiSmartClinic
 /obj
 /obj
+*.cache
+/obj/Debug/net8.0
+/obj/Debug
+/obj
+/bin/Debug/net8.0

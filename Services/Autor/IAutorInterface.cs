@@ -11,5 +11,5 @@ public interface IAutorInterface
     Task<ResponseModel<List<AutorModel>>> CriarAutor(AutorCreateDto autorCreateDto);
 
     Task<ResponseModel<List<AutorModel>>> EditarAutor(AutorEdicaoDto autorEdicaoDto);
-    Task<ResponseModel<List<AutorModel>>> ExcluirAutor(int idAutor);
+    Task<ResponseModel<List<AutorModel>>> DeleteAutor(int idAutor);
 }

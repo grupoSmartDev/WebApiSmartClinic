@@ -53,7 +53,7 @@ public class AutorController : ControllerBase
     }
 
     [HttpDelete("ExcluirAutor")]
-    public async Task<ActionResult<ResponseModel<List<AutorModel>>>> ExcluirAutor(AutorEdicaoDto autorEdicaoDto)
+    public async Task<ActionResult<ResponseModel<List<AutorModel>>>> DeleteAutor(AutorEdicaoDto autorEdicaoDto)
     {
         var autores = await _autorInterface.EditarAutor(autorEdicaoDto);
         return Ok(autores);

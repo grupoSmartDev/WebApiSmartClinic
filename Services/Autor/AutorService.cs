@@ -133,7 +133,7 @@ namespace WebApiSmartClinic.Services.Autor
             }
         }
 
-        public async Task<ResponseModel<List<AutorModel>>> ExcluirAutor(int idAutor)
+        public async Task<ResponseModel<List<AutorModel>>> DeleteAutor(int idAutor)
         {
             //primeiro, criar variavel de resposta
             ResponseModel<List<AutorModel>> resposta = new ResponseModel<List<AutorModel>>();

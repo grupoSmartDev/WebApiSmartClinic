@@ -13,4 +13,5 @@ public class AppDbContext : DbContext
   public DbSet<AutorModel> Autores { get; set; }
   public DbSet<LivroModel> Livros { get; set; }
   public DbSet<StatusModel> Status { get; set; }  
+  
 }

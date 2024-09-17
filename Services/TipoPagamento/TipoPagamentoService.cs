@@ -46,16 +46,11 @@ public class TipoPagamentoService : ITipoPagamentoInterface
         try
         {
             var tipopagamento = new TipoPagamentoModel();
-            if (tipopagamentoCreateDto == null)
-            {
-                resposta.Mensagem = "Erro ao Criar um TipoPagamento";
-                return resposta;
-            }
 
             // Atualizar para o código de acordo com o necessário
-            //tipopagamento.TipoPagamento = tipopagamentoCreateDto.TipoPagamento;
+            tipopagamento.Descricao = tipopagamentoCreateDto.Descricao;
 
-            _context.AddAsync(tipopagamento);
+            _context.Add(tipopagamento);
             await _context.SaveChangesAsync();
 
             resposta.Dados = await _context.TipoPagamento.ToListAsync();
@@ -115,7 +110,7 @@ public class TipoPagamentoService : ITipoPagamentoInterface
             }
 
             // Atualizar para o código de acordo com o necessário
-            //tipopagamento.TipoPagamento = tipopagamentoEdicaoDto.TipoPagamento;
+            tipopagamento.Descricao = tipopagamentoEdicaoDto.Descricao;
 
             _context.Update(tipopagamento);
             await _context.SaveChangesAsync();

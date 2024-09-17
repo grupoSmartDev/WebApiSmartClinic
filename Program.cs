@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using WebApiSmartClinic.Data;
 using WebApiSmartClinic.Services.Autor;
 using WebApiSmartClinic.Services.Status;
+using WebApiSmartClinic.Services.TipoPagamento;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -32,6 +33,7 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 // Vincular interface com os serviços
 builder.Services.AddScoped<IAutorInterface, AutorService>();
 builder.Services.AddScoped<IStatusInterface, StatusService>();
+builder.Services.AddScoped<ITipoPagamentoInterface, TipoPagamentoService>();
 
 var app = builder.Build();
 

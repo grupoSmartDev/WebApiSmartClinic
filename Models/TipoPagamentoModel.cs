@@ -1,10 +1,9 @@
 
-namespace WebApiSmartClinic.Models
-{
-    public class TipoPagamentoModel
-    {
-        public int Id { get; set; }
+namespace WebApiSmartClinic.Models;
 
-        public string? Descricao { get; set; }
-    }
+public class TipoPagamentoModel
+{
+    public int Id { get; set; }
+
+    public string? Descricao { get; set; }
 }

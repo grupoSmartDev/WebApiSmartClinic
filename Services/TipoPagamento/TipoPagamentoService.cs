@@ -27,7 +27,7 @@ public class TipoPagamentoService : ITipoPagamentoInterface
             }
 
             resposta.Dados = tipopagamento;
-            resposta.Mensagem = "TipoPagamento Encontrado";
+            resposta.Mensagem = "Tipo de Pagamento Encontrado";
             return resposta;
         }
         catch (Exception ex)
@@ -54,7 +54,7 @@ public class TipoPagamentoService : ITipoPagamentoInterface
             await _context.SaveChangesAsync();
 
             resposta.Dados = await _context.TipoPagamento.ToListAsync();
-            resposta.Mensagem = "TipoPagamento criado com sucesso";
+            resposta.Mensagem = "Tipo de Pagamento criado com sucesso";
             return resposta;
         }
         catch (Exception ex)
@@ -83,7 +83,7 @@ public class TipoPagamentoService : ITipoPagamentoInterface
             await _context.SaveChangesAsync();
 
             resposta.Dados = await _context.TipoPagamento.ToListAsync();
-            resposta.Mensagem = "TipoPagamento Excluido com sucesso";
+            resposta.Mensagem = "Tipo de Pagamento Excluido com sucesso";
             return resposta;
 
         }
@@ -105,7 +105,7 @@ public class TipoPagamentoService : ITipoPagamentoInterface
             var tipopagamento = _context.TipoPagamento.FirstOrDefault(x => x.Id == tipopagamentoEdicaoDto.Id);
             if (tipopagamento == null)
             {
-                resposta.Mensagem = "TipoPagamento não encontrado";
+                resposta.Mensagem = "Tipo de Pagamento não encontrado";
                 return resposta;
             }
 
@@ -116,7 +116,7 @@ public class TipoPagamentoService : ITipoPagamentoInterface
             await _context.SaveChangesAsync();
 
             resposta.Dados = await _context.TipoPagamento.ToListAsync();
-            resposta.Mensagem = "TipoPagamento Atualizado com sucesso";
+            resposta.Mensagem = "Tipo de Pagamento Atualizado com sucesso";
             return resposta;
         }
         catch (Exception ex)

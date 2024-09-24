@@ -5,6 +5,7 @@ using WebApiSmartClinic.Services.CentroCusto;
 using WebApiSmartClinic.Services.FormaPagamento;
 using WebApiSmartClinic.Services.Fornecedor;
 using WebApiSmartClinic.Services.Status;
+using WebApiSmartClinic.Services.SubCentroCusto;
 using WebApiSmartClinic.Services.TipoPagamento;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -40,6 +41,7 @@ builder.Services.AddScoped<ITipoPagamentoInterface, TipoPagamentoService>();
 builder.Services.AddScoped<IFornecedorInterface, FornecedorService>();
 builder.Services.AddScoped<IFormaPagamentoInterface, FormaPagamentoService>();
 builder.Services.AddScoped<ICentroCustoInterface, CentroCustoService>();
+builder.Services.AddScoped<ISubCentroCustoInterface, SubCentroCustoService>();
 
 var app = builder.Build();
 

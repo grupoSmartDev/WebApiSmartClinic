@@ -19,7 +19,8 @@ public class CentroCustoService : ICentroCustoInterface
         ResponseModel<CentroCustoModel> resposta = new ResponseModel<CentroCustoModel>();
         try
         {
-            var centrocusto = await _context.CentroCusto.FirstOrDefaultAsync(x => x.Id == idCentroCusto);
+            var centrocusto = await _context.CentroCusto.Include(c => c.SubCentrosCusto).FirstOrDefaultAsync(x => x.Id == idCentroCusto);
+
             if (centrocusto == null)
             {
                 resposta.Mensagem = "Nenhum centro de custo encontrado";
@@ -49,17 +50,12 @@ public class CentroCustoService : ICentroCustoInterface
 
             centrocusto.Descricao = centrocustoCreateDto.Descricao;
             centrocusto.Tipo = centrocustoCreateDto.Tipo;
-            centrocusto.CentroCustoOrigem = centrocustoCreateDto.CentroCustoOrigem;
 
-            _context.Add(centrocusto);
+            _context.CentroCusto.Add(centrocusto);
             await _context.SaveChangesAsync();
 
             resposta.Dados = await _context.CentroCusto.ToListAsync();
-            
-            if (string.IsNullOrEmpty(centrocusto.CentroCustoOrigem))
-                resposta.Mensagem = "Centro de custo criado com sucesso";
-            else
-                resposta.Mensagem = "Sub centro de custo criado com sucesso";
+            resposta.Mensagem = "Centro de Custo criado com sucesso";
 
             return resposta;
         }
@@ -69,27 +65,26 @@ public class CentroCustoService : ICentroCustoInterface
             resposta.Status = false;
             return resposta;
         }
-
     }
 
-    public async Task<ResponseModel<List<CentroCustoModel>>> DeleteCentroCusto(int idCentroCusto)
+    public async Task<ResponseModel<List<CentroCustoModel>>> DeleteCentroCusto(int id)
     {
-        ResponseModel<List<CentroCustoModel>> resposta = new ResponseModel<List<CentroCustoModel>>();
+        var resposta = new ResponseModel<List<CentroCustoModel>>();
 
         try
         {
-            var centrocusto = await _context.CentroCusto.FirstOrDefaultAsync(x => x.Id == idCentroCusto);
-            if (centrocusto == null)
+            var centroCusto = await _context.CentroCusto.Include(c => c.SubCentrosCusto).FirstOrDefaultAsync(x => x.Id == id);
+            if (centroCusto == null)
             {
-                resposta.Mensagem = "Nenhum centro de custo encontrado";
+                resposta.Mensagem = "Centro de Custo não encontrado";
                 return resposta;
             }
 
-            _context.Remove(centrocusto);
+            _context.CentroCusto.Remove(centroCusto);
             await _context.SaveChangesAsync();
 
-            resposta.Dados = await _context.CentroCusto.ToListAsync();
-            resposta.Mensagem = "Centro de custo Excluido com sucesso";
+            resposta.Dados = await _context.CentroCusto.Include(c => c.SubCentrosCusto).ToListAsync();
+            resposta.Mensagem = "Centro de Custo excluído com sucesso";
             return resposta;
         }
         catch (Exception ex)
@@ -121,11 +116,7 @@ public class CentroCustoService : ICentroCustoInterface
             await _context.SaveChangesAsync();
 
             resposta.Dados = await _context.CentroCusto.ToListAsync();
-            
-            if (string.IsNullOrEmpty(centrocusto.CentroCustoOrigem))
-                resposta.Mensagem = "Centro de custo atualizado com sucesso";
-            else
-                resposta.Mensagem = "Sub centro de custo atualizado com sucesso";
+            resposta.Mensagem = "Centro de Custo atualizado com sucesso";
 
             return resposta;
         }
@@ -143,7 +134,7 @@ public class CentroCustoService : ICentroCustoInterface
 
         try
         {
-            var centrocusto = await _context.CentroCusto.ToListAsync();
+            var centrocusto = await _context.CentroCusto.Include(c => c.SubCentrosCusto).ToListAsync();
 
             resposta.Dados = centrocusto;
             resposta.Mensagem = "Todos os centros de custos foram encontrados";

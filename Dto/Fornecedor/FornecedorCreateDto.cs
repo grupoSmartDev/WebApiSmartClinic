@@ -29,5 +29,7 @@ namespace WebApiSmartClinic.Dto.Fornecedor
         public string TipoPIX { get; set; }
         public string ChavePIX { get; set; }
         public string Email { get; set; }
+        public string Nome { get; set; }
+        public string Observacao { get; set; }
     }
 }

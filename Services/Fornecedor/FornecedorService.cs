@@ -73,6 +73,8 @@ public class FornecedorService : IFornecedorInterface
             fornecedor.TipoPIX = fornecedorCreateDto.TipoPIX;
             fornecedor.ChavePIX = fornecedorCreateDto.ChavePIX;
             fornecedor.Email = fornecedorCreateDto.Email;
+            fornecedor.Observacao = fornecedorCreateDto.Observacao;
+            fornecedor.nome = fornecedorCreateDto.Nome;
 
             _context.Add(fornecedor);
             await _context.SaveChangesAsync();
@@ -159,6 +161,8 @@ public class FornecedorService : IFornecedorInterface
             fornecedor.TipoPIX = fornecedorEdicaoDto.TipoPIX;
             fornecedor.ChavePIX = fornecedorEdicaoDto.ChavePIX;
             fornecedor.Email = fornecedorEdicaoDto.Email;
+            fornecedor.Observacao = fornecedorEdicaoDto.Observacao;
+            fornecedor.nome = fornecedorEdicaoDto.Nome;
 
             _context.Update(fornecedor);
             await _context.SaveChangesAsync();

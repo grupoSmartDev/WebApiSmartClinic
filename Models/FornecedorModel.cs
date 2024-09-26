@@ -30,6 +30,8 @@ public class FornecedorModel
     public string ChavePIX { get; set; }
     public string Email { get; set; }
     public DateTime? DataNascimento { get; set; }
+    public string nome { get; set; }
+    public string Observacao { get; set; }
 
     //public ICollection<Financ_Pagar> Financ_Pagar { get; set; }
 }

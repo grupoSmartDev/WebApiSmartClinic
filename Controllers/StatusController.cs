@@ -16,35 +16,35 @@ public class StatusController : ControllerBase
         _status = status;
     }
 
-    [HttpGet("ListarStatus")]
+    [HttpGet("Listar")]
     public async Task<ActionResult<ResponseModel<List<StatusModel>>>> ListarStatus()
     {
         var status = await _status.ListarStatus();
         return Ok(status);
     }
 
-    [HttpGet("BuscarStatusPorId/{idStatus}")]
+    [HttpGet("BuscarPorId/{idStatus}")]
     public async Task<ActionResult<ResponseModel<List<StatusModel>>>> BuscarStatusPorId(int idStatus)
     {
         var status = await _status.BuscarStatusPorId(idStatus);
         return Ok(status);
     }
 
-    [HttpPost("CriarStatus")]
+    [HttpPost("Criar")]
     public async Task<ActionResult<ResponseModel<List<StatusModel>>>> CriarStatus(StatusCreateDto statusCreateDto)
     {
         var status = await _status.CriarStatus(statusCreateDto);
         return Ok(status);
     }
 
-    [HttpPut("EditarStatus")]
+    [HttpPut("Editar")]
     public async Task<ActionResult<ResponseModel<List<StatusModel>>>> EditarStatus(StatusEdicaoDto statusEdicaoDto)
     {
         var status = await _status.EditarStatus(statusEdicaoDto);
         return Ok(status);
     }
 
-    [HttpDelete("DeleteStatus/{idStatus}")]
+    [HttpDelete("Delete/{idStatus}")]
     public async Task<ActionResult<ResponseModel<List<StatusModel>>>> DeleteStatus(int idStatus)
     {
         var status = await _status.DeleteStatus(idStatus);

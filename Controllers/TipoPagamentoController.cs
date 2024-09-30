@@ -16,35 +16,35 @@ namespace WebApiSmartClinic.Controllers
             _tipopagamento = tipopagamento;
         }
 
-        [HttpGet("ListarTipoPagamento")]
+        [HttpGet("Listar")]
         public async Task<ActionResult<ResponseModel<List<TipoPagamentoModel>>>> ListarTipoPagamento()
         {
             var tipopagamento = await _tipopagamento.ListarTipoPagamento();
             return Ok(tipopagamento);
         }
 
-        [HttpGet("BuscarTipoPagamentoPorId/{idTipoPagamento}")]
+        [HttpGet("BuscarPorId/{idTipoPagamento}")]
         public async Task<ActionResult<ResponseModel<List<TipoPagamentoModel>>>> BuscarTipoPagamentoPorId(int idTipoPagamento)
         {
             var tipopagamento = await _tipopagamento.BuscarTipoPagamentoPorId(idTipoPagamento);
             return Ok(tipopagamento);
         }
 
-        [HttpPost("CriarTipoPagamento")]
+        [HttpPost("Criar")]
         public async Task<ActionResult<ResponseModel<List<TipoPagamentoModel>>>> CriarTipoPagamento(TipoPagamentoCreateDto tipopagamentoCreateDto)
         {
             var tipopagamento = await _tipopagamento.CriarTipoPagamento(tipopagamentoCreateDto);
             return Ok(tipopagamento);
         }
 
-        [HttpPut("EditarTipoPagamento")]
+        [HttpPut("Editar")]
         public async Task<ActionResult<ResponseModel<List<TipoPagamentoModel>>>> EditarTipoPagamento(TipoPagamentoEdicaoDto tipopagamentoEdicaoDto)
         {
             var tipopagamento = await _tipopagamento.EditarTipoPagamento(tipopagamentoEdicaoDto);
             return Ok(tipopagamento);
         }
 
-        [HttpDelete("DeleteTipoPagamento/{idTipoPagamento}")]
+        [HttpDelete("Delete/{idTipoPagamento}")]
         public async Task<ActionResult<ResponseModel<List<TipoPagamentoModel>>>> DeleteTipoPagamento(int idTipoPagamento)
         {
             var tipopagamento = await _tipopagamento.DeleteTipoPagamento(idTipoPagamento);

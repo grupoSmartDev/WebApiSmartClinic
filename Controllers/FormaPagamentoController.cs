@@ -16,35 +16,35 @@ namespace WebApiSmartClinic.Controllers
             _formapagamento = formapagamento;
         }
 
-        [HttpGet("ListarFormaPagamento")]
+        [HttpGet("Listar")]
         public async Task<ActionResult<ResponseModel<List<FormaPagamentoModel>>>> ListarFormaPagamento()
         {
             var formapagamento = await _formapagamento.ListarFormaPagamento();
             return Ok(formapagamento);
         }
 
-        [HttpGet("BuscarFormaPagamentoPorId/{idFormaPagamento}")]
+        [HttpGet("BuscarPorId/{idFormaPagamento}")]
         public async Task<ActionResult<ResponseModel<List<FormaPagamentoModel>>>> BuscarFormaPagamentoPorId(int idFormaPagamento)
         {
             var formapagamento = await _formapagamento.BuscarFormaPagamentoPorId(idFormaPagamento);
             return Ok(formapagamento);
         }
 
-        [HttpPost("CriarFormaPagamento")]
+        [HttpPost("Criar")]
         public async Task<ActionResult<ResponseModel<List<FormaPagamentoModel>>>> CriarFormaPagamento(FormaPagamentoCreateDto formapagamentoCreateDto)
         {
             var formapagamento = await _formapagamento.CriarFormaPagamento(formapagamentoCreateDto);
             return Ok(formapagamento);
         }
 
-        [HttpPut("EditarFormaPagamento")]
+        [HttpPut("Editar")]
         public async Task<ActionResult<ResponseModel<List<FormaPagamentoModel>>>> EditarFormaPagamento(FormaPagamentoEdicaoDto formapagamentoEdicaoDto)
         {
             var formapagamento = await _formapagamento.EditarFormaPagamento(formapagamentoEdicaoDto);
             return Ok(formapagamento);
         }
 
-        [HttpDelete("DeleteFormaPagamento/{idFormaPagamento}")]
+        [HttpDelete("Delete/{idFormaPagamento}")]
         public async Task<ActionResult<ResponseModel<List<FormaPagamentoModel>>>> DeleteFormaPagamento(int idFormaPagamento)
         {
             var formapagamento = await _formapagamento.DeleteFormaPagamento(idFormaPagamento);

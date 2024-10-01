@@ -4,6 +4,7 @@ using WebApiSmartClinic.Services.Autor;
 using WebApiSmartClinic.Services.CentroCusto;
 using WebApiSmartClinic.Services.FormaPagamento;
 using WebApiSmartClinic.Services.Fornecedor;
+using WebApiSmartClinic.Services.Sala;
 using WebApiSmartClinic.Services.Status;
 using WebApiSmartClinic.Services.SubCentroCusto;
 using WebApiSmartClinic.Services.TipoPagamento;
@@ -36,12 +37,13 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 
 // Vincular interface com os serviços
 builder.Services.AddScoped<IAutorInterface, AutorService>();
-builder.Services.AddScoped<IStatusInterface, StatusService>();
+builder.Services.AddScoped<ISalaInterface, SalaService>();
 builder.Services.AddScoped<ITipoPagamentoInterface, TipoPagamentoService>();
 builder.Services.AddScoped<IFornecedorInterface, FornecedorService>();
 builder.Services.AddScoped<IFormaPagamentoInterface, FormaPagamentoService>();
 builder.Services.AddScoped<ICentroCustoInterface, CentroCustoService>();
 builder.Services.AddScoped<ISubCentroCustoInterface, SubCentroCustoService>();
+builder.Services.AddScoped<IStatusInterface, StatusService>();
 
 var app = builder.Build();
 

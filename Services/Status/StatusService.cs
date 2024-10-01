@@ -38,7 +38,7 @@ public class StatusService : IStatusInterface
         }
     }
 
-    public async Task<ResponseModel<List<StatusModel>>> CriarStatus(StatusCreateDto statusCreateDto)
+    public async Task<ResponseModel<List<StatusModel>>> CriarStatus(SalaCreateDto statusCreateDto)
     {
         ResponseModel<List<StatusModel>> resposta = new ResponseModel<List<StatusModel>>();
 

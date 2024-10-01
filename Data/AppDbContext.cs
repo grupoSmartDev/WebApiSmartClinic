@@ -15,6 +15,7 @@ public class AppDbContext : DbContext
     public DbSet<FornecedorModel> Fornecedor { get; set; }
     public DbSet<CentroCustoModel> CentroCusto { get; set; }  // Define uma tabela CentroCusto no banco de dados
     public DbSet<SubCentroCustoModel> SubCentroCusto { get; set; }  // Define uma tabela SubCentroCusto no banco de dados
+    public DbSet<SalaModel> Sala{ get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

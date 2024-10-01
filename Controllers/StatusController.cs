@@ -31,7 +31,7 @@ public class StatusController : ControllerBase
     }
 
     [HttpPost("Criar")]
-    public async Task<ActionResult<ResponseModel<List<StatusModel>>>> CriarStatus(StatusCreateDto statusCreateDto)
+    public async Task<ActionResult<ResponseModel<List<StatusModel>>>> CriarStatus(SalaCreateDto statusCreateDto)
     {
         var status = await _status.CriarStatus(statusCreateDto);
         return Ok(status);

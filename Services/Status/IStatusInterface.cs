@@ -7,7 +7,7 @@ public interface IStatusInterface
 {
     Task<ResponseModel<List<StatusModel>>> ListarStatus();
     Task<ResponseModel<StatusModel>> BuscarStatusPorId(int idStatus);
-    Task<ResponseModel<List<StatusModel>>> CriarStatus(SalaCreateDto statusCreateDto);
+    Task<ResponseModel<List<StatusModel>>> CriarStatus(StatusCreateDto statusCreateDto);
     Task<ResponseModel<List<StatusModel>>> EditarStatus(StatusEdicaoDto statusEdicaoDto);
     Task<ResponseModel<List<StatusModel>>> DeleteStatus(int idStatus);
 

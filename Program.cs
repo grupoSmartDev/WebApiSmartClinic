@@ -2,9 +2,11 @@ using Microsoft.EntityFrameworkCore;
 using WebApiSmartClinic.Data;
 using WebApiSmartClinic.Services.Autor;
 using WebApiSmartClinic.Services.CentroCusto;
+using WebApiSmartClinic.Services.Convenio;
 using WebApiSmartClinic.Services.FormaPagamento;
 using WebApiSmartClinic.Services.Fornecedor;
 using WebApiSmartClinic.Services.Sala;
+using WebApiSmartClinic.Services.Paciente;
 using WebApiSmartClinic.Services.Status;
 using WebApiSmartClinic.Services.SubCentroCusto;
 using WebApiSmartClinic.Services.TipoPagamento;
@@ -35,7 +37,7 @@ builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("ConexaoPadrao"));
 });
 
-// Vincular interface com os serviços
+// Vincular interface com os serviï¿½os
 builder.Services.AddScoped<IAutorInterface, AutorService>();
 builder.Services.AddScoped<ISalaInterface, SalaService>();
 builder.Services.AddScoped<ITipoPagamentoInterface, TipoPagamentoService>();
@@ -44,6 +46,8 @@ builder.Services.AddScoped<IFormaPagamentoInterface, FormaPagamentoService>();
 builder.Services.AddScoped<ICentroCustoInterface, CentroCustoService>();
 builder.Services.AddScoped<ISubCentroCustoInterface, SubCentroCustoService>();
 builder.Services.AddScoped<IStatusInterface, StatusService>();
+builder.Services.AddScoped<IPacienteInterface, PacienteService>();
+builder.Services.AddScoped<IConvenioInterface, ConvenioService>();
 
 var app = builder.Build();
 
@@ -56,7 +60,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-// Use CORS middleware (aplicando a política que permite tudo)
+// Use CORS middleware (aplicando a polï¿½tica que permite tudo)
 app.UseCors("AllowAll");
 
 app.UseAuthorization();

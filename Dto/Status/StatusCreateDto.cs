@@ -1,6 +1,6 @@
 ﻿namespace WebApiSmartClinic.Dto.Status;
 
-public class SalaCreateDto
+public class StatusCreateDto
 {
     public string Status { get; set; }
     public string Legenda { get; set; }

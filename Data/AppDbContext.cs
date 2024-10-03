@@ -13,6 +13,8 @@ public class AppDbContext : DbContext
     public DbSet<TipoPagamentoModel> TipoPagamento { get; set; }
     public DbSet<FormaPagamentoModel> FormaPagamento { get; set; }
     public DbSet<FornecedorModel> Fornecedor { get; set; }
+    public DbSet<PacienteModel> Paciente { get; set; }
+    public DbSet<ConvenioModel> Convenio { get; set; }
     public DbSet<CentroCustoModel> CentroCusto { get; set; }  // Define uma tabela CentroCusto no banco de dados
     public DbSet<SubCentroCustoModel> SubCentroCusto { get; set; }  // Define uma tabela SubCentroCusto no banco de dados
     public DbSet<SalaModel> Sala{ get; set; }

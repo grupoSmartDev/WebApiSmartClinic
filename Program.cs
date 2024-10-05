@@ -10,6 +10,11 @@ using WebApiSmartClinic.Services.Paciente;
 using WebApiSmartClinic.Services.Status;
 using WebApiSmartClinic.Services.SubCentroCusto;
 using WebApiSmartClinic.Services.TipoPagamento;
+using WebApiSmartClinic.Services.Banco;
+using WebApiSmartClinic.Services.Conselho;
+using WebApiSmartClinic.Services.Procedimento;
+using WebApiSmartClinic.Services.Boleto;
+using WebApiSmartClinic.Services.Categoria;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -48,6 +53,11 @@ builder.Services.AddScoped<ISubCentroCustoInterface, SubCentroCustoService>();
 builder.Services.AddScoped<IStatusInterface, StatusService>();
 builder.Services.AddScoped<IPacienteInterface, PacienteService>();
 builder.Services.AddScoped<IConvenioInterface, ConvenioService>();
+builder.Services.AddScoped<IBancoInterface, BancoService>();
+builder.Services.AddScoped<IConselhoInterface, ConselhoService>();
+builder.Services.AddScoped<IProcedimentoInterface, ProcedimentoService>();
+builder.Services.AddScoped<IBoletoInterface, BoletoService>();
+builder.Services.AddScoped<ICategoriaInterface, CategoriaService>();
 
 var app = builder.Build();
 

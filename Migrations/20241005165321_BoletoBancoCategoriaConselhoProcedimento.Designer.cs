@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using WebApiSmartClinic.Data;
 
@@ -11,9 +12,11 @@ using WebApiSmartClinic.Data;
 namespace WebApiSmartClinic.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241005165321_BoletoBancoCategoriaConselhoProcedimento")]
+    partial class BoletoBancoCategoriaConselhoProcedimento
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -40,7 +43,7 @@ namespace WebApiSmartClinic.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Autores", (string)null);
+                    b.ToTable("Autores");
                 });
 
             modelBuilder.Entity("WebApiSmartClinic.Models.BancoModel", b =>
@@ -111,7 +114,7 @@ namespace WebApiSmartClinic.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Banco", (string)null);
+                    b.ToTable("Banco");
                 });
 
             modelBuilder.Entity("WebApiSmartClinic.Models.BoletoModel", b =>
@@ -171,7 +174,7 @@ namespace WebApiSmartClinic.Migrations
 
                     b.HasIndex("BancoId");
 
-                    b.ToTable("Boleto", (string)null);
+                    b.ToTable("Boleto");
                 });
 
             modelBuilder.Entity("WebApiSmartClinic.Models.CategoriaModel", b =>
@@ -188,7 +191,7 @@ namespace WebApiSmartClinic.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Categoria", (string)null);
+                    b.ToTable("Categoria");
                 });
 
             modelBuilder.Entity("WebApiSmartClinic.Models.CentroCustoModel", b =>
@@ -209,7 +212,7 @@ namespace WebApiSmartClinic.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("CentroCusto", (string)null);
+                    b.ToTable("CentroCusto");
                 });
 
             modelBuilder.Entity("WebApiSmartClinic.Models.ConselhoModel", b =>
@@ -226,7 +229,7 @@ namespace WebApiSmartClinic.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Conselho", (string)null);
+                    b.ToTable("Conselho");
                 });
 
             modelBuilder.Entity("WebApiSmartClinic.Models.ConvenioModel", b =>
@@ -251,7 +254,7 @@ namespace WebApiSmartClinic.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Convenio", (string)null);
+                    b.ToTable("Convenio");
                 });
 
             modelBuilder.Entity("WebApiSmartClinic.Models.FormaPagamentoModel", b =>
@@ -271,7 +274,7 @@ namespace WebApiSmartClinic.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("FormaPagamento", (string)null);
+                    b.ToTable("FormaPagamento");
                 });
 
             modelBuilder.Entity("WebApiSmartClinic.Models.FornecedorModel", b =>
@@ -395,7 +398,7 @@ namespace WebApiSmartClinic.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Fornecedor", (string)null);
+                    b.ToTable("Fornecedor");
                 });
 
             modelBuilder.Entity("WebApiSmartClinic.Models.LivroModel", b =>
@@ -417,7 +420,7 @@ namespace WebApiSmartClinic.Migrations
 
                     b.HasIndex("AutorId");
 
-                    b.ToTable("Livros", (string)null);
+                    b.ToTable("Livros");
                 });
 
             modelBuilder.Entity("WebApiSmartClinic.Models.PacienteModel", b =>
@@ -536,7 +539,7 @@ namespace WebApiSmartClinic.Migrations
 
                     b.HasIndex("ConvenioId");
 
-                    b.ToTable("Paciente", (string)null);
+                    b.ToTable("Paciente");
                 });
 
             modelBuilder.Entity("WebApiSmartClinic.Models.ProcedimentoModel", b =>
@@ -575,7 +578,7 @@ namespace WebApiSmartClinic.Migrations
 
                     b.HasIndex("CategoriaId");
 
-                    b.ToTable("Procedimento", (string)null);
+                    b.ToTable("Procedimento");
                 });
 
             modelBuilder.Entity("WebApiSmartClinic.Models.SalaModel", b =>
@@ -615,7 +618,7 @@ namespace WebApiSmartClinic.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Sala", (string)null);
+                    b.ToTable("Sala");
                 });
 
             modelBuilder.Entity("WebApiSmartClinic.Models.StatusModel", b =>
@@ -640,7 +643,7 @@ namespace WebApiSmartClinic.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Status", (string)null);
+                    b.ToTable("Status");
                 });
 
             modelBuilder.Entity("WebApiSmartClinic.Models.SubCentroCustoModel", b =>
@@ -662,7 +665,7 @@ namespace WebApiSmartClinic.Migrations
 
                     b.HasIndex("CentroCustoId");
 
-                    b.ToTable("SubCentroCusto", (string)null);
+                    b.ToTable("SubCentroCusto");
                 });
 
             modelBuilder.Entity("WebApiSmartClinic.Models.TipoPagamentoModel", b =>
@@ -678,7 +681,7 @@ namespace WebApiSmartClinic.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("TipoPagamento", (string)null);
+                    b.ToTable("TipoPagamento");
                 });
 
             modelBuilder.Entity("WebApiSmartClinic.Models.BoletoModel", b =>

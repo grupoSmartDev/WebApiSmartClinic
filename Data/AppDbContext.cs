@@ -18,7 +18,11 @@ public class AppDbContext : DbContext
     public DbSet<CentroCustoModel> CentroCusto { get; set; }  // Define uma tabela CentroCusto no banco de dados
     public DbSet<SubCentroCustoModel> SubCentroCusto { get; set; }  // Define uma tabela SubCentroCusto no banco de dados
     public DbSet<SalaModel> Sala{ get; set; }
-
+    public DbSet<BancoModel> Banco { get; set; }
+    public DbSet<ConselhoModel> Conselho { get; set; }
+    public DbSet<ProcedimentoModel> Procedimento { get; set; }
+    public DbSet<BoletoModel> Boleto { get; set; }
+    public DbSet<CategoriaModel> Categoria { get; set; }
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         // Configura a entidade CentroCustoModel para ter uma relação de um para muitos com SubCentroCustoModel

@@ -52,6 +52,9 @@ public class ConvenioService : IConvenioInterface
             convenio.Nome = convenioCreateDto.Nome;
             convenio.RegistroAvs = convenioCreateDto.RegistroAvs;
             convenio.PeriodoCarencia = convenioCreateDto.PeriodoCarencia;
+            convenio.Telefone = convenioCreateDto.Telefone;
+            convenio.Email  = convenioCreateDto.Email;
+            convenio.Ativo = convenioCreateDto.Ativo;
 
             _context.Add(convenio);
             await _context.SaveChangesAsync();
@@ -116,6 +119,9 @@ public class ConvenioService : IConvenioInterface
             convenio.Nome = convenioEdicaoDto.Nome;
             convenio.RegistroAvs = convenioEdicaoDto.RegistroAvs;
             convenio.PeriodoCarencia = convenioEdicaoDto.PeriodoCarencia;
+            convenio.Telefone = convenioEdicaoDto.Telefone;
+            convenio.Email = convenioEdicaoDto.Email;
+            convenio.Ativo = convenioEdicaoDto.Ativo;
 
             _context.Update(convenio);
             await _context.SaveChangesAsync();

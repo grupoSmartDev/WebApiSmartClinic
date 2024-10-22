@@ -1,4 +1,6 @@
-﻿namespace WebApiSmartClinic.Dto.Sala;
+﻿using System.Text.Json.Serialization;
+
+namespace WebApiSmartClinic.Dto.Sala;
 
 public class SalaEdicaoDto
 {

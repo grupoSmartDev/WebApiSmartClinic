@@ -23,6 +23,10 @@ public class AppDbContext : DbContext
     public DbSet<ProcedimentoModel> Procedimento { get; set; }
     public DbSet<BoletoModel> Boleto { get; set; }
     public DbSet<CategoriaModel> Categoria { get; set; }
+    public DbSet<Financ_PagarModel> Financ_Pagar { get; set; }
+    public DbSet<Financ_ReceberModel> Financ_Receber { get; set; }
+    public DbSet<ProfissionalModel> Profissional { get; set; }
+    public DbSet<UsuarioModel> Usuario { get; set; }
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         // Configura a entidade CentroCustoModel para ter uma relação de um para muitos com SubCentroCustoModel

@@ -46,8 +46,6 @@ public class PacienteService : IPacienteInterface
 
         try
         {
-            // Verifica se o ConvenioId é válido
-
             var paciente = new PacienteModel();
 
             paciente.Bairro = pacienteCreateDto.Bairro;
@@ -77,6 +75,7 @@ public class PacienteService : IPacienteInterface
             paciente.Sexo = pacienteCreateDto.Sexo;
             paciente.Telefone = pacienteCreateDto.Telefone;
 
+            // Verifica se o ConvenioId é válido
             var convenioExiste = await _context.Convenio.AnyAsync(c => c.Id == pacienteCreateDto.ConvenioId);
             if (convenioExiste)
             {

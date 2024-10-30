@@ -1,5 +1,6 @@
 
 using Microsoft.AspNetCore.Mvc;
+using Swashbuckle.AspNetCore.Annotations;
 using WebApiSmartClinic.Dto.Financ_Pagar;
 using WebApiSmartClinic.Models;
 using WebApiSmartClinic.Services.Financ_Pagar;
@@ -50,5 +51,23 @@ namespace WebApiSmartClinic.Controllers
             var financ_pagar = await _financ_pagar.Delete(idFinanc_Pagar);
             return Ok(financ_pagar);
         }
+
+        [HttpPost("BaixarPagamento/{idFinanc_Pagar}")]
+        [SwaggerOperation(Summary = "Baixa um pagamento especifico",
+                  Description = "Realiza a baixa de um pagamento, alterando o status para 'Pago' e definindo a data de pagamento como a data atual.")]
+        [SwaggerResponse(200, "Pagamento baixado com sucesso", typeof(ResponseModel<Financ_PagarModel>))]
+        [SwaggerResponse(404, "Pagamento não encontrado")]
+        [SwaggerResponse(500, "Erro interno")]
+
+        public async Task<ActionResult<ResponseModel<Financ_PagarModel>>> BaixarPagamento(int idFinanc_Pagar, decimal valorPago, DateTime? dataPagamento = null)
+        {
+            var resultado = await _financ_pagar.BaixarPagamento(idFinanc_Pagar, valorPago, dataPagamento);
+            if (resultado.Status == false)
+            {
+                return NotFound(resultado);
+            }
+            return Ok(resultado);
+        }
+
     }
 }

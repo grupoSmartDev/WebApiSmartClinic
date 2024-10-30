@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using WebApiSmartClinic.Data;
 
@@ -11,9 +12,11 @@ using WebApiSmartClinic.Data;
 namespace WebApiSmartClinic.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241030225435_Financ_Pagar_Receber")]
+    partial class Financ_Pagar_Receber
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -277,7 +280,7 @@ namespace WebApiSmartClinic.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<int>("BancoId")
+                    b.Property<int?>("BancoId")
                         .HasColumnType("int");
 
                     b.Property<int?>("CentroCustoId")
@@ -343,7 +346,7 @@ namespace WebApiSmartClinic.Migrations
                     b.Property<decimal>("ValorOriginal")
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<decimal>("ValorPago")
+                    b.Property<decimal?>("ValorPago")
                         .HasColumnType("decimal(18,2)");
 
                     b.HasKey("Id");
@@ -595,47 +598,6 @@ namespace WebApiSmartClinic.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Fornecedor");
-                });
-
-            modelBuilder.Entity("WebApiSmartClinic.Models.HistoricoTransacaoModel", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("BancoId")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("DataTransacao")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Descricao")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Referencia")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("TipoTransacao")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int?>("UsuarioId")
-                        .HasColumnType("int");
-
-                    b.Property<decimal>("Valor")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("BancoId");
-
-                    b.HasIndex("UsuarioId");
-
-                    b.ToTable("HistoricoTransacao");
                 });
 
             modelBuilder.Entity("WebApiSmartClinic.Models.LivroModel", b =>
@@ -1039,9 +1001,7 @@ namespace WebApiSmartClinic.Migrations
                 {
                     b.HasOne("WebApiSmartClinic.Models.BancoModel", "Banco")
                         .WithMany()
-                        .HasForeignKey("BancoId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("BancoId");
 
                     b.HasOne("WebApiSmartClinic.Models.CentroCustoModel", "CentroCusto")
                         .WithMany()
@@ -1101,23 +1061,6 @@ namespace WebApiSmartClinic.Migrations
                     b.Navigation("Fornecedor");
 
                     b.Navigation("TipoPagamento");
-                });
-
-            modelBuilder.Entity("WebApiSmartClinic.Models.HistoricoTransacaoModel", b =>
-                {
-                    b.HasOne("WebApiSmartClinic.Models.BancoModel", "Banco")
-                        .WithMany()
-                        .HasForeignKey("BancoId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("WebApiSmartClinic.Models.UsuarioModel", "Usuario")
-                        .WithMany()
-                        .HasForeignKey("UsuarioId");
-
-                    b.Navigation("Banco");
-
-                    b.Navigation("Usuario");
                 });
 
             modelBuilder.Entity("WebApiSmartClinic.Models.LivroModel", b =>

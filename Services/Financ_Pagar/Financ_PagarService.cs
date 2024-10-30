@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using WebApiSmartClinic.Data;
 using WebApiSmartClinic.Dto.Financ_Pagar;
 using WebApiSmartClinic.Models;
+using WebApiSmartClinic.Services.Banco;
 
 namespace WebApiSmartClinic.Services.Financ_Pagar;
 
@@ -187,67 +188,60 @@ public class Financ_PagarService : IFinanc_PagarInterface
 
     public async Task<ResponseModel<Financ_PagarModel>> BaixarPagamento(int idFinanc_Pagar, decimal valorPago, DateTime? dataPagamento = null)
     {
-        ResponseModel<Financ_PagarModel> resposta = new ResponseModel<Financ_PagarModel>();
+        var resposta = new ResponseModel<Financ_PagarModel>();
 
         try
         {
             var financ_pagar = await _context.Financ_Pagar.FirstOrDefaultAsync(x => x.Id == idFinanc_Pagar);
             if (financ_pagar == null)
             {
-                resposta.Mensagem = "Pagamento não encontrado";
+                resposta.Mensagem = "Pagamento não encontrado.";
                 return resposta;
             }
 
-            // Atualiza o valor pago e define a data de pagamento
+            // Validação de saldo suficiente
+            BancoService _bancoService = new BancoService(_context);
+            var bancoResposta = await _bancoService.DebitarSaldo(financ_pagar.BancoId, valorPago);
+            if (!bancoResposta.Status)
+            {
+                resposta.Mensagem = bancoResposta.Mensagem;
+                resposta.Status = false;
+                return resposta;
+            }
+
+            // Atualização do valor pago e status do pagamento
             financ_pagar.ValorPago += valorPago;
             financ_pagar.DataPagamento = dataPagamento ?? DateTime.Now;
+            financ_pagar.Status = financ_pagar.ValorPago >= financ_pagar.ValorOriginal ? "Pago" : "Parcialmente Pago";
 
-            // Calcula o valor restante
-            decimal? valorRestante = financ_pagar.ValorOriginal - financ_pagar.ValorPago;
-
-            if (valorRestante > 0)
+            if (financ_pagar.ValorPago < financ_pagar.ValorOriginal)
             {
-                // Pagamento parcial: cria novo lançamento com o valor restante
-                financ_pagar.Status = "Parcialmente Pago";
-
-                // Cria novo lançamento para o valor pendente
+                // Criar novo lançamento para o valor restante
+                var valorRestante = financ_pagar.ValorOriginal - financ_pagar.ValorPago;
                 var novoLancamento = new Financ_PagarModel
                 {
                     IdOrigem = financ_pagar.IdOrigem,
                     NrDocto = financ_pagar.NrDocto,
                     DataEmissao = financ_pagar.DataEmissao,
-                    DataVencimento = financ_pagar.DataVencimento, // mantemos a mesma data de vencimento
+                    DataVencimento = financ_pagar.DataVencimento,
                     ValorOriginal = valorRestante,
                     ValorPago = 0,
                     Status = "Em Aberto",
                     NotaFiscal = financ_pagar.NotaFiscal,
                     Descricao = financ_pagar.Descricao,
-                    Parcela = financ_pagar.Parcela,
-                    Classificacao = financ_pagar.Classificacao,
-                    Desconto = financ_pagar.Desconto,
-                    Juros = financ_pagar.Juros,
-                    Multa = financ_pagar.Multa,
-                    Observacao = financ_pagar.Observacao,
                     FornecedorId = financ_pagar.FornecedorId,
-                    CentroCustoId = financ_pagar.CentroCustoId,
-                    TipoPagamentoId = financ_pagar.TipoPagamentoId,
-                    FormaPagamentoId = financ_pagar.FormaPagamentoId,
-                    BancoId = financ_pagar.BancoId
+                    BancoId = financ_pagar.BancoId,
+                    CentroCustoId = financ_pagar.CentroCustoId
                 };
 
                 _context.Add(novoLancamento);
-            }
-            else
-            {
-                // Pagamento completo: marca como "Pago"
-                financ_pagar.Status = "Pago";
             }
 
             _context.Update(financ_pagar);
             await _context.SaveChangesAsync();
 
             resposta.Dados = financ_pagar;
-            resposta.Mensagem = "Pagamento baixado com sucesso";
+            resposta.Mensagem = "Pagamento baixado com sucesso.";
             return resposta;
         }
         catch (Exception ex)
@@ -258,5 +252,49 @@ public class Financ_PagarService : IFinanc_PagarInterface
         }
     }
 
+    public async Task<ResponseModel<Financ_PagarModel>> EstornarPagamento(int idFinanc_Pagar)
+    {
+        var resposta = new ResponseModel<Financ_PagarModel>();
 
+        try
+        {
+            var financ_pagar = await _context.Financ_Pagar.FirstOrDefaultAsync(x => x.Id == idFinanc_Pagar);
+            if (financ_pagar == null)
+            {
+                resposta.Mensagem = "Pagamento não encontrado.";
+                return resposta;
+            }
+
+            // Crédita o valor de volta ao saldo da conta bancária
+            BancoService _bancoService = new BancoService(_context);
+            await _bancoService.CreditarSaldo(financ_pagar.BancoId, financ_pagar.ValorPago);
+
+            // Zera o valor pago e redefine o status
+            financ_pagar.ValorPago = 0;
+            financ_pagar.DataPagamento = null;
+            financ_pagar.Status = "Em Aberto";
+
+            // Registro de histórico do estorno
+            await _context.HistoricoTransacao.AddAsync(new HistoricoTransacaoModel
+            {
+                BancoId = financ_pagar.BancoId,
+                Valor = financ_pagar.ValorPago,
+                TipoTransacao = "Estorno",
+                DataTransacao = DateTime.Now
+            });
+
+            _context.Update(financ_pagar);
+            await _context.SaveChangesAsync();
+
+            resposta.Dados = financ_pagar;
+            resposta.Mensagem = "Pagamento estornado com sucesso.";
+            return resposta;
+        }
+        catch (Exception ex)
+        {
+            resposta.Mensagem = ex.Message;
+            resposta.Status = false;
+            return resposta;
+        }
+    }
 }

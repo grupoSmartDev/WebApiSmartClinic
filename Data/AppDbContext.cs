@@ -27,6 +27,7 @@ public class AppDbContext : DbContext
     public DbSet<Financ_ReceberModel> Financ_Receber { get; set; }
     public DbSet<ProfissionalModel> Profissional { get; set; }
     public DbSet<UsuarioModel> Usuario { get; set; }
+    public DbSet<HistoricoTransacaoModel> HistoricoTransacao { get; set; }
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         // Configura a entidade CentroCustoModel para ter uma relação de um para muitos com SubCentroCustoModel

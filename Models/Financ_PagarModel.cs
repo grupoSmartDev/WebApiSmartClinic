@@ -11,8 +11,8 @@ namespace WebApiSmartClinic.Models
         public DateTime DataEmissao { get; set; }
         public DateTime DataVencimento { get; set; }
         public DateTime? DataPagamento { get; set; }
-        public decimal? ValorOriginal { get; set; }
-        public decimal? ValorPago { get; set; }
+        public decimal ValorOriginal { get; set; }
+        public decimal ValorPago { get; set; }
         public string Status { get; set; } // Pendente, Pago, Atrasado, Cancelado
         public string NotaFiscal { get; set; }
         public string Descricao { get; set; }
@@ -41,6 +41,6 @@ namespace WebApiSmartClinic.Models
 
         [JsonIgnore]
         public BancoModel Banco { get; set; }
-        public int? BancoId { get; set; } = 0; // Relacionamento com a tabela de Banco
+        public int BancoId { get; set; } = 0; // Relacionamento com a tabela de Banco
     }
 }

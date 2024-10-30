@@ -176,4 +176,73 @@ public class BancoService : IBancoInterface
             return resposta;
         }
     }
+
+    public async Task<ResponseModel<BancoModel>> DebitarSaldo(int idBanco, decimal valor)
+    {
+        var resposta = new ResponseModel<BancoModel>();
+
+        var banco = await _context.Banco.FirstOrDefaultAsync(b => b.Id == idBanco);
+        if (banco == null || !banco.Ativo)
+        {
+            resposta.Mensagem = "Banco não encontrado ou inativo.";
+            return resposta;
+        }
+
+        if (banco.SaldoInicial < valor)
+        {
+            resposta.Mensagem = "Saldo insuficiente.";
+            resposta.Status = false;
+            return resposta;
+        }
+
+        banco.SaldoInicial -= valor;
+        _context.Update(banco);
+
+        // Registra o histórico da transação de débito
+        await RegistrarHistoricoTransacao(idBanco, valor, "Débito");
+
+        await _context.SaveChangesAsync();
+
+        resposta.Dados = banco;
+        resposta.Mensagem = "Saldo debitado com sucesso.";
+        return resposta;
+    }
+
+    public async Task<ResponseModel<BancoModel>> CreditarSaldo(int idBanco, decimal valor)
+    {
+        var resposta = new ResponseModel<BancoModel>();
+
+        var banco = await _context.Banco.FirstOrDefaultAsync(b => b.Id == idBanco);
+        if (banco == null || !banco.Ativo)
+        {
+            resposta.Mensagem = "Banco não encontrado ou inativo.";
+            return resposta;
+        }
+
+        banco.SaldoInicial += valor;
+        _context.Update(banco);
+
+        // Registra o histórico da transação de crédito
+        await RegistrarHistoricoTransacao(idBanco, valor, "Crédito");
+
+        await _context.SaveChangesAsync();
+
+        resposta.Dados = banco;
+        resposta.Mensagem = "Saldo creditado com sucesso.";
+        return resposta;
+    }
+
+    private async Task RegistrarHistoricoTransacao(int idBanco, decimal valor, string tipoTransacao)
+    {
+        var transacao = new HistoricoTransacaoModel
+        {
+            BancoId = idBanco,
+            Valor = valor,
+            TipoTransacao = tipoTransacao,
+            DataTransacao = DateTime.Now
+        };
+
+        _context.HistoricoTransacao.Add(transacao);
+        await _context.SaveChangesAsync();
+    }
 }

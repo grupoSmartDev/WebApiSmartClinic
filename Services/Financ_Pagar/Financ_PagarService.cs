@@ -183,4 +183,80 @@ public class Financ_PagarService : IFinanc_PagarInterface
             return resposta;
         }
     }
+
+
+    public async Task<ResponseModel<Financ_PagarModel>> BaixarPagamento(int idFinanc_Pagar, decimal valorPago, DateTime? dataPagamento = null)
+    {
+        ResponseModel<Financ_PagarModel> resposta = new ResponseModel<Financ_PagarModel>();
+
+        try
+        {
+            var financ_pagar = await _context.Financ_Pagar.FirstOrDefaultAsync(x => x.Id == idFinanc_Pagar);
+            if (financ_pagar == null)
+            {
+                resposta.Mensagem = "Pagamento não encontrado";
+                return resposta;
+            }
+
+            // Atualiza o valor pago e define a data de pagamento
+            financ_pagar.ValorPago += valorPago;
+            financ_pagar.DataPagamento = dataPagamento ?? DateTime.Now;
+
+            // Calcula o valor restante
+            decimal? valorRestante = financ_pagar.ValorOriginal - financ_pagar.ValorPago;
+
+            if (valorRestante > 0)
+            {
+                // Pagamento parcial: cria novo lançamento com o valor restante
+                financ_pagar.Status = "Parcialmente Pago";
+
+                // Cria novo lançamento para o valor pendente
+                var novoLancamento = new Financ_PagarModel
+                {
+                    IdOrigem = financ_pagar.IdOrigem,
+                    NrDocto = financ_pagar.NrDocto,
+                    DataEmissao = financ_pagar.DataEmissao,
+                    DataVencimento = financ_pagar.DataVencimento, // mantemos a mesma data de vencimento
+                    ValorOriginal = valorRestante,
+                    ValorPago = 0,
+                    Status = "Em Aberto",
+                    NotaFiscal = financ_pagar.NotaFiscal,
+                    Descricao = financ_pagar.Descricao,
+                    Parcela = financ_pagar.Parcela,
+                    Classificacao = financ_pagar.Classificacao,
+                    Desconto = financ_pagar.Desconto,
+                    Juros = financ_pagar.Juros,
+                    Multa = financ_pagar.Multa,
+                    Observacao = financ_pagar.Observacao,
+                    FornecedorId = financ_pagar.FornecedorId,
+                    CentroCustoId = financ_pagar.CentroCustoId,
+                    TipoPagamentoId = financ_pagar.TipoPagamentoId,
+                    FormaPagamentoId = financ_pagar.FormaPagamentoId,
+                    BancoId = financ_pagar.BancoId
+                };
+
+                _context.Add(novoLancamento);
+            }
+            else
+            {
+                // Pagamento completo: marca como "Pago"
+                financ_pagar.Status = "Pago";
+            }
+
+            _context.Update(financ_pagar);
+            await _context.SaveChangesAsync();
+
+            resposta.Dados = financ_pagar;
+            resposta.Mensagem = "Pagamento baixado com sucesso";
+            return resposta;
+        }
+        catch (Exception ex)
+        {
+            resposta.Mensagem = ex.Message;
+            resposta.Status = false;
+            return resposta;
+        }
+    }
+
+
 }

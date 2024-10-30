@@ -11,7 +11,7 @@ namespace WebApiSmartClinic.Models
         public DateTime DataEmissao { get; set; }
         public DateTime DataVencimento { get; set; }
         public DateTime? DataPagamento { get; set; }
-        public decimal ValorOriginal { get; set; }
+        public decimal? ValorOriginal { get; set; }
         public decimal? ValorPago { get; set; }
         public string Status { get; set; } // Pendente, Pago, Atrasado, Cancelado
         public string NotaFiscal { get; set; }

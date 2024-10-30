@@ -17,6 +17,7 @@ using WebApiSmartClinic.Services.Boleto;
 using WebApiSmartClinic.Services.Categoria;
 using WebApiSmartClinic.Services.Financ_Pagar;
 using WebApiSmartClinic.Services.Financ_Receber;
+using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -37,7 +38,11 @@ builder.Services.AddCors(options =>
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(c =>
+{
+    c.SwaggerDoc("v1", new OpenApiInfo { Title = "WebApiSmartClinic", Version = "v1" });
+    c.EnableAnnotations(); // Habilita as anotações do Swagger
+});
 
 builder.Services.AddDbContext<AppDbContext>(options =>
 {

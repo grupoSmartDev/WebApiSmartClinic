@@ -13,6 +13,7 @@ namespace WebApiSmartClinic.Dto.Procedimento
         public TimeSpan Duracao { get; set; } // Duração estimada do Procedimento (horas/minutos)
         public bool Ativo { get; set; } // Indica se o procedimento está ativo ou não no sistema
         public int CategoriaId { get; set; }
+        public decimal PercentualComissao { get; set; }
 
         [JsonIgnore]
         public CategoriaModel Categoria { get; set; }

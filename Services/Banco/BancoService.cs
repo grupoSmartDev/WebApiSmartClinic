@@ -232,7 +232,7 @@ public class BancoService : IBancoInterface
         return resposta;
     }
 
-    private async Task RegistrarHistoricoTransacao(int idBanco, decimal valor, string tipoTransacao)
+    public async Task RegistrarHistoricoTransacao(int idBanco, decimal valor, string tipoTransacao)
     {
         var transacao = new HistoricoTransacaoModel
         {

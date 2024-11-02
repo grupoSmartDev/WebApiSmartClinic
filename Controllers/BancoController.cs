@@ -52,7 +52,7 @@ namespace WebApiSmartClinic.Controllers
         }
 
         [HttpPost("DebitarSaldo")]
-        public async Task<IActionResult> DebitarSaldo(int bancoId, decimal valor)
+        public async Task<ActionResult> DebitarSaldo(int bancoId, decimal valor)
         {
             var resposta = await _banco.DebitarSaldo(bancoId, valor);
             if (!resposta.Status)
@@ -63,7 +63,7 @@ namespace WebApiSmartClinic.Controllers
         }
 
         [HttpPost("CreditarSaldo")]
-        public async Task<IActionResult> CreditarSaldo(int bancoId, decimal valor)
+        public async Task<ActionResult> CreditarSaldo(int bancoId, decimal valor)
         {
             var resposta = await _banco.CreditarSaldo(bancoId, valor);
             if (!resposta.Status)

@@ -50,5 +50,34 @@ namespace WebApiSmartClinic.Controllers
             var banco = await _banco.Delete(idBanco);
             return Ok(banco);
         }
+
+        [HttpPost("DebitarSaldo")]
+        public async Task<ActionResult> DebitarSaldo(int bancoId, decimal valor)
+        {
+            var resposta = await _banco.DebitarSaldo(bancoId, valor);
+            if (!resposta.Status)
+            {
+                return BadRequest(resposta);
+            }
+            return Ok(resposta);
+        }
+
+        [HttpPost("CreditarSaldo")]
+        public async Task<ActionResult> CreditarSaldo(int bancoId, decimal valor)
+        {
+            var resposta = await _banco.CreditarSaldo(bancoId, valor);
+            if (!resposta.Status)
+            {
+                return BadRequest(resposta);
+            }
+            return Ok(resposta);
+        }
+
+        [HttpGet("ObterHistoricoTransacoes/{bancoId}")]
+        public async Task<IActionResult> ObterHistoricoTransacoes(int bancoId)
+        {
+            var resposta = await _banco.ObterHistoricoTransacoes(bancoId);
+            return Ok(resposta);
+        }
     }
 }

@@ -232,7 +232,7 @@ public class BancoService : IBancoInterface
         return resposta;
     }
 
-    private async Task RegistrarHistoricoTransacao(int idBanco, decimal valor, string tipoTransacao)
+    public async Task RegistrarHistoricoTransacao(int idBanco, decimal valor, string tipoTransacao)
     {
         var transacao = new HistoricoTransacaoModel
         {
@@ -244,5 +244,36 @@ public class BancoService : IBancoInterface
 
         _context.HistoricoTransacao.Add(transacao);
         await _context.SaveChangesAsync();
+    }
+
+    public async Task<ResponseModel<List<HistoricoTransacaoModel>>> ObterHistoricoTransacoes(int bancoId)
+    {
+        var resposta = new ResponseModel<List<HistoricoTransacaoModel>>();
+
+        try
+        {
+            var transacoes = await _context.HistoricoTransacao
+                .Where(t => t.BancoId == bancoId)
+                .OrderByDescending(t => t.DataTransacao)
+                .ToListAsync();
+
+            if (!transacoes.Any())
+            {
+                resposta.Mensagem = "Nenhuma transação encontrada para o banco especificado.";
+                resposta.Status = false;
+                return resposta;
+            }
+
+            resposta.Dados = transacoes;
+            resposta.Mensagem = "Histórico de transações encontrado com sucesso.";
+            resposta.Status = true;
+            return resposta;
+        }
+        catch (Exception ex)
+        {
+            resposta.Mensagem = $"Erro ao obter histórico de transações: {ex.Message}";
+            resposta.Status = false;
+            return resposta;
+        }
     }
 }

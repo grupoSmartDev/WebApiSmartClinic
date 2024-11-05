@@ -11,5 +11,9 @@ namespace WebApiSmartClinic.Services.Banco
         Task<ResponseModel<BancoModel>> BuscarPorId(int idBanco);
         Task<ResponseModel<List<BancoModel>>> Criar(BancoCreateDto bancoCreateDto);
         Task<ResponseModel<List<BancoModel>>> Editar(BancoEdicaoDto bancoEdicaoDto);
+        Task<ResponseModel<BancoModel>> DebitarSaldo(int idBanco, decimal valor);
+        Task<ResponseModel<BancoModel>> CreditarSaldo(int idBanco, decimal valor);
+        Task<ResponseModel<List<HistoricoTransacaoModel>>> ObterHistoricoTransacoes(int bancoId);
+        Task RegistrarHistoricoTransacao(int idBanco, decimal valor, string tipoTransacao);
     }
 }

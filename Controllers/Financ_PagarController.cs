@@ -53,21 +53,32 @@ namespace WebApiSmartClinic.Controllers
         }
 
         [HttpPost("BaixarPagamento/{idFinanc_Pagar}")]
-        [SwaggerOperation(Summary = "Baixa um pagamento especifico",
-                  Description = "Realiza a baixa de um pagamento, alterando o status para 'Pago' e definindo a data de pagamento como a data atual.")]
+        [SwaggerOperation(
+            Summary = "Baixa um pagamento especifico",
+            Description = "Realiza a baixa de um pagamento, alterando o status para 'Pago' e definindo a data de pagamento como a data atual."
+        )]
         [SwaggerResponse(200, "Pagamento baixado com sucesso", typeof(ResponseModel<Financ_PagarModel>))]
         [SwaggerResponse(404, "Pagamento não encontrado")]
         [SwaggerResponse(500, "Erro interno")]
-
-        public async Task<ActionResult<ResponseModel<Financ_PagarModel>>> BaixarPagamento(int idFinanc_Pagar, decimal valorPago, DateTime? dataPagamento = null)
+        public async Task<IActionResult> BaixarPagamento(int idFinanc_Pagar, decimal valorPago, DateTime? dataPagamento = null)
         {
-            var resultado = await _financ_pagar.BaixarPagamento(idFinanc_Pagar, valorPago, dataPagamento);
-            if (resultado.Status == false)
+            var resposta = await _financ_pagar.BaixarPagamento(idFinanc_Pagar, valorPago, dataPagamento);
+            if (!resposta.Status)
             {
-                return NotFound(resultado);
+                return BadRequest(resposta);
             }
-            return Ok(resultado);
+            return Ok(resposta);
         }
 
+        [HttpPost("EstornarPagamento/{idFinanc_Pagar}")]
+        public async Task<IActionResult> EstornarPagamento(int idFinanc_Pagar)
+        {
+            var resposta = await _financ_pagar.EstornarPagamento(idFinanc_Pagar);
+            if (!resposta.Status)
+            {
+                return BadRequest(resposta);
+            }
+            return Ok(resposta);
+        }
     }
 }

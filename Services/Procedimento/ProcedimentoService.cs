@@ -55,6 +55,7 @@ public class ProcedimentoService : IProcedimentoInterface
             procedimento.Categoria = procedimentoCreateDto.Categoria;
             procedimento.Ativo = procedimentoCreateDto.Ativo;
             procedimento.MateriaisNecessarios = procedimentoCreateDto.MateriaisNecessarios;
+            procedimento.PercentualComissao = procedimentoCreateDto.PercentualComissao;
 
             // Verificar depois a possíbilidade de fazer apenas uma verificação se é diferente de nulo e não haver necessidade de toda hora bater no banco pra ver se é válido
             var categoriaExiste = await _context.Categoria.AnyAsync(c => c.Id == procedimentoCreateDto.CategoriaId);
@@ -129,6 +130,7 @@ public class ProcedimentoService : IProcedimentoInterface
             procedimento.Categoria = procedimentoEdicaoDto.Categoria;
             procedimento.Ativo = procedimentoEdicaoDto.Ativo;
             procedimento.MateriaisNecessarios = procedimentoEdicaoDto.MateriaisNecessarios;
+            procedimento.PercentualComissao = procedimentoEdicaoDto.PercentualComissao;
 
             // Verificar depois a possíbilidade de fazer apenas uma verificação se é diferente de nulo e não haver necessidade de toda hora bater no banco pra ver se é válido
             var categoriaExiste = await _context.Categoria.AnyAsync(c => c.Id == procedimentoEdicaoDto.CategoriaId);
@@ -142,6 +144,7 @@ public class ProcedimentoService : IProcedimentoInterface
 
             resposta.Dados = await _context.Procedimento.ToListAsync();
             resposta.Mensagem = "Procedimento Atualizado com sucesso";
+            
             return resposta;
         }
         catch (Exception ex)
@@ -149,6 +152,7 @@ public class ProcedimentoService : IProcedimentoInterface
 
             resposta.Mensagem = ex.Message;
             resposta.Status = false;
+           
             return resposta;
         }
     }
@@ -163,14 +167,14 @@ public class ProcedimentoService : IProcedimentoInterface
 
             resposta.Dados = procedimento;
             resposta.Mensagem = "Todos os Procedimento foram encontrados";
+            
             return resposta;
-
-
         }
         catch (Exception e)
         {
             resposta.Mensagem = e.Message;
             resposta.Status = false;
+          
             return resposta;
         }
     }

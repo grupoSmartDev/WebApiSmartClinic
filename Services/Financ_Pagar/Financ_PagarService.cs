@@ -297,4 +297,26 @@ public class Financ_PagarService : IFinanc_PagarInterface
             return resposta;
         }
     }
+
+    // ** NECESSITA TER A PARAMETRIZAÇÃO CRIADA ** //
+    //public decimal CalcularValorComJurosMultas(Decimal valorOriginal, DateTime dataVencimento, DateTime dataPagamento)
+    //{
+    //    decimal valorFinal = valorOriginal;
+    //    if (dataPagamento > dataVencimento)
+    //    {
+    //        // Aplica juros e multa
+    //        var diasAtraso = (dataPagamento - dataVencimento).Days;
+    //        var juros = diasAtraso * 0.01m * valorOriginal; // 1% de juros ao dia
+    //        var multa = valorOriginal * 0.05m; // Multa de 5%
+    //        valorFinal += juros + multa;
+    //    }
+    //    else if (dataPagamento < dataVencimento)
+    //    {
+    //        // Aplica desconto para pagamento antecipado
+    //        var desconto = valorOriginal * 0.02m; // 2% de desconto
+    //        valorFinal -= desconto;
+    //    }
+    //    return valorFinal;
+    //}
+
 }

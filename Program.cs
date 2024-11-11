@@ -20,6 +20,7 @@ using WebApiSmartClinic.Services.Financ_Receber;
 using Microsoft.OpenApi.Models;
 using WebApiSmartClinic.Services.HistoricoTransacao;
 using WebApiSmartClinic.Services.Comissao;
+using WebApiSmartClinic.Services.Plano;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -71,6 +72,7 @@ builder.Services.AddScoped<IFinanc_PagarInterface, Financ_PagarService>();
 builder.Services.AddScoped<IFinanc_ReceberInterface, Financ_ReceberService>();
 builder.Services.AddScoped<IHistoricoTransacaoInterface, HistoricoTransacaoService>();
 builder.Services.AddScoped<IComissaoInterface, ComissaoService>();
+builder.Services.AddScoped<IPlanoInterface, PlanoService>();
 
 var app = builder.Build();
 

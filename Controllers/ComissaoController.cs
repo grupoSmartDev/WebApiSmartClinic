@@ -58,12 +58,14 @@ namespace WebApiSmartClinic.Controllers
             return Ok(comissao);
         }
 
+        [HttpGet("ObterComissoesPendentes/{profissionalId}")]
         public async Task<ActionResult<ResponseModel<List<ComissaoModel>>>> ObterComissoesPendentes(int profissionalId)
         {
             var comissao = await _comissao.ObterComissoesPendentes(profissionalId);
             return Ok(comissao);
         }
 
+        [HttpPost("PagarComissao")]
         public async Task<ActionResult<ResponseModel<ComissaoModel>>> PagarComissao(int comissaoId)
         {
             var comissao = await _comissao.PagarComissao(comissaoId);

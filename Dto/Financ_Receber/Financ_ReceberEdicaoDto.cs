@@ -23,25 +23,17 @@ namespace WebApiSmartClinic.Dto.Financ_Receber
         public decimal? Juros { get; set; }
         public decimal? Multa { get; set; }
         public string Observacao { get; set; }
-
-        [JsonIgnore]
-        public FornecedorModel Fornecedor { get; set; }
+        [JsonIgnore] public PacienteModel Paciente { get; set; }
+        public int? PacienteId { get; set; } = 0; // Relacionamento com a tabela de Fornecedor
+        [JsonIgnore] public FornecedorModel Fornecedor { get; set; }
         public int? FornecedorId { get; set; } = 0; // Relacionamento com a tabela de Fornecedor
-
-        [JsonIgnore]
-        public CentroCustoModel CentroCusto { get; set; }
+        [JsonIgnore] public CentroCustoModel CentroCusto { get; set; }
         public int? CentroCustoId { get; set; } = 0; // Relacionamento com a tabela de CentroCusto
-
-        [JsonIgnore]
-        public TipoPagamentoModel TipoPagamento { get; set; }
+        [JsonIgnore] public TipoPagamentoModel TipoPagamento { get; set; }
         public int? TipoPagamentoId { get; set; } = 0; // Relacionamento com a tabela de TipoPagamento
-
-        [JsonIgnore]
-        public FormaPagamentoModel FormaPagamento { get; set; }
+        [JsonIgnore] public FormaPagamentoModel FormaPagamento { get; set; }
         public int? FormaPagamentoId { get; set; } = 0; // Relacionamento com a tabela de FormaPagamento
-
-        [JsonIgnore]
-        public BancoModel Banco { get; set; }
+        [JsonIgnore] public BancoModel Banco { get; set; }
         public int? BancoId { get; set; } = 0; // Relacionamento com a tabela de Banco
     }
 }

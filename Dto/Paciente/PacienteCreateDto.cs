@@ -34,11 +34,11 @@ namespace WebApiSmartClinic.Dto.Paciente
 
         [EmailAddress(ErrorMessage = "O email deve ser válido.")]
         public string Email { get; set; }
-        public string Estado { get; set; }
+        public string Uf { get; set; }
         public string EstadoCivil { get; set; }
         public string Logradouro { get; set; }
         public string Medicamento { get; set; }
-        public string Medico { get; set; }
+        public string ProfissionalId { get; set; }
 
         [Required(ErrorMessage = "O nome é obrigatório.")]
         public string Nome { get; set; }
@@ -54,5 +54,6 @@ namespace WebApiSmartClinic.Dto.Paciente
 
         [Phone(ErrorMessage = "O número de telefone deve ser válido.")]
         public string Telefone { get; set; }
+        public string PlanoId { get; set; }
     }
 }

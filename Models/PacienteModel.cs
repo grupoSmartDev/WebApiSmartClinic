@@ -33,15 +33,16 @@ namespace WebApiSmartClinic.Models
 
         [EmailAddress(ErrorMessage = "O email deve ser válido.")]
         public string Email { get; set; }
-        public string Estado { get; set; }
+        public string Uf { get; set; }
         public string EstadoCivil { get; set; }
         public string Logradouro { get; set; }
+        public string ProfissionalId { get; set; }
+        [JsonIgnore]
+        public ProfissionalModel? Profissional { get; set; }
         public string Medicamento { get; set; }
-        public string Medico { get; set; }
 
         [Required(ErrorMessage = "O nome é obrigatório.")]
         public string Nome { get; set; }
-        public string NomeDaEmpresa { get; set; }
         public string Numero { get; set; }
         public string Pais { get; set; }
         public bool PermitirLembretes { get; set; }
@@ -53,5 +54,9 @@ namespace WebApiSmartClinic.Models
 
         [Phone(ErrorMessage = "O número de telefone deve ser válido.")]
         public string Telefone { get; set; }
+        public string PlanoId{ get; set; }
+        [JsonIgnore]
+        public PlanoModel? Plano { get;set; }
+
     }
 }

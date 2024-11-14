@@ -58,13 +58,12 @@ public class PacienteService : IPacienteInterface
             paciente.Cpf = pacienteCreateDto.Cpf;
             paciente.DataNascimento = pacienteCreateDto.DataNascimento;
             paciente.Email = pacienteCreateDto.Email;
-            paciente.Estado = pacienteCreateDto.Estado;
+            paciente.Uf = pacienteCreateDto.Uf;
             paciente.EstadoCivil = pacienteCreateDto.EstadoCivil;
             paciente.Logradouro = pacienteCreateDto.Logradouro;
             paciente.Medicamento = pacienteCreateDto.Medicamento;
-            paciente.Medico = pacienteCreateDto.Medico;
+            paciente.ProfissionalId = pacienteCreateDto.ProfissionalId;
             paciente.Nome = pacienteCreateDto.Nome;
-            paciente.NomeDaEmpresa = pacienteCreateDto.NomeDaEmpresa;
             paciente.Numero = pacienteCreateDto.Numero;
             paciente.Pais = pacienteCreateDto.Pais;
             paciente.PermitirLembretes = pacienteCreateDto.PermitirLembretes;
@@ -74,6 +73,7 @@ public class PacienteService : IPacienteInterface
             paciente.Rg = pacienteCreateDto.Rg;
             paciente.Sexo = pacienteCreateDto.Sexo;
             paciente.Telefone = pacienteCreateDto.Telefone;
+            paciente.PlanoId = pacienteCreateDto.PlanoId;
 
             // Verifica se o ConvenioId é válido
             var convenioExiste = await _context.Convenio.AnyAsync(c => c.Id == pacienteCreateDto.ConvenioId);
@@ -152,13 +152,12 @@ public class PacienteService : IPacienteInterface
             paciente.Cpf = pacienteEdicaoDto.Cpf;
             paciente.DataNascimento = pacienteEdicaoDto.DataNascimento;
             paciente.Email = pacienteEdicaoDto.Email;
-            paciente.Estado = pacienteEdicaoDto.Estado;
+            paciente.Uf = pacienteEdicaoDto.Uf;
             paciente.EstadoCivil = pacienteEdicaoDto.EstadoCivil;
             paciente.Logradouro = pacienteEdicaoDto.Logradouro;
             paciente.Medicamento = pacienteEdicaoDto.Medicamento;
-            paciente.Medico = pacienteEdicaoDto.Medico;
-            paciente.Nome = pacienteEdicaoDto.Nome;
-            paciente.NomeDaEmpresa = pacienteEdicaoDto.NomeDaEmpresa;
+            paciente.ProfissionalId = pacienteEdicaoDto.ProfissionalId;
+            paciente.Nome = pacienteEdicaoDto.Nome;           
             paciente.Numero = pacienteEdicaoDto.Numero;
             paciente.Pais = pacienteEdicaoDto.Pais;
             paciente.PermitirLembretes = pacienteEdicaoDto.PermitirLembretes;
@@ -168,6 +167,7 @@ public class PacienteService : IPacienteInterface
             paciente.Rg = pacienteEdicaoDto.Rg;
             paciente.Sexo = pacienteEdicaoDto.Sexo;
             paciente.Telefone = pacienteEdicaoDto.Telefone;
+            paciente.PlanoId = pacienteEdicaoDto.PlanoId;
 
             var convenioExiste = await _context.Convenio.AnyAsync(c => c.Id == pacienteEdicaoDto.ConvenioId);
             if (convenioExiste)

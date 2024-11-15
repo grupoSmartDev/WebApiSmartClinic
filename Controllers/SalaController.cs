@@ -23,17 +23,17 @@ public class SalaController : ControllerBase
         return Ok(sala);
     }
 
-    [HttpGet("BuscarPorId/{idStatus}")]
-    public async Task<ActionResult<ResponseModel<List<SalaModel>>>> BuscarStatusPorId(int idStatus)
+    [HttpGet("BuscarPorId/{id}")]
+    public async Task<ActionResult<ResponseModel<List<SalaModel>>>> BuscarStatusPorId(int id)
     {
-        var sala = await _context.BuscarSalaPorId(idStatus);
+        var sala = await _context.BuscarSalaPorId(id);
         return Ok(sala);
     }
 
     [HttpPost("Criar")]
-    public async Task<ActionResult<ResponseModel<List<SalaModel>>>> CriarStatus(SalaCreateDto statusCreateDto)
+    public async Task<ActionResult<ResponseModel<List<SalaModel>>>> CriarStatus(SalaCreateDto salaCreateDto)
     {
-        var sala = await _context.CriarSala(statusCreateDto);
+        var sala = await _context.CriarSala(salaCreateDto);
         return Ok(sala);
     }
 
@@ -44,10 +44,10 @@ public class SalaController : ControllerBase
         return Ok(sala);
     }
 
-    [HttpDelete("Delete/{idStatus}")]
-    public async Task<ActionResult<ResponseModel<List<SalaModel>>>> DeleteSala(int idSala)
+    [HttpDelete("Delete/{id}")]
+    public async Task<ActionResult<ResponseModel<List<SalaModel>>>> DeleteSala(int id)
     {
-        var sala = await _context.DeleteSala(idSala);
+        var sala = await _context.DeleteSala(id);
         return Ok(sala);
     }
 

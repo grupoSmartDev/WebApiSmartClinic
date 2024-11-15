@@ -22,6 +22,7 @@ using WebApiSmartClinic.Services.HistoricoTransacao;
 using WebApiSmartClinic.Services.Comissao;
 using WebApiSmartClinic.Services.Plano;
 using WebApiSmartClinic.Services.Agenda;
+using WebApiSmartClinic.Services.Profissional;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -75,6 +76,7 @@ builder.Services.AddScoped<IHistoricoTransacaoInterface, HistoricoTransacaoServi
 builder.Services.AddScoped<IComissaoInterface, ComissaoService>();
 builder.Services.AddScoped<IPlanoInterface, PlanoService>();
 builder.Services.AddScoped<IAgendaInterface, AgendaService>();
+builder.Services.AddScoped<IProfissionalInterface, ProfissionalService>();
 
 var app = builder.Build();
 

@@ -52,16 +52,7 @@ public class PlanoService : IPlanoInterface
             plano.Descricao = planoCreateDto.Descricao;
             plano.TempoMinutos = planoCreateDto.TempoMinutos;
             plano.CentroCustoId = planoCreateDto.CentroCustoId;
-            plano.TipoCobranca = planoCreateDto.TipoCobranca;
-            plano.PlanoGratuito = planoCreateDto.PlanoGratuito;
-
-            if (!plano.PlanoGratuito)
-            {
-                plano.ValorPlano = planoCreateDto.ValorPlano;
-            }
-            
-            plano.SalaId = planoCreateDto.SalaId;
-            plano.ProfissionalId = planoCreateDto.ProfissionalId;
+                      
 
             if (plano.PlanoBimestral)
             {
@@ -166,17 +157,7 @@ public class PlanoService : IPlanoInterface
             plano.Descricao = planoEdicaoDto.Descricao;
             plano.TempoMinutos = planoEdicaoDto.TempoMinutos;
             plano.CentroCustoId = planoEdicaoDto.CentroCustoId;
-            plano.TipoCobranca = planoEdicaoDto.TipoCobranca;
-            plano.PlanoGratuito = planoEdicaoDto.PlanoGratuito;
-
-            if (!plano.PlanoGratuito)
-            {
-                plano.ValorPlano = planoEdicaoDto.ValorPlano;
-            }
-
-            plano.SalaId = planoEdicaoDto.SalaId;
-            plano.ProfissionalId = planoEdicaoDto.ProfissionalId;
-
+     
             if (plano.PlanoBimestral)
             {
                 plano.PlanoBimestral = planoEdicaoDto.PlanoBimestral;

@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using WebApiSmartClinic.Data;
 
@@ -11,9 +12,11 @@ using WebApiSmartClinic.Data;
 namespace WebApiSmartClinic.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241115031127_pacientedto")]
+    partial class pacientedto
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -785,12 +788,15 @@ namespace WebApiSmartClinic.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Bairro")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("BreveDiagnostico")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Celular")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Cep")
@@ -798,12 +804,15 @@ namespace WebApiSmartClinic.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Cidade")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("ComoConheceu")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Complemento")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<int?>("ConvenioId")
@@ -821,12 +830,15 @@ namespace WebApiSmartClinic.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("EstadoCivil")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Logradouro")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Medicamento")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Nome")
@@ -834,48 +846,64 @@ namespace WebApiSmartClinic.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Numero")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Pais")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<bool>("PermitirLembretes")
                         .HasColumnType("bit");
 
-                    b.Property<int?>("PlanoId")
+                    b.Property<string>("PlanoId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("PlanoId1")
                         .HasColumnType("int");
 
                     b.Property<string>("PreferenciaDeContato")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Profissao")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int?>("ProfissionalId")
+                    b.Property<string>("ProfissionalId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("ProfissionalId1")
                         .HasColumnType("int");
 
                     b.Property<bool>("Responsavel")
                         .HasColumnType("bit");
 
                     b.Property<string>("Rg")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Sexo")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Telefone")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Uf")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
                     b.HasIndex("ConvenioId");
 
-                    b.HasIndex("PlanoId");
+                    b.HasIndex("PlanoId1");
 
-                    b.HasIndex("ProfissionalId");
+                    b.HasIndex("ProfissionalId1");
 
                     b.ToTable("Paciente");
                 });
@@ -916,6 +944,9 @@ namespace WebApiSmartClinic.Migrations
                     b.Property<bool>("PlanoBimestral")
                         .HasColumnType("bit");
 
+                    b.Property<bool>("PlanoGratuito")
+                        .HasColumnType("bit");
+
                     b.Property<bool>("PlanoQuadrimestral")
                         .HasColumnType("bit");
 
@@ -925,8 +956,18 @@ namespace WebApiSmartClinic.Migrations
                     b.Property<bool>("PlanoTrimestral")
                         .HasColumnType("bit");
 
+                    b.Property<int?>("ProfissionalId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("SalaId")
+                        .HasColumnType("int");
+
                     b.Property<int>("TempoMinutos")
                         .HasColumnType("int");
+
+                    b.Property<string>("TipoCobranca")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<decimal?>("ValorMesAnual")
                         .HasColumnType("decimal(18,2)");
@@ -964,6 +1005,10 @@ namespace WebApiSmartClinic.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("CentroCustoId");
+
+                    b.HasIndex("ProfissionalId");
+
+                    b.HasIndex("SalaId");
 
                     b.ToTable("Plano");
                 });
@@ -1390,11 +1435,11 @@ namespace WebApiSmartClinic.Migrations
 
                     b.HasOne("WebApiSmartClinic.Models.PlanoModel", "Plano")
                         .WithMany()
-                        .HasForeignKey("PlanoId");
+                        .HasForeignKey("PlanoId1");
 
                     b.HasOne("WebApiSmartClinic.Models.ProfissionalModel", "Profissional")
                         .WithMany()
-                        .HasForeignKey("ProfissionalId");
+                        .HasForeignKey("ProfissionalId1");
 
                     b.Navigation("Convenio");
 
@@ -1409,7 +1454,19 @@ namespace WebApiSmartClinic.Migrations
                         .WithMany()
                         .HasForeignKey("CentroCustoId");
 
+                    b.HasOne("WebApiSmartClinic.Models.ProfissionalModel", "Profissional")
+                        .WithMany()
+                        .HasForeignKey("ProfissionalId");
+
+                    b.HasOne("WebApiSmartClinic.Models.SalaModel", "Sala")
+                        .WithMany()
+                        .HasForeignKey("SalaId");
+
                     b.Navigation("CentroCusto");
+
+                    b.Navigation("Profissional");
+
+                    b.Navigation("Sala");
                 });
 
             modelBuilder.Entity("WebApiSmartClinic.Models.ProcedimentoModel", b =>

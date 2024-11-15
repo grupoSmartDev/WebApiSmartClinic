@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using WebApiSmartClinic.Data;
 
@@ -11,9 +12,11 @@ using WebApiSmartClinic.Data;
 namespace WebApiSmartClinic.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241115033847_pacientedtod")]
+    partial class pacientedtod
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -916,6 +919,9 @@ namespace WebApiSmartClinic.Migrations
                     b.Property<bool>("PlanoBimestral")
                         .HasColumnType("bit");
 
+                    b.Property<bool>("PlanoGratuito")
+                        .HasColumnType("bit");
+
                     b.Property<bool>("PlanoQuadrimestral")
                         .HasColumnType("bit");
 
@@ -925,8 +931,18 @@ namespace WebApiSmartClinic.Migrations
                     b.Property<bool>("PlanoTrimestral")
                         .HasColumnType("bit");
 
+                    b.Property<int?>("ProfissionalId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("SalaId")
+                        .HasColumnType("int");
+
                     b.Property<int>("TempoMinutos")
                         .HasColumnType("int");
+
+                    b.Property<string>("TipoCobranca")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<decimal?>("ValorMesAnual")
                         .HasColumnType("decimal(18,2)");
@@ -964,6 +980,10 @@ namespace WebApiSmartClinic.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("CentroCustoId");
+
+                    b.HasIndex("ProfissionalId");
+
+                    b.HasIndex("SalaId");
 
                     b.ToTable("Plano");
                 });
@@ -1409,7 +1429,19 @@ namespace WebApiSmartClinic.Migrations
                         .WithMany()
                         .HasForeignKey("CentroCustoId");
 
+                    b.HasOne("WebApiSmartClinic.Models.ProfissionalModel", "Profissional")
+                        .WithMany()
+                        .HasForeignKey("ProfissionalId");
+
+                    b.HasOne("WebApiSmartClinic.Models.SalaModel", "Sala")
+                        .WithMany()
+                        .HasForeignKey("SalaId");
+
                     b.Navigation("CentroCusto");
+
+                    b.Navigation("Profissional");
+
+                    b.Navigation("Sala");
                 });
 
             modelBuilder.Entity("WebApiSmartClinic.Models.ProcedimentoModel", b =>

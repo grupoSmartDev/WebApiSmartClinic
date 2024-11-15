@@ -66,10 +66,10 @@ public class PacienteService : IPacienteInterface
             paciente.Nome = pacienteCreateDto.Nome;
             paciente.Numero = pacienteCreateDto.Numero;
             paciente.Pais = pacienteCreateDto.Pais;
-            paciente.PermitirLembretes = pacienteCreateDto.PermitirLembretes;
+            paciente.PermitirLembretes = (bool)pacienteCreateDto.PermitirLembretes;
             paciente.PreferenciaDeContato = pacienteCreateDto.PreferenciaDeContato;
             paciente.Profissao = pacienteCreateDto.Profissao;
-            paciente.Responsavel = pacienteCreateDto.Responsavel;
+            paciente.Responsavel = (bool)pacienteCreateDto.Responsavel;
             paciente.Rg = pacienteCreateDto.Rg;
             paciente.Sexo = pacienteCreateDto.Sexo;
             paciente.Telefone = pacienteCreateDto.Telefone;

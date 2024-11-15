@@ -9,27 +9,10 @@ namespace WebApiSmartClinic.Dto.Plano
         private decimal _valorPlano;
         public string Descricao { get; set; }
         public int TempoMinutos { get; set; } = 0;
-        [JsonIgnore] public CentroCustoModel CentroCusto { get; set; }
         public int? CentroCustoId { get; set; } = 0; // Relacionamento com a tabela de CentroCusto
-        public ICollection<TipoCobranca> TipoCobranca { get; set; }
-        public bool PlanoGratuito { get; set; }
-        public decimal ValorPlano
-        {
-            get => PlanoGratuito ? 0 : _valorPlano; // Retorna 0 se for gratuito
-            set
-            {
-                if (!PlanoGratuito)
-                {
-                    _valorPlano = value; // Permite definir valor apenas se não for gratuito
-                }
-            }
-        }
-
-        [JsonIgnore] public SalaModel? Sala { get; set; }
-        public int? SalaId { get; set; } = 0;
-        [JsonIgnore] public ProfissionalModel? Profissional { get; set; }
-        public int? ProfissionalId { get; set; } = 0;
-
+        [JsonIgnore] 
+        public CentroCustoModel? CentroCusto { get; set; }
+        public decimal ValorPlano {get;set;}
         public bool PlanoBimestral { get; set; }
         public decimal? ValorMesBimestral { get; set; } = 0;
         public decimal? ValorTotalBimestral { get; set; } = 0;

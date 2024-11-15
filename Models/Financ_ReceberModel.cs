@@ -32,9 +32,7 @@ namespace WebApiSmartClinic.Models
         public int? TipoPagamentoId { get; set; } = 0; // Relacionamento com a tabela de TipoPagamento
         [JsonIgnore] public FormaPagamentoModel FormaPagamento { get; set; }
         public int? FormaPagamentoId { get; set; } = 0; // Relacionamento com a tabela de FormaPagamento
-
-        [JsonIgnore]
-        public BancoModel Banco { get; set; }
+        [JsonIgnore] public BancoModel Banco { get; set; }
         public int? BancoId { get; set; } = 0; // Relacionamento com a tabela de Banco
     }
 }

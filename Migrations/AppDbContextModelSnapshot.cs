@@ -794,7 +794,6 @@ namespace WebApiSmartClinic.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Cep")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Cidade")
@@ -979,15 +978,19 @@ namespace WebApiSmartClinic.Migrations
                     b.Property<bool>("Ativo")
                         .HasColumnType("bit");
 
-                    b.Property<int>("CategoriaId")
+                    b.Property<int?>("CategoriaId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("CategoriaModelId")
                         .HasColumnType("int");
 
                     b.Property<string>("Descricao")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<TimeSpan>("Duracao")
-                        .HasColumnType("time");
+                    b.Property<string>("Duracao")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("MateriaisNecessarios")
                         .IsRequired()
@@ -1005,7 +1008,7 @@ namespace WebApiSmartClinic.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("CategoriaId");
+                    b.HasIndex("CategoriaModelId");
 
                     b.ToTable("Procedimento");
                 });
@@ -1414,13 +1417,9 @@ namespace WebApiSmartClinic.Migrations
 
             modelBuilder.Entity("WebApiSmartClinic.Models.ProcedimentoModel", b =>
                 {
-                    b.HasOne("WebApiSmartClinic.Models.CategoriaModel", "Categoria")
+                    b.HasOne("WebApiSmartClinic.Models.CategoriaModel", null)
                         .WithMany("Procedimentos")
-                        .HasForeignKey("CategoriaId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Categoria");
+                        .HasForeignKey("CategoriaModelId");
                 });
 
             modelBuilder.Entity("WebApiSmartClinic.Models.SubCentroCustoModel", b =>

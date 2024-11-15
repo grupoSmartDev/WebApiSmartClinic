@@ -52,7 +52,7 @@ public class ProcedimentoService : IProcedimentoInterface
             procedimento.Descricao = procedimentoCreateDto.Descricao;
             procedimento.Preco = procedimentoCreateDto.Preco;
             procedimento.Duracao = procedimentoCreateDto.Duracao;
-            procedimento.Categoria = procedimentoCreateDto.Categoria;
+            procedimento.CategoriaId = procedimentoCreateDto.CategoriaId;
             procedimento.Ativo = procedimentoCreateDto.Ativo;
             procedimento.MateriaisNecessarios = procedimentoCreateDto.MateriaisNecessarios;
             procedimento.PercentualComissao = procedimentoCreateDto.PercentualComissao;
@@ -127,7 +127,7 @@ public class ProcedimentoService : IProcedimentoInterface
             procedimento.Descricao = procedimentoEdicaoDto.Descricao;
             procedimento.Preco = procedimentoEdicaoDto.Preco;
             procedimento.Duracao = procedimentoEdicaoDto.Duracao;
-            procedimento.Categoria = procedimentoEdicaoDto.Categoria;
+            procedimento.CategoriaId = procedimentoEdicaoDto.CategoriaId;
             procedimento.Ativo = procedimentoEdicaoDto.Ativo;
             procedimento.MateriaisNecessarios = procedimentoEdicaoDto.MateriaisNecessarios;
             procedimento.PercentualComissao = procedimentoEdicaoDto.PercentualComissao;

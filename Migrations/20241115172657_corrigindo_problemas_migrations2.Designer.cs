@@ -12,8 +12,8 @@ using WebApiSmartClinic.Data;
 namespace WebApiSmartClinic.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20241115033847_pacientedtod")]
-    partial class pacientedtod
+    [Migration("20241115172657_corrigindo_problemas_migrations2")]
+    partial class corrigindo_problemas_migrations2
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -797,7 +797,6 @@ namespace WebApiSmartClinic.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Cep")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Cidade")
@@ -919,9 +918,6 @@ namespace WebApiSmartClinic.Migrations
                     b.Property<bool>("PlanoBimestral")
                         .HasColumnType("bit");
 
-                    b.Property<bool>("PlanoGratuito")
-                        .HasColumnType("bit");
-
                     b.Property<bool>("PlanoQuadrimestral")
                         .HasColumnType("bit");
 
@@ -931,18 +927,8 @@ namespace WebApiSmartClinic.Migrations
                     b.Property<bool>("PlanoTrimestral")
                         .HasColumnType("bit");
 
-                    b.Property<int?>("ProfissionalId")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("SalaId")
-                        .HasColumnType("int");
-
                     b.Property<int>("TempoMinutos")
                         .HasColumnType("int");
-
-                    b.Property<string>("TipoCobranca")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<decimal?>("ValorMesAnual")
                         .HasColumnType("decimal(18,2)");
@@ -981,10 +967,6 @@ namespace WebApiSmartClinic.Migrations
 
                     b.HasIndex("CentroCustoId");
 
-                    b.HasIndex("ProfissionalId");
-
-                    b.HasIndex("SalaId");
-
                     b.ToTable("Plano");
                 });
 
@@ -999,15 +981,19 @@ namespace WebApiSmartClinic.Migrations
                     b.Property<bool>("Ativo")
                         .HasColumnType("bit");
 
-                    b.Property<int>("CategoriaId")
+                    b.Property<int?>("CategoriaId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("CategoriaModelId")
                         .HasColumnType("int");
 
                     b.Property<string>("Descricao")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<TimeSpan>("Duracao")
-                        .HasColumnType("time");
+                    b.Property<string>("Duracao")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("MateriaisNecessarios")
                         .IsRequired()
@@ -1025,7 +1011,7 @@ namespace WebApiSmartClinic.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("CategoriaId");
+                    b.HasIndex("CategoriaModelId");
 
                     b.ToTable("Procedimento");
                 });
@@ -1429,30 +1415,14 @@ namespace WebApiSmartClinic.Migrations
                         .WithMany()
                         .HasForeignKey("CentroCustoId");
 
-                    b.HasOne("WebApiSmartClinic.Models.ProfissionalModel", "Profissional")
-                        .WithMany()
-                        .HasForeignKey("ProfissionalId");
-
-                    b.HasOne("WebApiSmartClinic.Models.SalaModel", "Sala")
-                        .WithMany()
-                        .HasForeignKey("SalaId");
-
                     b.Navigation("CentroCusto");
-
-                    b.Navigation("Profissional");
-
-                    b.Navigation("Sala");
                 });
 
             modelBuilder.Entity("WebApiSmartClinic.Models.ProcedimentoModel", b =>
                 {
-                    b.HasOne("WebApiSmartClinic.Models.CategoriaModel", "Categoria")
+                    b.HasOne("WebApiSmartClinic.Models.CategoriaModel", null)
                         .WithMany("Procedimentos")
-                        .HasForeignKey("CategoriaId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Categoria");
+                        .HasForeignKey("CategoriaModelId");
                 });
 
             modelBuilder.Entity("WebApiSmartClinic.Models.SubCentroCustoModel", b =>

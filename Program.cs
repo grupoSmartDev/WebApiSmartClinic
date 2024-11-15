@@ -23,11 +23,33 @@ using WebApiSmartClinic.Services.Comissao;
 using WebApiSmartClinic.Services.Plano;
 using WebApiSmartClinic.Services.Agenda;
 using WebApiSmartClinic.Services.Profissional;
+using System.Globalization;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllers();
+
+var cultureInfo = new CultureInfo("pt-BR"); // Use "en-US" para separador decimal como ponto
+cultureInfo.NumberFormat.NumberDecimalSeparator = ",";
+cultureInfo.NumberFormat.NumberGroupSeparator = ".";
+
+// Aplica a cultura a nível global
+CultureInfo.DefaultThreadCurrentCulture = cultureInfo;
+CultureInfo.DefaultThreadCurrentUICulture = cultureInfo;
+
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.WriteIndented = true;
+    });
+
+
+builder.Services.AddControllers()
+    .AddNewtonsoftJson(options =>
+    {
+        options.SerializerSettings.Culture = new CultureInfo("pt-BR");
+    });
 
 // Add CORS service (libera acesso para qualquer origem)
 builder.Services.AddCors(options =>
@@ -80,6 +102,8 @@ builder.Services.AddScoped<IProfissionalInterface, ProfissionalService>();
 
 var app = builder.Build();
 
+
+
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
@@ -92,6 +116,8 @@ app.UseHttpsRedirection();
 // Use CORS middleware (aplicando a pol�tica que permite tudo)
 app.UseCors("AllowAll");
 
+// Aplicar middleware
+app.UseRouting();
 app.UseAuthorization();
 
 app.MapControllers();

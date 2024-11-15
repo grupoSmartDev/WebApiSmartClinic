@@ -17,10 +17,13 @@ namespace WebApiSmartClinic.Controllers
         }
 
         [HttpGet("Listar")]
-        public async Task<ActionResult<ResponseModel<List<ProcedimentoModel>>>> Listar()
+        public async Task<ActionResult> Listar([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
         {
-            var procedimento = await _procedimento.Listar();
-            return Ok(procedimento);
+            var response = await _procedimento.Listar(pageNumber, pageSize);
+            if (!response.Status)
+                return BadRequest(response);
+
+            return Ok(response);
         }
 
         [HttpGet("BuscarPorId/{idProcedimento}")]
@@ -31,24 +34,33 @@ namespace WebApiSmartClinic.Controllers
         }
 
         [HttpPost("Criar")]
-        public async Task<ActionResult<ResponseModel<List<ProcedimentoModel>>>> Criar(ProcedimentoCreateDto procedimentoCreateDto)
+        public async Task<ActionResult<ResponseModel<List<ProcedimentoModel>>>> Criar(ProcedimentoCreateDto procedimentoCreateDto, [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
         {
-            var procedimento = await _procedimento.Criar(procedimentoCreateDto);
-            return Ok(procedimento);
+            var response = await _procedimento.Criar(procedimentoCreateDto, pageNumber, pageSize);
+            if (!response.Status)
+                return BadRequest(response);
+
+            return Ok(response);
         }
 
         [HttpPut("Editar")]
-        public async Task<ActionResult<ResponseModel<List<ProcedimentoModel>>>> Editar(ProcedimentoEdicaoDto procedimentoEdicaoDto)
+        public async Task<ActionResult<ResponseModel<List<ProcedimentoModel>>>> Editar(ProcedimentoEdicaoDto procedimentoEdicaoDto, [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
         {
-            var procedimento = await _procedimento.Editar(procedimentoEdicaoDto);
-            return Ok(procedimento);
+            var response = await _procedimento.Editar(procedimentoEdicaoDto, pageNumber, pageSize);
+            if (!response.Status)
+                return BadRequest(response);
+
+            return Ok(response);
         }
 
         [HttpDelete("Delete/{idProcedimento}")]
-        public async Task<ActionResult<ResponseModel<List<ProcedimentoModel>>>> Delete(int idProcedimento)
+        public async Task<ActionResult<ResponseModel<List<ProcedimentoModel>>>> Delete(int idProcedimento, [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
         {
-            var procedimento = await _procedimento.Delete(idProcedimento);
-            return Ok(procedimento);
+            var response = await _procedimento.Delete(idProcedimento, pageNumber, pageSize);
+            if (!response.Status)
+                return BadRequest(response);
+
+            return Ok(response);
         }
     }
 }

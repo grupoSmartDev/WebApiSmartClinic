@@ -40,7 +40,7 @@ public class ProcedimentoService : IProcedimentoInterface
         }
     }
 
-    public async Task<ResponseModel<List<ProcedimentoModel>>> Criar(ProcedimentoCreateDto procedimentoCreateDto)
+    public async Task<ResponseModel<List<ProcedimentoModel>>> Criar(ProcedimentoCreateDto procedimentoCreateDto, int pageNumber = 1, int pageSize = 10)
     {
         ResponseModel<List<ProcedimentoModel>> resposta = new ResponseModel<List<ProcedimentoModel>>();
 
@@ -67,8 +67,11 @@ public class ProcedimentoService : IProcedimentoInterface
             _context.Add(procedimento);
             await _context.SaveChangesAsync();
 
-            resposta.Dados = await _context.Procedimento.ToListAsync();
-            resposta.Mensagem = "Procedimento criado com sucesso";
+            // Query do banco de dados
+            var query = _context.Procedimento.AsQueryable();
+
+            // Paginação usando o helper
+            resposta = await PaginationHelper.PaginateAsync(query, pageNumber, pageSize);
             return resposta;
         }
         catch (Exception ex)
@@ -80,7 +83,7 @@ public class ProcedimentoService : IProcedimentoInterface
 
     }
 
-    public async Task<ResponseModel<List<ProcedimentoModel>>> Delete(int idProcedimento)
+    public async Task<ResponseModel<List<ProcedimentoModel>>> Delete(int idProcedimento, int pageNumber = 1, int pageSize = 10)
     {
         ResponseModel<List<ProcedimentoModel>> resposta = new ResponseModel<List<ProcedimentoModel>>();
 
@@ -96,8 +99,11 @@ public class ProcedimentoService : IProcedimentoInterface
             _context.Remove(procedimento);
             await _context.SaveChangesAsync();
 
-            resposta.Dados = await _context.Procedimento.ToListAsync();
-            resposta.Mensagem = "Procedimento Excluido com sucesso";
+            // Query do banco de dados
+            var query = _context.Procedimento.AsQueryable();
+
+            // Paginação usando o helper
+            resposta = await PaginationHelper.PaginateAsync(query, pageNumber, pageSize);
 
             return resposta;
         }
@@ -109,7 +115,7 @@ public class ProcedimentoService : IProcedimentoInterface
         }
     }
 
-    public async Task<ResponseModel<List<ProcedimentoModel>>> Editar(ProcedimentoEdicaoDto procedimentoEdicaoDto)
+    public async Task<ResponseModel<List<ProcedimentoModel>>> Editar(ProcedimentoEdicaoDto procedimentoEdicaoDto, int pageNumber = 1, int pageSize = 10)
     {
         ResponseModel<List<ProcedimentoModel>> resposta = new ResponseModel<List<ProcedimentoModel>>();
 
@@ -142,9 +148,12 @@ public class ProcedimentoService : IProcedimentoInterface
             _context.Update(procedimento);
             await _context.SaveChangesAsync();
 
-            resposta.Dados = await _context.Procedimento.ToListAsync();
-            resposta.Mensagem = "Procedimento Atualizado com sucesso";
-            
+            // Query do banco de dados
+            var query = _context.Procedimento.AsQueryable();
+
+            // Paginação usando o helper
+            resposta = await PaginationHelper.PaginateAsync(query, pageNumber, pageSize);
+
             return resposta;
         }
         catch (Exception ex)
@@ -157,25 +166,27 @@ public class ProcedimentoService : IProcedimentoInterface
         }
     }
 
-    public async Task<ResponseModel<List<ProcedimentoModel>>> Listar()
+    public async Task<ResponseModel<List<ProcedimentoModel>>> Listar(int pageNumber = 1, int pageSize = 10)
     {
         ResponseModel<List<ProcedimentoModel>> resposta = new ResponseModel<List<ProcedimentoModel>>();
 
         try
         {
-            var procedimento = await _context.Procedimento.ToListAsync();
+            // Query do banco de dados
+            var query = _context.Procedimento.AsQueryable();
 
-            resposta.Dados = procedimento;
-            resposta.Mensagem = "Todos os Procedimento foram encontrados";
-            
+            // Paginação usando o helper
+            resposta = await PaginationHelper.PaginateAsync(query, pageNumber, pageSize);
+
             return resposta;
         }
-        catch (Exception e)
+        catch (Exception ex)
         {
-            resposta.Mensagem = e.Message;
-            resposta.Status = false;
-          
-            return resposta;
+            return new ResponseModel<List<ProcedimentoModel>>
+            {
+                Status = false,
+                Mensagem = ex.Message
+            };
         }
     }
 }

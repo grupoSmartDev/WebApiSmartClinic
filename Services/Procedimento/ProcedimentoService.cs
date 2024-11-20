@@ -24,18 +24,20 @@ public class ProcedimentoService : IProcedimentoInterface
             if (procedimento == null)
             {
                 resposta.Mensagem = "Nenhum Procedimento encontrado";
+            
                 return resposta;
             }
 
             resposta.Dados = procedimento;
             resposta.Mensagem = "Procedimento Encontrado";
+            
             return resposta;
         }
         catch (Exception ex)
         {
-
-            resposta.Mensagem = "Erro ao buscar Procedimento";
+            resposta.Mensagem = ex.Message;
             resposta.Status = false;
+            
             return resposta;
         }
     }
@@ -72,15 +74,16 @@ public class ProcedimentoService : IProcedimentoInterface
 
             // Paginação usando o helper
             resposta = await PaginationHelper.PaginateAsync(query, pageNumber, pageSize);
+            
             return resposta;
         }
         catch (Exception ex)
         {
             resposta.Mensagem = ex.Message;
             resposta.Status = false;
+            
             return resposta;
         }
-
     }
 
     public async Task<ResponseModel<List<ProcedimentoModel>>> Delete(int idProcedimento, int pageNumber = 1, int pageSize = 10)
@@ -93,6 +96,7 @@ public class ProcedimentoService : IProcedimentoInterface
             if (procedimento == null)
             {
                 resposta.Mensagem = "Nenhum Procedimento encontrado";
+               
                 return resposta;
             }
 
@@ -111,6 +115,7 @@ public class ProcedimentoService : IProcedimentoInterface
         {
             resposta.Mensagem = ex.Message;
             resposta.Status = false;
+          
             return resposta;
         }
     }
@@ -125,6 +130,7 @@ public class ProcedimentoService : IProcedimentoInterface
             if (procedimento == null)
             {
                 resposta.Mensagem = "Procedimento não encontrado";
+                
                 return resposta;
             }
 
@@ -166,7 +172,7 @@ public class ProcedimentoService : IProcedimentoInterface
         }
     }
 
-    public async Task<ResponseModel<List<ProcedimentoModel>>> Listar(int pageNumber = 1, int pageSize = 10)
+    public async Task<ResponseModel<List<ProcedimentoModel>>> Listar(int pageNumber = 1, int pageSize = 10, int? codigo = null, string? nome = null)
     {
         ResponseModel<List<ProcedimentoModel>> resposta = new ResponseModel<List<ProcedimentoModel>>();
 
@@ -174,6 +180,19 @@ public class ProcedimentoService : IProcedimentoInterface
         {
             // Query do banco de dados
             var query = _context.Procedimento.AsQueryable();
+
+            // Filtros
+            if (codigo.HasValue)
+            {
+                query.Where(x => x.Id == codigo.Value);
+            }
+
+            if (!string.IsNullOrEmpty(nome))
+            {
+                query.Where(x => x.Nome.Contains(nome));
+            }
+
+            query = query.OrderBy(x => x.Id);
 
             // Paginação usando o helper
             resposta = await PaginationHelper.PaginateAsync(query, pageNumber, pageSize);

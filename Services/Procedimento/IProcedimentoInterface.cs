@@ -6,7 +6,7 @@ namespace WebApiSmartClinic.Services.Procedimento
 {
     public interface IProcedimentoInterface
     {
-        Task<ResponseModel<List<ProcedimentoModel>>> Listar(int pageNumber = 1, int pageSize = 10);
+        Task<ResponseModel<List<ProcedimentoModel>>> Listar(int pageNumber = 1, int pageSize = 10, int? codigo = null, string? nome = null);
         Task<ResponseModel<List<ProcedimentoModel>>> Delete(int idProcedimento, int pageNumber = 1, int pageSize = 10);
         Task<ResponseModel<ProcedimentoModel>> BuscarPorId(int idProcedimento);
         Task<ResponseModel<List<ProcedimentoModel>>> Criar(ProcedimentoCreateDto procedimentoCreateDto, int pageNumber = 1, int pageSize = 10);

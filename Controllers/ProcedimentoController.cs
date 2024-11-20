@@ -17,14 +17,20 @@ namespace WebApiSmartClinic.Controllers
         }
 
         [HttpGet("Listar")]
-        public async Task<ActionResult> Listar([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
+        public async Task<ActionResult> Listar(
+            [FromQuery] int pageNumber = 1,
+            [FromQuery] int pageSize = 10,
+            [FromQuery] int? codigo = null,
+            [FromQuery] string? nome = null)
         {
-            var response = await _procedimento.Listar(pageNumber, pageSize);
+            var response = await _procedimento.Listar(pageNumber, pageSize, codigo, nome);
+
             if (!response.Status)
                 return BadRequest(response);
 
             return Ok(response);
         }
+
 
         [HttpGet("BuscarPorId/{idProcedimento}")]
         public async Task<ActionResult<ResponseModel<List<ProcedimentoModel>>>> BuscarPorId(int idProcedimento)

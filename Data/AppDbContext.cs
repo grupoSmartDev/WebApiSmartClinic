@@ -25,6 +25,7 @@ public class AppDbContext : DbContext
     public DbSet<CategoriaModel> Categoria { get; set; }
     public DbSet<Financ_PagarModel> Financ_Pagar { get; set; }
     public DbSet<Financ_ReceberModel> Financ_Receber { get; set; }
+    public DbSet<Financ_ReceberSubModel> Financ_ReceberSub { get; set; }
     public DbSet<ProfissionalModel> Profissional { get; set; }
     public DbSet<UsuarioModel> Usuario { get; set; }
     public DbSet<HistoricoTransacaoModel> HistoricoTransacao { get; set; }
@@ -39,5 +40,13 @@ public class AppDbContext : DbContext
             .HasMany(c => c.SubCentrosCusto)  // Um CentroCustoModel pode ter muitos SubCentroCustoModel associados
             .WithOne(sc => sc.CentroCusto)  // Cada SubCentroCustoModel está relacionado com um único CentroCustoModel
             .HasForeignKey(sc => sc.CentroCustoId);  // O campo CentroCustoId em SubCentroCustoModel é a chave estrangeira que referencia o Id de CentroCustoModel
+
+        // Configura a entidade Financ_ReceberModel para ter uma relação de um para muitos com Financ_ReceberSubModel
+        modelBuilder.Entity<Financ_ReceberModel>()
+            .HasMany(f => f.Parcelas)  // Um Financ_ReceberModel pode ter muitas Financ_ReceberSubModel associadas
+            .WithOne()  // Cada Financ_ReceberSubModel pertence a um único Financ_ReceberModel
+            .HasForeignKey(p => p.Financ_ReceberId);  // O campo Financ_ReceberId é a chave estrangeira que referencia o Id de Financ_ReceberModel
+
+        base.OnModelCreating(modelBuilder);
     }
 }

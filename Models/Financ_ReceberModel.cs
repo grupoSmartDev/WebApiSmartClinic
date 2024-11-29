@@ -34,5 +34,19 @@ namespace WebApiSmartClinic.Models
         public int? FormaPagamentoId { get; set; } = 0; // Relacionamento com a tabela de FormaPagamento
         [JsonIgnore] public BancoModel Banco { get; set; }
         public int? BancoId { get; set; } = 0; // Relacionamento com a tabela de Banco
+
+        public ICollection<Financ_ReceberSubModel> Parcelas { get; set; } = new List<Financ_ReceberSubModel>();
+
+    }
+
+    public class Financ_ReceberSubModel
+    {
+        public int Id { get; set; }
+        public int Financ_ReceberId { get; set; }
+        public int? ParcelaX { get; set; }
+        public decimal Valor { get; set; }
+        public DateTime? DataPagamento { get; set; }
+        public DateTime? DataVencimento { get; set; }
+        public string? Obs { get; set; }
     }
 }

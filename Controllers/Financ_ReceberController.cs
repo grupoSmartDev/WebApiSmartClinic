@@ -50,5 +50,29 @@ namespace WebApiSmartClinic.Controllers
             var financ_receber = await _financ_receber.Delete(idFinanc_Receber);
             return Ok(financ_receber);
         }
+
+        [HttpGet("BuscarContasEmAberto")]
+        public async Task<ActionResult<ResponseModel<List<Financ_ReceberModel>>>> BuscarContasEmAberto()
+        {
+            var contasEmAberto = await _financ_receber.BuscarContasEmAberto();
+            return Ok(contasEmAberto);
+        }
+
+        [HttpPut("QuitarParcela/{idParcela}")]
+        public async Task<ActionResult<ResponseModel<Financ_ReceberSubModel>>> QuitarParcela(
+            int idParcela,
+            [FromQuery] decimal valorPago,
+            [FromQuery] DateTime dataPagamento)
+        {
+            var parcelaQuitada = await _financ_receber.QuitarParcela(idParcela, valorPago, dataPagamento);
+            return Ok(parcelaQuitada);
+        }
+
+        [HttpGet("CalcularTotalRecebiveis")]
+        public async Task<ActionResult<ResponseModel<decimal>>> CalcularTotalRecebiveis()
+        {
+            var totalRecebiveis = await _financ_receber.CalcularTotalRecebiveis();
+            return Ok(totalRecebiveis);
+        }
     }
 }

@@ -19,7 +19,10 @@ public class Financ_ReceberService : IFinanc_ReceberInterface
         ResponseModel<Financ_ReceberModel> resposta = new ResponseModel<Financ_ReceberModel>();
         try
         {
-            var financ_receber = await _context.Financ_Receber.FirstOrDefaultAsync(x => x.Id == idFinanc_Receber);
+            var financ_receber = await _context.Financ_Receber
+                .Include(f => f.Parcelas) // Inclui as parcelas no resultado
+                .FirstOrDefaultAsync(x => x.Id == idFinanc_Receber);
+
             if (financ_receber == null)
             {
                 resposta.Mensagem = "Nenhum Financ_Receber encontrado";
@@ -41,38 +44,60 @@ public class Financ_ReceberService : IFinanc_ReceberInterface
     public async Task<ResponseModel<List<Financ_ReceberModel>>> Criar(Financ_ReceberCreateDto financ_receberCreateDto)
     {
         ResponseModel<List<Financ_ReceberModel>> resposta = new ResponseModel<List<Financ_ReceberModel>>();
-
         try
         {
-            var financ_receber = new Financ_ReceberModel();
+            // Criação do cabeçalho (pai)
+            var financ_receber = new Financ_ReceberModel
+            {
+                IdOrigem = financ_receberCreateDto.IdOrigem,
+                NrDocto = financ_receberCreateDto.NrDocto,
+                DataEmissao = financ_receberCreateDto.DataEmissao,
+                DataVencimento = financ_receberCreateDto.DataVencimento,
+                DataPagamento = financ_receberCreateDto.DataPagamento,
+                ValorOriginal = financ_receberCreateDto.ValorOriginal,
+                ValorPago = financ_receberCreateDto.ValorPago,
+                Status = financ_receberCreateDto.Status,
+                NotaFiscal = financ_receberCreateDto.NotaFiscal,
+                Descricao = financ_receberCreateDto.Descricao,
+                Parcela = financ_receberCreateDto.Parcela,
+                Classificacao = financ_receberCreateDto.Classificacao,
+                Desconto = financ_receberCreateDto.Desconto,
+                Juros = financ_receberCreateDto.Juros,
+                Multa = financ_receberCreateDto.Multa,
+                Observacao = financ_receberCreateDto.Observacao,
+                FornecedorId = financ_receberCreateDto.FornecedorId,
+                CentroCustoId = financ_receberCreateDto.CentroCustoId,
+                TipoPagamentoId = financ_receberCreateDto.TipoPagamentoId,
+                FormaPagamentoId = financ_receberCreateDto.FormaPagamentoId,
+                BancoId = financ_receberCreateDto.BancoId
+            };
 
             _context.Add(financ_receber);
             await _context.SaveChangesAsync();
 
-            financ_receber.IdOrigem = financ_receberCreateDto.IdOrigem;
-            financ_receber.NrDocto = financ_receberCreateDto.NrDocto;
-            financ_receber.DataEmissao = financ_receberCreateDto.DataEmissao;
-            financ_receber.DataVencimento = financ_receberCreateDto.DataVencimento;
-            financ_receber.DataPagamento = financ_receberCreateDto.DataPagamento;
-            financ_receber.ValorOriginal = financ_receberCreateDto.ValorOriginal;
-            financ_receber.ValorPago = financ_receberCreateDto.ValorPago;
-            financ_receber.Status = financ_receberCreateDto.Status;
-            financ_receber.NotaFiscal = financ_receberCreateDto.NotaFiscal;
-            financ_receber.Descricao = financ_receberCreateDto.Descricao;
-            financ_receber.Parcela = financ_receberCreateDto.Parcela;
-            financ_receber.Classificacao = financ_receberCreateDto.Classificacao;
-            financ_receber.Desconto = financ_receberCreateDto.Desconto;
-            financ_receber.Juros = financ_receberCreateDto.Juros;
-            financ_receber.Multa = financ_receberCreateDto.Multa;
-            financ_receber.Observacao = financ_receberCreateDto.Observacao;
-            financ_receber.FornecedorId = financ_receberCreateDto.FornecedorId;
-            financ_receber.CentroCustoId = financ_receberCreateDto.CentroCustoId;
-            financ_receber.TipoPagamentoId = financ_receberCreateDto.TipoPagamentoId;
-            financ_receber.FormaPagamentoId = financ_receberCreateDto.FormaPagamentoId;
-            financ_receber.BancoId = financ_receberCreateDto.BancoId;
+            // Adicionando subitens (filhos)
+            if (financ_receberCreateDto.Parcelas != null && financ_receberCreateDto.Parcelas.Any())
+            {
+                foreach (var parcela in financ_receberCreateDto.Parcelas)
+                {
+                    var subItem = new Financ_ReceberSubModel
+                    {
+                        Financ_ReceberId = financ_receber.Id, // Relaciona com o pai
+                        ParcelaX = parcela.ParcelaX,
+                        Valor = parcela.Valor,
+                        DataPagamento = parcela.DataPagamento,
+                        DataVencimento = parcela.DataVencimento,
+                        Obs = parcela.Obs
+                    };
 
-            resposta.Dados = await _context.Financ_Receber.ToListAsync();
-            resposta.Mensagem = "Financ_Receber criado com sucesso";
+                    _context.Add(subItem);
+                }
+
+                await _context.SaveChangesAsync();
+            }
+
+            resposta.Dados = await _context.Financ_Receber.Include(f => f.Parcelas).ToListAsync();
+            resposta.Mensagem = "Financ_Receber e parcelas criados com sucesso";
             return resposta;
         }
         catch (Exception ex)
@@ -89,7 +114,10 @@ public class Financ_ReceberService : IFinanc_ReceberInterface
 
         try
         {
-            var financ_receber = await _context.Financ_Receber.FirstOrDefaultAsync(x => x.Id == idFinanc_Receber);
+            var financ_receber = await _context.Financ_Receber
+                .Include(f => f.Parcelas) // Inclui as parcelas para exclusão em cascata
+                .FirstOrDefaultAsync(x => x.Id == idFinanc_Receber);
+
             if (financ_receber == null)
             {
                 resposta.Mensagem = "Nenhum Financ_Receber encontrado";
@@ -100,7 +128,7 @@ public class Financ_ReceberService : IFinanc_ReceberInterface
             await _context.SaveChangesAsync();
 
             resposta.Dados = await _context.Financ_Receber.ToListAsync();
-            resposta.Mensagem = "Financ_Receber Excluido com sucesso";
+            resposta.Mensagem = "Financ_Receber Excluído com sucesso";
             return resposta;
         }
         catch (Exception ex)
@@ -117,14 +145,16 @@ public class Financ_ReceberService : IFinanc_ReceberInterface
 
         try
         {
-            var financ_receber = _context.Financ_Receber.FirstOrDefault(x => x.Id == financ_receberEdicaoDto.Id);
+            var financ_receber = await _context.Financ_Receber
+                .Include(f => f.Parcelas)
+                .FirstOrDefaultAsync(x => x.Id == financ_receberEdicaoDto.Id);
+
             if (financ_receber == null)
             {
                 resposta.Mensagem = "Financ_Receber não encontrado";
                 return resposta;
             }
 
-            financ_receber.Id = financ_receberEdicaoDto.Id;
             financ_receber.IdOrigem = financ_receberEdicaoDto.IdOrigem;
             financ_receber.NrDocto = financ_receberEdicaoDto.NrDocto;
             financ_receber.DataEmissao = financ_receberEdicaoDto.DataEmissao;
@@ -147,10 +177,11 @@ public class Financ_ReceberService : IFinanc_ReceberInterface
             financ_receber.FormaPagamentoId = financ_receberEdicaoDto.FormaPagamentoId;
             financ_receber.BancoId = financ_receberEdicaoDto.BancoId;
 
+            // Atualiza parcelas existentes
             _context.Update(financ_receber);
             await _context.SaveChangesAsync();
 
-            resposta.Dados = await _context.Financ_Receber.ToListAsync();
+            resposta.Dados = await _context.Financ_Receber.Include(f => f.Parcelas).ToListAsync();
             resposta.Mensagem = "Financ_Receber Atualizado com sucesso";
             return resposta;
         }
@@ -168,7 +199,9 @@ public class Financ_ReceberService : IFinanc_ReceberInterface
 
         try
         {
-            var financ_receber = await _context.Financ_Receber.ToListAsync();
+            var financ_receber = await _context.Financ_Receber
+                .Include(f => f.Parcelas) // Inclui as parcelas no resultado
+                .ToListAsync();
 
             resposta.Dados = financ_receber;
             resposta.Mensagem = "Todos os Financ_Receber foram encontrados";
@@ -177,6 +210,84 @@ public class Financ_ReceberService : IFinanc_ReceberInterface
         catch (Exception e)
         {
             resposta.Mensagem = e.Message;
+            resposta.Status = false;
+            return resposta;
+        }
+    }
+
+    public async Task<ResponseModel<List<Financ_ReceberModel>>> BuscarContasEmAberto()
+    {
+        ResponseModel<List<Financ_ReceberModel>> resposta = new ResponseModel<List<Financ_ReceberModel>>();
+
+        try
+        {
+            var contasEmAberto = await _context.Financ_Receber
+                .Include(f => f.Parcelas)
+                .Where(f => f.Status == "Em Aberto" || f.Status == "Parcial")
+                .ToListAsync();
+
+            resposta.Dados = contasEmAberto;
+            resposta.Mensagem = "Contas em aberto encontradas com sucesso";
+            return resposta;
+        }
+        catch (Exception ex)
+        {
+            resposta.Mensagem = ex.Message;
+            resposta.Status = false;
+            return resposta;
+        }
+    }
+
+    public async Task<ResponseModel<Financ_ReceberSubModel>> QuitarParcela(int idParcela, decimal valorPago, DateTime dataPagamento)
+    {
+        ResponseModel<Financ_ReceberSubModel> resposta = new ResponseModel<Financ_ReceberSubModel>();
+
+        try
+        {
+            var parcela = await _context.Financ_ReceberSub.FirstOrDefaultAsync(p => p.Id == idParcela);
+
+            if (parcela == null)
+            {
+                resposta.Mensagem = "Parcela não encontrada";
+                resposta.Status = false;
+                return resposta;
+            }
+
+            parcela.Valor = valorPago;
+            parcela.DataPagamento = dataPagamento;
+
+            _context.Update(parcela);
+            await _context.SaveChangesAsync();
+
+            resposta.Dados = parcela;
+            resposta.Mensagem = "Parcela quitada com sucesso";
+            return resposta;
+        }
+        catch (Exception ex)
+        {
+            resposta.Mensagem = ex.Message;
+            resposta.Status = false;
+            return resposta;
+        }
+    }
+
+    public async Task<ResponseModel<decimal>> CalcularTotalRecebiveis()
+    {
+        ResponseModel<decimal> resposta = new ResponseModel<decimal>();
+
+        try
+        {
+            var total = await _context.Financ_Receber
+                .Where(f => f.Status == "Em Aberto")
+                .SumAsync(f => f.ValorOriginal - f.ValorPago);
+
+            resposta.Dados = (decimal)total;
+            resposta.Mensagem = "Total de recebíveis calculado com sucesso";
+            return resposta;
+        }
+        catch (Exception ex)
+        {
+            resposta.Mensagem = ex.Message;
             resposta.Status = false;
             return resposta;
         }

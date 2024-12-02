@@ -35,6 +35,7 @@ public class AppDbContext : DbContext
     public DbSet<LogUsuarioModel> LogUsuario { get; set; }
     public DbSet<ExercicioModel> Exercicio { get; set; }
     public DbSet<AtividadeModel> Atividade { get; set; }
+    public DbSet<EvolucaoModel> Evolucao { get; set; }
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         // Configura a entidade CentroCustoModel para ter uma relação de um para muitos com SubCentroCustoModel

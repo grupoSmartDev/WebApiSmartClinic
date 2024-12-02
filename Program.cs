@@ -27,6 +27,7 @@ using System.Globalization;
 using WebApiSmartClinic.Services.LogUsuario;
 using WebApiSmartClinic.Services.Exercicio;
 using WebApiSmartClinic.Services.Atividade;
+using WebApiSmartClinic.Services.Evolucao;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -105,6 +106,7 @@ builder.Services.AddScoped<IProfissionalInterface, ProfissionalService>();
 builder.Services.AddScoped<ILogUsuarioInterface, LogUsuarioService>();
 builder.Services.AddScoped<IExercicioInterface, ExercicioService>();
 builder.Services.AddScoped<IAtividadeInterface, AtividadeService>();
+builder.Services.AddScoped<IEvolucaoInterface, EvolucaoService>();
 
 var app = builder.Build();
 

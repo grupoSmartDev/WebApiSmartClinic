@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using WebApiSmartClinic.Data;
 
@@ -11,9 +12,11 @@ using WebApiSmartClinic.Data;
 namespace WebApiSmartClinic.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241116145107_alteracaoProfissional")]
+    partial class alteracaoProfissional
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -90,33 +93,6 @@ namespace WebApiSmartClinic.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Agenda");
-                });
-
-            modelBuilder.Entity("WebApiSmartClinic.Models.AtividadeModel", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Descricao")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int?>("EvolucaoId")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("EvolucaoId1")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("EvolucaoId");
-
-                    b.HasIndex("EvolucaoId1");
-
-                    b.ToTable("Atividade");
                 });
 
             modelBuilder.Entity("WebApiSmartClinic.Models.AutorModel", b =>
@@ -407,99 +383,6 @@ namespace WebApiSmartClinic.Migrations
                     b.ToTable("Convenio");
                 });
 
-            modelBuilder.Entity("WebApiSmartClinic.Models.Evolucao", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime>("DataEvolucao")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Observacao")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int?>("PacienteId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("PacienteId");
-
-                    b.ToTable("Evolucao");
-                });
-
-            modelBuilder.Entity("WebApiSmartClinic.Models.EvolucaoModel", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime>("DataEvolucao")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Observacao")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int?>("PacienteId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("PacienteId");
-
-                    b.ToTable("Evolucoes");
-                });
-
-            modelBuilder.Entity("WebApiSmartClinic.Models.ExercicioModel", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Descricao")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("EvolucaoId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("EvolucaoId1")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Obs")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("Peso")
-                        .HasColumnType("int");
-
-                    b.Property<int>("Repeticoes")
-                        .HasColumnType("int");
-
-                    b.Property<int>("Series")
-                        .HasColumnType("int");
-
-                    b.Property<int>("Tempo")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("EvolucaoId");
-
-                    b.HasIndex("EvolucaoId1");
-
-                    b.ToTable("Exercicio");
-                });
-
             modelBuilder.Entity("WebApiSmartClinic.Models.Financ_PagarModel", b =>
                 {
                     b.Property<int>("Id")
@@ -687,39 +570,6 @@ namespace WebApiSmartClinic.Migrations
                     b.HasIndex("TipoPagamentoId");
 
                     b.ToTable("Financ_Receber");
-                });
-
-            modelBuilder.Entity("WebApiSmartClinic.Models.Financ_ReceberSubModel", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime?>("DataPagamento")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime?>("DataVencimento")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("Financ_ReceberId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Obs")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int?>("ParcelaX")
-                        .HasColumnType("int");
-
-                    b.Property<decimal>("Valor")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("Financ_ReceberId");
-
-                    b.ToTable("Financ_ReceberSub");
                 });
 
             modelBuilder.Entity("WebApiSmartClinic.Models.FormaPagamentoModel", b =>
@@ -929,36 +779,6 @@ namespace WebApiSmartClinic.Migrations
                     b.ToTable("Livros");
                 });
 
-            modelBuilder.Entity("WebApiSmartClinic.Models.LogUsuarioModel", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime>("DataMovimentacao")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Descricao")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("IdMovimentacao")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Rotina")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("UsuarioId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("LogUsuario");
-                });
-
             modelBuilder.Entity("WebApiSmartClinic.Models.PacienteModel", b =>
                 {
                     b.Property<int>("Id")
@@ -998,10 +818,8 @@ namespace WebApiSmartClinic.Migrations
                     b.Property<DateTime?>("DataNascimento")
                         .HasColumnType("datetime2");
 
-                    b.Property<DateTime?>("DataUltimoAtendimento")
-                        .HasColumnType("datetime2");
-
                     b.Property<string>("Email")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("EstadoCivil")
@@ -1057,9 +875,7 @@ namespace WebApiSmartClinic.Migrations
 
                     b.HasIndex("ConvenioId");
 
-                    b.HasIndex("PlanoId")
-                        .IsUnique()
-                        .HasFilter("[PlanoId] IS NOT NULL");
+                    b.HasIndex("PlanoId");
 
                     b.HasIndex("ProfissionalId");
 
@@ -1074,63 +890,82 @@ namespace WebApiSmartClinic.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<bool>("Ativo")
-                        .HasColumnType("bit");
-
                     b.Property<int?>("CentroCustoId")
                         .HasColumnType("int");
 
-                    b.Property<DateTime?>("DataFim")
-                        .HasColumnType("datetime2");
+                    b.Property<decimal?>("DescontoMesAnual")
+                        .HasColumnType("decimal(18,2)");
 
-                    b.Property<DateTime?>("DataInicio")
-                        .HasColumnType("datetime2");
+                    b.Property<decimal?>("DescontoMesBimestral")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal?>("DescontoMesQuadrimestral")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal?>("DescontoMesSemestral")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal?>("DescontoMesTrimestral")
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<string>("Descricao")
                         .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("nvarchar(255)");
+                        .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("DiasSemana")
-                        .HasColumnType("int");
+                    b.Property<bool>("PlanoAnual")
+                        .HasColumnType("bit");
 
-                    b.Property<int?>("FinanceiroId")
-                        .HasColumnType("int");
+                    b.Property<bool>("PlanoBimestral")
+                        .HasColumnType("bit");
 
-                    b.Property<int?>("PacienteId")
-                        .HasColumnType("int");
+                    b.Property<bool>("PlanoQuadrimestral")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("PlanoSemestral")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("PlanoTrimestral")
+                        .HasColumnType("bit");
 
                     b.Property<int>("TempoMinutos")
                         .HasColumnType("int");
 
-                    b.Property<string>("TipoMes")
-                        .IsRequired()
-                        .HasMaxLength(1)
-                        .HasColumnType("nvarchar(1)");
-
-                    b.Property<decimal?>("ValorAnual")
+                    b.Property<decimal?>("ValorMesAnual")
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<decimal?>("ValorBimestral")
+                    b.Property<decimal?>("ValorMesBimestral")
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<decimal?>("ValorMensal")
+                    b.Property<decimal?>("ValorMesQuadrimestral")
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<decimal?>("ValorQuadrimestral")
+                    b.Property<decimal?>("ValorMesSemestral")
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<decimal?>("ValorSemestral")
+                    b.Property<decimal?>("ValorMesTrimestral")
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<decimal?>("ValorTrimestral")
+                    b.Property<decimal>("ValorPlano")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal?>("ValorTotalAnual")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal?>("ValorTotalBimestral")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal?>("ValorTotalQuadrimestral")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal?>("ValorTotalSemestral")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal?>("ValorTotalTrimestral")
                         .HasColumnType("decimal(18,2)");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("FinanceiroId");
-
-                    b.HasIndex("PacienteId");
+                    b.HasIndex("CentroCustoId");
 
                     b.ToTable("Plano");
                 });
@@ -1407,18 +1242,6 @@ namespace WebApiSmartClinic.Migrations
                     b.ToTable("Usuario");
                 });
 
-            modelBuilder.Entity("WebApiSmartClinic.Models.AtividadeModel", b =>
-                {
-                    b.HasOne("WebApiSmartClinic.Models.EvolucaoModel", null)
-                        .WithMany("Atividades")
-                        .HasForeignKey("EvolucaoId")
-                        .OnDelete(DeleteBehavior.Cascade);
-
-                    b.HasOne("WebApiSmartClinic.Models.Evolucao", null)
-                        .WithMany("atividades")
-                        .HasForeignKey("EvolucaoId1");
-                });
-
             modelBuilder.Entity("WebApiSmartClinic.Models.BoletoModel", b =>
                 {
                     b.HasOne("WebApiSmartClinic.Models.BancoModel", "Banco")
@@ -1447,39 +1270,6 @@ namespace WebApiSmartClinic.Migrations
                     b.Navigation("Procedimento");
 
                     b.Navigation("Profissional");
-                });
-
-            modelBuilder.Entity("WebApiSmartClinic.Models.Evolucao", b =>
-                {
-                    b.HasOne("WebApiSmartClinic.Models.PacienteModel", "paciente")
-                        .WithMany("Evolucoes")
-                        .HasForeignKey("PacienteId");
-
-                    b.Navigation("paciente");
-                });
-
-            modelBuilder.Entity("WebApiSmartClinic.Models.EvolucaoModel", b =>
-                {
-                    b.HasOne("WebApiSmartClinic.Models.PacienteModel", "Paciente")
-                        .WithMany()
-                        .HasForeignKey("PacienteId");
-
-                    b.Navigation("Paciente");
-                });
-
-            modelBuilder.Entity("WebApiSmartClinic.Models.ExercicioModel", b =>
-                {
-                    b.HasOne("WebApiSmartClinic.Models.EvolucaoModel", null)
-                        .WithMany("Exercicios")
-                        .HasForeignKey("EvolucaoId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("WebApiSmartClinic.Models.Evolucao", null)
-                        .WithMany("exercicios")
-                        .HasForeignKey("EvolucaoId1")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
                 });
 
             modelBuilder.Entity("WebApiSmartClinic.Models.Financ_PagarModel", b =>
@@ -1536,7 +1326,7 @@ namespace WebApiSmartClinic.Migrations
                         .HasForeignKey("FornecedorId");
 
                     b.HasOne("WebApiSmartClinic.Models.PacienteModel", "Paciente")
-                        .WithMany("FinancReceber")
+                        .WithMany()
                         .HasForeignKey("PacienteId");
 
                     b.HasOne("WebApiSmartClinic.Models.TipoPagamentoModel", "TipoPagamento")
@@ -1554,15 +1344,6 @@ namespace WebApiSmartClinic.Migrations
                     b.Navigation("Paciente");
 
                     b.Navigation("TipoPagamento");
-                });
-
-            modelBuilder.Entity("WebApiSmartClinic.Models.Financ_ReceberSubModel", b =>
-                {
-                    b.HasOne("WebApiSmartClinic.Models.Financ_ReceberModel", null)
-                        .WithMany("Parcelas")
-                        .HasForeignKey("Financ_ReceberId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
                 });
 
             modelBuilder.Entity("WebApiSmartClinic.Models.HistoricoTransacaoModel", b =>
@@ -1600,9 +1381,8 @@ namespace WebApiSmartClinic.Migrations
                         .HasForeignKey("ConvenioId");
 
                     b.HasOne("WebApiSmartClinic.Models.PlanoModel", "Plano")
-                        .WithOne()
-                        .HasForeignKey("WebApiSmartClinic.Models.PacienteModel", "PlanoId")
-                        .OnDelete(DeleteBehavior.Restrict);
+                        .WithMany()
+                        .HasForeignKey("PlanoId");
 
                     b.HasOne("WebApiSmartClinic.Models.ProfissionalModel", "Profissional")
                         .WithMany()
@@ -1617,17 +1397,11 @@ namespace WebApiSmartClinic.Migrations
 
             modelBuilder.Entity("WebApiSmartClinic.Models.PlanoModel", b =>
                 {
-                    b.HasOne("WebApiSmartClinic.Models.Financ_ReceberModel", "Financeiro")
+                    b.HasOne("WebApiSmartClinic.Models.CentroCustoModel", "CentroCusto")
                         .WithMany()
-                        .HasForeignKey("FinanceiroId");
+                        .HasForeignKey("CentroCustoId");
 
-                    b.HasOne("WebApiSmartClinic.Models.PacienteModel", "Paciente")
-                        .WithMany()
-                        .HasForeignKey("PacienteId");
-
-                    b.Navigation("Financeiro");
-
-                    b.Navigation("Paciente");
+                    b.Navigation("CentroCusto");
                 });
 
             modelBuilder.Entity("WebApiSmartClinic.Models.ProcedimentoModel", b =>
@@ -1675,32 +1449,6 @@ namespace WebApiSmartClinic.Migrations
             modelBuilder.Entity("WebApiSmartClinic.Models.ConvenioModel", b =>
                 {
                     b.Navigation("Pacientes");
-                });
-
-            modelBuilder.Entity("WebApiSmartClinic.Models.Evolucao", b =>
-                {
-                    b.Navigation("atividades");
-
-                    b.Navigation("exercicios");
-                });
-
-            modelBuilder.Entity("WebApiSmartClinic.Models.EvolucaoModel", b =>
-                {
-                    b.Navigation("Atividades");
-
-                    b.Navigation("Exercicios");
-                });
-
-            modelBuilder.Entity("WebApiSmartClinic.Models.Financ_ReceberModel", b =>
-                {
-                    b.Navigation("Parcelas");
-                });
-
-            modelBuilder.Entity("WebApiSmartClinic.Models.PacienteModel", b =>
-                {
-                    b.Navigation("Evolucoes");
-
-                    b.Navigation("FinancReceber");
                 });
 #pragma warning restore 612, 618
         }

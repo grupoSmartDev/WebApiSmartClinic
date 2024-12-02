@@ -1,42 +1,53 @@
 
+using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
 using WebApiSmartClinic.Models;
 
-namespace WebApiSmartClinic.Dto.Plano
+namespace WebApiSmartClinic.Dto.Plano;
+
+public class PlanoEdicaoDto
 {
-    public class PlanoEdicaoDto
-    {
-        private decimal _valorPlano;
-        public int Id { get; set; }
-        public string Descricao { get; set; }
-        public int TempoMinutos { get; set; } = 0;
-        public int? CentroCustoId { get; set; } = 0; // Relacionamento com a tabela de CentroCusto
-        [JsonIgnore] 
-        public CentroCustoModel? CentroCusto { get; set; }
-        public decimal ValorPlano{ get; set; }
-        public bool PlanoBimestral { get; set; }
-        public decimal? ValorMesBimestral { get; set; } = 0;
-        public decimal? ValorTotalBimestral { get; set; } = 0;
-        public decimal? DescontoMesBimestral { get; set; } = 0;
+    
+    public int Id { get; set; }
+    [Required(ErrorMessage = "A descrição é obrigatória.")]
+    [StringLength(255, ErrorMessage = "A descrição deve ter no máximo 255 caracteres.")]
+    public string Descricao { get; set; } = string.Empty;
 
-        public bool PlanoTrimestral { get; set; }
-        public decimal? ValorMesTrimestral { get; set; } = 0;
-        public decimal? ValorTotalTrimestral { get; set; } = 0;
-        public decimal? DescontoMesTrimestral { get; set; } = 0;
+    [Required(ErrorMessage = "O tempo em minutos é obrigatório.")]
+    [Range(1, int.MaxValue, ErrorMessage = "O tempo em minutos deve ser maior que zero.")]
+    public int TempoMinutos { get; set; }
 
-        public bool PlanoQuadrimestral { get; set; }
-        public decimal? ValorMesQuadrimestral { get; set; } = 0;
-        public decimal? ValorTotalQuadrimestral { get; set; } = 0;
-        public decimal? DescontoMesQuadrimestral { get; set; } = 0;
+    [Required(ErrorMessage = "Os dias da semana são obrigatórios.")]
+    [Range(1, 7, ErrorMessage = "Os dias da semana devem estar entre 1 e 7.")]
+    public int DiasSemana { get; set; }
 
-        public bool PlanoSemestral { get; set; }
-        public decimal? ValorMesSemestral { get; set; } = 0;
-        public decimal? ValorTotalSemestral { get; set; } = 0;
-        public decimal? DescontoMesSemestral { get; set; } = 0;
+    public int? CentroCustoId { get; set; } // Relacionamento opcional com centro de custo
 
-        public bool PlanoAnual { get; set; }
-        public decimal? ValorMesAnual { get; set; } = 0;
-        public decimal? ValorTotalAnual { get; set; } = 0;
-        public decimal? DescontoMesAnual { get; set; } = 0;
-    }
+    [Range(0, double.MaxValue, ErrorMessage = "O valor deve ser maior ou igual a zero.")]
+    public decimal? ValorBimestral { get; set; }
+    public decimal? ValorTrimestral { get; set; }
+    public decimal? ValorQuadrimestral { get; set; }
+    public decimal? ValorSemestral { get; set; }
+    public decimal? ValorAnual { get; set; }
+    public decimal? ValorMensal { get; set; }
+
+    [DataType(DataType.Date)]
+    public DateTime? DataInicio { get; set; }
+
+    [DataType(DataType.Date)]
+    public DateTime? DataFim { get; set; }
+
+    public bool Ativo { get; set; }
+
+    public int? PacienteId { get; set; } // Relacionamento opcional com paciente
+    [JsonIgnore]
+    public PacienteModel? Paciente { get; set; }
+
+    public int? FinanceiroId { get; set; } // Relacionamento opcional com financeiro
+    [JsonIgnore]
+    public Financ_ReceberModel? Financeiro { get; set; }
+
+    [Required(ErrorMessage = "O tipo de mês é obrigatório.")]
+    [StringLength(1, ErrorMessage = "O tipo de mês deve ter apenas um caractere.")]
+    public string TipoMes { get; set; } = string.Empty; // Usado como enum no front-end
 }

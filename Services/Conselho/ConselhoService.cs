@@ -48,6 +48,7 @@ public class ConselhoService : IConselhoInterface
             var conselho = new ConselhoModel();
 
             conselho.Nome = conselhoCreateDto.Nome;
+            conselho.Sigla = conselhoCreateDto.Sigla;
 
             _context.Add(conselho);
             await _context.SaveChangesAsync();
@@ -110,6 +111,7 @@ public class ConselhoService : IConselhoInterface
 
             conselho.Id = conselhoEdicaoDto.Id;
             conselho.Nome = conselhoEdicaoDto.Nome;
+            conselho.Sigla= conselhoEdicaoDto.Sigla;
 
             _context.Update(conselho);
             await _context.SaveChangesAsync();

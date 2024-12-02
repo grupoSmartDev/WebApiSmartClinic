@@ -19,14 +19,15 @@ public class EvolucaoService : IEvolucaoInterface
         ResponseModel<EvolucaoModel> resposta = new ResponseModel<EvolucaoModel>();
         try
         {
-            var evolucao = await _context.Evolucao.FirstOrDefaultAsync(x => x.Id == idEvolucao);
+            var evolucao = await _context.Evolucoes.FirstOrDefaultAsync(x => x.Id == idEvolucao);
             if (evolucao == null)
             {
                 resposta.Mensagem = "Nenhum Evolucao encontrado";
                 return resposta;
             }
-
+            
             resposta.Dados = evolucao;
+
             resposta.Mensagem = "Evolucao Encontrado";
             return resposta;
         }
@@ -47,7 +48,7 @@ public class EvolucaoService : IEvolucaoInterface
         {
             var evolucao = new EvolucaoModel();
 
-            evolucao.Obs = evolucaoCreateDto.Obs;
+            evolucao.Observacao = evolucaoCreateDto.Observacao;
             evolucao.DataEvolucao = evolucaoCreateDto.DataEvolucao;
             evolucao.PacienteId = evolucaoCreateDto.PacienteId;
             evolucao.Exercicios = evolucaoCreateDto.Exercicios;
@@ -56,7 +57,7 @@ public class EvolucaoService : IEvolucaoInterface
             _context.Add(evolucao);
             await _context.SaveChangesAsync();
 
-            resposta.Dados = await _context.Evolucao.ToListAsync();
+            resposta.Dados = await _context.Evolucoes.ToListAsync();
             resposta.Mensagem = "Evolucao criado com sucesso";
             return resposta;
         }
@@ -75,7 +76,7 @@ public class EvolucaoService : IEvolucaoInterface
 
         try
         {
-            var evolucao = await _context.Evolucao.FirstOrDefaultAsync(x => x.Id == idEvolucao);
+            var evolucao = await _context.Evolucoes.FirstOrDefaultAsync(x => x.Id == idEvolucao);
             if (evolucao == null)
             {
                 resposta.Mensagem = "Nenhum Evolucao encontrado";
@@ -85,7 +86,7 @@ public class EvolucaoService : IEvolucaoInterface
             _context.Remove(evolucao);
             await _context.SaveChangesAsync();
 
-            resposta.Dados = await _context.Evolucao.ToListAsync();
+            resposta.Dados = await _context.Evolucoes.ToListAsync();
             resposta.Mensagem = "Evolucao Excluido com sucesso";
             return resposta;
 
@@ -105,14 +106,14 @@ public class EvolucaoService : IEvolucaoInterface
 
         try
         {
-            var evolucao = _context.Evolucao.FirstOrDefault(x => x.Id == evolucaoEdicaoDto.Id);
+            var evolucao = _context.Evolucoes.FirstOrDefault(x => x.Id == evolucaoEdicaoDto.Id);
             if (evolucao == null)
             {
                 resposta.Mensagem = "Evolucao não encontrado";
                 return resposta;
             }
 
-            evolucao.Obs = evolucaoEdicaoDto.Obs;
+            evolucao.Observacao = evolucaoEdicaoDto.Observacao;
             evolucao.DataEvolucao = evolucaoEdicaoDto.DataEvolucao;
             evolucao.PacienteId = evolucaoEdicaoDto.PacienteId;
             evolucao.Exercicios = evolucaoEdicaoDto.Exercicios;
@@ -121,7 +122,7 @@ public class EvolucaoService : IEvolucaoInterface
             _context.Update(evolucao);
             await _context.SaveChangesAsync();
 
-            resposta.Dados = await _context.Evolucao.ToListAsync();
+            resposta.Dados = await _context.Evolucoes.ToListAsync();
             resposta.Mensagem = "Evolucao Atualizado com sucesso";
             return resposta;
         }
@@ -140,7 +141,7 @@ public class EvolucaoService : IEvolucaoInterface
 
         try
         {
-            var evolucao = await _context.Evolucao.ToListAsync();
+            var evolucao = await _context.Evolucoes.ToListAsync();
 
             resposta.Dados = evolucao;
             resposta.Mensagem = "Todos os Evolucao foram encontrados";

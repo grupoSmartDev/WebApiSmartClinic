@@ -11,5 +11,6 @@ namespace WebApiSmartClinic.Models
         public int Repeticoes { get; set; }
         public int Series { get; set; }
         public int EvolucaoId { get; set; }
+
     }
 }

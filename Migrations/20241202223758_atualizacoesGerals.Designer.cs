@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using WebApiSmartClinic.Data;
 
@@ -11,9 +12,11 @@ using WebApiSmartClinic.Data;
 namespace WebApiSmartClinic.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241202223758_atualizacoesGerals")]
+    partial class atualizacoesGerals
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1130,8 +1133,6 @@ namespace WebApiSmartClinic.Migrations
 
                     b.HasIndex("FinanceiroId");
 
-                    b.HasIndex("PacienteId");
-
                     b.ToTable("Plano");
                 });
 
@@ -1600,9 +1601,8 @@ namespace WebApiSmartClinic.Migrations
                         .HasForeignKey("ConvenioId");
 
                     b.HasOne("WebApiSmartClinic.Models.PlanoModel", "Plano")
-                        .WithOne()
-                        .HasForeignKey("WebApiSmartClinic.Models.PacienteModel", "PlanoId")
-                        .OnDelete(DeleteBehavior.Restrict);
+                        .WithOne("Paciente")
+                        .HasForeignKey("WebApiSmartClinic.Models.PacienteModel", "PlanoId");
 
                     b.HasOne("WebApiSmartClinic.Models.ProfissionalModel", "Profissional")
                         .WithMany()
@@ -1621,13 +1621,7 @@ namespace WebApiSmartClinic.Migrations
                         .WithMany()
                         .HasForeignKey("FinanceiroId");
 
-                    b.HasOne("WebApiSmartClinic.Models.PacienteModel", "Paciente")
-                        .WithMany()
-                        .HasForeignKey("PacienteId");
-
                     b.Navigation("Financeiro");
-
-                    b.Navigation("Paciente");
                 });
 
             modelBuilder.Entity("WebApiSmartClinic.Models.ProcedimentoModel", b =>
@@ -1701,6 +1695,11 @@ namespace WebApiSmartClinic.Migrations
                     b.Navigation("Evolucoes");
 
                     b.Navigation("FinancReceber");
+                });
+
+            modelBuilder.Entity("WebApiSmartClinic.Models.PlanoModel", b =>
+                {
+                    b.Navigation("Paciente");
                 });
 #pragma warning restore 612, 618
         }

@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Identity.Client.Extensions.Msal;
 using WebApiSmartClinic.Data;
 using WebApiSmartClinic.Dto.Plano;
 using WebApiSmartClinic.Models;
@@ -52,47 +53,21 @@ public class PlanoService : IPlanoInterface
             plano.Descricao = planoCreateDto.Descricao;
             plano.TempoMinutos = planoCreateDto.TempoMinutos;
             plano.CentroCustoId = planoCreateDto.CentroCustoId;
-                      
+            plano.DiasSemana = planoCreateDto.DiasSemana;
+            plano.ValorBimestral = planoCreateDto.ValorBimestral;
+            plano.ValorMensal = planoCreateDto.ValorMensal;
+            plano.ValorTrimestral = planoCreateDto.ValorTrimestral;
+            plano.ValorQuadrimestral = planoCreateDto.ValorQuadrimestral;
+            plano.ValorSemestral = planoCreateDto.ValorSemestral;
+            plano.ValorAnual = planoCreateDto.ValorAnual;
+            plano.DataInicio = planoCreateDto.DataInicio;
+            plano.DataFim = planoCreateDto.DataFim;
+            plano.Ativo = planoCreateDto.Ativo;
+            plano.PacienteId = planoCreateDto.PacienteId;
+            plano.FinanceiroId = planoCreateDto.FinanceiroId;
+            plano.TipoMes = planoCreateDto.TipoMes;
 
-            if (plano.PlanoBimestral)
-            {
-                plano.PlanoBimestral = planoCreateDto.PlanoBimestral;
-                plano.ValorMesBimestral = planoCreateDto.ValorMesBimestral;
-                plano.ValorTotalBimestral = planoCreateDto.ValorTotalBimestral;
-                plano.DescontoMesBimestral = planoCreateDto.DescontoMesBimestral;
-            }
-
-            if (plano.PlanoTrimestral)
-            {
-                plano.PlanoTrimestral = planoCreateDto.PlanoTrimestral;
-                plano.ValorMesTrimestral = planoCreateDto.ValorMesTrimestral;
-                plano.ValorTotalTrimestral = planoCreateDto.ValorTotalTrimestral;
-                plano.DescontoMesTrimestral = planoCreateDto.DescontoMesTrimestral;
-            }
-
-            if (plano.PlanoQuadrimestral)
-            {
-                plano.PlanoQuadrimestral = planoCreateDto.PlanoQuadrimestral;
-                plano.ValorMesQuadrimestral = planoCreateDto.ValorMesQuadrimestral;
-                plano.ValorTotalQuadrimestral = planoCreateDto.ValorTotalQuadrimestral;
-                plano.DescontoMesQuadrimestral = planoCreateDto.DescontoMesQuadrimestral;
-            }
-
-            if (plano.PlanoSemestral)
-            {
-                plano.PlanoSemestral = planoCreateDto.PlanoSemestral;
-                plano.ValorMesSemestral = planoCreateDto.ValorMesSemestral;
-                plano.ValorTotalSemestral = planoCreateDto.ValorTotalSemestral;
-                plano.DescontoMesSemestral = planoCreateDto.DescontoMesSemestral;
-            }
             
-            if (plano.PlanoAnual)
-            {
-                plano.PlanoAnual = planoCreateDto.PlanoAnual;
-                plano.ValorMesAnual = planoCreateDto.ValorMesAnual;
-                plano.ValorTotalAnual = planoCreateDto.ValorTotalAnual;
-                plano.DescontoMesAnual = planoCreateDto.DescontoMesAnual;
-            }
 
             _context.Add(plano);
             await _context.SaveChangesAsync();
@@ -157,46 +132,21 @@ public class PlanoService : IPlanoInterface
             plano.Descricao = planoEdicaoDto.Descricao;
             plano.TempoMinutos = planoEdicaoDto.TempoMinutos;
             plano.CentroCustoId = planoEdicaoDto.CentroCustoId;
-     
-            if (plano.PlanoBimestral)
-            {
-                plano.PlanoBimestral = planoEdicaoDto.PlanoBimestral;
-                plano.ValorMesBimestral = planoEdicaoDto.ValorMesBimestral;
-                plano.ValorTotalBimestral = planoEdicaoDto.ValorTotalBimestral;
-                plano.DescontoMesBimestral = planoEdicaoDto.DescontoMesBimestral;
-            }
+            plano.DiasSemana = planoEdicaoDto.DiasSemana;
+            plano.ValorBimestral = planoEdicaoDto.ValorBimestral;
+            plano.ValorMensal = planoEdicaoDto.ValorMensal;
+            plano.ValorTrimestral = planoEdicaoDto.ValorTrimestral;
+            plano.ValorQuadrimestral = planoEdicaoDto.ValorQuadrimestral;
+            plano.ValorSemestral = planoEdicaoDto.ValorSemestral;
+            plano.ValorAnual = planoEdicaoDto.ValorAnual;
+            plano.DataInicio = planoEdicaoDto.DataInicio;
+            plano.DataFim = planoEdicaoDto.DataFim;
+            plano.Ativo = planoEdicaoDto.Ativo;
+            plano.PacienteId = planoEdicaoDto.PacienteId;
+            plano.FinanceiroId = planoEdicaoDto.FinanceiroId;
+            plano.TipoMes = planoEdicaoDto.TipoMes;
 
-            if (plano.PlanoTrimestral)
-            {
-                plano.PlanoTrimestral = planoEdicaoDto.PlanoTrimestral;
-                plano.ValorMesTrimestral = planoEdicaoDto.ValorMesTrimestral;
-                plano.ValorTotalTrimestral = planoEdicaoDto.ValorTotalTrimestral;
-                plano.DescontoMesTrimestral = planoEdicaoDto.DescontoMesTrimestral;
-            }
 
-            if (plano.PlanoQuadrimestral)
-            {
-                plano.PlanoQuadrimestral = planoEdicaoDto.PlanoQuadrimestral;
-                plano.ValorMesQuadrimestral = planoEdicaoDto.ValorMesQuadrimestral;
-                plano.ValorTotalQuadrimestral = planoEdicaoDto.ValorTotalQuadrimestral;
-                plano.DescontoMesQuadrimestral = planoEdicaoDto.DescontoMesQuadrimestral;
-            }
-
-            if (plano.PlanoSemestral)
-            {
-                plano.PlanoSemestral = planoEdicaoDto.PlanoSemestral;
-                plano.ValorMesSemestral = planoEdicaoDto.ValorMesSemestral;
-                plano.ValorTotalSemestral = planoEdicaoDto.ValorTotalSemestral;
-                plano.DescontoMesSemestral = planoEdicaoDto.DescontoMesSemestral;
-            }
-
-            if (plano.PlanoAnual)
-            {
-                plano.PlanoAnual = planoEdicaoDto.PlanoAnual;
-                plano.ValorMesAnual = planoEdicaoDto.ValorMesAnual;
-                plano.ValorTotalAnual = planoEdicaoDto.ValorTotalAnual;
-                plano.DescontoMesAnual = planoEdicaoDto.DescontoMesAnual;
-            }
 
             _context.Update(plano);
             await _context.SaveChangesAsync();

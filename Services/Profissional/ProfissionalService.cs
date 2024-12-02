@@ -62,6 +62,15 @@ public class ProfissionalService : IProfissionalInterface
             profissional.Cbo = profissionalCreateDto.Cbo;
             profissional.Rqe = profissionalCreateDto.Rqe;
             profissional.Cnes = profissionalCreateDto.Cnes;
+            profissional.TipoPagamento = profissionalCreateDto.TipoPagamento;
+            profissional.ChavePix = profissionalCreateDto.ChavePix;
+            profissional.BancoNome = profissionalCreateDto.BancoNome;
+            profissional.BancoAgencia = profissionalCreateDto.BancoAgencia;
+            profissional.BancoConta = profissionalCreateDto.BancoConta;
+            profissional.BancoTipoConta = profissionalCreateDto.BancoTipoConta;
+            profissional.BancoCpfTitular = profissionalCreateDto.BancoCpfTitular;
+            profissional.EhUsuario = profissionalCreateDto.EhUsuario;
+            profissional.DataCadastro = profissionalCreateDto.DataCadastro;
 
 
             _context.Add(profissional);
@@ -136,6 +145,15 @@ public class ProfissionalService : IProfissionalInterface
             profissional.Cbo = profissionalEdicaoDto.Cbo;
             profissional.Rqe = profissionalEdicaoDto.Rqe;
             profissional.Cnes = profissionalEdicaoDto.Cnes;
+            profissional.TipoPagamento = profissionalEdicaoDto.TipoPagamento;
+            profissional.ChavePix = profissionalEdicaoDto.ChavePix;
+            profissional.BancoNome = profissionalEdicaoDto.BancoNome;
+            profissional.BancoAgencia = profissionalEdicaoDto.BancoAgencia;
+            profissional.BancoConta = profissionalEdicaoDto.BancoConta;
+            profissional.BancoTipoConta = profissionalEdicaoDto.BancoTipoConta;
+            profissional.BancoCpfTitular = profissionalEdicaoDto.BancoCpfTitular;
+            profissional.EhUsuario = profissionalEdicaoDto.EhUsuario;
+            profissional.DataCadastro = profissionalEdicaoDto.DataCadastro;
 
             _context.Update(profissional);
             await _context.SaveChangesAsync();

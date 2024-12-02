@@ -35,7 +35,8 @@ public class AppDbContext : DbContext
     public DbSet<LogUsuarioModel> LogUsuario { get; set; }
     public DbSet<ExercicioModel> Exercicio { get; set; }
     public DbSet<AtividadeModel> Atividade { get; set; }
-    public DbSet<EvolucaoModel> Evolucao { get; set; }
+    public DbSet<EvolucaoModel> Evolucoes { get; set; }
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         // Configura a entidade CentroCustoModel para ter uma relação de um para muitos com SubCentroCustoModel
@@ -49,6 +50,27 @@ public class AppDbContext : DbContext
             .HasMany(f => f.Parcelas)  // Um Financ_ReceberModel pode ter muitas Financ_ReceberSubModel associadas
             .WithOne()  // Cada Financ_ReceberSubModel pertence a um único Financ_ReceberModel
             .HasForeignKey(p => p.Financ_ReceberId);  // O campo Financ_ReceberId é a chave estrangeira que referencia o Id de Financ_ReceberModel
+
+        modelBuilder.Entity<PacienteModel>()
+        .HasOne(p => p.Plano)
+        .WithOne()
+        .HasForeignKey<PacienteModel>(p => p.PlanoId)
+        .OnDelete(DeleteBehavior.Restrict); // Ou Cascade, conforme necessidade
+
+
+        modelBuilder.Entity<EvolucaoModel>()
+             .HasMany(e => e.Exercicios) // Evolução tem vários exercícios
+             .WithOne() // Relacionamento não tem navegação reversa
+             .HasForeignKey("EvolucaoId") // Define EvolucaoId como chave estrangeira
+             .OnDelete(DeleteBehavior.Cascade); // Configuração de exclusão em cascata
+
+        // Configuração para Evolucao -> Atividade
+        modelBuilder.Entity<EvolucaoModel>()
+            .HasMany(e => e.Atividades) // Evolução tem várias atividades
+            .WithOne() // Relacionamento não tem navegação reversa
+            .HasForeignKey("EvolucaoId") // Define EvolucaoId como chave estrangeira
+            .OnDelete(DeleteBehavior.Cascade); // Configuração de exclusão em cascata
+
 
         base.OnModelCreating(modelBuilder);
     }

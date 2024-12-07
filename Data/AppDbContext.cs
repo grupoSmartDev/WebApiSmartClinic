@@ -47,9 +47,9 @@ public class AppDbContext : DbContext
 
         // Configura a entidade Financ_ReceberModel para ter uma relação de um para muitos com Financ_ReceberSubModel
         modelBuilder.Entity<Financ_ReceberModel>()
-            .HasMany(f => f.Parcelas)  // Um Financ_ReceberModel pode ter muitas Financ_ReceberSubModel associadas
+            .HasMany(f => f.subFinancReceber)  // Um Financ_ReceberModel pode ter muitas Financ_ReceberSubModel associadas
             .WithOne()  // Cada Financ_ReceberSubModel pertence a um único Financ_ReceberModel
-            .HasForeignKey(p => p.Financ_ReceberId);  // O campo Financ_ReceberId é a chave estrangeira que referencia o Id de Financ_ReceberModel
+            .HasForeignKey(p => p.financReceberId);  // O campo Financ_ReceberId é a chave estrangeira que referencia o Id de Financ_ReceberModel
 
         modelBuilder.Entity<PacienteModel>()
         .HasOne(p => p.Plano)
@@ -70,6 +70,18 @@ public class AppDbContext : DbContext
             .WithOne() // Relacionamento não tem navegação reversa
             .HasForeignKey("EvolucaoId") // Define EvolucaoId como chave estrangeira
             .OnDelete(DeleteBehavior.Cascade); // Configuração de exclusão em cascata
+
+        //configuração para financ receber e sub financ receber
+        modelBuilder.Entity<Financ_ReceberModel>()
+      .HasKey(f => f.Id);
+
+        modelBuilder.Entity<Financ_ReceberSubModel>()
+            .HasKey(s => s.Id);
+
+        modelBuilder.Entity<Financ_ReceberSubModel>()
+            .HasOne(s => s.FinancReceber)
+            .WithMany(f => f.subFinancReceber)
+            .HasForeignKey(s => s.financReceberId);
 
 
         base.OnModelCreating(modelBuilder);

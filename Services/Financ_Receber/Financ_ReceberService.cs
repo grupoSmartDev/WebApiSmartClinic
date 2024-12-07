@@ -20,7 +20,7 @@ public class Financ_ReceberService : IFinanc_ReceberInterface
         try
         {
             var financ_receber = await _context.Financ_Receber
-                .Include(f => f.Parcelas) // Inclui as parcelas no resultado
+                .Include(f => f.subFinancReceber) // Inclui as parcelas no resultado
                 .FirstOrDefaultAsync(x => x.Id == idFinanc_Receber);
 
             if (financ_receber == null)
@@ -52,8 +52,6 @@ public class Financ_ReceberService : IFinanc_ReceberInterface
                 IdOrigem = financ_receberCreateDto.IdOrigem,
                 NrDocto = financ_receberCreateDto.NrDocto,
                 DataEmissao = financ_receberCreateDto.DataEmissao,
-                DataVencimento = financ_receberCreateDto.DataVencimento,
-                DataPagamento = financ_receberCreateDto.DataPagamento,
                 ValorOriginal = financ_receberCreateDto.ValorOriginal,
                 ValorPago = financ_receberCreateDto.ValorPago,
                 Status = financ_receberCreateDto.Status,
@@ -67,8 +65,6 @@ public class Financ_ReceberService : IFinanc_ReceberInterface
                 Observacao = financ_receberCreateDto.Observacao,
                 FornecedorId = financ_receberCreateDto.FornecedorId,
                 CentroCustoId = financ_receberCreateDto.CentroCustoId,
-                TipoPagamentoId = financ_receberCreateDto.TipoPagamentoId,
-                FormaPagamentoId = financ_receberCreateDto.FormaPagamentoId,
                 BancoId = financ_receberCreateDto.BancoId
             };
 
@@ -76,18 +72,20 @@ public class Financ_ReceberService : IFinanc_ReceberInterface
             await _context.SaveChangesAsync();
 
             // Adicionando subitens (filhos)
-            if (financ_receberCreateDto.Parcelas != null && financ_receberCreateDto.Parcelas.Any())
+            if (financ_receberCreateDto.subFinancReceber != null && financ_receberCreateDto.subFinancReceber.Any())
             {
-                foreach (var parcela in financ_receberCreateDto.Parcelas)
+                foreach (var parcela in financ_receberCreateDto.subFinancReceber)
                 {
                     var subItem = new Financ_ReceberSubModel
                     {
-                        Financ_ReceberId = financ_receber.Id, // Relaciona com o pai
-                        ParcelaX = parcela.ParcelaX,
+                        financReceberId = financ_receber.Id, // Relaciona com o pai
+                        Parcela= parcela.Parcela,
                         Valor = parcela.Valor,
+                        TipoPagamentoId = parcela.TipoPagamentoId,
+                        FormaPagamentoId= parcela.FormaPagamentoId,
                         DataPagamento = parcela.DataPagamento,
                         DataVencimento = parcela.DataVencimento,
-                        Obs = parcela.Obs
+                        Observacao = parcela.Observacao
                     };
 
                     _context.Add(subItem);
@@ -96,7 +94,7 @@ public class Financ_ReceberService : IFinanc_ReceberInterface
                 await _context.SaveChangesAsync();
             }
 
-            resposta.Dados = await _context.Financ_Receber.Include(f => f.Parcelas).ToListAsync();
+            resposta.Dados = await _context.Financ_Receber.Include(f => f.subFinancReceber).ToListAsync();
             resposta.Mensagem = "Financ_Receber e parcelas criados com sucesso";
             return resposta;
         }
@@ -115,7 +113,7 @@ public class Financ_ReceberService : IFinanc_ReceberInterface
         try
         {
             var financ_receber = await _context.Financ_Receber
-                .Include(f => f.Parcelas) // Inclui as parcelas para exclusão em cascata
+                .Include(f => f.subFinancReceber) // Inclui as parcelas para exclusão em cascata
                 .FirstOrDefaultAsync(x => x.Id == idFinanc_Receber);
 
             if (financ_receber == null)
@@ -146,7 +144,7 @@ public class Financ_ReceberService : IFinanc_ReceberInterface
         try
         {
             var financ_receber = await _context.Financ_Receber
-                .Include(f => f.Parcelas)
+                .Include(f => f.subFinancReceber)
                 .FirstOrDefaultAsync(x => x.Id == financ_receberEdicaoDto.Id);
 
             if (financ_receber == null)
@@ -158,8 +156,6 @@ public class Financ_ReceberService : IFinanc_ReceberInterface
             financ_receber.IdOrigem = financ_receberEdicaoDto.IdOrigem;
             financ_receber.NrDocto = financ_receberEdicaoDto.NrDocto;
             financ_receber.DataEmissao = financ_receberEdicaoDto.DataEmissao;
-            financ_receber.DataVencimento = financ_receberEdicaoDto.DataVencimento;
-            financ_receber.DataPagamento = financ_receberEdicaoDto.DataPagamento;
             financ_receber.ValorOriginal = financ_receberEdicaoDto.ValorOriginal;
             financ_receber.ValorPago = financ_receberEdicaoDto.ValorPago;
             financ_receber.Status = financ_receberEdicaoDto.Status;
@@ -173,15 +169,13 @@ public class Financ_ReceberService : IFinanc_ReceberInterface
             financ_receber.Observacao = financ_receberEdicaoDto.Observacao;
             financ_receber.FornecedorId = financ_receberEdicaoDto.FornecedorId;
             financ_receber.CentroCustoId = financ_receberEdicaoDto.CentroCustoId;
-            financ_receber.TipoPagamentoId = financ_receberEdicaoDto.TipoPagamentoId;
-            financ_receber.FormaPagamentoId = financ_receberEdicaoDto.FormaPagamentoId;
             financ_receber.BancoId = financ_receberEdicaoDto.BancoId;
 
             // Atualiza parcelas existentes
             _context.Update(financ_receber);
             await _context.SaveChangesAsync();
 
-            resposta.Dados = await _context.Financ_Receber.Include(f => f.Parcelas).ToListAsync();
+            resposta.Dados = await _context.Financ_Receber.Include(f => f.subFinancReceber).ToListAsync();
             resposta.Mensagem = "Financ_Receber Atualizado com sucesso";
             return resposta;
         }
@@ -200,7 +194,7 @@ public class Financ_ReceberService : IFinanc_ReceberInterface
         try
         {
             var financ_receber = await _context.Financ_Receber
-                .Include(f => f.Parcelas) // Inclui as parcelas no resultado
+                .Include(f => f.subFinancReceber) // Inclui as parcelas no resultado
                 .ToListAsync();
 
             resposta.Dados = financ_receber;
@@ -222,7 +216,7 @@ public class Financ_ReceberService : IFinanc_ReceberInterface
         try
         {
             var contasEmAberto = await _context.Financ_Receber
-                .Include(f => f.Parcelas)
+                .Include(f => f.subFinancReceber)
                 .Where(f => f.Status == "Em Aberto" || f.Status == "Parcial")
                 .ToListAsync();
 

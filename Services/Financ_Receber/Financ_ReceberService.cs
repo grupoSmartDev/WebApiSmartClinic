@@ -59,9 +59,6 @@ public class Financ_ReceberService : IFinanc_ReceberInterface
                 Descricao = financ_receberCreateDto.Descricao,
                 Parcela = financ_receberCreateDto.Parcela,
                 Classificacao = financ_receberCreateDto.Classificacao,
-                Desconto = financ_receberCreateDto.Desconto,
-                Juros = financ_receberCreateDto.Juros,
-                Multa = financ_receberCreateDto.Multa,
                 Observacao = financ_receberCreateDto.Observacao,
                 FornecedorId = financ_receberCreateDto.FornecedorId,
                 CentroCustoId = financ_receberCreateDto.CentroCustoId,
@@ -84,6 +81,9 @@ public class Financ_ReceberService : IFinanc_ReceberInterface
                         TipoPagamentoId = parcela.TipoPagamentoId,
                         FormaPagamentoId= parcela.FormaPagamentoId,
                         DataPagamento = parcela.DataPagamento,
+                        Desconto = parcela.Desconto,
+                        Juros = parcela.Juros,
+                        Multa = parcela.Multa,
                         DataVencimento = parcela.DataVencimento,
                         Observacao = parcela.Observacao
                     };
@@ -163,9 +163,6 @@ public class Financ_ReceberService : IFinanc_ReceberInterface
             financ_receber.Descricao = financ_receberEdicaoDto.Descricao;
             financ_receber.Parcela = financ_receberEdicaoDto.Parcela;
             financ_receber.Classificacao = financ_receberEdicaoDto.Classificacao;
-            financ_receber.Desconto = financ_receberEdicaoDto.Desconto;
-            financ_receber.Juros = financ_receberEdicaoDto.Juros;
-            financ_receber.Multa = financ_receberEdicaoDto.Multa;
             financ_receber.Observacao = financ_receberEdicaoDto.Observacao;
             financ_receber.FornecedorId = financ_receberEdicaoDto.FornecedorId;
             financ_receber.CentroCustoId = financ_receberEdicaoDto.CentroCustoId;
@@ -174,6 +171,32 @@ public class Financ_ReceberService : IFinanc_ReceberInterface
             // Atualiza parcelas existentes
             _context.Update(financ_receber);
             await _context.SaveChangesAsync();
+
+            // Adicionando subitens (filhos)
+            if (financ_receberEdicaoDto.subFinancReceber != null && financ_receberEdicaoDto.subFinancReceber.Any())
+            {
+                foreach (var parcela in financ_receberEdicaoDto.subFinancReceber)
+                {
+                    var subItem = new Financ_ReceberSubModel
+                    {
+                        financReceberId = financ_receber.Id, // Relaciona com o pai
+                        Parcela = parcela.Parcela,
+                        Valor = parcela.Valor,
+                        TipoPagamentoId = parcela.TipoPagamentoId,
+                        FormaPagamentoId = parcela.FormaPagamentoId,
+                        DataPagamento = parcela.DataPagamento,
+                        Desconto = parcela.Desconto,
+                        Juros = parcela.Juros,
+                        Multa = parcela.Multa,
+                        DataVencimento = parcela.DataVencimento,
+                        Observacao = parcela.Observacao
+                    };
+
+                    _context.Update(subItem);
+                }
+
+                await _context.SaveChangesAsync();
+            }
 
             resposta.Dados = await _context.Financ_Receber.Include(f => f.subFinancReceber).ToListAsync();
             resposta.Mensagem = "Financ_Receber Atualizado com sucesso";

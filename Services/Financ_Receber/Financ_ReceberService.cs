@@ -54,6 +54,7 @@ public class Financ_ReceberService : IFinanc_ReceberInterface
                 DataEmissao = financ_receberCreateDto.DataEmissao,
                 ValorOriginal = financ_receberCreateDto.ValorOriginal,
                 ValorPago = financ_receberCreateDto.ValorPago,
+                Valor = financ_receberCreateDto.Valor,
                 Status = financ_receberCreateDto.Status,
                 NotaFiscal = financ_receberCreateDto.NotaFiscal,
                 Descricao = financ_receberCreateDto.Descricao,
@@ -158,6 +159,7 @@ public class Financ_ReceberService : IFinanc_ReceberInterface
             financ_receber.DataEmissao = financ_receberEdicaoDto.DataEmissao;
             financ_receber.ValorOriginal = financ_receberEdicaoDto.ValorOriginal;
             financ_receber.ValorPago = financ_receberEdicaoDto.ValorPago;
+            financ_receber.Valor = financ_receberEdicaoDto.Valor;
             financ_receber.Status = financ_receberEdicaoDto.Status;
             financ_receber.NotaFiscal = financ_receberEdicaoDto.NotaFiscal;
             financ_receber.Descricao = financ_receberEdicaoDto.Descricao;

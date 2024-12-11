@@ -83,6 +83,18 @@ public class AppDbContext : DbContext
             .WithMany(f => f.subFinancReceber)
             .HasForeignKey(s => s.financReceberId);
 
+        //configuração para financ receber e sub financ receber
+        modelBuilder.Entity<Financ_PagarModel>()
+      .HasKey(f => f.Id);
+
+        modelBuilder.Entity<Financ_PagarSubModel>()
+            .HasKey(s => s.Id);
+
+        modelBuilder.Entity<Financ_PagarSubModel>()
+            .HasOne(s => s.FinancPagar)
+            .WithMany(f => f.subFinancPagar)
+            .HasForeignKey(s => s.financPagarId);
+
 
         base.OnModelCreating(modelBuilder);
     }

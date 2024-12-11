@@ -4,6 +4,7 @@ using WebApiSmartClinic.Data;
 using WebApiSmartClinic.Dto.Financ_Pagar;
 using WebApiSmartClinic.Models;
 using WebApiSmartClinic.Services.Banco;
+using WebApiSmartClinic.Dto.Financ_Receber;
 
 namespace WebApiSmartClinic.Services.Financ_Pagar;
 
@@ -46,32 +47,54 @@ public class Financ_PagarService : IFinanc_PagarInterface
 
         try
         {
-            var financ_pagar = new Financ_PagarModel();
-
-            financ_pagar.IdOrigem = financ_pagarCreateDto.IdOrigem;
-            financ_pagar.NrDocto = financ_pagarCreateDto.NrDocto;
-            financ_pagar.DataEmissao = financ_pagarCreateDto.DataEmissao;
-            financ_pagar.DataVencimento = financ_pagarCreateDto.DataVencimento;
-            financ_pagar.DataPagamento = financ_pagarCreateDto.DataPagamento;
-            financ_pagar.ValorOriginal = financ_pagarCreateDto.ValorOriginal;
-            financ_pagar.ValorPago = financ_pagarCreateDto.ValorPago;
-            financ_pagar.Status = financ_pagarCreateDto.Status;
-            financ_pagar.NotaFiscal = financ_pagarCreateDto.NotaFiscal;
-            financ_pagar.Descricao = financ_pagarCreateDto.Descricao;
-            financ_pagar.Parcela = financ_pagarCreateDto.Parcela;
-            financ_pagar.Classificacao = financ_pagarCreateDto.Classificacao;
-            financ_pagar.Desconto = financ_pagarCreateDto.Desconto;
-            financ_pagar.Juros = financ_pagarCreateDto.Juros;
-            financ_pagar.Multa = financ_pagarCreateDto.Multa;
-            financ_pagar.Observacao = financ_pagarCreateDto.Observacao;
-            financ_pagar.FornecedorId = financ_pagarCreateDto.FornecedorId;
-            financ_pagar.CentroCustoId = financ_pagarCreateDto.CentroCustoId;
-            financ_pagar.TipoPagamentoId = financ_pagarCreateDto.TipoPagamentoId;
-            financ_pagar.FormaPagamentoId = financ_pagarCreateDto.FormaPagamentoId;
-            financ_pagar.BancoId = financ_pagarCreateDto.BancoId;
+            // Criação do cabeçalho (pai)
+            var financ_pagar = new Financ_PagarModel
+            {
+                IdOrigem = financ_pagarCreateDto.IdOrigem,
+                NrDocto = financ_pagarCreateDto.NrDocto,
+                DataEmissao = financ_pagarCreateDto.DataEmissao,
+                ValorOriginal = financ_pagarCreateDto.ValorOriginal,
+                ValorPago = financ_pagarCreateDto.ValorPago,
+                Valor = financ_pagarCreateDto.Valor,
+                Status = financ_pagarCreateDto.Status,
+                NotaFiscal = financ_pagarCreateDto.NotaFiscal,
+                Descricao = financ_pagarCreateDto.Descricao,
+                Parcela = financ_pagarCreateDto.Parcela,
+                Classificacao = financ_pagarCreateDto.Classificacao,
+                Observacao = financ_pagarCreateDto.Observacao,
+                FornecedorId = financ_pagarCreateDto.FornecedorId,
+                CentroCustoId = financ_pagarCreateDto.CentroCustoId,
+                BancoId = financ_pagarCreateDto.BancoId
+            };
 
             _context.Add(financ_pagar);
             await _context.SaveChangesAsync();
+
+            // Adicionando subitens (filhos)
+            if (financ_pagarCreateDto.subFinancPagar != null && financ_pagarCreateDto.subFinancPagar.Any())
+            {
+                foreach (var parcela in financ_pagarCreateDto.subFinancPagar)
+                {
+                    var subItem = new Financ_PagarSubModel
+                    {
+                        financPagarId = financ_pagar.Id, // Relaciona com o pai
+                        Parcela = parcela.Parcela,
+                        Valor = parcela.Valor,
+                        TipoPagamentoId = parcela.TipoPagamentoId,
+                        FormaPagamentoId = parcela.FormaPagamentoId,
+                        DataPagamento = parcela.DataPagamento,
+                        Desconto = parcela.Desconto,
+                        Juros = parcela.Juros,
+                        Multa = parcela.Multa,
+                        DataVencimento = parcela.DataVencimento,
+                        Observacao = parcela.Observacao
+                    };
+
+                    _context.Add(subItem);
+                }
+
+                await _context.SaveChangesAsync();
+            }
 
             resposta.Dados = await _context.Financ_Pagar.ToListAsync();
             resposta.Mensagem = "Financ_Pagar criado com sucesso";
@@ -127,31 +150,50 @@ public class Financ_PagarService : IFinanc_PagarInterface
                 return resposta;
             }
 
-            financ_pagar.Id = financ_pagarEdicaoDto.Id;
             financ_pagar.IdOrigem = financ_pagarEdicaoDto.IdOrigem;
             financ_pagar.NrDocto = financ_pagarEdicaoDto.NrDocto;
             financ_pagar.DataEmissao = financ_pagarEdicaoDto.DataEmissao;
-            financ_pagar.DataVencimento = financ_pagarEdicaoDto.DataVencimento;
-            financ_pagar.DataPagamento = financ_pagarEdicaoDto.DataPagamento;
             financ_pagar.ValorOriginal = financ_pagarEdicaoDto.ValorOriginal;
             financ_pagar.ValorPago = financ_pagarEdicaoDto.ValorPago;
+            financ_pagar.Valor = financ_pagarEdicaoDto.Valor;
             financ_pagar.Status = financ_pagarEdicaoDto.Status;
             financ_pagar.NotaFiscal = financ_pagarEdicaoDto.NotaFiscal;
             financ_pagar.Descricao = financ_pagarEdicaoDto.Descricao;
             financ_pagar.Parcela = financ_pagarEdicaoDto.Parcela;
             financ_pagar.Classificacao = financ_pagarEdicaoDto.Classificacao;
-            financ_pagar.Desconto = financ_pagarEdicaoDto.Desconto;
-            financ_pagar.Juros = financ_pagarEdicaoDto.Juros;
-            financ_pagar.Multa = financ_pagarEdicaoDto.Multa;
             financ_pagar.Observacao = financ_pagarEdicaoDto.Observacao;
             financ_pagar.FornecedorId = financ_pagarEdicaoDto.FornecedorId;
             financ_pagar.CentroCustoId = financ_pagarEdicaoDto.CentroCustoId;
-            financ_pagar.TipoPagamentoId = financ_pagarEdicaoDto.TipoPagamentoId;
-            financ_pagar.FormaPagamentoId = financ_pagarEdicaoDto.FormaPagamentoId;
             financ_pagar.BancoId = financ_pagarEdicaoDto.BancoId;
 
             _context.Update(financ_pagar);
             await _context.SaveChangesAsync();
+
+            // Adicionando subitens (filhos)
+            if (financ_pagarEdicaoDto.subFinancPagar != null && financ_pagarEdicaoDto.subFinancPagar.Any())
+            {
+                foreach (var parcela in financ_pagarEdicaoDto.subFinancPagar)
+                {
+                    var subItem = new Financ_PagarSubEdicaoDto
+                    {
+                        financPagarId = financ_pagar.Id, // Relaciona com o pai
+                        Parcela = parcela.Parcela,
+                        Valor = parcela.Valor,
+                        TipoPagamentoId = parcela.TipoPagamentoId,
+                        FormaPagamentoId = parcela.FormaPagamentoId,
+                        DataPagamento = parcela.DataPagamento,
+                        Desconto = parcela.Desconto,
+                        Juros = parcela.Juros,
+                        Multa = parcela.Multa,
+                        DataVencimento = parcela.DataVencimento,
+                        Observacao = parcela.Observacao
+                    };
+
+                    _context.Update(subItem);
+                }
+
+                await _context.SaveChangesAsync();
+            }
 
             resposta.Dados = await _context.Financ_Pagar.ToListAsync();
             resposta.Mensagem = "Financ_Pagar Atualizado com sucesso";
@@ -201,17 +243,21 @@ public class Financ_PagarService : IFinanc_PagarInterface
 
             // Validação de saldo suficiente
             BancoService _bancoService = new BancoService(_context);
-            var bancoResposta = await _bancoService.DebitarSaldo(financ_pagar.BancoId, valorPago);
-            if (!bancoResposta.Status)
-            {
-                resposta.Mensagem = bancoResposta.Mensagem;
-                resposta.Status = false;
-                return resposta;
-            }
+
+            //BRUNAO VERIFICAR
+
+            //var bancoResposta = await _bancoService.DebitarSaldo(financ_pagar.BancoId, valorPago);
+            //if (!bancoResposta.Status)
+            //{
+            //    resposta.Mensagem = bancoResposta.Mensagem;
+            //    resposta.Status = false;
+            //    return resposta;
+            //}
 
             // Atualização do valor pago e status do pagamento
             financ_pagar.ValorPago += valorPago;
-            financ_pagar.DataPagamento = dataPagamento ?? DateTime.Now;
+            //BRUNAO VERIFICAR FOI ALTERADO A DATA DE PAGAMENTO AGORA QUE TEMOS UM SUB, VAI MUDAR A LOGICA? 
+            //financ_pagar.DataPagamento = dataPagamento ?? DateTime.Now;
             financ_pagar.Status = financ_pagar.ValorPago >= financ_pagar.ValorOriginal ? "Pago" : "Parcialmente Pago";
 
             if (financ_pagar.ValorPago < financ_pagar.ValorOriginal)
@@ -223,7 +269,7 @@ public class Financ_PagarService : IFinanc_PagarInterface
                     IdOrigem = financ_pagar.IdOrigem,
                     NrDocto = financ_pagar.NrDocto,
                     DataEmissao = financ_pagar.DataEmissao,
-                    DataVencimento = financ_pagar.DataVencimento,
+                    //DataVencimento = financ_pagar.DataVencimento,
                     ValorOriginal = valorRestante,
                     ValorPago = 0,
                     Status = "Em Aberto",
@@ -267,18 +313,18 @@ public class Financ_PagarService : IFinanc_PagarInterface
 
             // Crédita o valor de volta ao saldo da conta bancária
             BancoService _bancoService = new BancoService(_context);
-            await _bancoService.CreditarSaldo(financ_pagar.BancoId, financ_pagar.ValorPago);
+            await _bancoService.CreditarSaldo((int)financ_pagar.BancoId, (decimal)financ_pagar.ValorPago);
 
             // Zera o valor pago e redefine o status
             financ_pagar.ValorPago = 0;
-            financ_pagar.DataPagamento = null;
+           // financ_pagar.DataPagamento = null;
             financ_pagar.Status = "Em Aberto";
 
             // Registro de histórico do estorno
             await _context.HistoricoTransacao.AddAsync(new HistoricoTransacaoModel
             {
-                BancoId = financ_pagar.BancoId,
-                Valor = financ_pagar.ValorPago,
+                //BancoId = financ_pagar.BancoId,
+                //Valor = financ_pagar.ValorPago,
                 TipoTransacao = "Estorno",
                 DataTransacao = DateTime.Now
             });

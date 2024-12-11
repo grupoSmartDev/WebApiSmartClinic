@@ -219,6 +219,7 @@ public class BancoService : IBancoInterface
             return resposta;
         }
 
+        
         banco.SaldoInicial += valor;
         _context.Update(banco);
 
@@ -275,5 +276,10 @@ public class BancoService : IBancoInterface
             resposta.Status = false;
             return resposta;
         }
+    }
+
+    internal Task DebitarSaldo(int? bancoId, decimal? valorPago)
+    {
+        throw new NotImplementedException();
     }
 }

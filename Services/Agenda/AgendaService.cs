@@ -182,4 +182,54 @@ public class AgendaService : IAgendaInterface
             return resposta;
         }
     }
+
+    public async Task<ResponseModel<List<Tuple<int, int, int, int>>>> ContadoresDashboard(int? profissionalId, DateTime? dataInicio = null, DateTime? dataFim = null)
+    {
+        ResponseModel<List<Tuple<int, int, int, int>>> resposta = new ResponseModel<List<Tuple<int, int, int, int>>>();
+
+        try
+        {
+            var agendaQuery = _context.Agenda.AsQueryable();
+
+            if (dataInicio.HasValue)
+            {
+                agendaQuery = agendaQuery.Where(a => a.Data >= dataInicio);
+            }
+
+            if (dataFim.HasValue)
+            {
+                agendaQuery = agendaQuery.Where(a => a.Data <= dataFim);
+            }
+
+            if (profissionalId.HasValue && profissionalId > 0)
+            {
+                agendaQuery = agendaQuery.Where(a => a.ProfissionalId == profissionalId);
+            }
+
+            var agenda = await agendaQuery.ToListAsync();
+            var paciente = await _context.Paciente.ToListAsync();
+
+            int count1 = agenda.Count();
+            int count2 = agenda.Where(a => a.Status == "Finalizado").Count();
+            int count3 = agenda.Where(a => a.Status != "Finalizado" && a.Data > DateTime.Now).Count();
+            int count4 = paciente.Where(a => a.DataUltimoAtendimento >= dataInicio && a.DataUltimoAtendimento <= dataFim).Count();
+
+
+            var lista = new List<Tuple<int, int, int, int>>()
+            {
+                new Tuple<int, int, int, int>(count1, count2, count3, count4)
+            };
+
+            resposta.Dados = lista;
+            resposta.Mensagem = "Contadores calculados com sucesso";
+
+            return resposta;
+        }
+        catch (Exception e)
+        {
+            resposta.Mensagem = e.Message;
+            resposta.Status = false;
+            return resposta;
+        }
+    }
 }

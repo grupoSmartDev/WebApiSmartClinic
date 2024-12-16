@@ -28,6 +28,7 @@ using WebApiSmartClinic.Services.LogUsuario;
 using WebApiSmartClinic.Services.Exercicio;
 using WebApiSmartClinic.Services.Atividade;
 using WebApiSmartClinic.Services.Evolucao;
+using WebApiSmartClinic.Services.Profissao;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -80,7 +81,7 @@ builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("ConexaoPadrao"));
 });
 
-// Vincular interface com os servi�os
+// Vincular interface com os servicos
 builder.Services.AddScoped<IAutorInterface, AutorService>();
 builder.Services.AddScoped<ISalaInterface, SalaService>();
 builder.Services.AddScoped<ITipoPagamentoInterface, TipoPagamentoService>();
@@ -107,12 +108,10 @@ builder.Services.AddScoped<ILogUsuarioInterface, LogUsuarioService>();
 builder.Services.AddScoped<IExercicioInterface, ExercicioService>();
 builder.Services.AddScoped<IAtividadeInterface, AtividadeService>();
 builder.Services.AddScoped<IEvolucaoInterface, EvolucaoService>();
+builder.Services.AddScoped<IProfissaoInterface, ProfissaoService>();
 
 var app = builder.Build();
 
-
-
-// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -120,14 +119,9 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-
-// Use CORS middleware (aplicando a pol�tica que permite tudo)
 app.UseCors("AllowAll");
-
-// Aplicar middleware
 app.UseRouting();
 app.UseAuthorization();
-
 app.MapControllers();
 
 app.Run();

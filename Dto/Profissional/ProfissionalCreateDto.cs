@@ -5,16 +5,16 @@ namespace WebApiSmartClinic.Dto.Profissional
     {
         public string Email { get; set; }
         public string Nome { get; set; }
-        public string Cpf { get; set; }
+        public string? Cpf { get; set; }
         public string Celular { get; set; }
-        public string Sexo { get; set; }
-        public int ConselhoId { get; set; }
-        public string RegistroConselho { get; set; }
-        public string UfConselho { get; set; }
-        public int ProfissaoId { get; set; }
-        public string Cbo { get; set; }
-        public string Rqe { get; set; }
-        public string Cnes { get; set; }
+        public string? Sexo { get; set; }
+        public int? ConselhoId { get; set; }
+        public string? RegistroConselho { get; set; }
+        public string? UfConselho { get; set; }
+        public int? ProfissaoId { get; set; }
+        public string? Cbo { get; set; }
+        public string? Rqe { get; set; }
+        public string? Cnes { get; set; }
 
         // Propriedades para pagamento
         public string? TipoPagamento { get; set; } // Ex: "PIX", "Banco", "Dinheiro"
@@ -29,6 +29,6 @@ namespace WebApiSmartClinic.Dto.Profissional
         public bool EhUsuario { get; set; } = false; // Identifica se o profissional é um usuário do sistema
 
         // Opcional: Data de cadastro para rastrear a criação do registro
-        public DateTime DataCadastro { get; set; } = DateTime.Now;
+        public DateTime? DataCadastro { get; set; } = DateTime.Now;
     }
 }

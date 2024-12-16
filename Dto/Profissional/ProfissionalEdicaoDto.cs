@@ -6,8 +6,8 @@ namespace WebApiSmartClinic.Dto.Profissional
         public int Id { get; set; }
         public string Email { get; set; }
         public string Nome { get; set; }
-        public string Cpf { get; set; }
-        public string? Celular { get; set; }
+        public string? Cpf { get; set; }
+        public string Celular { get; set; }
         public string? Sexo { get; set; }
         public int? ConselhoId { get; set; }
         public string? RegistroConselho { get; set; }
@@ -30,6 +30,6 @@ namespace WebApiSmartClinic.Dto.Profissional
         public bool EhUsuario { get; set; } = false; // Identifica se o profissional é um usuário do sistema
 
         // Opcional: Data de cadastro para rastrear a criação do registro
-        public DateTime DataCadastro { get; set; } = DateTime.Now;
+        public DateTime? DataCadastro { get; set; } = DateTime.Now;
     }
 }

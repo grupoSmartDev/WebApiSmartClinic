@@ -26,5 +26,6 @@ namespace WebApiSmartClinic.Dto.Agenda
         public string Status { get; set; }
         public string CorStatus { get; set; }
         public bool IntegracaoGmail { get; set; }
+        public bool StatusFinal { get; set; }
     }
 }

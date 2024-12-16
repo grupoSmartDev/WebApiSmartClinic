@@ -66,6 +66,7 @@ public class AgendaService : IAgendaInterface
             agenda.Status = agendaCreateDto.Status;
             agenda.CorStatus = agendaCreateDto.CorStatus;
             agenda.IntegracaoGmail = agendaCreateDto.IntegracaoGmail;
+            agenda.StatusFinal = agendaCreateDto.StatusFinal;
 
             _context.Add(agenda);
             await _context.SaveChangesAsync();
@@ -145,6 +146,7 @@ public class AgendaService : IAgendaInterface
             agenda.Status = agendaEdicaoDto.Status;
             agenda.CorStatus = agendaEdicaoDto.CorStatus;
             agenda.IntegracaoGmail = agendaEdicaoDto.IntegracaoGmail;
+            agenda.StatusFinal = agendaEdicaoDto.StatusFinal;
 
             _context.Update(agenda);
             await _context.SaveChangesAsync();

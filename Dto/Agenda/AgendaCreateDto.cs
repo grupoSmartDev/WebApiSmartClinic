@@ -1,9 +1,13 @@
 
+using System.ComponentModel.DataAnnotations;
+
 namespace WebApiSmartClinic.Dto.Agenda
 {
     public class AgendaCreateDto
     {
         public int Id { get; set; }
+        
+        [DataType(DataType.Date)]
         public DateTime Data { get; set; }
         public TimeSpan HoraInicio { get; set; }
         public TimeSpan HoraFim { get; set; }

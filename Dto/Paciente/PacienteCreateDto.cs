@@ -45,5 +45,6 @@ public class PacienteCreateDto
     public string? Telefone { get; set; }
     public int? PlanoId { get; set; }
 
-
+    [DataType(DataType.Date)]
+    public DateTime DataCadastro { get; set; }
 }

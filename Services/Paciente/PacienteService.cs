@@ -74,13 +74,8 @@ public class PacienteService : IPacienteInterface
             paciente.Sexo = pacienteCreateDto.Sexo;
             paciente.Telefone = pacienteCreateDto.Telefone;
             paciente.PlanoId = pacienteCreateDto.PlanoId;
-
-            // Verifica se o ConvenioId é válido
-            var convenioExiste = await _context.Convenio.AnyAsync(c => c.Id == pacienteCreateDto.ConvenioId);
-            if (convenioExiste)
-            {
-                paciente.ConvenioId = pacienteCreateDto.ConvenioId; 
-            }
+            paciente.DataCadastro = DateTime.Now;
+            paciente.ConvenioId = pacienteCreateDto.ConvenioId;
 
             _context.Add(paciente);
             await _context.SaveChangesAsync();
@@ -168,12 +163,7 @@ public class PacienteService : IPacienteInterface
             paciente.Sexo = pacienteEdicaoDto.Sexo;
             paciente.Telefone = pacienteEdicaoDto.Telefone;
             paciente.PlanoId = pacienteEdicaoDto.PlanoId;
-
-            var convenioExiste = await _context.Convenio.AnyAsync(c => c.Id == pacienteEdicaoDto.ConvenioId);
-            if (convenioExiste)
-            {
-                paciente.ConvenioId = pacienteEdicaoDto.ConvenioId; 
-            }
+            paciente.ConvenioId = pacienteEdicaoDto.ConvenioId;
 
             _context.Update(paciente);
             await _context.SaveChangesAsync();

@@ -1,4 +1,5 @@
 
+using System.ComponentModel.DataAnnotations;
 using System.Drawing;
 using System.Globalization;
 
@@ -7,6 +8,8 @@ namespace WebApiSmartClinic.Models
     public class AgendaModel
     {
         public int Id { get; set; }
+        
+        [DataType(DataType.Date)]
         public DateTime Data { get; set; }
         public TimeSpan HoraInicio { get; set; }
         public TimeSpan HoraFim { get; set; }
@@ -25,5 +28,6 @@ namespace WebApiSmartClinic.Models
         public string Status { get; set; }
         public string CorStatus { get; set; }
         public bool IntegracaoGmail { get; set; }
+        public bool StatusFinal { get; set; }
     }
 }

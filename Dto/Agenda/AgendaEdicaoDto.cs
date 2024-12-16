@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
 using WebApiSmartClinic.Models;
 
@@ -6,6 +7,8 @@ namespace WebApiSmartClinic.Dto.Agenda
     public class AgendaEdicaoDto
     {
         public int Id { get; set; }
+        
+        [DataType(DataType.Date)]
         public DateTime Data { get; set; }
         public TimeSpan HoraInicio { get; set; }
         public TimeSpan HoraFim { get; set; }

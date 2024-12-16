@@ -50,5 +50,23 @@ namespace WebApiSmartClinic.Controllers
             var agenda = await _agenda.Delete(idAgenda);
             return Ok(agenda);
         }
+
+        [HttpGet("ObterContadoresDashboard")]
+        public async Task<IActionResult> ObterContadoresDashboard([FromQuery] int? profissionalId, [FromQuery] DateTime? dataInicio, [FromQuery] DateTime? dataFim)
+        {
+            try
+            {
+                var resultado = await _agenda.ObterContadoresDashboard(profissionalId, dataInicio, dataFim);
+
+                if (!resultado.Status)
+                    return BadRequest(new { mensagem = resultado.Mensagem });
+
+                return Ok(resultado);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { mensagem = "Erro interno no servidor.", detalhes = ex.Message });
+            }
+        }
     }
 }

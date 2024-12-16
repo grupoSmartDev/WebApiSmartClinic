@@ -59,6 +59,9 @@ namespace WebApiSmartClinic.Models
         [DataType(DataType.Date)]
         public DateTime? DataUltimoAtendimento { get; set; } // Ultima data de atendimento
 
+        [DataType(DataType.Date)]
+        public DateTime? DataCadastro { get; set; } // Ultima data de atendimento
+
         public List<Financ_ReceberModel>? FinancReceber { get; set; } // Relacionamento com financeiro
     }
 }

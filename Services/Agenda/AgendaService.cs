@@ -1,4 +1,5 @@
 
+using System.Runtime.Serialization;
 using Microsoft.EntityFrameworkCore;
 using WebApiSmartClinic.Data;
 using WebApiSmartClinic.Dto.Agenda;
@@ -183,53 +184,74 @@ public class AgendaService : IAgendaInterface
         }
     }
 
-    public async Task<ResponseModel<List<Tuple<int, int, int, int>>>> ContadoresDashboard(int? profissionalId, DateTime? dataInicio = null, DateTime? dataFim = null)
+
+
+    public async Task<ResponseModel<List<ContadoresDashboard>>> ObterContadoresDashboard(int? profissionalId, DateTime? dataInicio = null, DateTime? dataFim = null)
     {
-        ResponseModel<List<Tuple<int, int, int, int>>> resposta = new ResponseModel<List<Tuple<int, int, int, int>>>();
+        ResponseModel<List<ContadoresDashboard>> resposta = new ResponseModel<List<ContadoresDashboard>>();
 
         try
         {
-            var agendaQuery = _context.Agenda.AsQueryable();
+            var consultaAgenda = _context.Agenda.AsQueryable();
 
             if (dataInicio.HasValue)
             {
-                agendaQuery = agendaQuery.Where(a => a.Data >= dataInicio);
+                consultaAgenda = consultaAgenda.Where(a => a.Data >= dataInicio);
             }
 
             if (dataFim.HasValue)
             {
-                agendaQuery = agendaQuery.Where(a => a.Data <= dataFim);
+                consultaAgenda = consultaAgenda.Where(a => a.Data <= dataFim);
             }
 
             if (profissionalId.HasValue && profissionalId > 0)
             {
-                agendaQuery = agendaQuery.Where(a => a.ProfissionalId == profissionalId);
+                consultaAgenda = consultaAgenda.Where(a => a.ProfissionalId == profissionalId);
             }
 
-            var agenda = await agendaQuery.ToListAsync();
-            var paciente = await _context.Paciente.ToListAsync();
+            var agendas = await consultaAgenda.ToListAsync();
+            var consultaPaciente = _context.Paciente.AsQueryable();
 
-            int count1 = agenda.Count();
-            int count2 = agenda.Where(a => a.Status == "Finalizado").Count();
-            int count3 = agenda.Where(a => a.Status != "Finalizado" && a.Data > DateTime.Now).Count();
-            int count4 = paciente.Where(a => a.DataUltimoAtendimento >= dataInicio && a.DataUltimoAtendimento <= dataFim).Count();
-
-
-            var lista = new List<Tuple<int, int, int, int>>()
+            if (dataInicio.HasValue && dataFim.HasValue)
             {
-                new Tuple<int, int, int, int>(count1, count2, count3, count4)
+                consultaPaciente = consultaPaciente.Where(p => p.DataCadastro >= dataInicio && p.DataCadastro <= dataFim);
+            }
+
+            int totalAgendas = agendas.Count;
+            int agendasFinalizadas = agendas.Count(a => a.StatusFinal);
+            int agendasFuturas = agendas.Count(a => a.Status != "Finalizado" && a.Data > DateTime.Now);
+            int pacientesNoPeriodo = await consultaPaciente.CountAsync();
+
+            var listaContadores = new List<ContadoresDashboard>
+            {
+                new ContadoresDashboard
+                {
+                    TotalAgendas = totalAgendas,
+                    AgendasFinalizadas = agendasFinalizadas,
+                    AgendasFuturas = agendasFuturas,
+                    PacientesNoPeriodo = pacientesNoPeriodo
+                }
             };
 
-            resposta.Dados = lista;
+            resposta.Dados = listaContadores;
             resposta.Mensagem = "Contadores calculados com sucesso";
+            resposta.Status = true;
 
             return resposta;
         }
-        catch (Exception e)
+        catch (Exception ex)
         {
-            resposta.Mensagem = e.Message;
+            resposta.Mensagem = ex.Message;
             resposta.Status = false;
             return resposta;
         }
     }
+}
+
+public class ContadoresDashboard
+{
+    public int TotalAgendas { get; set; }
+    public int AgendasFinalizadas { get; set; }
+    public int AgendasFuturas { get; set; }
+    public int PacientesNoPeriodo { get; set; }
 }

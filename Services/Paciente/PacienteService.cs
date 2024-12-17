@@ -1,7 +1,9 @@
 
+using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using WebApiSmartClinic.Data;
+using WebApiSmartClinic.Helpers;
 using WebApiSmartClinic.Dto.Paciente;
 using WebApiSmartClinic.Models;
 
@@ -46,36 +48,50 @@ public class PacienteService : IPacienteInterface
 
         try
         {
-            var paciente = new PacienteModel();
+            var cpfLimpo = Funcoes.RemoverCaracteres(pacienteCreateDto.Cpf);
 
-            paciente.Bairro = pacienteCreateDto.Bairro;
-            paciente.BreveDiagnostico = pacienteCreateDto.BreveDiagnostico;
-            paciente.Celular = pacienteCreateDto.Celular;
-            paciente.Cep = pacienteCreateDto.Cep;
-            paciente.Cidade = pacienteCreateDto.Cidade;
-            paciente.ComoConheceu = pacienteCreateDto.ComoConheceu;
-            paciente.Complemento = pacienteCreateDto.Complemento;
-            paciente.Cpf = pacienteCreateDto.Cpf;
-            paciente.DataNascimento = pacienteCreateDto.DataNascimento;
-            paciente.Email = pacienteCreateDto.Email;
-            paciente.Uf = pacienteCreateDto.Uf;
-            paciente.EstadoCivil = pacienteCreateDto.EstadoCivil;
-            paciente.Logradouro = pacienteCreateDto.Logradouro;
-            paciente.Medicamento = pacienteCreateDto.Medicamento;
-            paciente.ProfissionalId = pacienteCreateDto.ProfissionalId;
-            paciente.Nome = pacienteCreateDto.Nome;
-            paciente.Numero = pacienteCreateDto.Numero;
-            paciente.Pais = pacienteCreateDto.Pais;
-            paciente.PermitirLembretes = (bool)pacienteCreateDto.PermitirLembretes;
-            paciente.PreferenciaDeContato = pacienteCreateDto.PreferenciaDeContato;
-            paciente.Profissao = pacienteCreateDto.Profissao;
-            paciente.Responsavel = (bool)pacienteCreateDto.Responsavel;
-            paciente.Rg = pacienteCreateDto.Rg;
-            paciente.Sexo = pacienteCreateDto.Sexo;
-            paciente.Telefone = pacienteCreateDto.Telefone;
-            paciente.PlanoId = pacienteCreateDto.PlanoId;
-            paciente.DataCadastro = DateTime.Now;
-            paciente.ConvenioId = pacienteCreateDto.ConvenioId;
+            // Verificação de duplicidade do CPF no banco
+            var cpfExistente = await _context.Paciente
+                .AnyAsync(p => p.Cpf == cpfLimpo);
+
+            if (cpfExistente)
+            {
+                resposta.Mensagem = "CPF já cadastrado, verifique.";
+                return resposta;
+            }
+
+            // Criação do paciente com dados limpos
+            var paciente = new PacienteModel
+            {
+                Bairro = pacienteCreateDto.Bairro,
+                BreveDiagnostico = pacienteCreateDto.BreveDiagnostico,
+                Celular = pacienteCreateDto.Celular,
+                Cep = pacienteCreateDto.Cep,
+                Cidade = pacienteCreateDto.Cidade,
+                ComoConheceu = pacienteCreateDto.ComoConheceu,
+                Complemento = pacienteCreateDto.Complemento,
+                Cpf = cpfLimpo,
+                DataNascimento = pacienteCreateDto.DataNascimento,
+                Email = pacienteCreateDto.Email,
+                Uf = pacienteCreateDto.Uf,
+                EstadoCivil = pacienteCreateDto.EstadoCivil,
+                Logradouro = pacienteCreateDto.Logradouro,
+                Medicamento = pacienteCreateDto.Medicamento,
+                ProfissionalId = pacienteCreateDto.ProfissionalId,
+                Nome = pacienteCreateDto.Nome,
+                Numero = pacienteCreateDto.Numero,
+                Pais = pacienteCreateDto.Pais,
+                PermitirLembretes = pacienteCreateDto.PermitirLembretes ?? false,
+                PreferenciaDeContato = pacienteCreateDto.PreferenciaDeContato,
+                Profissao = pacienteCreateDto.Profissao,
+                Responsavel = pacienteCreateDto.Responsavel ?? false,
+                Rg = Funcoes.RemoverCaracteres(pacienteCreateDto.Rg),
+                Sexo = pacienteCreateDto.Sexo,
+                Telefone = pacienteCreateDto.Telefone,
+                PlanoId = pacienteCreateDto.PlanoId,
+                DataCadastro = DateTime.Now,
+                ConvenioId = pacienteCreateDto.ConvenioId
+            };
 
             _context.Add(paciente);
             await _context.SaveChangesAsync();
@@ -91,6 +107,7 @@ public class PacienteService : IPacienteInterface
             return resposta;
         }
     }
+
 
 
     public async Task<ResponseModel<List<PacienteModel>>> Delete(int idPaciente)
@@ -133,6 +150,18 @@ public class PacienteService : IPacienteInterface
             if (paciente == null)
             {
                 resposta.Mensagem = "Paciente não encontrado";
+                return resposta;
+            }
+
+            var cpfLimpo = Funcoes.RemoverCaracteres(pacienteEdicaoDto.Cpf);
+
+            // Verificação de duplicidade do CPF no banco
+            var cpfExistente = await _context.Paciente
+                .AnyAsync(p => p.Cpf == cpfLimpo);
+
+            if (cpfExistente)
+            {
+                resposta.Mensagem = "CPF já cadastrado, verifique.";
                 return resposta;
             }
 

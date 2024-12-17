@@ -186,8 +186,6 @@ public class AgendaService : IAgendaInterface
         }
     }
 
-
-
     public async Task<ResponseModel<List<ContadoresDashboard>>> ObterContadoresDashboard(int? profissionalId, DateTime? dataInicio = null, DateTime? dataFim = null)
     {
         ResponseModel<List<ContadoresDashboard>> resposta = new ResponseModel<List<ContadoresDashboard>>();

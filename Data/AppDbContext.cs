@@ -37,6 +37,7 @@ public class AppDbContext : DbContext
     public DbSet<AtividadeModel> Atividade { get; set; }
     public DbSet<EvolucaoModel> Evolucoes { get; set; }
     public DbSet<ProfissaoModel> Profissao { get; set; }
+    public DbSet<FichaAvaliacaoModel> FichaAvaliacao { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

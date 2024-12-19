@@ -17,9 +17,9 @@ namespace WebApiSmartClinic.Controllers
         }
 
         [HttpGet("Listar")]
-        public async Task<ActionResult<ResponseModel<List<PlanoModel>>>> Listar()
+        public async Task<ActionResult<ResponseModel<List<PlanoModel>>>> Listar([FromQuery] string status,[FromQuery] string cor, [FromQuery] int page, [FromQuery] int pageSize)
         {
-            var plano = await _plano.Listar();
+            var plano = await _plano.Listar(status, cor, page, pageSize);
             return Ok(plano);
         }
 

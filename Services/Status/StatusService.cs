@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using WebApiSmartClinic.Data;
 using WebApiSmartClinic.Dto.Status;
 using WebApiSmartClinic.Models;
@@ -134,19 +135,43 @@ public class StatusService : IStatusInterface
         }
     }
 
-    public async Task<ResponseModel<List<StatusModel>>> ListarStatus()
+    [HttpGet("Listar")]
+    public async Task<ResponseModel<List<StatusModel>>> Listar(string status, string cor,int page = 1, int pageSize = 10)
     {
         ResponseModel<List<StatusModel>> resposta = new ResponseModel<List<StatusModel>>();
 
         try
         {
-            var status = await _context.Status.ToListAsync();
+            // Query base
+            var query = _context.Status.AsQueryable();
 
-            resposta.Dados = status;
-            resposta.Mensagem = "Todos os Status foram encontrados";
+            // Filtro por status
+            if (!string.IsNullOrEmpty(status))
+            {
+                query = query.Where(x => x.Status.Contains(status));
+            }
+
+            // Filtro por cor
+            if (!string.IsNullOrEmpty(cor))
+            {
+                query = query.Where(x => x.Cor.Contains(cor));
+            }
+
+            // Contar total para paginação
+            int totalItens = await query.CountAsync();
+
+            // Paginação
+            var statusPaginado = await query
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            // Montando a resposta
+            resposta.Dados = statusPaginado;
+            resposta.Mensagem = "Dados filtrados com sucesso.";
+            resposta.Status = true;
+            resposta.TotalCount = totalItens; // Campo total opcional para paginação
             return resposta;
-
-
         }
         catch (Exception e)
         {

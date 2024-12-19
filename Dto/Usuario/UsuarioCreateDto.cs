@@ -17,5 +17,8 @@ namespace WebApiSmartClinic.Dto.Usuario
 
         [JsonIgnore]
         public ProfissionalModel? Profissional { get; set; }
+        public int EmpresaId { get; set; }
+        [JsonIgnore]
+        public EmpresaModel? Empresa { get; set; }
     }
 }

@@ -17,10 +17,10 @@ public class StatusController : ControllerBase
     }
 
     [HttpGet("Listar")]
-    public async Task<ActionResult<ResponseModel<List<StatusModel>>>> ListarStatus()
+    public async Task<ActionResult<ResponseModel<List<StatusModel>>>> ListarStatus([FromQuery] string? statusFiltro = null, [FromQuery] string? cor = null, [FromQuery] int page = 1, [FromQuery] int pageSize = 10)
     {
-        var status = await _status.ListarStatus();
-        return Ok(status);
+        var statusS = await _status.Listar(statusFiltro, cor, page, pageSize);
+        return Ok(statusS);
     }
 
     [HttpGet("BuscarPorId/{idStatus}")]

@@ -165,25 +165,42 @@ public class PlanoService : IPlanoInterface
         }
     }
 
-    public async Task<ResponseModel<List<PlanoModel>>> Listar()
+    public async Task<ResponseModel<List<PlanoModel>>> Listar(string filtro1, string filtro2, int page, int pageSize)
     {
         ResponseModel<List<PlanoModel>> resposta = new ResponseModel<List<PlanoModel>>();
 
         try
         {
-            var plano = await _context.Plano.ToListAsync();
+            var query = _context.Plano.AsQueryable();
 
-            resposta.Dados = plano;
-            resposta.Mensagem = "Todos os Plano foram encontrados";
-         
+            // Adicione filtros
+            if (!string.IsNullOrEmpty(filtro1))
+            {
+                query = query.Where(p => p.Descricao.Contains(filtro1));
+            }
+            if (!string.IsNullOrEmpty(filtro2))
+            {
+                query = query.Where(p => p.TipoMes.Contains(filtro2));
+
+            }
+
+            // Paginação
+            int totalItens = await query.CountAsync();
+            var itensPaginados = await query.Skip((page - 1) * pageSize).Take(pageSize).ToListAsync();
+
+            resposta.Dados = itensPaginados;
+            resposta.Mensagem = "Planos listados com sucesso";
+            resposta.Status = true;
+            resposta.TotalCount = totalItens;
+
             return resposta;
         }
-        catch (Exception e)
+        catch (Exception ex)
         {
-            resposta.Mensagem = e.Message;
+            resposta.Mensagem = "Erro ao listar planos: " + ex.Message;
             resposta.Status = false;
-            
             return resposta;
         }
     }
+
 }

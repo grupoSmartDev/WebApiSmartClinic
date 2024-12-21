@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using WebApiSmartClinic.Data;
 using WebApiSmartClinic.Dto.Atividade;
 using WebApiSmartClinic.Models;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace WebApiSmartClinic.Services.Atividade;
 
@@ -39,7 +40,7 @@ public class AtividadeService : IAtividadeInterface
         }
     }
 
-    public async Task<ResponseModel<List<AtividadeModel>>> Criar(AtividadeCreateDto atividadeCreateDto)
+    public async Task<ResponseModel<List<AtividadeModel>>> Criar(AtividadeCreateDto atividadeCreateDto, int pageNumber = 1, int pageSize = 10)
     {
         ResponseModel<List<AtividadeModel>> resposta = new ResponseModel<List<AtividadeModel>>();
 
@@ -53,7 +54,9 @@ public class AtividadeService : IAtividadeInterface
             _context.Add(atividade);
             await _context.SaveChangesAsync();
 
-            resposta.Dados = await _context.Atividade.ToListAsync();
+            var query = _context.Atividade.AsQueryable();
+
+            resposta.Dados = (await PaginationHelper.PaginateAsync(query, pageNumber, pageSize)).Dados;
             resposta.Mensagem = "Atividade criado com sucesso";
             return resposta;
         }
@@ -66,7 +69,7 @@ public class AtividadeService : IAtividadeInterface
 
     }
 
-    public async Task<ResponseModel<List<AtividadeModel>>> Delete(int idAtividade)
+    public async Task<ResponseModel<List<AtividadeModel>>> Delete(int idAtividade, int pageNumber = 1, int pageSize = 10)
     {
         ResponseModel<List<AtividadeModel>> resposta = new ResponseModel<List<AtividadeModel>>();
 
@@ -82,7 +85,9 @@ public class AtividadeService : IAtividadeInterface
             _context.Remove(atividade);
             await _context.SaveChangesAsync();
 
-            resposta.Dados = await _context.Atividade.ToListAsync();
+            var query = _context.Atividade.AsQueryable();
+
+            resposta.Dados = (await PaginationHelper.PaginateAsync(query, pageNumber, pageSize)).Dados;
             resposta.Mensagem = "Atividade Excluido com sucesso";
             return resposta;
 
@@ -96,7 +101,7 @@ public class AtividadeService : IAtividadeInterface
         }
     }
 
-    public async Task<ResponseModel<List<AtividadeModel>>> Editar(AtividadeEdicaoDto atividadeEdicaoDto)
+    public async Task<ResponseModel<List<AtividadeModel>>> Editar(AtividadeEdicaoDto atividadeEdicaoDto, int pageNumber = 1, int pageSize = 10)
     {
         ResponseModel<List<AtividadeModel>> resposta = new ResponseModel<List<AtividadeModel>>();
 
@@ -116,7 +121,9 @@ public class AtividadeService : IAtividadeInterface
             _context.Update(atividade);
             await _context.SaveChangesAsync();
 
-            resposta.Dados = await _context.Atividade.ToListAsync();
+            var query = _context.Atividade.AsQueryable();
+
+            resposta.Dados = (await PaginationHelper.PaginateAsync(query, pageNumber, pageSize)).Dados;
             resposta.Mensagem = "Atividade Atualizado com sucesso";
             return resposta;
         }
@@ -129,15 +136,21 @@ public class AtividadeService : IAtividadeInterface
         }
     }
 
-    public async Task<ResponseModel<List<AtividadeModel>>> Listar()
+    public async Task<ResponseModel<List<AtividadeModel>>> Listar(int pageNumber = 1, int pageSize = 10, int? codigoFiltro = null, string? nomeFiltro = null, bool paginar = true)
     {
         ResponseModel<List<AtividadeModel>> resposta = new ResponseModel<List<AtividadeModel>>();
 
         try
         {
-            var atividade = await _context.Atividade.ToListAsync();
+            var query = _context.Atividade.AsQueryable();
 
-            resposta.Dados = atividade;
+            query = query.Where(x =>
+                (!codigoFiltro.HasValue || x.Id == codigoFiltro) &&
+                (string.IsNullOrEmpty(nomeFiltro) || x.Descricao == nomeFiltro)
+            );
+            query.OrderBy(x => x.Id);
+
+            resposta.Dados = paginar ? (await PaginationHelper.PaginateAsync(query, pageNumber, pageSize)).Dados : await query.ToListAsync();
             resposta.Mensagem = "Todos os Atividade foram encontrados";
             return resposta;
 

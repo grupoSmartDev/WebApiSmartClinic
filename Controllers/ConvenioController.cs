@@ -17,9 +17,9 @@ namespace WebApiSmartClinic.Controllers
         }
 
         [HttpGet("Listar")]
-        public async Task<ActionResult<ResponseModel<List<ConvenioModel>>>> Listar()
+        public async Task<ActionResult<ResponseModel<List<ConvenioModel>>>> Listar(int pageNumber = 1, int pageSize = 10, int? codigoFiltro = null, string? nomeFiltro = null, string? telefoneFiltro = null, string? registroAvsFiltro = null, bool paginar = true)
         {
-            var convenio = await _convenio.Listar();
+            var convenio = await _convenio.Listar(pageNumber, pageSize, codigoFiltro, nomeFiltro, telefoneFiltro, registroAvsFiltro, paginar);
             return Ok(convenio);
         }
 
@@ -31,23 +31,23 @@ namespace WebApiSmartClinic.Controllers
         }
 
         [HttpPost("Criar")]
-        public async Task<ActionResult<ResponseModel<List<ConvenioModel>>>> Criar(ConvenioCreateDto convenioCreateDto)
+        public async Task<ActionResult<ResponseModel<List<ConvenioModel>>>> Criar(ConvenioCreateDto convenioCreateDto, int pageNumber = 1, int pageSize = 10)
         {
-            var convenio = await _convenio.Criar(convenioCreateDto);
+            var convenio = await _convenio.Criar(convenioCreateDto, pageNumber, pageSize);
             return Ok(convenio);
         }
 
         [HttpPut("Editar")]
-        public async Task<ActionResult<ResponseModel<List<ConvenioModel>>>> Editar(ConvenioEdicaoDto convenioEdicaoDto)
+        public async Task<ActionResult<ResponseModel<List<ConvenioModel>>>> Editar(ConvenioEdicaoDto convenioEdicaoDto, int pageNumber = 1, int pageSize = 10)
         {
-            var convenio = await _convenio.Editar(convenioEdicaoDto);
+            var convenio = await _convenio.Editar(convenioEdicaoDto, pageNumber, pageSize);
             return Ok(convenio);
         }
 
         [HttpDelete("Delete/{idConvenio}")]
-        public async Task<ActionResult<ResponseModel<List<ConvenioModel>>>> Delete(int idConvenio)
+        public async Task<ActionResult<ResponseModel<List<ConvenioModel>>>> Delete(int idConvenio, int pageNumber = 1, int pageSize = 10)
         {
-            var convenio = await _convenio.Delete(idConvenio);
+            var convenio = await _convenio.Delete(idConvenio, pageNumber, pageSize);
             return Ok(convenio);
         }
     }

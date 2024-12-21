@@ -41,7 +41,7 @@ public class ConvenioService : IConvenioInterface
         }
     }
 
-    public async Task<ResponseModel<List<ConvenioModel>>> Criar(ConvenioCreateDto convenioCreateDto)
+    public async Task<ResponseModel<List<ConvenioModel>>> Criar(ConvenioCreateDto convenioCreateDto, int pageNumber = 1, int pageSize = 10)
     {
         ResponseModel<List<ConvenioModel>> resposta = new ResponseModel<List<ConvenioModel>>();
 
@@ -59,7 +59,9 @@ public class ConvenioService : IConvenioInterface
             _context.Add(convenio);
             await _context.SaveChangesAsync();
 
-            resposta.Dados = await _context.Convenio.ToListAsync();
+            var query = _context.Convenio.AsQueryable();
+
+            resposta.Dados = (await PaginationHelper.PaginateAsync(query, pageNumber, pageSize)).Dados;
             resposta.Mensagem = "Convenio criado com sucesso";
             return resposta;
         }
@@ -72,7 +74,7 @@ public class ConvenioService : IConvenioInterface
 
     }
 
-    public async Task<ResponseModel<List<ConvenioModel>>> Delete(int idConvenio)
+    public async Task<ResponseModel<List<ConvenioModel>>> Delete(int idConvenio, int pageNumber = 1, int pageSize = 10)
     {
         ResponseModel<List<ConvenioModel>> resposta = new ResponseModel<List<ConvenioModel>>();
 
@@ -88,7 +90,9 @@ public class ConvenioService : IConvenioInterface
             _context.Remove(convenio);
             await _context.SaveChangesAsync();
 
-            resposta.Dados = await _context.Convenio.ToListAsync();
+            var query = _context.Convenio.AsQueryable();
+
+            resposta.Dados = (await PaginationHelper.PaginateAsync(query, pageNumber, pageSize)).Dados;
             resposta.Mensagem = "Convenio Excluido com sucesso";
             
             return resposta;
@@ -102,7 +106,7 @@ public class ConvenioService : IConvenioInterface
         }
     }
 
-    public async Task<ResponseModel<List<ConvenioModel>>> Editar(ConvenioEdicaoDto convenioEdicaoDto)
+    public async Task<ResponseModel<List<ConvenioModel>>> Editar(ConvenioEdicaoDto convenioEdicaoDto, int pageNumber = 1, int pageSize = 10)
     {
         ResponseModel<List<ConvenioModel>> resposta = new ResponseModel<List<ConvenioModel>>();
 
@@ -126,7 +130,9 @@ public class ConvenioService : IConvenioInterface
             _context.Update(convenio);
             await _context.SaveChangesAsync();
 
-            resposta.Dados = await _context.Convenio.ToListAsync();
+            var query = _context.Convenio.AsQueryable();
+
+            resposta.Dados = (await PaginationHelper.PaginateAsync(query, pageNumber, pageSize)).Dados;
             resposta.Mensagem = "Convenio Atualizado com sucesso";
             return resposta;
         }
@@ -139,15 +145,24 @@ public class ConvenioService : IConvenioInterface
         }
     }
 
-    public async Task<ResponseModel<List<ConvenioModel>>> Listar()
+    public async Task<ResponseModel<List<ConvenioModel>>> Listar(int pageNumber = 1, int pageSize = 10, int? codigoFiltro = null, string? nomeFiltro = null, string? telefoneFiltro = null, string? registroAvsFiltro = null, bool paginar = true)
     {
         ResponseModel<List<ConvenioModel>> resposta = new ResponseModel<List<ConvenioModel>>();
 
         try
         {
-            var convenio = await _context.Convenio.ToListAsync();
+            var query = _context.Convenio.AsQueryable();
 
-            resposta.Dados = convenio;
+            query = query.Where(x =>
+                (!codigoFiltro.HasValue || x.Id == codigoFiltro) &&
+                (string.IsNullOrEmpty(nomeFiltro) || x.Nome == nomeFiltro) &&
+                (string.IsNullOrEmpty(telefoneFiltro) || x.Telefone == telefoneFiltro) &&
+                (string.IsNullOrEmpty(registroAvsFiltro) || x.RegistroAvs == registroAvsFiltro)
+            );
+                
+            query = query.OrderBy(x => x.Id);
+
+            resposta.Dados = paginar ? (await PaginationHelper.PaginateAsync(query, pageNumber, pageSize)).Dados : await query.ToListAsync();
             resposta.Mensagem = "Todos os Convenio foram encontrados";
             
             return resposta;

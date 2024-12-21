@@ -41,7 +41,7 @@ public class ProfissaoService : IProfissaoInterface
         }
     }
 
-    public async Task<ResponseModel<List<ProfissaoModel>>> Criar(ProfissaoCreateDto profissaoCreateDto)
+    public async Task<ResponseModel<List<ProfissaoModel>>> Criar(ProfissaoCreateDto profissaoCreateDto, int pageNumber = 1, int pageSize = 10)
     {
         ResponseModel<List<ProfissaoModel>> resposta = new ResponseModel<List<ProfissaoModel>>();
 
@@ -54,7 +54,9 @@ public class ProfissaoService : IProfissaoInterface
             _context.Add(profissao);
             await _context.SaveChangesAsync();
 
-            resposta.Dados = await _context.Profissao.ToListAsync();
+            var query = _context.Profissao.AsQueryable();
+
+            resposta.Dados = (await PaginationHelper.PaginateAsync(query, pageNumber, pageSize)).Dados;
             resposta.Mensagem = "Profissao criado com sucesso";
             
             return resposta;
@@ -68,7 +70,7 @@ public class ProfissaoService : IProfissaoInterface
         }
     }
 
-    public async Task<ResponseModel<List<ProfissaoModel>>> Delete(int idProfissao)
+    public async Task<ResponseModel<List<ProfissaoModel>>> Delete(int idProfissao, int pageNumber = 1, int pageSize = 10)
     {
         ResponseModel<List<ProfissaoModel>> resposta = new ResponseModel<List<ProfissaoModel>>();
 
@@ -84,7 +86,9 @@ public class ProfissaoService : IProfissaoInterface
             _context.Remove(profissao);
             await _context.SaveChangesAsync();
 
-            resposta.Dados = await _context.Profissao.ToListAsync();
+            var query = _context.Profissao.AsQueryable();
+
+            resposta.Dados = (await PaginationHelper.PaginateAsync(query, pageNumber, pageSize)).Dados;
             resposta.Mensagem = "Profissao Excluido com sucesso";
             
             return resposta;
@@ -100,7 +104,7 @@ public class ProfissaoService : IProfissaoInterface
         }
     }
 
-    public async Task<ResponseModel<List<ProfissaoModel>>> Editar(ProfissaoEdicaoDto profissaoEdicaoDto)
+    public async Task<ResponseModel<List<ProfissaoModel>>> Editar(ProfissaoEdicaoDto profissaoEdicaoDto, int pageNumber = 1, int pageSize = 10)
     {
         ResponseModel<List<ProfissaoModel>> resposta = new ResponseModel<List<ProfissaoModel>>();
 
@@ -120,7 +124,9 @@ public class ProfissaoService : IProfissaoInterface
             _context.Update(profissao);
             await _context.SaveChangesAsync();
 
-            resposta.Dados = await _context.Profissao.ToListAsync();
+            var query = _context.Profissao.AsQueryable();
+
+            resposta.Dados = (await PaginationHelper.PaginateAsync(query, pageNumber, pageSize)).Dados;
             resposta.Mensagem = "Profissao Atualizado com sucesso";
             
             return resposta;
@@ -135,15 +141,25 @@ public class ProfissaoService : IProfissaoInterface
         }
     }
 
-    public async Task<ResponseModel<List<ProfissaoModel>>> Listar()
+    public async Task<ResponseModel<List<ProfissaoModel>>> Listar(int pageNumber = 1, int pageSize = 10, int? codigoFiltro = null, string? nomeFiltro = null, bool paginar = true)
     {
         ResponseModel<List<ProfissaoModel>> resposta = new ResponseModel<List<ProfissaoModel>>();
 
         try
         {
-            var profissao = await _context.Profissao.ToListAsync();
+            var query = _context.Profissao.AsQueryable();
 
-            resposta.Dados = profissao;
+            // Aplicar filtros
+            query = query.Where(x =>
+                (!codigoFiltro.HasValue || x.Id == codigoFiltro.Value) &&
+                (string.IsNullOrEmpty(nomeFiltro) || x.Descricao.Contains(nomeFiltro))
+            );
+
+            // Ordenação padrão
+            query = query.OrderBy(x => x.Id);
+
+            // Paginação opcional
+            resposta.Dados = paginar ? (await PaginationHelper.PaginateAsync(query, pageNumber, pageSize)).Dados : await query.ToListAsync();
             resposta.Mensagem = "Todos os Profissao foram encontrados";
 
             return resposta;

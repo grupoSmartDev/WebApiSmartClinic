@@ -17,9 +17,9 @@ namespace WebApiSmartClinic.Controllers
         }
 
         [HttpGet("Listar")]
-        public async Task<ActionResult<ResponseModel<List<ProfissaoModel>>>> Listar()
+        public async Task<ActionResult<ResponseModel<List<ProfissaoModel>>>> Listar(int pageNumber = 1, int pageSize = 10, int? codigoFiltro = null, string? nomeFiltro = null, bool paginar = true)
         {
-            var profissao = await _profissao.Listar();
+            var profissao = await _profissao.Listar(pageNumber, pageSize, codigoFiltro, nomeFiltro, paginar);
             return Ok(profissao);
         }
 
@@ -31,23 +31,23 @@ namespace WebApiSmartClinic.Controllers
         }
 
         [HttpPost("Criar")]
-        public async Task<ActionResult<ResponseModel<List<ProfissaoModel>>>> Criar(ProfissaoCreateDto profissaoCreateDto)
+        public async Task<ActionResult<ResponseModel<List<ProfissaoModel>>>> Criar(ProfissaoCreateDto profissaoCreateDto, int pageNumber = 1, int pageSize = 10)
         {
-            var profissao = await _profissao.Criar(profissaoCreateDto);
+            var profissao = await _profissao.Criar(profissaoCreateDto, pageNumber, pageSize);
             return Ok(profissao);
         }
 
         [HttpPut("Editar")]
-        public async Task<ActionResult<ResponseModel<List<ProfissaoModel>>>> Editar(ProfissaoEdicaoDto profissaoEdicaoDto)
+        public async Task<ActionResult<ResponseModel<List<ProfissaoModel>>>> Editar(ProfissaoEdicaoDto profissaoEdicaoDto, int pageNumber = 1, int pageSize = 10)
         {
-            var profissao = await _profissao.Editar(profissaoEdicaoDto);
+            var profissao = await _profissao.Editar(profissaoEdicaoDto, pageNumber, pageSize);
             return Ok(profissao);
         }
 
         [HttpDelete("Delete/{idProfissao}")]
-        public async Task<ActionResult<ResponseModel<List<ProfissaoModel>>>> Delete(int idProfissao)
+        public async Task<ActionResult<ResponseModel<List<ProfissaoModel>>>> Delete(int idProfissao, int pageNumber = 1, int pageSize = 10)
         {
-            var profissao = await _profissao.Delete(idProfissao);
+            var profissao = await _profissao.Delete(idProfissao, pageNumber, pageSize);
             return Ok(profissao);
         }
     }

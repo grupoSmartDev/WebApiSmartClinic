@@ -17,9 +17,9 @@ namespace WebApiSmartClinic.Controllers
         }
 
         [HttpGet("Listar")]
-        public async Task<ActionResult<ResponseModel<List<ExercicioModel>>>> Listar()
+        public async Task<ActionResult<ResponseModel<List<ExercicioModel>>>> Listar(int pageNumber = 1, int pageSize = 10, int? codigoFiltro = null, string? nomeFiltro = null, bool paginar = true)
         {
-            var exercicio = await _exercicio.Listar();
+            var exercicio = await _exercicio.Listar(pageNumber, pageSize, codigoFiltro, nomeFiltro, paginar);
             return Ok(exercicio);
         }
 
@@ -31,23 +31,23 @@ namespace WebApiSmartClinic.Controllers
         }
 
         [HttpPost("Criar")]
-        public async Task<ActionResult<ResponseModel<List<ExercicioModel>>>> Criar(ExercicioCreateDto exercicioCreateDto)
+        public async Task<ActionResult<ResponseModel<List<ExercicioModel>>>> Criar(ExercicioCreateDto exercicioCreateDto, int pageNumber = 1, int pageSize = 10)
         {
-            var exercicio = await _exercicio.Criar(exercicioCreateDto);
+            var exercicio = await _exercicio.Criar(exercicioCreateDto, pageNumber, pageSize);
             return Ok(exercicio);
         }
 
         [HttpPut("Editar")]
-        public async Task<ActionResult<ResponseModel<List<ExercicioModel>>>> Editar(ExercicioEdicaoDto exercicioEdicaoDto)
+        public async Task<ActionResult<ResponseModel<List<ExercicioModel>>>> Editar(ExercicioEdicaoDto exercicioEdicaoDto, int pageNumber = 1, int pageSize = 10)
         {
-            var exercicio = await _exercicio.Editar(exercicioEdicaoDto);
+            var exercicio = await _exercicio.Editar(exercicioEdicaoDto, pageNumber, pageSize);
             return Ok(exercicio);
         }
 
         [HttpDelete("Delete/{idExercicio}")]
-        public async Task<ActionResult<ResponseModel<List<ExercicioModel>>>> Delete(int idExercicio)
+        public async Task<ActionResult<ResponseModel<List<ExercicioModel>>>> Delete(int idExercicio, int pageNumber = 1, int pageSize = 10)
         {
-            var exercicio = await _exercicio.Delete(idExercicio);
+            var exercicio = await _exercicio.Delete(idExercicio, pageNumber, pageSize);
             return Ok(exercicio);
         }
     }

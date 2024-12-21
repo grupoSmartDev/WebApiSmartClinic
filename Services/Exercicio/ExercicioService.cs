@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using WebApiSmartClinic.Data;
 using WebApiSmartClinic.Dto.Exercicio;
 using WebApiSmartClinic.Models;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace WebApiSmartClinic.Services.Exercicio;
 
@@ -39,7 +40,7 @@ public class ExercicioService : IExercicioInterface
         }
     }
 
-    public async Task<ResponseModel<List<ExercicioModel>>> Criar(ExercicioCreateDto exercicioCreateDto)
+    public async Task<ResponseModel<List<ExercicioModel>>> Criar(ExercicioCreateDto exercicioCreateDto, int pageNumber = 1, int pageSize = 10)
     {
         ResponseModel<List<ExercicioModel>> resposta = new ResponseModel<List<ExercicioModel>>();
 
@@ -58,7 +59,9 @@ public class ExercicioService : IExercicioInterface
             _context.Add(exercicio);
             await _context.SaveChangesAsync();
 
-            resposta.Dados = await _context.Exercicio.ToListAsync();
+            var query = _context.Exercicio.AsQueryable();
+
+            resposta.Dados = (await PaginationHelper.PaginateAsync(query, pageNumber, pageSize)).Dados;
             resposta.Mensagem = "Exercicio criado com sucesso";
             return resposta;
         }
@@ -71,7 +74,7 @@ public class ExercicioService : IExercicioInterface
 
     }
 
-    public async Task<ResponseModel<List<ExercicioModel>>> Delete(int idExercicio)
+    public async Task<ResponseModel<List<ExercicioModel>>> Delete(int idExercicio, int pageNumber = 1, int pageSize = 10)
     {
         ResponseModel<List<ExercicioModel>> resposta = new ResponseModel<List<ExercicioModel>>();
 
@@ -87,7 +90,9 @@ public class ExercicioService : IExercicioInterface
             _context.Remove(exercicio);
             await _context.SaveChangesAsync();
 
-            resposta.Dados = await _context.Exercicio.ToListAsync();
+            var query = _context.Exercicio.AsQueryable();
+
+            resposta.Dados = (await PaginationHelper.PaginateAsync(query, pageNumber, pageSize)).Dados;
             resposta.Mensagem = "Exercicio Excluido com sucesso";
             return resposta;
 
@@ -101,7 +106,7 @@ public class ExercicioService : IExercicioInterface
         }
     }
 
-    public async Task<ResponseModel<List<ExercicioModel>>> Editar(ExercicioEdicaoDto exercicioEdicaoDto)
+    public async Task<ResponseModel<List<ExercicioModel>>> Editar(ExercicioEdicaoDto exercicioEdicaoDto, int pageNumber = 1, int pageSize = 10)
     {
         ResponseModel<List<ExercicioModel>> resposta = new ResponseModel<List<ExercicioModel>>();
 
@@ -126,7 +131,9 @@ public class ExercicioService : IExercicioInterface
             _context.Update(exercicio);
             await _context.SaveChangesAsync();
 
-            resposta.Dados = await _context.Exercicio.ToListAsync();
+            var query = _context.Exercicio.AsQueryable();
+
+            resposta.Dados = (await PaginationHelper.PaginateAsync(query, pageNumber, pageSize)).Dados;
             resposta.Mensagem = "Exercicio Atualizado com sucesso";
             return resposta;
         }
@@ -139,15 +146,22 @@ public class ExercicioService : IExercicioInterface
         }
     }
 
-    public async Task<ResponseModel<List<ExercicioModel>>> Listar()
+    public async Task<ResponseModel<List<ExercicioModel>>> Listar(int pageNumber = 1, int pageSize = 10, int? codigoFiltro = null, string? nomeFiltro = null, bool paginar = true)
     {
         ResponseModel<List<ExercicioModel>> resposta = new ResponseModel<List<ExercicioModel>>();
 
         try
         {
-            var exercicio = await _context.Exercicio.ToListAsync();
+            var query = _context.Exercicio.AsQueryable();
 
-            resposta.Dados = exercicio;
+            query = query.Where(x =>
+                (!codigoFiltro.HasValue || x.Id == codigoFiltro) &&
+                (string.IsNullOrEmpty(nomeFiltro) || x.Descricao == nomeFiltro)
+            );
+
+            query.OrderBy(x => x.Id);
+
+            resposta.Dados = paginar ? (await PaginationHelper.PaginateAsync(query, pageNumber, pageSize)).Dados : await query.ToListAsync();
             resposta.Mensagem = "Todos os Exercicio foram encontrados";
             return resposta;
 

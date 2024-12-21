@@ -1,4 +1,3 @@
-
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
 using WebApiSmartClinic.Dto.Financ_Pagar;
@@ -52,33 +51,72 @@ namespace WebApiSmartClinic.Controllers
             return Ok(financ_pagar);
         }
 
-        [HttpPost("BaixarPagamento/{idFinanc_Pagar}")]
-        [SwaggerOperation(
-            Summary = "Baixa um pagamento especifico",
-            Description = "Realiza a baixa de um pagamento, alterando o status para 'Pago' e definindo a data de pagamento como a data atual."
-        )]
-        [SwaggerResponse(200, "Pagamento baixado com sucesso", typeof(ResponseModel<Financ_PagarModel>))]
-        [SwaggerResponse(404, "Pagamento não encontrado")]
-        [SwaggerResponse(500, "Erro interno")]
-        public async Task<IActionResult> BaixarPagamento(int idFinanc_Pagar, decimal valorPago, DateTime? dataPagamento = null)
+        [HttpPost("BaixarParcela/{parcelaId}")]
+        public async Task<ActionResult<ResponseModel<Financ_PagarModel>>> BaixarParcela(int parcelaId, [FromBody] decimal valorPago)
         {
-            var resposta = await _financ_pagar.BaixarPagamento(idFinanc_Pagar, valorPago, dataPagamento);
-            if (!resposta.Status)
-            {
-                return BadRequest(resposta);
-            }
-            return Ok(resposta);
+            var resultado = await _financ_pagar.BaixarParcela(parcelaId, valorPago);
+            return Ok(resultado);
         }
 
-        [HttpPost("EstornarPagamento/{idFinanc_Pagar}")]
-        public async Task<IActionResult> EstornarPagamento(int idFinanc_Pagar)
+        [HttpPost("AgruparParcelas/{idPai}")]
+        public async Task<ActionResult<ResponseModel<string>>> AgruparParcelas(int idPai, [FromBody] dynamic body)
         {
-            var resposta = await _financ_pagar.EstornarPagamento(idFinanc_Pagar);
-            if (!resposta.Status)
-            {
-                return BadRequest(resposta);
-            }
-            return Ok(resposta);
+            List<int> parcelasFilhasIds = body.ParcelasFilhasIds.ToObject<List<int>>();
+            decimal valorPago = body.ValorPago;
+
+            var resultado = await _financ_pagar.AgruparParcelas(idPai, parcelasFilhasIds, valorPago);
+            return Ok(resultado);
+        }
+
+        [HttpPost("EstornarParcela/{parcelaId}")]
+        public async Task<ActionResult<ResponseModel<string>>> EstornarParcela(int parcelaId)
+        {
+            var resultado = await _financ_pagar.EstornarParcela(parcelaId);
+            return Ok(resultado);
+        }
+
+        [HttpPost("EstornarAgrupamento")]
+        public async Task<ActionResult<ResponseModel<string>>> EstornarAgrupamento([FromBody] List<int> parcelasIds)
+        {
+            var resultado = await _financ_pagar.EstornarAgrupamento(parcelasIds);
+            return Ok(resultado);
+        }
+
+        [HttpGet("ObterContasAbertas")]
+        public async Task<ActionResult<ResponseModel<List<Financ_PagarSubModel>>>> ObterContasAbertas()
+        {
+            var resultado = await _financ_pagar.ObterContasAbertas();
+            return Ok(resultado);
         }
     }
 }
+
+
+//[HttpPost("BaixarPagamento/{idFinanc_Pagar}")]
+//[SwaggerOperation(
+//    Summary = "Baixa um pagamento especifico",
+//    Description = "Realiza a baixa de um pagamento, alterando o status para 'Pago' e definindo a data de pagamento como a data atual."
+//)]
+//[SwaggerResponse(200, "Pagamento baixado com sucesso", typeof(ResponseModel<Financ_PagarModel>))]
+//[SwaggerResponse(404, "Pagamento não encontrado")]
+//[SwaggerResponse(500, "Erro interno")]
+//public async Task<IActionResult> BaixarPagamento(int idFinanc_Pagar, decimal valorPago, DateTime? dataPagamento = null)
+//{
+//    var resposta = await _financ_pagar.BaixarPagamento(idFinanc_Pagar, valorPago, dataPagamento);
+//    if (!resposta.Status)
+//    {
+//        return BadRequest(resposta);
+//    }
+//    return Ok(resposta);
+//}
+
+//[HttpPost("EstornarPagamento/{idFinanc_Pagar}")]
+//public async Task<IActionResult> EstornarPagamento(int idFinanc_Pagar)
+//{
+//    var resposta = await _financ_pagar.EstornarPagamento(idFinanc_Pagar);
+//    if (!resposta.Status)
+//    {
+//        return BadRequest(resposta);
+//    }
+//    return Ok(resposta);
+//}

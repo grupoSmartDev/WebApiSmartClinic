@@ -42,6 +42,7 @@ public class Financ_PagarSubModel
     public Financ_PagarModel? FinancPagar { get; set; }
     public int? Parcela { get; set; }
     public decimal Valor { get; set; }
+    public decimal? ValorPago { get; set; }
     public decimal? Desconto { get; set; }
     public decimal? Juros { get; set; }
     public decimal? Multa { get; set; }

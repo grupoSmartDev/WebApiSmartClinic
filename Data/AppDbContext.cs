@@ -17,13 +17,14 @@ public class AppDbContext : DbContext
     public DbSet<ConvenioModel> Convenio { get; set; }
     public DbSet<CentroCustoModel> CentroCusto { get; set; }  // Define uma tabela CentroCusto no banco de dados
     public DbSet<SubCentroCustoModel> SubCentroCusto { get; set; }  // Define uma tabela SubCentroCusto no banco de dados
-    public DbSet<SalaModel> Sala{ get; set; }
+    public DbSet<SalaModel> Sala { get; set; }
     public DbSet<BancoModel> Banco { get; set; }
     public DbSet<ConselhoModel> Conselho { get; set; }
     public DbSet<ProcedimentoModel> Procedimento { get; set; }
     public DbSet<BoletoModel> Boleto { get; set; }
     public DbSet<CategoriaModel> Categoria { get; set; }
     public DbSet<Financ_PagarModel> Financ_Pagar { get; set; }
+    public DbSet<Financ_PagarSubModel> Financ_PagarSub { get; set; }
     public DbSet<Financ_ReceberModel> Financ_Receber { get; set; }
     public DbSet<Financ_ReceberSubModel> Financ_ReceberSub { get; set; }
     public DbSet<ProfissionalModel> Profissional { get; set; }
@@ -56,10 +57,10 @@ public class AppDbContext : DbContext
             .HasForeignKey(p => p.financReceberId);  // O campo Financ_ReceberId � a chave estrangeira que referencia o Id de Financ_ReceberModel
 
         modelBuilder.Entity<PacienteModel>()
-        .HasOne(p => p.Plano)
-        .WithOne()
-        .HasForeignKey<PacienteModel>(p => p.PlanoId)
-        .OnDelete(DeleteBehavior.Restrict); // Ou Cascade, conforme necessidade
+            .HasOne(p => p.Plano)
+            .WithOne()
+            .HasForeignKey<PacienteModel>(p => p.PlanoId)
+            .OnDelete(DeleteBehavior.Restrict); // Ou Cascade, conforme necessidade
 
 
         modelBuilder.Entity<EvolucaoModel>()
@@ -77,7 +78,7 @@ public class AppDbContext : DbContext
 
         //configura��o para financ receber e sub financ receber
         modelBuilder.Entity<Financ_ReceberModel>()
-      .HasKey(f => f.Id);
+            .HasKey(f => f.Id);
 
         modelBuilder.Entity<Financ_ReceberSubModel>()
             .HasKey(s => s.Id);
@@ -87,9 +88,9 @@ public class AppDbContext : DbContext
             .WithMany(f => f.subFinancReceber)
             .HasForeignKey(s => s.financReceberId);
 
-        //configura��o para financ receber e sub financ receber
+        //configura��o para financ pagar e sub financ pagar
         modelBuilder.Entity<Financ_PagarModel>()
-      .HasKey(f => f.Id);
+            .HasKey(f => f.Id);
 
         modelBuilder.Entity<Financ_PagarSubModel>()
             .HasKey(s => s.Id);

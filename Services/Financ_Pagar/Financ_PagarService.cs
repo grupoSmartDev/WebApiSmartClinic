@@ -1,10 +1,10 @@
-
 using Microsoft.EntityFrameworkCore;
 using WebApiSmartClinic.Data;
 using WebApiSmartClinic.Dto.Financ_Pagar;
 using WebApiSmartClinic.Models;
 using WebApiSmartClinic.Services.Banco;
 using WebApiSmartClinic.Dto.Financ_Receber;
+using System.Linq;
 
 namespace WebApiSmartClinic.Services.Financ_Pagar;
 
@@ -98,12 +98,14 @@ public class Financ_PagarService : IFinanc_PagarInterface
 
             resposta.Dados = await _context.Financ_Pagar.ToListAsync();
             resposta.Mensagem = "Financ_Pagar criado com sucesso";
+
             return resposta;
         }
         catch (Exception ex)
         {
             resposta.Mensagem = ex.Message;
             resposta.Status = false;
+
             return resposta;
         }
     }
@@ -227,113 +229,59 @@ public class Financ_PagarService : IFinanc_PagarInterface
         }
     }
 
-
-    public async Task<ResponseModel<Financ_PagarModel>> BaixarPagamento(int idFinanc_Pagar, decimal valorPago, DateTime? dataPagamento = null)
+    public async Task<ResponseModel<Financ_PagarModel>> BaixarParcela(int parcelaId, decimal valorPago)
     {
         var resposta = new ResponseModel<Financ_PagarModel>();
-
         try
         {
-            var financ_pagar = await _context.Financ_Pagar.FirstOrDefaultAsync(x => x.Id == idFinanc_Pagar);
-            if (financ_pagar == null)
+            var parcela = await _context.Financ_PagarSub.FirstOrDefaultAsync(x => x.Id == parcelaId);
+
+            if (parcela == null)
             {
-                resposta.Mensagem = "Pagamento não encontrado.";
+                resposta.Mensagem = "Parcela não encontrada.";
+                resposta.Status = false;
                 return resposta;
             }
 
-            // Validação de saldo suficiente
-            BancoService _bancoService = new BancoService(_context);
-
-            //BRUNAO VERIFICAR
-
-            //var bancoResposta = await _bancoService.DebitarSaldo(financ_pagar.BancoId, valorPago);
-            //if (!bancoResposta.Status)
-            //{
-            //    resposta.Mensagem = bancoResposta.Mensagem;
-            //    resposta.Status = false;
-            //    return resposta;
-            //}
-
-            // Atualização do valor pago e status do pagamento
-            financ_pagar.ValorPago += valorPago;
-            //BRUNAO VERIFICAR FOI ALTERADO A DATA DE PAGAMENTO AGORA QUE TEMOS UM SUB, VAI MUDAR A LOGICA? 
-            //financ_pagar.DataPagamento = dataPagamento ?? DateTime.Now;
-            financ_pagar.Status = financ_pagar.ValorPago >= financ_pagar.ValorOriginal ? "Pago" : "Parcialmente Pago";
-
-            if (financ_pagar.ValorPago < financ_pagar.ValorOriginal)
+            if (parcela.DataPagamento != null)
             {
-                // Criar novo lançamento para o valor restante
-                var valorRestante = financ_pagar.ValorOriginal - financ_pagar.ValorPago;
-                var novoLancamento = new Financ_PagarModel
+                resposta.Mensagem = "Parcela já foi paga.";
+                resposta.Status = false;
+                return resposta;
+            }
+
+            if (valorPago < parcela.Valor)
+            {
+                // Valor pago é menor que o valor da parcela
+                var valorRestante = parcela.Valor - valorPago;
+
+                // Criar uma nova parcela com o valor restante
+                var novaParcela = new Financ_PagarSubModel
                 {
-                    IdOrigem = financ_pagar.IdOrigem,
-                    NrDocto = financ_pagar.NrDocto,
-                    DataEmissao = financ_pagar.DataEmissao,
-                    //DataVencimento = financ_pagar.DataVencimento,
-                    ValorOriginal = valorRestante,
-                    ValorPago = 0,
-                    Status = "Em Aberto",
-                    NotaFiscal = financ_pagar.NotaFiscal,
-                    Descricao = financ_pagar.Descricao,
-                    FornecedorId = financ_pagar.FornecedorId,
-                    BancoId = financ_pagar.BancoId,
-                    CentroCustoId = financ_pagar.CentroCustoId
+                    financPagarId = parcela.financPagarId,
+                    Parcela = parcela.Parcela,
+                    Valor = valorRestante,
+                    TipoPagamentoId = parcela.TipoPagamentoId,
+                    FormaPagamentoId = parcela.FormaPagamentoId,
+                    DataVencimento = DateTime.Now.AddMonths(1), // Ajuste conforme necessário
+                    Observacao = "Parcela gerada automaticamente devido a pagamento parcial."
                 };
-
-                _context.Add(novoLancamento);
+                _context.Financ_PagarSub.Add(novaParcela);
             }
-
-            _context.Update(financ_pagar);
-            await _context.SaveChangesAsync();
-
-            resposta.Dados = financ_pagar;
-            resposta.Mensagem = "Pagamento baixado com sucesso.";
-            return resposta;
-        }
-        catch (Exception ex)
-        {
-            resposta.Mensagem = ex.Message;
-            resposta.Status = false;
-            return resposta;
-        }
-    }
-
-    public async Task<ResponseModel<Financ_PagarModel>> EstornarPagamento(int idFinanc_Pagar)
-    {
-        var resposta = new ResponseModel<Financ_PagarModel>();
-
-        try
-        {
-            var financ_pagar = await _context.Financ_Pagar.FirstOrDefaultAsync(x => x.Id == idFinanc_Pagar);
-            if (financ_pagar == null)
+            else if (valorPago > parcela.Valor)
             {
-                resposta.Mensagem = "Pagamento não encontrado.";
+                resposta.Mensagem = "Valor pago é maior que o valor da parcela.";
+                resposta.Status = false;
                 return resposta;
             }
 
-            // Crédita o valor de volta ao saldo da conta bancária
-            BancoService _bancoService = new BancoService(_context);
-            await _bancoService.CreditarSaldo((int)financ_pagar.BancoId, (decimal)financ_pagar.ValorPago);
+            parcela.DataPagamento = DateTime.Now;
+            parcela.ValorPago = valorPago;
 
-            // Zera o valor pago e redefine o status
-            financ_pagar.ValorPago = 0;
-           // financ_pagar.DataPagamento = null;
-            financ_pagar.Status = "Em Aberto";
-
-            // Registro de histórico do estorno
-            await _context.HistoricoTransacao.AddAsync(new HistoricoTransacaoModel
-            {
-                //BancoId = financ_pagar.BancoId,
-                //Valor = financ_pagar.ValorPago,
-                TipoTransacao = "Estorno",
-                DataTransacao = DateTime.Now
-            });
-
-            _context.Update(financ_pagar);
             await _context.SaveChangesAsync();
 
-            resposta.Dados = financ_pagar;
-            resposta.Mensagem = "Pagamento estornado com sucesso.";
+            resposta.Dados = await _context.Financ_Pagar.FirstOrDefaultAsync(x => x.Id == parcela.financPagarId);
+            resposta.Mensagem = "Parcela baixada com sucesso.";
             return resposta;
         }
         catch (Exception ex)
@@ -343,6 +291,259 @@ public class Financ_PagarService : IFinanc_PagarInterface
             return resposta;
         }
     }
+
+    public async Task<ResponseModel<string>> AgruparParcelas(int idPai, List<int> parcelasFilhasIds, decimal valorPago)
+    {
+        var resposta = new ResponseModel<string>();
+        try
+        {
+            var parcelasFilhas = await _context.Financ_PagarSub
+                .Where(x => parcelasFilhasIds.Contains((int)x.Id) && x.DataPagamento == null)
+                .ToListAsync();
+
+            if (!parcelasFilhas.Any())
+            {
+                resposta.Mensagem = "Nenhuma parcela válida encontrada para agrupamento.";
+                resposta.Status = false;
+                return resposta;
+            }
+
+            decimal totalValor = parcelasFilhas.Sum(p => p.Valor);
+
+            if (valorPago < totalValor)
+            {
+                var valorRestante = totalValor - valorPago;
+                resposta.Mensagem = $"Valor pago é insuficiente. Faltam {valorRestante:C}.";
+                resposta.Status = false;
+                return resposta;
+            }
+            else if (valorPago > totalValor)
+            {
+                resposta.Mensagem = "Valor pago é maior que o total das parcelas.";
+                resposta.Status = false;
+                return resposta;
+            }
+
+            foreach (var parcela in parcelasFilhas)
+            {
+                parcela.DataPagamento = DateTime.Now;
+                parcela.ValorPago = parcela.Valor;
+            }
+
+            await _context.SaveChangesAsync();
+
+            resposta.Mensagem = "Parcelas agrupadas e baixadas com sucesso.";
+            return resposta;
+        }
+        catch (Exception ex)
+        {
+            resposta.Mensagem = ex.Message;
+            resposta.Status = false;
+            return resposta;
+        }
+    }
+
+    public async Task<ResponseModel<string>> EstornarParcela(int parcelaId)
+    {
+        var resposta = new ResponseModel<string>();
+        try
+        {
+            var parcela = await _context.Financ_PagarSub.FirstOrDefaultAsync(x => x.Id == parcelaId);
+
+            if (parcela == null || parcela.DataPagamento == null)
+            {
+                resposta.Mensagem = "Parcela não encontrada ou já está em aberto.";
+                resposta.Status = false;
+                return resposta;
+            }
+
+            parcela.DataPagamento = null;
+            parcela.ValorPago = 0;
+
+            await _context.SaveChangesAsync();
+
+            resposta.Mensagem = "Baixa da parcela estornada com sucesso.";
+            return resposta;
+        }
+        catch (Exception ex)
+        {
+            resposta.Mensagem = ex.Message;
+            resposta.Status = false;
+            return resposta;
+        }
+    }
+
+    public async Task<ResponseModel<string>> EstornarAgrupamento(List<int> parcelasIds)
+    {
+        var resposta = new ResponseModel<string>();
+        try
+        {
+            var parcelas = await _context.Financ_PagarSub
+                .Where(x => parcelasIds.Contains((int)x.Id) && x.DataPagamento != null)
+                .ToListAsync();
+
+            if (!parcelas.Any())
+            {
+                resposta.Mensagem = "Nenhuma parcela válida encontrada para estorno.";
+                resposta.Status = false;
+                return resposta;
+            }
+
+            foreach (var parcela in parcelas)
+            {
+                parcela.DataPagamento = null;
+                parcela.ValorPago = 0;
+            }
+
+            await _context.SaveChangesAsync();
+
+            resposta.Mensagem = "Estorno de agrupamento realizado com sucesso.";
+            return resposta;
+        }
+        catch (Exception ex)
+        {
+            resposta.Mensagem = ex.Message;
+            resposta.Status = false;
+            return resposta;
+        }
+    }
+
+    public async Task<ResponseModel<List<Financ_PagarSubModel>>> ObterContasAbertas()
+    {
+        var resposta = new ResponseModel<List<Financ_PagarSubModel>>();
+        try
+        {
+            var contasAbertas = await _context.Financ_PagarSub
+                .Where(x => x.DataPagamento == null)
+                .ToListAsync();
+
+            resposta.Dados = contasAbertas;
+            resposta.Mensagem = "Contas em aberto obtidas com sucesso.";
+            return resposta;
+        }
+        catch (Exception ex)
+        {
+            resposta.Mensagem = ex.Message;
+            resposta.Status = false;
+            return resposta;
+        }
+    }
+
+    //public async Task<ResponseModel<Financ_PagarModel>> BaixarPagamento(int idFinanc_Pagar, decimal valorPago, DateTime? dataPagamento = null)
+    //{
+    //    var resposta = new ResponseModel<Financ_PagarModel>();
+
+    //    try
+    //    {
+    //        var financ_pagar = await _context.Financ_Pagar.FirstOrDefaultAsync(x => x.Id == idFinanc_Pagar);
+    //        if (financ_pagar == null)
+    //        {
+    //            resposta.Mensagem = "Pagamento não encontrado.";
+    //            return resposta;
+    //        }
+
+    //        // Validação de saldo suficiente
+    //        BancoService _bancoService = new BancoService(_context);
+
+    //        //BRUNAO VERIFICAR
+
+    //        //var bancoResposta = await _bancoService.DebitarSaldo(financ_pagar.BancoId, valorPago);
+    //        //if (!bancoResposta.Status)
+    //        //{
+    //        //    resposta.Mensagem = bancoResposta.Mensagem;
+    //        //    resposta.Status = false;
+    //        //    return resposta;
+    //        //}
+
+    //        // Atualização do valor pago e status do pagamento
+    //        financ_pagar.ValorPago += valorPago;
+    //        //BRUNAO VERIFICAR FOI ALTERADO A DATA DE PAGAMENTO AGORA QUE TEMOS UM SUB, VAI MUDAR A LOGICA? 
+    //        //financ_pagar.DataPagamento = dataPagamento ?? DateTime.Now;
+    //        financ_pagar.Status = financ_pagar.ValorPago >= financ_pagar.ValorOriginal ? "Pago" : "Parcialmente Pago";
+
+    //        if (financ_pagar.ValorPago < financ_pagar.ValorOriginal)
+    //        {
+    //            // Criar novo lançamento para o valor restante
+    //            var valorRestante = financ_pagar.ValorOriginal - financ_pagar.ValorPago;
+    //            var novoLancamento = new Financ_PagarModel
+    //            {
+    //                IdOrigem = financ_pagar.IdOrigem,
+    //                NrDocto = financ_pagar.NrDocto,
+    //                DataEmissao = financ_pagar.DataEmissao,
+    //                //DataVencimento = financ_pagar.DataVencimento,
+    //                ValorOriginal = valorRestante,
+    //                ValorPago = 0,
+    //                Status = "Em Aberto",
+    //                NotaFiscal = financ_pagar.NotaFiscal,
+    //                Descricao = financ_pagar.Descricao,
+    //                FornecedorId = financ_pagar.FornecedorId,
+    //                BancoId = financ_pagar.BancoId,
+    //                CentroCustoId = financ_pagar.CentroCustoId
+    //            };
+
+    //            _context.Add(novoLancamento);
+    //        }
+
+    //        _context.Update(financ_pagar);
+    //        await _context.SaveChangesAsync();
+
+    //        resposta.Dados = financ_pagar;
+    //        resposta.Mensagem = "Pagamento baixado com sucesso.";
+    //        return resposta;
+    //    }
+    //    catch (Exception ex)
+    //    {
+    //        resposta.Mensagem = ex.Message;
+    //        resposta.Status = false;
+    //        return resposta;
+    //    }
+    //}
+
+    //public async Task<ResponseModel<Financ_PagarModel>> EstornarPagamento(int idFinanc_Pagar)
+    //{
+    //    var resposta = new ResponseModel<Financ_PagarModel>();
+
+    //    try
+    //    {
+    //        var financ_pagar = await _context.Financ_Pagar.FirstOrDefaultAsync(x => x.Id == idFinanc_Pagar);
+    //        if (financ_pagar == null)
+    //        {
+    //            resposta.Mensagem = "Pagamento não encontrado.";
+    //            return resposta;
+    //        }
+
+    //        // Crédita o valor de volta ao saldo da conta bancária
+    //        BancoService _bancoService = new BancoService(_context);
+    //        await _bancoService.CreditarSaldo((int)financ_pagar.BancoId, (decimal)financ_pagar.ValorPago);
+
+    //        // Zera o valor pago e redefine o status
+    //        financ_pagar.ValorPago = 0;
+    //        // financ_pagar.DataPagamento = null;
+    //        financ_pagar.Status = "Em Aberto";
+
+    //        // Registro de histórico do estorno
+    //        await _context.HistoricoTransacao.AddAsync(new HistoricoTransacaoModel
+    //        {
+    //            //BancoId = financ_pagar.BancoId,
+    //            //Valor = financ_pagar.ValorPago,
+    //            TipoTransacao = "Estorno",
+    //            DataTransacao = DateTime.Now
+    //        });
+
+    //        _context.Update(financ_pagar);
+    //        await _context.SaveChangesAsync();
+
+    //        resposta.Dados = financ_pagar;
+    //        resposta.Mensagem = "Pagamento estornado com sucesso.";
+    //        return resposta;
+    //    }
+    //    catch (Exception ex)
+    //    {
+    //        resposta.Mensagem = ex.Message;
+    //        resposta.Status = false;
+    //        return resposta;
+    //    }
+    //}
 
     // ** NECESSITA TER A PARAMETRIZAÇÃO CRIADA ** //
     //public decimal CalcularValorComJurosMultas(Decimal valorOriginal, DateTime dataVencimento, DateTime dataPagamento)

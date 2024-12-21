@@ -51,28 +51,32 @@ namespace WebApiSmartClinic.Controllers
             return Ok(financ_receber);
         }
 
-        [HttpGet("BuscarContasEmAberto")]
-        public async Task<ActionResult<ResponseModel<List<Financ_ReceberModel>>>> BuscarContasEmAberto()
+        [HttpPost("QuitarParcela/{idParcela}")]
+        public async Task<ActionResult<ResponseModel<Financ_ReceberSubModel>>> QuitarParcela(int idParcela, decimal valorPago)
         {
-            var contasEmAberto = await _financ_receber.BuscarContasEmAberto();
-            return Ok(contasEmAberto);
+            var resultado = await _financ_receber.QuitarParcela(idParcela, valorPago);
+            return Ok(resultado);
         }
 
-        [HttpPut("QuitarParcela/{idParcela}")]
-        public async Task<ActionResult<ResponseModel<Financ_ReceberSubModel>>> QuitarParcela(
-            int idParcela,
-            [FromQuery] decimal valorPago,
-            [FromQuery] DateTime dataPagamento)
+        [HttpPost("EstornarParcela/{idParcela}")]
+        public async Task<ActionResult<ResponseModel<string>>> EstornarParcela(int idParcela)
         {
-            var parcelaQuitada = await _financ_receber.QuitarParcela(idParcela, valorPago, dataPagamento);
-            return Ok(parcelaQuitada);
+            var resultado = await _financ_receber.EstornarParcela(idParcela);
+            return Ok(resultado);
         }
 
         [HttpGet("CalcularTotalRecebiveis")]
-        public async Task<ActionResult<ResponseModel<decimal>>> CalcularTotalRecebiveis()
+        public async Task<ActionResult<ResponseModel<decimal>>> CalcularTotalRecebiveis([FromQuery] int cliente = 0, [FromQuery] DateTime? dataInicio = null, [FromQuery] DateTime? dataFim = null)
         {
-            var totalRecebiveis = await _financ_receber.CalcularTotalRecebiveis();
-            return Ok(totalRecebiveis);
+            var resultado = await _financ_receber.CalcularTotalRecebiveis(cliente, dataInicio, dataFim);
+            return Ok(resultado);
+        }
+
+        [HttpGet("BuscarContasEmAberto")]
+        public async Task<ActionResult<ResponseModel<List<Financ_ReceberModel>>>> BuscarContasEmAberto()
+        {
+            var resultado = await _financ_receber.BuscarContasEmAberto();
+            return Ok(resultado);
         }
     }
 }

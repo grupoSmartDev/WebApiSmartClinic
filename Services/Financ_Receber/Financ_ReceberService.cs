@@ -257,9 +257,48 @@ public class Financ_ReceberService : IFinanc_ReceberInterface
         }
     }
 
-    public async Task<ResponseModel<Financ_ReceberSubModel>> QuitarParcela(int idParcela, decimal valorPago, DateTime dataPagamento)
+    public async Task<ResponseModel<string>> EstornarParcela(int idParcela)
     {
-        ResponseModel<Financ_ReceberSubModel> resposta = new ResponseModel<Financ_ReceberSubModel>();
+        var resposta = new ResponseModel<string>();
+
+        try
+        {
+            var parcela = await _context.Financ_ReceberSub.FirstOrDefaultAsync(p => p.Id == idParcela);
+
+            if (parcela == null || parcela.DataPagamento == null)
+            {
+                resposta.Mensagem = "Parcela não encontrada ou já está em aberto.";
+                resposta.Status = false;
+                return resposta;
+            }
+
+            parcela.DataPagamento = null;
+            parcela.ValorPago = 0;
+
+            var financReceber = await _context.Financ_Receber.FirstOrDefaultAsync(f => f.Id == parcela.financReceberId);
+            financReceber.ValorPago -= parcela.Valor;
+
+            financReceber.Status = financReceber.ValorPago > 0 ? "Parcial" : "Em Aberto";
+
+            _context.Update(parcela);
+            _context.Update(financReceber);
+            await _context.SaveChangesAsync();
+
+            resposta.Mensagem = "Recebimento estornado com sucesso.";
+            return resposta;
+        }
+        catch (Exception ex)
+        {
+            resposta.Mensagem = ex.Message;
+            resposta.Status = false;
+            return resposta;
+        }
+    }
+
+
+    public async Task<ResponseModel<Financ_ReceberSubModel>> QuitarParcela(int idParcela, decimal valorPago)
+    {
+        var resposta = new ResponseModel<Financ_ReceberSubModel>();
 
         try
         {
@@ -267,19 +306,63 @@ public class Financ_ReceberService : IFinanc_ReceberInterface
 
             if (parcela == null)
             {
-                resposta.Mensagem = "Parcela não encontrada";
+                resposta.Mensagem = "Parcela não encontrada.";
                 resposta.Status = false;
                 return resposta;
             }
 
-            parcela.Valor = valorPago;
-            parcela.DataPagamento = dataPagamento;
+            if (parcela.DataPagamento != null)
+            {
+                resposta.Mensagem = "Parcela já foi quitada.";
+                resposta.Status = false;
+                return resposta;
+            }
+
+            if (valorPago < parcela.Valor)
+            {
+                // Gerar nova parcela para o valor residual
+                var valorRestante = parcela.Valor - valorPago;
+
+                var novaParcela = new Financ_ReceberSubModel
+                {
+                    financReceberId = parcela.financReceberId,
+                    Parcela = parcela.Parcela,
+                    Valor = valorRestante,
+                    DataVencimento = DateTime.Now.AddMonths(1),
+                    Observacao = "Gerada automaticamente por pagamento parcial."
+                };
+
+                _context.Add(novaParcela);
+            }
+            else if (valorPago > parcela.Valor)
+            {
+                resposta.Mensagem = "Valor pago excede o valor da parcela.";
+                resposta.Status = false;
+                return resposta;
+            }
+
+            parcela.ValorPago = valorPago;
+            parcela.DataPagamento = DateTime.Now;
+
+            // Atualiza o status do pai
+            var financReceber = await _context.Financ_Receber.FirstOrDefaultAsync(f => f.Id == parcela.financReceberId);
+            financReceber.ValorPago += valorPago;
+
+            if (financReceber.ValorPago >= financReceber.ValorOriginal)
+            {
+                financReceber.Status = "Quitado";
+            }
+            else
+            {
+                financReceber.Status = "Parcial";
+            }
 
             _context.Update(parcela);
+            _context.Update(financReceber);
             await _context.SaveChangesAsync();
 
             resposta.Dados = parcela;
-            resposta.Mensagem = "Parcela quitada com sucesso";
+            resposta.Mensagem = "Parcela quitada com sucesso.";
             return resposta;
         }
         catch (Exception ex)
@@ -290,18 +373,28 @@ public class Financ_ReceberService : IFinanc_ReceberInterface
         }
     }
 
-    public async Task<ResponseModel<decimal>> CalcularTotalRecebiveis()
+    public async Task<ResponseModel<decimal>> CalcularTotalRecebiveis(int cliente, DateTime? dataInicio = null, DateTime? dataFim = null)
     {
-        ResponseModel<decimal> resposta = new ResponseModel<decimal>();
+        var resposta = new ResponseModel<decimal>();
 
         try
         {
-            var total = await _context.Financ_Receber
-                .Where(f => f.Status == "Em Aberto")
-                .SumAsync(f => f.ValorOriginal - f.ValorPago);
+            var query = _context.Financ_Receber.AsQueryable();
+
+            if (cliente > 0)
+                query = query.Where(f => f.PacienteId == cliente);
+
+            if (dataInicio.HasValue)
+                query = query.Where(f => f.DataEmissao >= dataInicio.Value);
+
+            if (dataFim.HasValue)
+                query = query.Where(f => f.DataEmissao <= dataFim.Value);
+
+            var total = await query.Where(f => f.Status == "Em Aberto")
+                                   .SumAsync(f => f.ValorOriginal - f.ValorPago);
 
             resposta.Dados = (decimal)total;
-            resposta.Mensagem = "Total de recebíveis calculado com sucesso";
+            resposta.Mensagem = "Total de recebíveis calculado com sucesso.";
             return resposta;
         }
         catch (Exception ex)
@@ -311,4 +404,5 @@ public class Financ_ReceberService : IFinanc_ReceberInterface
             return resposta;
         }
     }
+
 }

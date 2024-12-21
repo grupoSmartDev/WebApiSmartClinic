@@ -43,6 +43,7 @@ namespace WebApiSmartClinic.Models
         public Financ_ReceberModel? FinancReceber{ get; set; }
         public int? Parcela { get; set; }
         public decimal Valor { get; set; }
+        public decimal ValorPago { get; set; }
         public decimal? Desconto { get; set; }
         public decimal? Juros { get; set; }
         public decimal? Multa { get; set; }

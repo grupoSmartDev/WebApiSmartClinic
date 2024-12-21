@@ -1,5 +1,6 @@
 
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using System.Runtime.ConstrainedExecution;
 using WebApiSmartClinic.Data;
 using WebApiSmartClinic.Dto.Fornecedor;
@@ -15,7 +16,7 @@ public class FornecedorService : IFornecedorInterface
         _context = context;
     }
     
-    public async Task<ResponseModel<FornecedorModel>> BuscarFornecedorPorId(int idFornecedor)
+    public async Task<ResponseModel<FornecedorModel>> BuscarPorId(int idFornecedor)
     {
         ResponseModel<FornecedorModel> resposta = new ResponseModel<FornecedorModel>();
         try
@@ -40,7 +41,7 @@ public class FornecedorService : IFornecedorInterface
         }
     }
 
-    public async Task<ResponseModel<List<FornecedorModel>>> CriarFornecedor(FornecedorCreateDto fornecedorCreateDto)
+    public async Task<ResponseModel<List<FornecedorModel>>> Criar(FornecedorCreateDto fornecedorCreateDto, int pageNumber = 1, int pageSize = 10)
     {
         ResponseModel<List<FornecedorModel>> resposta = new ResponseModel<List<FornecedorModel>>();
 
@@ -79,7 +80,9 @@ public class FornecedorService : IFornecedorInterface
             _context.Add(fornecedor);
             await _context.SaveChangesAsync();
 
-            resposta.Dados = await _context.Fornecedor.ToListAsync();
+            var query = _context.Fornecedor.AsQueryable();
+
+            resposta.Dados = (await PaginationHelper.PaginateAsync(query, pageNumber, pageSize)).Dados;
             resposta.Mensagem = "Fornecedor criado com sucesso";
             return resposta;
         }
@@ -92,7 +95,7 @@ public class FornecedorService : IFornecedorInterface
 
     }
 
-    public async Task<ResponseModel<List<FornecedorModel>>> DeleteFornecedor(int idFornecedor)
+    public async Task<ResponseModel<List<FornecedorModel>>> Delete(int idFornecedor, int pageNumber = 1, int pageSize = 10)
     {
         ResponseModel<List<FornecedorModel>> resposta = new ResponseModel<List<FornecedorModel>>();
 
@@ -107,8 +110,10 @@ public class FornecedorService : IFornecedorInterface
 
             _context.Remove(fornecedor);
             await _context.SaveChangesAsync();
+            
+            var query = _context.Fornecedor.AsQueryable();
 
-            resposta.Dados = await _context.Fornecedor.ToListAsync();
+            resposta.Dados = (await PaginationHelper.PaginateAsync(query, pageNumber, pageSize)).Dados;
             resposta.Mensagem = "Fornecedor excluído com sucesso";
             return resposta;
 
@@ -122,7 +127,7 @@ public class FornecedorService : IFornecedorInterface
         }
     }
 
-    public async Task<ResponseModel<List<FornecedorModel>>> EditarFornecedor(FornecedorEdicaoDto fornecedorEdicaoDto)
+    public async Task<ResponseModel<List<FornecedorModel>>> Editar(FornecedorEdicaoDto fornecedorEdicaoDto, int pageNumber = 1, int pageSize = 10)
     {
         ResponseModel<List<FornecedorModel>> resposta = new ResponseModel<List<FornecedorModel>>();
 
@@ -167,7 +172,9 @@ public class FornecedorService : IFornecedorInterface
             _context.Update(fornecedor);
             await _context.SaveChangesAsync();
 
-            resposta.Dados = await _context.Fornecedor.ToListAsync();
+            var query = _context.Fornecedor.AsQueryable();
+
+            resposta.Dados = (await PaginationHelper.PaginateAsync(query, pageNumber, pageSize)).Dados;
             resposta.Mensagem = "Fornecedor atualizado com sucesso";
             return resposta;
         }
@@ -180,15 +187,28 @@ public class FornecedorService : IFornecedorInterface
         }
     }
 
-    public async Task<ResponseModel<List<FornecedorModel>>> ListarFornecedor()
+    public async Task<ResponseModel<List<FornecedorModel>>> Listar(int pageNumber = 1, int pageSize = 10, int? codigoFiltro = null, string? nomeFiltro = null, string? cpfFiltro = null, string? cnpjFiltro = null, string? celularFiltro = null, bool paginar = true)
     {
         ResponseModel<List<FornecedorModel>> resposta = new ResponseModel<List<FornecedorModel>>();
 
         try
         {
-            var fornecedor = await _context.Fornecedor.ToListAsync();
+            var query = _context.Fornecedor.AsQueryable();
 
-            resposta.Dados = fornecedor;
+            // Aplicar filtros
+            query = query.Where(x =>
+                (!codigoFiltro.HasValue || x.Id == codigoFiltro.Value) &&
+                (string.IsNullOrEmpty(nomeFiltro) || x.Razao.Contains(nomeFiltro) || x.Fantasia.Contains(nomeFiltro)) &&
+                (string.IsNullOrEmpty(cpfFiltro) || x.CPF.Contains(cpfFiltro)) &&
+                (string.IsNullOrEmpty(cnpjFiltro) || x.CNPJ.Contains(cnpjFiltro)) &&
+                (string.IsNullOrEmpty(celularFiltro) || x.Celular.Contains(celularFiltro))
+            );
+
+            // Ordenação padrão
+            query = query.OrderBy(x => x.Id);
+
+            // Paginação opcional
+            resposta.Dados = paginar ? (await PaginationHelper.PaginateAsync(query, pageNumber, pageSize)).Dados : await query.ToListAsync();
             resposta.Mensagem = "Todos os fornecedores foram encontrados";
             return resposta;
 

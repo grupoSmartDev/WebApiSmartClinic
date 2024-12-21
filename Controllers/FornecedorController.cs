@@ -17,37 +17,37 @@ namespace WebApiSmartClinic.Controllers
         }
 
         [HttpGet("Listar")]
-        public async Task<ActionResult<ResponseModel<List<FornecedorModel>>>> ListarFornecedor()
+        public async Task<ActionResult<ResponseModel<List<FornecedorModel>>>> ListarFornecedor(int pageNumber = 1, int pageSize = 10, int? codigoFiltro = null, string? nomeFiltro = null, string? cpfFiltro = null, string? cnpjFiltro = null, string? celularFiltro = null, bool paginar = true)
         {
-            var fornecedor = await _fornecedor.ListarFornecedor();
+            var fornecedor = await _fornecedor.Listar(pageNumber, pageSize, codigoFiltro, nomeFiltro, cpfFiltro, cnpjFiltro, celularFiltro, paginar);
             return Ok(fornecedor);
         }
 
         [HttpGet("BuscarPorId/{idFornecedor}")]
         public async Task<ActionResult<ResponseModel<List<FornecedorModel>>>> BuscarFornecedorPorId(int idFornecedor)
         {
-            var fornecedor = await _fornecedor.BuscarFornecedorPorId(idFornecedor);
+            var fornecedor = await _fornecedor.BuscarPorId(idFornecedor);
             return Ok(fornecedor);
         }
 
         [HttpPost("Criar")]
-        public async Task<ActionResult<ResponseModel<List<FornecedorModel>>>> CriarFornecedor(FornecedorCreateDto fornecedorCreateDto)
+        public async Task<ActionResult<ResponseModel<List<FornecedorModel>>>> CriarFornecedor(FornecedorCreateDto fornecedorCreateDto, int pageNumber = 1, int pageSize = 10)
         {
-            var fornecedor = await _fornecedor.CriarFornecedor(fornecedorCreateDto);
+            var fornecedor = await _fornecedor.Criar(fornecedorCreateDto, pageNumber, pageSize);
             return Ok(fornecedor);
         }
 
         [HttpPut("Editar")]
-        public async Task<ActionResult<ResponseModel<List<FornecedorModel>>>> EditarFornecedor(FornecedorEdicaoDto fornecedorEdicaoDto)
+        public async Task<ActionResult<ResponseModel<List<FornecedorModel>>>> EditarFornecedor(FornecedorEdicaoDto fornecedorEdicaoDto, int pageNumber = 1, int pageSize = 10)
         {
-            var fornecedor = await _fornecedor.EditarFornecedor(fornecedorEdicaoDto);
+            var fornecedor = await _fornecedor.Editar(fornecedorEdicaoDto, pageNumber, pageSize);
             return Ok(fornecedor);
         }
 
         [HttpDelete("Delete/{idFornecedor}")]
-        public async Task<ActionResult<ResponseModel<List<FornecedorModel>>>> DeleteFornecedor(int idFornecedor)
+        public async Task<ActionResult<ResponseModel<List<FornecedorModel>>>> DeleteFornecedor(int idFornecedor, int pageNumber = 1, int pageSize = 10)
         {
-            var fornecedor = await _fornecedor.DeleteFornecedor(idFornecedor);
+            var fornecedor = await _fornecedor.Delete(idFornecedor, pageNumber, pageSize);
             return Ok(fornecedor);
         }
     }

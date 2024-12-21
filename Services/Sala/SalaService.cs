@@ -14,7 +14,7 @@ public class SalaService : ISalaInterface
         _context = context;
     }
 
-    public async Task<ResponseModel<SalaModel>> BuscarSalaPorId(int idSala)
+    public async Task<ResponseModel<SalaModel>> BuscarPorId(int idSala)
     {
         ResponseModel<SalaModel> resposta = new ResponseModel<SalaModel>();
         try
@@ -39,7 +39,7 @@ public class SalaService : ISalaInterface
         }
     }
 
-    public async Task<ResponseModel<List<SalaModel>>> CriarSala(SalaCreateDto salaCreateDto)
+    public async Task<ResponseModel<List<SalaModel>>> Criar(SalaCreateDto salaCreateDto, int pageNumber = 1, int pageSize = 10)
     {
         ResponseModel<List<SalaModel>> resposta = new ResponseModel<List<SalaModel>>();
 
@@ -63,7 +63,9 @@ public class SalaService : ISalaInterface
             _context.AddAsync(sala);
             await _context.SaveChangesAsync();
 
-            resposta.Dados = await _context.Sala.ToListAsync();
+            var query = _context.Sala.AsQueryable();
+
+            resposta.Dados = (await PaginationHelper.PaginateAsync(query, pageNumber, pageSize)).Dados;
             resposta.Mensagem = "Sala criado com sucesso";
             return resposta;
         }
@@ -76,7 +78,7 @@ public class SalaService : ISalaInterface
 
     }
 
-    public async Task<ResponseModel<List<SalaModel>>> DeleteSala(int idSala)
+    public async Task<ResponseModel<List<SalaModel>>> Delete(int idSala, int pageNumber = 1, int pageSize = 10)
     {
         ResponseModel<List<SalaModel>> resposta = new ResponseModel<List<SalaModel>>();
 
@@ -92,7 +94,9 @@ public class SalaService : ISalaInterface
             _context.Remove(sala);
             await _context.SaveChangesAsync();
 
-            resposta.Dados = await _context.Sala.ToListAsync();
+            var query = _context.Sala.AsQueryable();
+
+            resposta.Dados = (await PaginationHelper.PaginateAsync(query, pageNumber, pageSize)).Dados;
             resposta.Mensagem = "Sala Excluido com sucesso";
             return resposta;
 
@@ -106,7 +110,7 @@ public class SalaService : ISalaInterface
         }
     }
 
-    public async Task<ResponseModel<List<SalaModel>>> EditarSala(SalaEdicaoDto salaEdicaoDto)
+    public async Task<ResponseModel<List<SalaModel>>> Editar(SalaEdicaoDto salaEdicaoDto, int pageNumber = 1, int pageSize = 10)
     {
         ResponseModel<List<SalaModel>> resposta = new ResponseModel<List<SalaModel>>();
 
@@ -130,7 +134,9 @@ public class SalaService : ISalaInterface
             _context.Update(sala);
             await _context.SaveChangesAsync();
 
-            resposta.Dados = await _context.Sala.ToListAsync();
+            var query = _context.Sala.AsQueryable();
+            
+            resposta.Dados = (await PaginationHelper.PaginateAsync(query, pageNumber, pageSize)).Dados;
             resposta.Mensagem = "Sala Atualizado com sucesso";
             return resposta;
         }
@@ -143,15 +149,23 @@ public class SalaService : ISalaInterface
         }
     }
 
-    public async Task<ResponseModel<List<SalaModel>>> ListarSala()
+    public async Task<ResponseModel<List<SalaModel>>> Listar(int pageNumber = 1, int pageSize = 10, int? codigoFiltro = null, string? nomeFiltro = null, string? localFiltro = null, int? capacidadeFiltro = null, bool paginar = true)
     {
         ResponseModel<List<SalaModel>> resposta = new ResponseModel<List<SalaModel>>();
 
         try
         {
-            var status = await _context.Sala.ToListAsync();
+            var query = _context.Sala.AsQueryable();
+            query = query.Where(x => 
+                (!codigoFiltro.HasValue || x.Id == codigoFiltro) &&
+                (!capacidadeFiltro.HasValue || x.Capacidade == capacidadeFiltro) &&
+                (string.IsNullOrEmpty(nomeFiltro) || x.Nome == nomeFiltro) &&            
+                (string.IsNullOrEmpty(localFiltro) || x.local == localFiltro)
+            );
 
-            resposta.Dados = status;
+            query = query.OrderBy(x => x.Id);
+
+            resposta.Dados = paginar ? (await PaginationHelper.PaginateAsync(query, pageNumber, pageSize)).Dados : await query.ToListAsync();
             resposta.Mensagem = "Todos os Sala foram encontrados";
             return resposta;
 

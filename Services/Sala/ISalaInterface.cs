@@ -5,11 +5,11 @@ namespace WebApiSmartClinic.Services.Sala;
 
 public interface ISalaInterface
 {
-    Task<ResponseModel<List<SalaModel>>> ListarSala();
-    Task<ResponseModel<SalaModel>> BuscarSalaPorId(int idSala);
-    Task<ResponseModel<List<SalaModel>>> CriarSala(SalaCreateDto salaCreateDto);
-    Task<ResponseModel<List<SalaModel>>> EditarSala(SalaEdicaoDto salaEdicaoDto);
-    Task<ResponseModel<List<SalaModel>>> DeleteSala(int idSala);
+    Task<ResponseModel<List<SalaModel>>> Listar(int pageNumber = 1, int pageSize = 10, int? codigoFiltro = null, string? nomeFiltro = null, string? localFiltro = null, int? capacidadeFiltro = null, bool paginar = true);
+    Task<ResponseModel<SalaModel>> BuscarPorId(int idSala);
+    Task<ResponseModel<List<SalaModel>>> Criar(SalaCreateDto salaCreateDto, int pageNumber = 1, int pageSize = 10);
+    Task<ResponseModel<List<SalaModel>>> Editar(SalaEdicaoDto salaEdicaoDto, int pageNumber = 1, int pageSize = 10);
+    Task<ResponseModel<List<SalaModel>>> Delete(int idSala, int pageNumber = 1, int pageSize = 10);
 
     
 }

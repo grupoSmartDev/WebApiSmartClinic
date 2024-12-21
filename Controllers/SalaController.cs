@@ -17,37 +17,37 @@ public class SalaController : ControllerBase
     }
 
     [HttpGet("Listar")]
-    public async Task<ActionResult<ResponseModel<List<SalaModel>>>> ListarStatus()
+    public async Task<ActionResult<ResponseModel<List<SalaModel>>>> Listar(int pageNumber = 1, int pageSize = 10, int? codigoFiltro = null, string? nomeFiltro = null, string? localFiltro = null, int? capacidadeFiltro = null, bool paginar = true)
     {
-        var sala = await _context.ListarSala();
+        var sala = await _context.Listar(pageNumber, pageSize, codigoFiltro, nomeFiltro, localFiltro, capacidadeFiltro, paginar);
         return Ok(sala);
     }
 
     [HttpGet("BuscarPorId/{id}")]
-    public async Task<ActionResult<ResponseModel<List<SalaModel>>>> BuscarStatusPorId(int id)
+    public async Task<ActionResult<ResponseModel<List<SalaModel>>>> BuscarPorId(int id)
     {
-        var sala = await _context.BuscarSalaPorId(id);
+        var sala = await _context.BuscarPorId(id);
         return Ok(sala);
     }
 
     [HttpPost("Criar")]
-    public async Task<ActionResult<ResponseModel<List<SalaModel>>>> CriarStatus(SalaCreateDto salaCreateDto)
+    public async Task<ActionResult<ResponseModel<List<SalaModel>>>> Criar(SalaCreateDto salaCreateDto, int pageNumber = 1, int pageSize = 10)
     {
-        var sala = await _context.CriarSala(salaCreateDto);
+        var sala = await _context.Criar(salaCreateDto, pageNumber, pageSize);
         return Ok(sala);
     }
 
     [HttpPut("Editar")]
-    public async Task<ActionResult<ResponseModel<List<SalaModel>>>> EditarSala(SalaEdicaoDto salaEdicaoDto)
+    public async Task<ActionResult<ResponseModel<List<SalaModel>>>> Editar(SalaEdicaoDto salaEdicaoDto, int pageNumber = 1, int pageSize = 10)
     {
-        var sala = await _context.EditarSala(salaEdicaoDto);
+        var sala = await _context.Editar(salaEdicaoDto, pageNumber, pageSize);
         return Ok(sala);
     }
 
     [HttpDelete("Delete/{id}")]
-    public async Task<ActionResult<ResponseModel<List<SalaModel>>>> DeleteSala(int id)
+    public async Task<ActionResult<ResponseModel<List<SalaModel>>>> Delete(int id, int pageNumber = 1, int pageSize = 10)
     {
-        var sala = await _context.DeleteSala(id);
+        var sala = await _context.Delete(id, pageNumber, pageSize);
         return Ok(sala);
     }
 

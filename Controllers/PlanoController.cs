@@ -17,9 +17,9 @@ namespace WebApiSmartClinic.Controllers
         }
 
         [HttpGet("Listar")]
-        public async Task<ActionResult<ResponseModel<List<PlanoModel>>>> Listar([FromQuery] string status,[FromQuery] string cor, [FromQuery] int page, [FromQuery] int pageSize)
+        public async Task<ActionResult<ResponseModel<List<PlanoModel>>>> Listar(int pageNumber = 1, int pageSize = 10, int? codigoFiltro = null, string? descricaoFiltro = null, bool paginar = true)
         {
-            var plano = await _plano.Listar(status, cor, page, pageSize);
+            var plano = await _plano.Listar(pageNumber, pageSize, codigoFiltro, descricaoFiltro, paginar);
             return Ok(plano);
         }
 
@@ -31,23 +31,23 @@ namespace WebApiSmartClinic.Controllers
         }
 
         [HttpPost("Criar")]
-        public async Task<ActionResult<ResponseModel<List<PlanoModel>>>> Criar(PlanoCreateDto planoCreateDto)
+        public async Task<ActionResult<ResponseModel<List<PlanoModel>>>> Criar(PlanoCreateDto planoCreateDto, int pageNumber = 1, int pageSize = 10)
         {
-            var plano = await _plano.Criar(planoCreateDto);
+            var plano = await _plano.Criar(planoCreateDto, pageNumber, pageSize);
             return Ok(plano);
         }
 
         [HttpPut("Editar")]
-        public async Task<ActionResult<ResponseModel<List<PlanoModel>>>> Editar(PlanoEdicaoDto planoEdicaoDto)
+        public async Task<ActionResult<ResponseModel<List<PlanoModel>>>> Editar(PlanoEdicaoDto planoEdicaoDto, int pageNumber = 1, int pageSize = 10)
         {
-            var plano = await _plano.Editar(planoEdicaoDto);
+            var plano = await _plano.Editar(planoEdicaoDto, pageNumber, pageSize);
             return Ok(plano);
         }
 
         [HttpDelete("Delete/{idPlano}")]
-        public async Task<ActionResult<ResponseModel<List<PlanoModel>>>> Delete(int idPlano)
+        public async Task<ActionResult<ResponseModel<List<PlanoModel>>>> Delete(int idPlano, int pageNumber = 1, int pageSize = 10)
         {
-            var plano = await _plano.Delete(idPlano);
+            var plano = await _plano.Delete(idPlano, pageNumber, pageSize);
             return Ok(plano);
         }
     }

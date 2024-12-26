@@ -7,10 +7,10 @@ namespace WebApiSmartClinic.Services.Plano
 {
     public interface IPlanoInterface
     {
-        Task<ResponseModel<List<PlanoModel>>> Listar(string status, string cor, int page = 1, int pageSize = 10);
-        Task<ResponseModel<List<PlanoModel>>> Delete(int idPlano);
         Task<ResponseModel<PlanoModel>> BuscarPorId(int idPlano);
-        Task<ResponseModel<List<PlanoModel>>> Criar(PlanoCreateDto planoCreateDto);
-        Task<ResponseModel<List<PlanoModel>>> Editar(PlanoEdicaoDto planoEdicaoDto);
+        Task<ResponseModel<List<PlanoModel>>> Delete(int idPlano, int pageNumber = 1, int pageSize = 10);
+        Task<ResponseModel<List<PlanoModel>>> Criar(PlanoCreateDto planoCreateDto, int pageNumber = 1, int pageSize = 10);
+        Task<ResponseModel<List<PlanoModel>>> Editar(PlanoEdicaoDto planoEdicaoDto, int pageNumber = 1, int pageSize = 10);
+        Task<ResponseModel<List<PlanoModel>>> Listar(int pageNumber = 1, int pageSize = 10, int? codigoFiltro = null, string? descricaoFiltro = null, bool paginar = true);
     }
 }

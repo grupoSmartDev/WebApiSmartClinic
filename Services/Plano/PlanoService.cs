@@ -42,7 +42,7 @@ public class PlanoService : IPlanoInterface
         }
     }
 
-    public async Task<ResponseModel<List<PlanoModel>>> Criar(PlanoCreateDto planoCreateDto)
+    public async Task<ResponseModel<List<PlanoModel>>> Criar(PlanoCreateDto planoCreateDto, int pageNumber = 1, int pageSize = 10)
     {
         ResponseModel<List<PlanoModel>> resposta = new ResponseModel<List<PlanoModel>>();
 
@@ -72,7 +72,9 @@ public class PlanoService : IPlanoInterface
             _context.Add(plano);
             await _context.SaveChangesAsync();
 
-            resposta.Dados = await _context.Plano.ToListAsync();
+            var query = _context.Plano.AsQueryable();
+
+            resposta.Dados = (await PaginationHelper.PaginateAsync(query, pageNumber, pageSize)).Dados;
             resposta.Mensagem = "Plano criado com sucesso";
             
             return resposta;
@@ -86,7 +88,7 @@ public class PlanoService : IPlanoInterface
         }
     }
 
-    public async Task<ResponseModel<List<PlanoModel>>> Delete(int idPlano)
+    public async Task<ResponseModel<List<PlanoModel>>> Delete(int idPlano, int pageNumber = 1, int pageSize = 10)
     {
         ResponseModel<List<PlanoModel>> resposta = new ResponseModel<List<PlanoModel>>();
 
@@ -102,7 +104,9 @@ public class PlanoService : IPlanoInterface
             _context.Remove(plano);
             await _context.SaveChangesAsync();
 
-            resposta.Dados = await _context.Plano.ToListAsync();
+            var query = _context.Plano.AsQueryable();
+
+            resposta.Dados = (await PaginationHelper.PaginateAsync(query, pageNumber, pageSize)).Dados;
             resposta.Mensagem = "Plano Excluido com sucesso";
             
             return resposta;
@@ -116,7 +120,7 @@ public class PlanoService : IPlanoInterface
         }
     }
 
-    public async Task<ResponseModel<List<PlanoModel>>> Editar(PlanoEdicaoDto planoEdicaoDto)
+    public async Task<ResponseModel<List<PlanoModel>>> Editar(PlanoEdicaoDto planoEdicaoDto, int pageNumber = 1, int pageSize = 10)
     {
         ResponseModel<List<PlanoModel>> resposta = new ResponseModel<List<PlanoModel>>();
 
@@ -151,7 +155,9 @@ public class PlanoService : IPlanoInterface
             _context.Update(plano);
             await _context.SaveChangesAsync();
 
-            resposta.Dados = await _context.Plano.ToListAsync();
+            var query = _context.Plano.AsQueryable();
+
+            resposta.Dados = (await PaginationHelper.PaginateAsync(query, pageNumber, pageSize)).Dados;
             resposta.Mensagem = "Plano Atualizado com sucesso";
             
             return resposta;
@@ -165,7 +171,7 @@ public class PlanoService : IPlanoInterface
         }
     }
 
-    public async Task<ResponseModel<List<PlanoModel>>> Listar(string filtro1, string filtro2, int page, int pageSize)
+    public async Task<ResponseModel<List<PlanoModel>>> Listar(int pageNumber = 1, int pageSize = 10, int? codigoFiltro = null, string? descricaoFiltro = null, bool paginar = true)
     {
         ResponseModel<List<PlanoModel>> resposta = new ResponseModel<List<PlanoModel>>();
 
@@ -173,25 +179,15 @@ public class PlanoService : IPlanoInterface
         {
             var query = _context.Plano.AsQueryable();
 
-            // Adicione filtros
-            if (!string.IsNullOrEmpty(filtro1))
-            {
-                query = query.Where(p => p.Descricao.Contains(filtro1));
-            }
-            if (!string.IsNullOrEmpty(filtro2))
-            {
-                query = query.Where(p => p.TipoMes.Contains(filtro2));
+            query = query.Where(x =>
+                (!codigoFiltro.HasValue || x.Id == codigoFiltro) &&
+                (string.IsNullOrEmpty(descricaoFiltro) || x.Descricao == descricaoFiltro)
+            );
 
-            }
+            query.OrderBy(x => x.Id);
 
-            // Paginação
-            int totalItens = await query.CountAsync();
-            var itensPaginados = await query.Skip((page - 1) * pageSize).Take(pageSize).ToListAsync();
-
-            resposta.Dados = itensPaginados;
+            resposta.Dados = paginar ? (await PaginationHelper.PaginateAsync(query, pageNumber, pageSize)).Dados : await query.ToListAsync();
             resposta.Mensagem = "Planos listados com sucesso";
-            resposta.Status = true;
-            resposta.TotalCount = totalItens;
 
             return resposta;
         }

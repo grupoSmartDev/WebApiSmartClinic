@@ -6,6 +6,7 @@ using WebApiSmartClinic.Data;
 using WebApiSmartClinic.Helpers;
 using WebApiSmartClinic.Dto.Paciente;
 using WebApiSmartClinic.Models;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace WebApiSmartClinic.Services.Paciente;
 
@@ -42,7 +43,7 @@ public class PacienteService : IPacienteInterface
         }
     }
 
-    public async Task<ResponseModel<List<PacienteModel>>> Criar(PacienteCreateDto pacienteCreateDto)
+    public async Task<ResponseModel<List<PacienteModel>>> Criar(PacienteCreateDto pacienteCreateDto, int pageNumber = 1, int pageSize = 10)
     {
         ResponseModel<List<PacienteModel>> resposta = new ResponseModel<List<PacienteModel>>();
 
@@ -96,7 +97,9 @@ public class PacienteService : IPacienteInterface
             _context.Add(paciente);
             await _context.SaveChangesAsync();
 
-            resposta.Dados = await _context.Paciente.ToListAsync();
+            var query = _context.Paciente.AsQueryable();
+
+            resposta.Dados = (await PaginationHelper.PaginateAsync(query, pageNumber, pageSize)).Dados;
             resposta.Mensagem = "Paciente criado com sucesso";
             return resposta;
         }
@@ -110,7 +113,7 @@ public class PacienteService : IPacienteInterface
 
 
 
-    public async Task<ResponseModel<List<PacienteModel>>> Delete(int idPaciente)
+    public async Task<ResponseModel<List<PacienteModel>>> Delete(int idPaciente, int pageNumber = 1, int pageSize = 10)
     {
         ResponseModel<List<PacienteModel>> resposta = new ResponseModel<List<PacienteModel>>();
 
@@ -126,7 +129,9 @@ public class PacienteService : IPacienteInterface
             _context.Remove(paciente);
             await _context.SaveChangesAsync();
 
-            resposta.Dados = await _context.Paciente.ToListAsync();
+            var query = _context.Paciente.AsQueryable();
+
+            resposta.Dados = (await PaginationHelper.PaginateAsync(query, pageNumber, pageSize)).Dados;
             resposta.Mensagem = "Paciente Excluido com sucesso";
             return resposta;
 
@@ -140,7 +145,7 @@ public class PacienteService : IPacienteInterface
         }
     }
 
-    public async Task<ResponseModel<List<PacienteModel>>> Editar(PacienteEdicaoDto pacienteEdicaoDto)
+    public async Task<ResponseModel<List<PacienteModel>>> Editar(PacienteEdicaoDto pacienteEdicaoDto, int pageNumber = 1, int pageSize = 10)
     {
         ResponseModel<List<PacienteModel>> resposta = new ResponseModel<List<PacienteModel>>();
 
@@ -197,7 +202,9 @@ public class PacienteService : IPacienteInterface
             _context.Update(paciente);
             await _context.SaveChangesAsync();
 
-            resposta.Dados = await _context.Paciente.ToListAsync();
+            var query = _context.Paciente.AsQueryable();
+
+            resposta.Dados = (await PaginationHelper.PaginateAsync(query, pageNumber, pageSize)).Dados;
             resposta.Mensagem = "Paciente Atualizado com sucesso";
             return resposta;
         }
@@ -210,15 +217,24 @@ public class PacienteService : IPacienteInterface
         }
     }
 
-    public async Task<ResponseModel<List<PacienteModel>>> Listar()
+    public async Task<ResponseModel<List<PacienteModel>>> Listar(int pageNumber = 1, int pageSize = 10, int? codigoFiltro = null, string? nomeFiltro = null, string? cpfFiltro = null, string? celularFiltro = null, bool paginar = true)
     {
         ResponseModel<List<PacienteModel>> resposta = new ResponseModel<List<PacienteModel>>();
 
         try
         {
-            var paciente = await _context.Paciente.ToListAsync();
+            var query = _context.Paciente.AsQueryable();
 
-            resposta.Dados = paciente;
+            query = query.Where(x =>
+                (!codigoFiltro.HasValue || x.Id == codigoFiltro) &&
+                (string.IsNullOrEmpty(nomeFiltro) || x.Nome == nomeFiltro) &&
+                (string.IsNullOrEmpty(cpfFiltro) || x.Cpf == cpfFiltro) &&
+                (string.IsNullOrEmpty(celularFiltro) || x.Celular == celularFiltro)
+            );
+            
+            query.OrderBy(x => x.Id);
+            
+            resposta.Dados = paginar ? (await PaginationHelper.PaginateAsync(query, pageNumber, pageSize)).Dados : await query.ToListAsync();
             resposta.Mensagem = "Todos os Paciente foram encontrados";
             return resposta;
 

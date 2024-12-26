@@ -6,11 +6,12 @@ namespace WebApiSmartClinic.Services.Financ_Receber
 {
     public interface IFinanc_ReceberInterface
     {
-        Task<ResponseModel<List<Financ_ReceberModel>>> Listar();
-        Task<ResponseModel<List<Financ_ReceberModel>>> Delete(int idFinanc_Receber);
+        Task<ResponseModel<List<Financ_ReceberModel>>> Listar(int pageNumber = 1, int pageSize = 10, int? codigoFiltro = null, string? descricaoFiltro = null, DateTime? dataEmissaoInicio = null, DateTime? dataEmissaoFim = null,
+            decimal? valorMinimoFiltro = null, decimal? valorMaximoFiltro = null, int? parcelaNumeroFiltro = null, DateTime? vencimentoInicio = null, DateTime? vencimentoFim = null, bool paginar = true);
+        Task<ResponseModel<List<Financ_ReceberModel>>> Delete(int idFinanc_Receber, int pageNumber = 1, int pageSize = 10);
         Task<ResponseModel<Financ_ReceberModel>> BuscarPorId(int idFinanc_Receber);
-        Task<ResponseModel<List<Financ_ReceberModel>>> Criar(Financ_ReceberCreateDto financ_receberCreateDto);
-        Task<ResponseModel<List<Financ_ReceberModel>>> Editar(Financ_ReceberEdicaoDto financ_receberEdicaoDto);
+        Task<ResponseModel<List<Financ_ReceberModel>>> Criar(Financ_ReceberCreateDto financ_receberCreateDto, int pageNumber = 1, int pageSize = 10);
+        Task<ResponseModel<List<Financ_ReceberModel>>> Editar(Financ_ReceberEdicaoDto financ_receberEdicaoDto, int pageNumber = 1, int pageSize = 10);
         Task<ResponseModel<List<Financ_ReceberModel>>> BuscarContasEmAberto();
         Task<ResponseModel<Financ_ReceberSubModel>> QuitarParcela(int idParcela, decimal valorPago);
         Task<ResponseModel<decimal>> CalcularTotalRecebiveis(int cliente, DateTime? dataInicio = null, DateTime? dataFim = null);

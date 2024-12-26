@@ -17,9 +17,10 @@ namespace WebApiSmartClinic.Controllers
         }
 
         [HttpGet("Listar")]
-        public async Task<ActionResult<ResponseModel<List<Financ_ReceberModel>>>> Listar()
+        public async Task<ActionResult<ResponseModel<List<Financ_ReceberModel>>>> Listar(int pageNumber = 1, int pageSize = 10, int? codigoFiltro = null, string? descricaoFiltro = null, DateTime? dataEmissaoInicio = null, DateTime? dataEmissaoFim = null,
+            decimal? valorMinimoFiltro = null, decimal? valorMaximoFiltro = null, int? parcelaNumeroFiltro = null, DateTime? vencimentoInicio = null, DateTime? vencimentoFim = null, bool paginar = true)
         {
-            var financ_receber = await _financ_receber.Listar();
+            var financ_receber = await _financ_receber.Listar(pageNumber, pageSize, codigoFiltro, descricaoFiltro, dataEmissaoInicio, dataEmissaoFim, valorMinimoFiltro, valorMaximoFiltro, parcelaNumeroFiltro, vencimentoInicio, vencimentoFim, paginar);
             return Ok(financ_receber);
         }
 
@@ -31,21 +32,21 @@ namespace WebApiSmartClinic.Controllers
         }
 
         [HttpPost("Criar")]
-        public async Task<ActionResult<ResponseModel<List<Financ_ReceberModel>>>> Criar(Financ_ReceberCreateDto financ_receberCreateDto)
+        public async Task<ActionResult<ResponseModel<List<Financ_ReceberModel>>>> Criar(Financ_ReceberCreateDto financ_receberCreateDto, int pageNumber = 1, int pageSize = 10)
         {
-            var financ_receber = await _financ_receber.Criar(financ_receberCreateDto);
+            var financ_receber = await _financ_receber.Criar(financ_receberCreateDto, pageNumber, pageSize);
             return Ok(financ_receber);
         }
 
         [HttpPut("Editar")]
-        public async Task<ActionResult<ResponseModel<List<Financ_ReceberModel>>>> Editar(Financ_ReceberEdicaoDto financ_receberEdicaoDto)
+        public async Task<ActionResult<ResponseModel<List<Financ_ReceberModel>>>> Editar(Financ_ReceberEdicaoDto financ_receberEdicaoDto, int pageNumber = 1, int pageSize = 10)
         {
-            var financ_receber = await _financ_receber.Editar(financ_receberEdicaoDto);
+            var financ_receber = await _financ_receber.Editar(financ_receberEdicaoDto, pageNumber, pageSize);
             return Ok(financ_receber);
         }
 
         [HttpDelete("Delete/{idFinanc_Receber}")]
-        public async Task<ActionResult<ResponseModel<List<Financ_ReceberModel>>>> Delete(int idFinanc_Receber)
+        public async Task<ActionResult<ResponseModel<List<Financ_ReceberModel>>>> Delete(int idFinanc_Receber, int pageNumber = 1, int pageSize = 10)
         {
             var financ_receber = await _financ_receber.Delete(idFinanc_Receber);
             return Ok(financ_receber);

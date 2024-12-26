@@ -41,7 +41,7 @@ public class Financ_ReceberService : IFinanc_ReceberInterface
         }
     }
 
-    public async Task<ResponseModel<List<Financ_ReceberModel>>> Criar(Financ_ReceberCreateDto financ_receberCreateDto)
+    public async Task<ResponseModel<List<Financ_ReceberModel>>> Criar(Financ_ReceberCreateDto financ_receberCreateDto, int pageNumber = 1, int pageSize = 10)
     {
         ResponseModel<List<Financ_ReceberModel>> resposta = new ResponseModel<List<Financ_ReceberModel>>();
         try
@@ -77,10 +77,10 @@ public class Financ_ReceberService : IFinanc_ReceberInterface
                     var subItem = new Financ_ReceberSubModel
                     {
                         financReceberId = financ_receber.Id, // Relaciona com o pai
-                        Parcela= parcela.Parcela,
+                        Parcela = parcela.Parcela,
                         Valor = parcela.Valor,
                         TipoPagamentoId = parcela.TipoPagamentoId,
-                        FormaPagamentoId= parcela.FormaPagamentoId,
+                        FormaPagamentoId = parcela.FormaPagamentoId,
                         DataPagamento = parcela.DataPagamento,
                         Desconto = parcela.Desconto,
                         Juros = parcela.Juros,
@@ -95,7 +95,11 @@ public class Financ_ReceberService : IFinanc_ReceberInterface
                 await _context.SaveChangesAsync();
             }
 
-            resposta.Dados = await _context.Financ_Receber.Include(f => f.subFinancReceber).ToListAsync();
+            var query = _context.Financ_Receber
+                .Include(x => x.subFinancReceber)
+                .AsQueryable();
+
+            resposta.Dados = (await PaginationHelper.PaginateAsync(query, pageNumber, pageSize)).Dados;
             resposta.Mensagem = "Financ_Receber e parcelas criados com sucesso";
             return resposta;
         }
@@ -107,7 +111,7 @@ public class Financ_ReceberService : IFinanc_ReceberInterface
         }
     }
 
-    public async Task<ResponseModel<List<Financ_ReceberModel>>> Delete(int idFinanc_Receber)
+    public async Task<ResponseModel<List<Financ_ReceberModel>>> Delete(int idFinanc_Receber, int pageNumber = 1, int pageSize = 10)
     {
         ResponseModel<List<Financ_ReceberModel>> resposta = new ResponseModel<List<Financ_ReceberModel>>();
 
@@ -126,7 +130,11 @@ public class Financ_ReceberService : IFinanc_ReceberInterface
             _context.Remove(financ_receber);
             await _context.SaveChangesAsync();
 
-            resposta.Dados = await _context.Financ_Receber.ToListAsync();
+            var query = _context.Financ_Receber
+                .Include(x => x.subFinancReceber)
+                .AsQueryable();
+
+            resposta.Dados = (await PaginationHelper.PaginateAsync(query, pageNumber, pageSize)).Dados;
             resposta.Mensagem = "Financ_Receber Excluído com sucesso";
             return resposta;
         }
@@ -138,7 +146,7 @@ public class Financ_ReceberService : IFinanc_ReceberInterface
         }
     }
 
-    public async Task<ResponseModel<List<Financ_ReceberModel>>> Editar(Financ_ReceberEdicaoDto financ_receberEdicaoDto)
+    public async Task<ResponseModel<List<Financ_ReceberModel>>> Editar(Financ_ReceberEdicaoDto financ_receberEdicaoDto, int pageNumber = 1, int pageSize = 10)
     {
         ResponseModel<List<Financ_ReceberModel>> resposta = new ResponseModel<List<Financ_ReceberModel>>();
 
@@ -200,7 +208,11 @@ public class Financ_ReceberService : IFinanc_ReceberInterface
                 await _context.SaveChangesAsync();
             }
 
-            resposta.Dados = await _context.Financ_Receber.Include(f => f.subFinancReceber).ToListAsync();
+            var query = _context.Financ_Receber
+                .Include(x => x.subFinancReceber)
+                .AsQueryable();
+
+            resposta.Dados = (await PaginationHelper.PaginateAsync(query, pageNumber, pageSize)).Dados;
             resposta.Mensagem = "Financ_Receber Atualizado com sucesso";
             return resposta;
         }
@@ -212,24 +224,46 @@ public class Financ_ReceberService : IFinanc_ReceberInterface
         }
     }
 
-    public async Task<ResponseModel<List<Financ_ReceberModel>>> Listar()
+    public async Task<ResponseModel<List<Financ_ReceberModel>>> Listar(int pageNumber = 1, int pageSize = 10, int? codigoFiltro = null, string? descricaoFiltro = null, DateTime? dataEmissaoInicio = null, DateTime? dataEmissaoFim = null,
+        decimal? valorMinimoFiltro = null, decimal? valorMaximoFiltro = null, int? parcelaNumeroFiltro = null, DateTime? vencimentoInicio = null, DateTime? vencimentoFim = null, bool paginar = true)
     {
         ResponseModel<List<Financ_ReceberModel>> resposta = new ResponseModel<List<Financ_ReceberModel>>();
-
         try
         {
-            var financ_receber = await _context.Financ_Receber
-                .Include(f => f.subFinancReceber) // Inclui as parcelas no resultado
-                .ToListAsync();
+            var query = _context.Financ_Receber
+                .Include(x => x.subFinancReceber)
+                .AsQueryable();
 
-            resposta.Dados = financ_receber;
+            query = query.Where(x =>
+                (!codigoFiltro.HasValue || x.Id == codigoFiltro) &&
+                (string.IsNullOrEmpty(descricaoFiltro) || x.Descricao.Contains(descricaoFiltro)) &&
+                (!dataEmissaoInicio.HasValue || x.DataEmissao >= dataEmissaoInicio.Value) &&
+                (!dataEmissaoFim.HasValue || x.DataEmissao <= dataEmissaoFim.Value) &&
+                (!valorMinimoFiltro.HasValue || x.Valor >= valorMinimoFiltro) &&
+                (!valorMaximoFiltro.HasValue || x.Valor <= valorMaximoFiltro)
+            );
+
+            if (parcelaNumeroFiltro.HasValue || vencimentoInicio.HasValue || vencimentoFim.HasValue)
+            {
+                query = query.Where(x => x.subFinancReceber.Any(p =>
+                    (!parcelaNumeroFiltro.HasValue || p.Parcela == parcelaNumeroFiltro) &&
+                    (!vencimentoInicio.HasValue || p.DataVencimento >= vencimentoInicio) &&
+                    (!vencimentoFim.HasValue || p.DataVencimento <= vencimentoFim)
+                ));
+            }
+
+            query = query.OrderBy(x => x.Id);
+
+            resposta.Dados = paginar ? (await PaginationHelper.PaginateAsync(query, pageNumber, pageSize)).Dados : await query.ToListAsync();
             resposta.Mensagem = "Todos os Financ_Receber foram encontrados";
+
             return resposta;
         }
-        catch (Exception e)
+        catch (Exception ex)
         {
-            resposta.Mensagem = e.Message;
+            resposta.Mensagem = ex.Message;
             resposta.Status = false;
+
             return resposta;
         }
     }

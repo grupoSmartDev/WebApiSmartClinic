@@ -41,7 +41,7 @@ public class Financ_PagarService : IFinanc_PagarInterface
         }
     }
 
-    public async Task<ResponseModel<List<Financ_PagarModel>>> Criar(Financ_PagarCreateDto financ_pagarCreateDto)
+    public async Task<ResponseModel<List<Financ_PagarModel>>> Criar(Financ_PagarCreateDto financ_pagarCreateDto, int pageNumber = 1, int pageSize = 10)
     {
         ResponseModel<List<Financ_PagarModel>> resposta = new ResponseModel<List<Financ_PagarModel>>();
 
@@ -96,7 +96,11 @@ public class Financ_PagarService : IFinanc_PagarInterface
                 await _context.SaveChangesAsync();
             }
 
-            resposta.Dados = await _context.Financ_Pagar.ToListAsync();
+            var query = _context.Financ_Pagar
+                .Include(x => x.subFinancPagar)
+                .AsQueryable();
+
+            resposta.Dados = (await PaginationHelper.PaginateAsync(query, pageNumber, pageSize)).Dados;
             resposta.Mensagem = "Financ_Pagar criado com sucesso";
 
             return resposta;
@@ -110,7 +114,7 @@ public class Financ_PagarService : IFinanc_PagarInterface
         }
     }
 
-    public async Task<ResponseModel<List<Financ_PagarModel>>> Delete(int idFinanc_Pagar)
+    public async Task<ResponseModel<List<Financ_PagarModel>>> Delete(int idFinanc_Pagar, int pageNumber = 1, int pageSize = 10)
     {
         ResponseModel<List<Financ_PagarModel>> resposta = new ResponseModel<List<Financ_PagarModel>>();
 
@@ -126,7 +130,11 @@ public class Financ_PagarService : IFinanc_PagarInterface
             _context.Remove(financ_pagar);
             await _context.SaveChangesAsync();
 
-            resposta.Dados = await _context.Financ_Pagar.ToListAsync();
+            var query = _context.Financ_Pagar
+                .Include(x => x.subFinancPagar)
+                .AsQueryable();
+
+            resposta.Dados = (await PaginationHelper.PaginateAsync(query, pageNumber, pageSize)).Dados;
             resposta.Mensagem = "Financ_Pagar Excluido com sucesso";
             return resposta;
 
@@ -139,7 +147,7 @@ public class Financ_PagarService : IFinanc_PagarInterface
         }
     }
 
-    public async Task<ResponseModel<List<Financ_PagarModel>>> Editar(Financ_PagarEdicaoDto financ_pagarEdicaoDto)
+    public async Task<ResponseModel<List<Financ_PagarModel>>> Editar(Financ_PagarEdicaoDto financ_pagarEdicaoDto, int pageNumber = 1, int pageSize = 10)
     {
         ResponseModel<List<Financ_PagarModel>> resposta = new ResponseModel<List<Financ_PagarModel>>();
 
@@ -197,7 +205,11 @@ public class Financ_PagarService : IFinanc_PagarInterface
                 await _context.SaveChangesAsync();
             }
 
-            resposta.Dados = await _context.Financ_Pagar.ToListAsync();
+            var query = _context.Financ_Pagar
+                .Include(x => x.subFinancPagar)
+                .AsQueryable();
+
+            resposta.Dados = (await PaginationHelper.PaginateAsync(query, pageNumber, pageSize)).Dados;
             resposta.Mensagem = "Financ_Pagar Atualizado com sucesso";
             return resposta;
         }
@@ -209,15 +221,38 @@ public class Financ_PagarService : IFinanc_PagarInterface
         }
     }
 
-    public async Task<ResponseModel<List<Financ_PagarModel>>> Listar()
+    public async Task<ResponseModel<List<Financ_PagarModel>>> Listar(int pageNumber = 1, int pageSize = 10, int? codigoFiltro = null, string? descricaoFiltro = null, DateTime? dataEmissaoInicio = null, DateTime? dataEmissaoFim = null,
+        decimal? valorMinimoFiltro = null, decimal? valorMaximoFiltro = null, int? parcelaNumeroFiltro = null, DateTime? vencimentoInicio = null, DateTime? vencimentoFim = null, bool paginar = true)
     {
         ResponseModel<List<Financ_PagarModel>> resposta = new ResponseModel<List<Financ_PagarModel>>();
 
         try
         {
-            var financ_pagar = await _context.Financ_Pagar.ToListAsync();
+            var query = _context.Financ_Pagar
+                .Include(x => x.subFinancPagar)
+                .AsQueryable();
 
-            resposta.Dados = financ_pagar;
+            query = query.Where(x =>
+                (!codigoFiltro.HasValue || x.Id == codigoFiltro) &&
+                (string.IsNullOrEmpty(descricaoFiltro) || x.Descricao.Contains(descricaoFiltro)) &&
+                (!dataEmissaoInicio.HasValue || x.DataEmissao >= dataEmissaoInicio.Value) &&
+                (!dataEmissaoFim.HasValue || x.DataEmissao <= dataEmissaoFim.Value) &&
+                (!valorMinimoFiltro.HasValue || x.Valor >= valorMinimoFiltro) &&
+                (!valorMaximoFiltro.HasValue || x.Valor <= valorMaximoFiltro)
+            );
+
+            if (parcelaNumeroFiltro.HasValue || vencimentoInicio.HasValue || vencimentoFim.HasValue)
+            {
+                query = query.Where(x => x.subFinancPagar.Any(p =>
+                    (!parcelaNumeroFiltro.HasValue || p.Parcela == parcelaNumeroFiltro) &&
+                    (!vencimentoInicio.HasValue || p.DataVencimento >= vencimentoInicio) &&
+                    (!vencimentoFim.HasValue || p.DataVencimento <= vencimentoFim)
+                ));
+            }
+
+            query = query.OrderBy(x => x.Id);
+
+            resposta.Dados = paginar ? (await PaginationHelper.PaginateAsync(query, pageNumber, pageSize)).Dados : await query.ToListAsync();
             resposta.Mensagem = "Todos os Financ_Pagar foram encontrados";
             return resposta;
         }
@@ -263,9 +298,10 @@ public class Financ_PagarService : IFinanc_PagarInterface
                     Valor = valorRestante,
                     TipoPagamentoId = parcela.TipoPagamentoId,
                     FormaPagamentoId = parcela.FormaPagamentoId,
-                    DataVencimento = DateTime.Now.AddMonths(1), // Ajuste conforme necessário
+                    DataVencimento = DateTime.Now.AddMonths(1), // Ajuste conforme parametrização
                     Observacao = "Parcela gerada automaticamente devido a pagamento parcial."
                 };
+
                 _context.Financ_PagarSub.Add(novaParcela);
             }
             else if (valorPago > parcela.Valor)
@@ -428,142 +464,4 @@ public class Financ_PagarService : IFinanc_PagarInterface
             return resposta;
         }
     }
-
-    //public async Task<ResponseModel<Financ_PagarModel>> BaixarPagamento(int idFinanc_Pagar, decimal valorPago, DateTime? dataPagamento = null)
-    //{
-    //    var resposta = new ResponseModel<Financ_PagarModel>();
-
-    //    try
-    //    {
-    //        var financ_pagar = await _context.Financ_Pagar.FirstOrDefaultAsync(x => x.Id == idFinanc_Pagar);
-    //        if (financ_pagar == null)
-    //        {
-    //            resposta.Mensagem = "Pagamento não encontrado.";
-    //            return resposta;
-    //        }
-
-    //        // Validação de saldo suficiente
-    //        BancoService _bancoService = new BancoService(_context);
-
-    //        //BRUNAO VERIFICAR
-
-    //        //var bancoResposta = await _bancoService.DebitarSaldo(financ_pagar.BancoId, valorPago);
-    //        //if (!bancoResposta.Status)
-    //        //{
-    //        //    resposta.Mensagem = bancoResposta.Mensagem;
-    //        //    resposta.Status = false;
-    //        //    return resposta;
-    //        //}
-
-    //        // Atualização do valor pago e status do pagamento
-    //        financ_pagar.ValorPago += valorPago;
-    //        //BRUNAO VERIFICAR FOI ALTERADO A DATA DE PAGAMENTO AGORA QUE TEMOS UM SUB, VAI MUDAR A LOGICA? 
-    //        //financ_pagar.DataPagamento = dataPagamento ?? DateTime.Now;
-    //        financ_pagar.Status = financ_pagar.ValorPago >= financ_pagar.ValorOriginal ? "Pago" : "Parcialmente Pago";
-
-    //        if (financ_pagar.ValorPago < financ_pagar.ValorOriginal)
-    //        {
-    //            // Criar novo lançamento para o valor restante
-    //            var valorRestante = financ_pagar.ValorOriginal - financ_pagar.ValorPago;
-    //            var novoLancamento = new Financ_PagarModel
-    //            {
-    //                IdOrigem = financ_pagar.IdOrigem,
-    //                NrDocto = financ_pagar.NrDocto,
-    //                DataEmissao = financ_pagar.DataEmissao,
-    //                //DataVencimento = financ_pagar.DataVencimento,
-    //                ValorOriginal = valorRestante,
-    //                ValorPago = 0,
-    //                Status = "Em Aberto",
-    //                NotaFiscal = financ_pagar.NotaFiscal,
-    //                Descricao = financ_pagar.Descricao,
-    //                FornecedorId = financ_pagar.FornecedorId,
-    //                BancoId = financ_pagar.BancoId,
-    //                CentroCustoId = financ_pagar.CentroCustoId
-    //            };
-
-    //            _context.Add(novoLancamento);
-    //        }
-
-    //        _context.Update(financ_pagar);
-    //        await _context.SaveChangesAsync();
-
-    //        resposta.Dados = financ_pagar;
-    //        resposta.Mensagem = "Pagamento baixado com sucesso.";
-    //        return resposta;
-    //    }
-    //    catch (Exception ex)
-    //    {
-    //        resposta.Mensagem = ex.Message;
-    //        resposta.Status = false;
-    //        return resposta;
-    //    }
-    //}
-
-    //public async Task<ResponseModel<Financ_PagarModel>> EstornarPagamento(int idFinanc_Pagar)
-    //{
-    //    var resposta = new ResponseModel<Financ_PagarModel>();
-
-    //    try
-    //    {
-    //        var financ_pagar = await _context.Financ_Pagar.FirstOrDefaultAsync(x => x.Id == idFinanc_Pagar);
-    //        if (financ_pagar == null)
-    //        {
-    //            resposta.Mensagem = "Pagamento não encontrado.";
-    //            return resposta;
-    //        }
-
-    //        // Crédita o valor de volta ao saldo da conta bancária
-    //        BancoService _bancoService = new BancoService(_context);
-    //        await _bancoService.CreditarSaldo((int)financ_pagar.BancoId, (decimal)financ_pagar.ValorPago);
-
-    //        // Zera o valor pago e redefine o status
-    //        financ_pagar.ValorPago = 0;
-    //        // financ_pagar.DataPagamento = null;
-    //        financ_pagar.Status = "Em Aberto";
-
-    //        // Registro de histórico do estorno
-    //        await _context.HistoricoTransacao.AddAsync(new HistoricoTransacaoModel
-    //        {
-    //            //BancoId = financ_pagar.BancoId,
-    //            //Valor = financ_pagar.ValorPago,
-    //            TipoTransacao = "Estorno",
-    //            DataTransacao = DateTime.Now
-    //        });
-
-    //        _context.Update(financ_pagar);
-    //        await _context.SaveChangesAsync();
-
-    //        resposta.Dados = financ_pagar;
-    //        resposta.Mensagem = "Pagamento estornado com sucesso.";
-    //        return resposta;
-    //    }
-    //    catch (Exception ex)
-    //    {
-    //        resposta.Mensagem = ex.Message;
-    //        resposta.Status = false;
-    //        return resposta;
-    //    }
-    //}
-
-    // ** NECESSITA TER A PARAMETRIZAÇÃO CRIADA ** //
-    //public decimal CalcularValorComJurosMultas(Decimal valorOriginal, DateTime dataVencimento, DateTime dataPagamento)
-    //{
-    //    decimal valorFinal = valorOriginal;
-    //    if (dataPagamento > dataVencimento)
-    //    {
-    //        // Aplica juros e multa
-    //        var diasAtraso = (dataPagamento - dataVencimento).Days;
-    //        var juros = diasAtraso * 0.01m * valorOriginal; // 1% de juros ao dia
-    //        var multa = valorOriginal * 0.05m; // Multa de 5%
-    //        valorFinal += juros + multa;
-    //    }
-    //    else if (dataPagamento < dataVencimento)
-    //    {
-    //        // Aplica desconto para pagamento antecipado
-    //        var desconto = valorOriginal * 0.02m; // 2% de desconto
-    //        valorFinal -= desconto;
-    //    }
-    //    return valorFinal;
-    //}
-
 }

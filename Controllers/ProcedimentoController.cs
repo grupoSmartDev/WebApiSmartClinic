@@ -17,13 +17,9 @@ namespace WebApiSmartClinic.Controllers
         }
 
         [HttpGet("Listar")]
-        public async Task<ActionResult> Listar(
-            [FromQuery] int pageNumber = 1,
-            [FromQuery] int pageSize = 10,
-            [FromQuery] int? codigo = null,
-            [FromQuery] string? nome = null)
+        public async Task<ActionResult> Listar(int pageNumber = 1, int pageSize = 10, int? codigoFiltro = null, string? nomeFiltro = null, string? descricaoFiltro = null, bool paginar = true)
         {
-            var response = await _procedimento.Listar(pageNumber, pageSize, codigo, nome);
+            var response = await _procedimento.Listar(pageNumber, pageSize, codigoFiltro, nomeFiltro, descricaoFiltro, paginar);
 
             if (!response.Status)
                 return BadRequest(response);
@@ -40,7 +36,7 @@ namespace WebApiSmartClinic.Controllers
         }
 
         [HttpPost("Criar")]
-        public async Task<ActionResult<ResponseModel<List<ProcedimentoModel>>>> Criar(ProcedimentoCreateDto procedimentoCreateDto, [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
+        public async Task<ActionResult<ResponseModel<List<ProcedimentoModel>>>> Criar(ProcedimentoCreateDto procedimentoCreateDto, int pageNumber = 1, int pageSize = 10)
         {
             var response = await _procedimento.Criar(procedimentoCreateDto, pageNumber, pageSize);
             if (!response.Status)
@@ -50,7 +46,7 @@ namespace WebApiSmartClinic.Controllers
         }
 
         [HttpPut("Editar")]
-        public async Task<ActionResult<ResponseModel<List<ProcedimentoModel>>>> Editar(ProcedimentoEdicaoDto procedimentoEdicaoDto, [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
+        public async Task<ActionResult<ResponseModel<List<ProcedimentoModel>>>> Editar(ProcedimentoEdicaoDto procedimentoEdicaoDto, int pageNumber = 1, int pageSize = 10)
         {
             var response = await _procedimento.Editar(procedimentoEdicaoDto, pageNumber, pageSize);
             if (!response.Status)

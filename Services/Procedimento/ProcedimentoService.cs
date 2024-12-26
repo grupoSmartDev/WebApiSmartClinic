@@ -69,12 +69,10 @@ public class ProcedimentoService : IProcedimentoInterface
             _context.Add(procedimento);
             await _context.SaveChangesAsync();
 
-            // Query do banco de dados
             var query = _context.Procedimento.AsQueryable();
 
-            // Paginação usando o helper
-            resposta = await PaginationHelper.PaginateAsync(query, pageNumber, pageSize);
-            
+            resposta.Dados = (await PaginationHelper.PaginateAsync(query, pageNumber, pageSize)).Dados;
+
             return resposta;
         }
         catch (Exception ex)
@@ -106,8 +104,7 @@ public class ProcedimentoService : IProcedimentoInterface
             // Query do banco de dados
             var query = _context.Procedimento.AsQueryable();
 
-            // Paginação usando o helper
-            resposta = await PaginationHelper.PaginateAsync(query, pageNumber, pageSize);
+            resposta.Dados = (await PaginationHelper.PaginateAsync(query, pageNumber, pageSize)).Dados;
 
             return resposta;
         }
@@ -157,8 +154,7 @@ public class ProcedimentoService : IProcedimentoInterface
             // Query do banco de dados
             var query = _context.Procedimento.AsQueryable();
 
-            // Paginação usando o helper
-            resposta = await PaginationHelper.PaginateAsync(query, pageNumber, pageSize);
+            resposta.Dados = (await PaginationHelper.PaginateAsync(query, pageNumber, pageSize)).Dados;
 
             return resposta;
         }
@@ -172,7 +168,7 @@ public class ProcedimentoService : IProcedimentoInterface
         }
     }
 
-    public async Task<ResponseModel<List<ProcedimentoModel>>> Listar(int pageNumber = 1, int pageSize = 10, int? codigo = null, string? nome = null)
+    public async Task<ResponseModel<List<ProcedimentoModel>>> Listar(int pageNumber = 1, int pageSize = 10, int? codigoFiltro = null, string? nomeFiltro = null, string? descricaoFiltro = null, bool paginar = true)
     {
         ResponseModel<List<ProcedimentoModel>> resposta = new ResponseModel<List<ProcedimentoModel>>();
 
@@ -181,21 +177,16 @@ public class ProcedimentoService : IProcedimentoInterface
             // Query do banco de dados
             var query = _context.Procedimento.AsQueryable();
 
-            // Filtros
-            if (codigo.HasValue)
-            {
-                query.Where(x => x.Id == codigo.Value);
-            }
+            query = query.Where(x =>
+                (!codigoFiltro.HasValue || x.Id == codigoFiltro) &&
+                (string.IsNullOrEmpty(nomeFiltro) || x.Nome == nomeFiltro) &&
+                (string.IsNullOrEmpty(descricaoFiltro) || x.Descricao == descricaoFiltro)
+            );
 
-            if (!string.IsNullOrEmpty(nome))
-            {
-                query.Where(x => x.Nome.Contains(nome));
-            }
+            query.OrderBy(x => x.Id);
 
-            query = query.OrderBy(x => x.Id);
-
-            // Paginação usando o helper
-            resposta = await PaginationHelper.PaginateAsync(query, pageNumber, pageSize);
+            resposta.Dados = paginar ? (await PaginationHelper.PaginateAsync(query, pageNumber, pageSize)).Dados : await query.ToListAsync();
+            resposta.Mensagem = "Todos os procedimentos foram encontrados";
 
             return resposta;
         }

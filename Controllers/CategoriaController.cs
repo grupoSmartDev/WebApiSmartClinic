@@ -17,9 +17,9 @@ namespace WebApiSmartClinic.Controllers
         }
 
         [HttpGet("Listar")]
-        public async Task<ActionResult<ResponseModel<List<CategoriaModel>>>> Listar()
+        public async Task<ActionResult<ResponseModel<List<CategoriaModel>>>> Listar(int pageNumber = 1, int pageSize = 10, int? codigoFiltro = null, string? nomeFiltro = null, bool paginar = true)
         {
-            var categoria = await _categoria.Listar();
+            var categoria = await _categoria.Listar(pageNumber, pageSize, codigoFiltro, nomeFiltro, paginar);
             return Ok(categoria);
         }
 
@@ -31,23 +31,23 @@ namespace WebApiSmartClinic.Controllers
         }
 
         [HttpPost("Criar")]
-        public async Task<ActionResult<ResponseModel<List<CategoriaModel>>>> Criar(CategoriaCreateDto categoriaCreateDto)
+        public async Task<ActionResult<ResponseModel<List<CategoriaModel>>>> Criar(CategoriaCreateDto categoriaCreateDto, int pageNumber = 1, int pageSize = 10)
         {
-            var categoria = await _categoria.Criar(categoriaCreateDto);
+            var categoria = await _categoria.Criar(categoriaCreateDto, pageNumber, pageSize);
             return Ok(categoria);
         }
 
         [HttpPut("Editar")]
-        public async Task<ActionResult<ResponseModel<List<CategoriaModel>>>> Editar(CategoriaEdicaoDto categoriaEdicaoDto)
+        public async Task<ActionResult<ResponseModel<List<CategoriaModel>>>> Editar(CategoriaEdicaoDto categoriaEdicaoDto, int pageNumber = 1, int pageSize = 10)
         {
-            var categoria = await _categoria.Editar(categoriaEdicaoDto);
+            var categoria = await _categoria.Editar(categoriaEdicaoDto, pageNumber, pageSize);
             return Ok(categoria);
         }
 
         [HttpDelete("Delete/{idCategoria}")]
-        public async Task<ActionResult<ResponseModel<List<CategoriaModel>>>> Delete(int idCategoria)
+        public async Task<ActionResult<ResponseModel<List<CategoriaModel>>>> Delete(int idCategoria, int pageNumber = 1, int pageSize = 10)
         {
-            var categoria = await _categoria.Delete(idCategoria);
+            var categoria = await _categoria.Delete(idCategoria, pageNumber, pageSize);
             return Ok(categoria);
         }
     }

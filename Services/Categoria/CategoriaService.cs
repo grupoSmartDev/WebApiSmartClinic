@@ -39,7 +39,7 @@ public class CategoriaService : ICategoriaInterface
         }
     }
 
-    public async Task<ResponseModel<List<CategoriaModel>>> Criar(CategoriaCreateDto categoriaCreateDto)
+    public async Task<ResponseModel<List<CategoriaModel>>> Criar(CategoriaCreateDto categoriaCreateDto, int pageNumber = 1, int pageSize = 10)
     {
         ResponseModel<List<CategoriaModel>> resposta = new ResponseModel<List<CategoriaModel>>();
 
@@ -52,7 +52,9 @@ public class CategoriaService : ICategoriaInterface
             _context.Add(categoria);
             await _context.SaveChangesAsync();
 
-            resposta.Dados = await _context.Categoria.ToListAsync();
+            var query = _context.Categoria.AsQueryable();
+
+            resposta.Dados = (await PaginationHelper.PaginateAsync(query, pageNumber, pageSize)).Dados;
             resposta.Mensagem = "Categoria criado com sucesso";
             return resposta;
         }
@@ -65,7 +67,7 @@ public class CategoriaService : ICategoriaInterface
 
     }
 
-    public async Task<ResponseModel<List<CategoriaModel>>> Delete(int idCategoria)
+    public async Task<ResponseModel<List<CategoriaModel>>> Delete(int idCategoria, int pageNumber = 1, int pageSize = 10)
     {
         ResponseModel<List<CategoriaModel>> resposta = new ResponseModel<List<CategoriaModel>>();
 
@@ -81,7 +83,9 @@ public class CategoriaService : ICategoriaInterface
             _context.Remove(categoria);
             await _context.SaveChangesAsync();
 
-            resposta.Dados = await _context.Categoria.ToListAsync();
+            var query = _context.Categoria.AsQueryable();
+
+            resposta.Dados = (await PaginationHelper.PaginateAsync(query, pageNumber, pageSize)).Dados;
             resposta.Mensagem = "Categoria Excluido com sucesso";
             return resposta;
 
@@ -95,7 +99,7 @@ public class CategoriaService : ICategoriaInterface
         }
     }
 
-    public async Task<ResponseModel<List<CategoriaModel>>> Editar(CategoriaEdicaoDto categoriaEdicaoDto)
+    public async Task<ResponseModel<List<CategoriaModel>>> Editar(CategoriaEdicaoDto categoriaEdicaoDto, int pageNumber = 1, int pageSize = 10)
     {
         ResponseModel<List<CategoriaModel>> resposta = new ResponseModel<List<CategoriaModel>>();
 
@@ -114,7 +118,9 @@ public class CategoriaService : ICategoriaInterface
             _context.Update(categoria);
             await _context.SaveChangesAsync();
 
-            resposta.Dados = await _context.Categoria.ToListAsync();
+            var query = _context.Categoria.AsQueryable();
+
+            resposta.Dados = (await PaginationHelper.PaginateAsync(query, pageNumber, pageSize)).Dados;
             resposta.Mensagem = "Categoria Atualizado com sucesso";
             return resposta;
         }
@@ -127,16 +133,23 @@ public class CategoriaService : ICategoriaInterface
         }
     }
 
-    public async Task<ResponseModel<List<CategoriaModel>>> Listar()
+    public async Task<ResponseModel<List<CategoriaModel>>> Listar(int pageNumber = 1, int pageSize = 10, int? codigoFiltro = null, string? nomeFiltro = null, bool paginar = true)
     {
         ResponseModel<List<CategoriaModel>> resposta = new ResponseModel<List<CategoriaModel>>();
 
         try
         {
-            var categoria = await _context.Categoria.ToListAsync();
+            var query = _context.Categoria.AsQueryable();
 
-            resposta.Dados = categoria;
-            resposta.Mensagem = "Todos os Categoria foram encontrados";
+            query = query.Where(x =>
+                (!codigoFiltro.HasValue || x.Id == codigoFiltro) &&
+                (string.IsNullOrEmpty(nomeFiltro) || x.Nome == nomeFiltro)
+            );
+
+            query.OrderBy(x => x.Id);
+
+            resposta.Dados = paginar ? (await PaginationHelper.PaginateAsync(query, pageNumber, pageSize)).Dados : await query.ToListAsync();
+            resposta.Mensagem = "Todos as categorias foram encontradas";
             return resposta;
 
 

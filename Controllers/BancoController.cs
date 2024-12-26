@@ -17,9 +17,9 @@ namespace WebApiSmartClinic.Controllers
         }
 
         [HttpGet("Listar")]
-        public async Task<ActionResult<ResponseModel<List<BancoModel>>>> Listar()
+        public async Task<ActionResult<ResponseModel<List<BancoModel>>>> Listar(int pageNumber = 1, int pageSize = 10, int? codigoFiltro = null, string? nomeBancoFiltro = null, string? nomeTitularFiltro = null, string? documentoTitularFiltro = null, bool paginar = true)
         {
-            var banco = await _banco.Listar();
+            var banco = await _banco.Listar(pageNumber, pageSize, codigoFiltro, nomeBancoFiltro, nomeTitularFiltro, documentoTitularFiltro, paginar);
             return Ok(banco);
         }
 
@@ -31,23 +31,23 @@ namespace WebApiSmartClinic.Controllers
         }
 
         [HttpPost("Criar")]
-        public async Task<ActionResult<ResponseModel<List<BancoModel>>>> Criar(BancoCreateDto bancoCreateDto)
+        public async Task<ActionResult<ResponseModel<List<BancoModel>>>> Criar(BancoCreateDto bancoCreateDto, int pageNumber = 1, int pageSize = 10)
         {
-            var banco = await _banco.Criar(bancoCreateDto);
+            var banco = await _banco.Criar(bancoCreateDto, pageNumber, pageSize);
             return Ok(banco);
         }
 
         [HttpPut("Editar")]
-        public async Task<ActionResult<ResponseModel<List<BancoModel>>>> Editar(BancoEdicaoDto bancoEdicaoDto)
+        public async Task<ActionResult<ResponseModel<List<BancoModel>>>> Editar(BancoEdicaoDto bancoEdicaoDto, int pageNumber = 1, int pageSize = 10)
         {
-            var banco = await _banco.Editar(bancoEdicaoDto);
+            var banco = await _banco.Editar(bancoEdicaoDto, pageNumber, pageSize);
             return Ok(banco);
         }
 
         [HttpDelete("Delete/{idBanco}")]
-        public async Task<ActionResult<ResponseModel<List<BancoModel>>>> Delete(int idBanco)
+        public async Task<ActionResult<ResponseModel<List<BancoModel>>>> Delete(int idBanco, int pageNumber = 1, int pageSize = 10)
         {
-            var banco = await _banco.Delete(idBanco);
+            var banco = await _banco.Delete(idBanco, pageNumber, pageSize);
             return Ok(banco);
         }
 

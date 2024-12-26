@@ -39,7 +39,7 @@ public class BancoService : IBancoInterface
         }
     }
 
-    public async Task<ResponseModel<List<BancoModel>>> Criar(BancoCreateDto bancoCreateDto)
+    public async Task<ResponseModel<List<BancoModel>>> Criar(BancoCreateDto bancoCreateDto, int pageNumber = 1, int pageSize = 10)
     {
         ResponseModel<List<BancoModel>> resposta = new ResponseModel<List<BancoModel>>();
 
@@ -66,7 +66,9 @@ public class BancoService : IBancoInterface
             _context.Add(banco);
             await _context.SaveChangesAsync();
 
-            resposta.Dados = await _context.Banco.ToListAsync();
+            var query = _context.Banco.AsQueryable();
+
+            resposta.Dados = (await PaginationHelper.PaginateAsync(query, pageNumber, pageSize)).Dados;
             resposta.Mensagem = "Banco criado com sucesso";
             return resposta;
         }
@@ -79,7 +81,7 @@ public class BancoService : IBancoInterface
 
     }
 
-    public async Task<ResponseModel<List<BancoModel>>> Delete(int idBanco)
+    public async Task<ResponseModel<List<BancoModel>>> Delete(int idBanco, int pageNumber = 1, int pageSize = 10)
     {
         ResponseModel<List<BancoModel>> resposta = new ResponseModel<List<BancoModel>>();
 
@@ -95,7 +97,9 @@ public class BancoService : IBancoInterface
             _context.Remove(banco);
             await _context.SaveChangesAsync();
 
-            resposta.Dados = await _context.Banco.ToListAsync();
+            var query = _context.Banco.AsQueryable();
+
+            resposta.Dados = (await PaginationHelper.PaginateAsync(query, pageNumber, pageSize)).Dados;
             resposta.Mensagem = "Banco Excluido com sucesso";
             return resposta;
 
@@ -109,7 +113,7 @@ public class BancoService : IBancoInterface
         }
     }
 
-    public async Task<ResponseModel<List<BancoModel>>> Editar(BancoEdicaoDto bancoEdicaoDto)
+    public async Task<ResponseModel<List<BancoModel>>> Editar(BancoEdicaoDto bancoEdicaoDto, int pageNumber = 1, int pageSize = 10)
     {
         ResponseModel<List<BancoModel>> resposta = new ResponseModel<List<BancoModel>>();
 
@@ -142,7 +146,9 @@ public class BancoService : IBancoInterface
             _context.Update(banco);
             await _context.SaveChangesAsync();
 
-            resposta.Dados = await _context.Banco.ToListAsync();
+            var query = _context.Banco.AsQueryable();
+
+            resposta.Dados = (await PaginationHelper.PaginateAsync(query, pageNumber, pageSize)).Dados;
             resposta.Mensagem = "Banco Atualizado com sucesso";
             return resposta;
         }
@@ -155,24 +161,33 @@ public class BancoService : IBancoInterface
         }
     }
 
-    public async Task<ResponseModel<List<BancoModel>>> Listar()
+    public async Task<ResponseModel<List<BancoModel>>> Listar(int pageNumber = 1, int pageSize = 10, int? codigoFiltro = null, string? nomeBancoFiltro = null, string? nomeTitularFiltro = null, string? documentoTitularFiltro = null, bool paginar = true)
     {
         ResponseModel<List<BancoModel>> resposta = new ResponseModel<List<BancoModel>>();
 
         try
         {
-            var banco = await _context.Banco.ToListAsync();
+            var query = _context.Banco.AsQueryable();
 
-            resposta.Dados = banco;
+            query = query.Where(x =>
+                (!codigoFiltro.HasValue || x.Id == codigoFiltro) &&
+                (string.IsNullOrEmpty(nomeBancoFiltro) || x.NomeBanco == nomeBancoFiltro) &&
+                (string.IsNullOrEmpty(nomeTitularFiltro) || x.NomeTitular == nomeTitularFiltro) &&
+                (string.IsNullOrEmpty(documentoTitularFiltro) || x.DocumentoTitular == documentoTitularFiltro)
+            );
+
+            query.OrderBy(x => x.Id);
+
+            resposta.Dados = paginar ? (await PaginationHelper.PaginateAsync(query, pageNumber, pageSize)).Dados : await query.ToListAsync();
             resposta.Mensagem = "Todos os Banco foram encontrados";
+            
             return resposta;
-
-
         }
         catch (Exception e)
         {
             resposta.Mensagem = e.Message;
             resposta.Status = false;
+            
             return resposta;
         }
     }

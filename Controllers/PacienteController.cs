@@ -17,7 +17,7 @@ namespace WebApiSmartClinic.Controllers
         }
 
         [HttpGet("Listar")]
-        public async Task<ActionResult<ResponseModel<List<PacienteModel>>>> Listar(int pageNumber = 1, int pageSize = 10, int? codigoFiltro = null, string? nomeFiltro = null, string? cpfFiltro = null, string? celularFiltro = null, bool paginar = true)
+        public async Task<ActionResult<ResponseModel<List<PacienteModel>>>> Listar([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10, [FromQuery] int? codigoFiltro = null, [FromQuery] string? nomeFiltro = null, [FromQuery] string? cpfFiltro = null, [FromQuery] string? celularFiltro = null, [FromQuery] bool paginar = true)
         {
             var paciente = await _paciente.Listar(pageNumber, pageSize, codigoFiltro, nomeFiltro, cpfFiltro, celularFiltro, paginar);
             return Ok(paciente);

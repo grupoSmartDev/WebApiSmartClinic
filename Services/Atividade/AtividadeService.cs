@@ -136,7 +136,7 @@ public class AtividadeService : IAtividadeInterface
         }
     }
 
-    public async Task<ResponseModel<List<AtividadeModel>>> Listar(int pageNumber = 1, int pageSize = 10, int? codigoFiltro = null, string? nomeFiltro = null, bool paginar = true)
+    public async Task<ResponseModel<List<AtividadeModel>>> Listar(int pageNumber = 1, int pageSize = 10, int? codigoFiltro = null, string? tituloFiltro = null, bool paginar = true)
     {
         ResponseModel<List<AtividadeModel>> resposta = new ResponseModel<List<AtividadeModel>>();
 
@@ -146,7 +146,7 @@ public class AtividadeService : IAtividadeInterface
 
             query = query.Where(x =>
                 (!codigoFiltro.HasValue || x.Id == codigoFiltro) &&
-                (string.IsNullOrEmpty(nomeFiltro) || x.Descricao == nomeFiltro)
+                (string.IsNullOrEmpty(tituloFiltro) || x.Titulo == tituloFiltro)
             );
             query.OrderBy(x => x.Id);
 

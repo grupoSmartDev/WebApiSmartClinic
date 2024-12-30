@@ -30,6 +30,7 @@ using WebApiSmartClinic.Services.Atividade;
 using WebApiSmartClinic.Services.Evolucao;
 using WebApiSmartClinic.Services.Profissao;
 using WebApiSmartClinic.Services.FichaAvaliacao;
+using WebApiSmartClinic.Services.PlanoConta;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -111,6 +112,7 @@ builder.Services.AddScoped<IAtividadeInterface, AtividadeService>();
 builder.Services.AddScoped<IEvolucaoInterface, EvolucaoService>();
 builder.Services.AddScoped<IProfissaoInterface, ProfissaoService>();
 builder.Services.AddScoped<IFichaAvaliacaoInterface, FichaAvaliacaoService>();
+builder.Services.AddScoped<IPlanoContaInterface, PlanoContaService>();
 
 var app = builder.Build();
 

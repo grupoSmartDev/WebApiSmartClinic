@@ -40,7 +40,8 @@ public class AppDbContext : DbContext
     public DbSet<ProfissaoModel> Profissao { get; set; }
     public DbSet<FichaAvaliacaoModel> FichaAvaliacao { get; set; }
     public DbSet<EmpresaModel> Empresa { get; set; }
-
+    public DbSet<PlanoContaModel> PlanoConta { get; set; }
+    public DbSet<PlanoContaSubModel> PlanoContaSub { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -99,6 +100,18 @@ public class AppDbContext : DbContext
             .HasOne(s => s.FinancPagar)
             .WithMany(f => f.subFinancPagar)
             .HasForeignKey(s => s.financPagarId);
+
+        //configuracao para plano de contas e sub plano de contas
+        modelBuilder.Entity<PlanoContaModel>()
+            .HasKey(f => f.Id);
+
+        modelBuilder.Entity<PlanoContaSubModel>()
+            .HasKey(s => s.Id);
+
+        modelBuilder.Entity<PlanoContaSubModel>()
+            .HasOne(s => s.PlanoConta)
+            .WithMany(f => f.SubPlanos)
+            .HasForeignKey(s => s.PlanoContaId);
 
 
         base.OnModelCreating(modelBuilder);

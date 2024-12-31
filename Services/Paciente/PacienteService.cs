@@ -164,11 +164,11 @@ public class PacienteService : IPacienteInterface
             var cpfExistente = await _context.Paciente
                 .AnyAsync(p => p.Cpf == cpfLimpo);
 
-            if (cpfExistente)
-            {
-                resposta.Mensagem = "CPF já cadastrado, verifique.";
-                return resposta;
-            }
+            //if (cpfExistente)
+            //{
+            //    resposta.Mensagem = "CPF já cadastrado, verifique.";
+            //    return resposta;
+            //}
 
             paciente.Id = pacienteEdicaoDto.Id;
             paciente.Bairro = pacienteEdicaoDto.Bairro;

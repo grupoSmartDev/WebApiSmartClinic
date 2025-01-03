@@ -1,56 +1,39 @@
 ﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.Data;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using WebApiSmartClinic.Models;
+using WebApiSmartClinic.Services.Auth;
 
+// 11. Controllers/AuthController.cs
 [ApiController]
 [Route("api/[controller]")]
 public class AuthController : ControllerBase
 {
-    private readonly UserManager<UsuarioModel> _userManager;
-    private readonly IConfiguration _configuration;
+    private readonly IAuthService _authService;
+    private readonly ILogger<AuthController> _logger;
 
-    public AuthController(UserManager<UsuarioModel> userManager, IConfiguration configuration)
+    public AuthController(IAuthService authService, ILogger<AuthController> logger)
     {
-        _userManager = userManager;
-        _configuration = configuration;
+        _authService = authService;
+        _logger = logger;
     }
 
     [HttpPost("login")]
-    public async Task<IActionResult> Login([FromBody] LoginDto loginDto)
+    public async Task<ActionResult<LoginResponse>> Login([FromBody] LoginModel request)
     {
-        var user = await _userManager.FindByEmailAsync(loginDto.Email);
-        if (user == null || !await _userManager.CheckPasswordAsync(user, loginDto.Password))
-            return Unauthorized();
-
-        var token = GenerateJwtToken(user);
-        return Ok(new { token });
-    }
-
-    private string GenerateJwtToken(UsuarioModel user)
-    {
-        var tokenHandler = new JwtSecurityTokenHandler();
-        var key = Encoding.ASCII.GetBytes(_configuration["Jwt:Key"]);
-        var tokenDescriptor = new SecurityTokenDescriptor
+        try
         {
-            Subject = new ClaimsIdentity(new Claim[]
-            {
-                new Claim(ClaimTypes.Name, user.Id.ToString()),
-                new Claim(ClaimTypes.Role, user.Permissao.ToString())
-            }),
-            Expires = DateTime.UtcNow.AddHours(12),
-            SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
-        };
-        var token = tokenHandler.CreateToken(tokenDescriptor);
-        return tokenHandler.WriteToken(token);
+            var response = await _authService.LoginAsync(request);
+            return Ok(response);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Erro no login");
+            return BadRequest(new { message = ex.Message });
+        }
     }
-}
-
-public class LoginDto
-{
-    public string Email { get; set; }
-    public string Password { get; set; }
 }

@@ -31,58 +31,87 @@ using WebApiSmartClinic.Services.Evolucao;
 using WebApiSmartClinic.Services.Profissao;
 using WebApiSmartClinic.Services.FichaAvaliacao;
 using WebApiSmartClinic.Services.PlanoConta;
+using WebApiSmartClinic.Services.Auth;
+using WebApiSmartClinic.Middleware;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+// Add services to the container
 builder.Services.AddControllers();
-
-var cultureInfo = new CultureInfo("pt-BR"); // Use "en-US" para separador decimal como ponto
-cultureInfo.NumberFormat.NumberDecimalSeparator = ",";
-cultureInfo.NumberFormat.NumberGroupSeparator = ".";
-
-// Aplica a cultura a nível global
-CultureInfo.DefaultThreadCurrentCulture = cultureInfo;
-CultureInfo.DefaultThreadCurrentUICulture = cultureInfo;
-
-builder.Services.AddControllers()
-    .AddJsonOptions(options =>
-    {
-        options.JsonSerializerOptions.WriteIndented = true;
-    });
-
-
-builder.Services.AddControllers()
-    .AddNewtonsoftJson(options =>
-    {
-        options.SerializerSettings.Culture = new CultureInfo("pt-BR");
-    });
-
-// Add CORS service (libera acesso para qualquer origem)
-builder.Services.AddCors(options =>
-{
-    options.AddPolicy("AllowAll",
-        policy =>
-        {
-            policy.AllowAnyOrigin()
-                  .AllowAnyMethod()
-                  .AllowAnyHeader();
-        });
-});
-
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
-    c.SwaggerDoc("v1", new OpenApiInfo { Title = "WebApiSmartClinic", Version = "v1" });
-    c.EnableAnnotations(); // Habilita as anotações do Swagger
+    c.SwaggerDoc("v1", new OpenApiInfo { Title = "Sua API", Version = "v1" });
+    c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    {
+        Description = "JWT Authorization header using the Bearer scheme",
+        Name = "Authorization",
+        In = ParameterLocation.Header,
+        Type = SecuritySchemeType.ApiKey,
+        Scheme = "Bearer"
+    });
+    c.AddSecurityRequirement(new OpenApiSecurityRequirement
+            {
+                {
+                    new OpenApiSecurityScheme
+                    {
+                        Reference = new OpenApiReference
+                        {
+                            Type = ReferenceType.SecurityScheme,
+                            Id = "Bearer"
+                        }
+                    },
+                    Array.Empty<string>()
+                }
+            });
+});
+
+// Configure DbContexts
+builder.Services.AddDbContext<MasterDbContext>(options =>
+{
+    options.UseSqlServer(builder.Configuration.GetConnectionString("ConexaoPadrao"),
+        sqlOptions => sqlOptions.EnableRetryOnFailure());
 });
 
 builder.Services.AddDbContext<AppDbContext>(options =>
 {
-    options.UseSqlServer(builder.Configuration.GetConnectionString("ConexaoPadrao"));
+    options.UseSqlServer("Server=dummy",
+        sqlOptions => sqlOptions.EnableRetryOnFailure());
 });
 
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+            .AddJwtBearer(options =>
+            {
+                options.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters
+                {
+                    ValidateIssuer = true,
+                    ValidateAudience = true,
+                    ValidateLifetime = true,
+                    ValidateIssuerSigningKey = true,
+                    ValidIssuer = builder.Configuration["JWT:Issuer"],
+                    ValidAudience = builder.Configuration["JWT:Audience"],
+                    IssuerSigningKey = new SymmetricSecurityKey(
+                        Encoding.UTF8.GetBytes(builder.Configuration["JWT:Secret"]))
+                };
+            });
+
+// Configure CORS - Versão corrigida
+var corsOrigins = builder.Configuration.GetSection("Cors:Origins").Get<string[]>();
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("DefaultPolicy", policy =>
+    {
+        policy.WithOrigins(corsOrigins ?? new[] { "http://localhost:4200" })
+              .AllowAnyMethod()
+              .AllowAnyHeader();
+    });
+});
+
+// Register Services
+builder.Services.AddScoped<IAuthService, AuthService>();
 // Vincular interface com os servicos
 builder.Services.AddScoped<IAutorInterface, AutorService>();
 builder.Services.AddScoped<ISalaInterface, SalaService>();
@@ -113,9 +142,11 @@ builder.Services.AddScoped<IEvolucaoInterface, EvolucaoService>();
 builder.Services.AddScoped<IProfissaoInterface, ProfissaoService>();
 builder.Services.AddScoped<IFichaAvaliacaoInterface, FichaAvaliacaoService>();
 builder.Services.AddScoped<IPlanoContaInterface, PlanoContaService>();
+builder.Services.AddHttpContextAccessor();
 
 var app = builder.Build();
 
+// Configure the HTTP request pipeline
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -123,9 +154,10 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-app.UseCors("AllowAll");
-app.UseRouting();
+app.UseCors("DefaultPolicy");
+app.UseAuthentication();
 app.UseAuthorization();
+app.UseMiddleware<EmpresasMiddleware>();
 app.MapControllers();
 
 app.Run();

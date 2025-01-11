@@ -17,12 +17,12 @@ namespace WebApiSmartClinic.Migrations
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     Nome = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Capacidade = table.Column<int>(type: "int", nullable: false),
-                    Tipo = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    local = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Status = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    HorarioFincionamento = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Observacao = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                    Capacidade = table.Column<int>(type: "int", nullable: true),
+                    Tipo = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    local = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Status = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    HorarioFincionamento = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Observacao = table.Column<string>(type: "nvarchar(max)", nullable: true)
                 },
                 constraints: table =>
                 {

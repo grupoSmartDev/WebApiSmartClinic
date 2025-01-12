@@ -17,9 +17,9 @@ namespace WebApiSmartClinic.Controllers
         }
 
         [HttpGet("Listar")]
-        public async Task<ActionResult<ResponseModel<List<ConselhoModel>>>> Listar()
+        public async Task<ActionResult<ResponseModel<List<ConselhoModel>>>> Listar(int pageNumber = 1, int pageSize = 10, int? codigoFiltro = null, string? nomeFiltro = null, string? siglaFiltro = null, bool paginar = true)
         {
-            var conselho = await _conselho.Listar();
+            var conselho = await _conselho.Listar(pageNumber, pageSize, codigoFiltro, nomeFiltro, siglaFiltro, paginar);
             return Ok(conselho);
         }
 
@@ -31,23 +31,23 @@ namespace WebApiSmartClinic.Controllers
         }
 
         [HttpPost("Criar")]
-        public async Task<ActionResult<ResponseModel<List<ConselhoModel>>>> Criar(ConselhoCreateDto conselhoCreateDto)
+        public async Task<ActionResult<ResponseModel<List<ConselhoModel>>>> Criar(ConselhoCreateDto conselhoCreateDto, int pageNumber = 1, int pageSize = 10)
         {
-            var conselho = await _conselho.Criar(conselhoCreateDto);
+            var conselho = await _conselho.Criar(conselhoCreateDto, pageNumber, pageSize);
             return Ok(conselho);
         }
 
         [HttpPut("Editar")]
-        public async Task<ActionResult<ResponseModel<List<ConselhoModel>>>> Editar(ConselhoEdicaoDto conselhoEdicaoDto)
+        public async Task<ActionResult<ResponseModel<List<ConselhoModel>>>> Editar(ConselhoEdicaoDto conselhoEdicaoDto, int pageNumber = 1, int pageSize = 10)
         {
-            var conselho = await _conselho.Editar(conselhoEdicaoDto);
+            var conselho = await _conselho.Editar(conselhoEdicaoDto, pageNumber, pageSize);
             return Ok(conselho);
         }
 
         [HttpDelete("Delete/{idConselho}")]
-        public async Task<ActionResult<ResponseModel<List<ConselhoModel>>>> Delete(int idConselho)
+        public async Task<ActionResult<ResponseModel<List<ConselhoModel>>>> Delete(int idConselho, int pageNumber = 1, int pageSize = 10)
         {
-            var conselho = await _conselho.Delete(idConselho);
+            var conselho = await _conselho.Delete(idConselho, pageNumber, pageSize);
             return Ok(conselho);
         }
     }

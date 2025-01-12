@@ -39,7 +39,7 @@ public class ConselhoService : IConselhoInterface
         }
     }
 
-    public async Task<ResponseModel<List<ConselhoModel>>> Criar(ConselhoCreateDto conselhoCreateDto)
+    public async Task<ResponseModel<List<ConselhoModel>>> Criar(ConselhoCreateDto conselhoCreateDto, int pageNumber = 1, int pageSize = 10)
     {
         ResponseModel<List<ConselhoModel>> resposta = new ResponseModel<List<ConselhoModel>>();
 
@@ -53,7 +53,9 @@ public class ConselhoService : IConselhoInterface
             _context.Add(conselho);
             await _context.SaveChangesAsync();
 
-            resposta.Dados = await _context.Conselho.ToListAsync();
+            var query = _context.Conselho.AsQueryable();
+
+            resposta.Dados = (await PaginationHelper.PaginateAsync(query, pageNumber, pageSize)).Dados;
             resposta.Mensagem = "Conselho criado com sucesso";
             return resposta;
         }
@@ -66,7 +68,7 @@ public class ConselhoService : IConselhoInterface
 
     }
 
-    public async Task<ResponseModel<List<ConselhoModel>>> Delete(int idConselho)
+    public async Task<ResponseModel<List<ConselhoModel>>> Delete(int idConselho, int pageNumber = 1, int pageSize = 10)
     {
         ResponseModel<List<ConselhoModel>> resposta = new ResponseModel<List<ConselhoModel>>();
 
@@ -82,7 +84,9 @@ public class ConselhoService : IConselhoInterface
             _context.Remove(conselho);
             await _context.SaveChangesAsync();
 
-            resposta.Dados = await _context.Conselho.ToListAsync();
+            var query = _context.Conselho.AsQueryable();
+
+            resposta.Dados = (await PaginationHelper.PaginateAsync(query, pageNumber, pageSize)).Dados;
             resposta.Mensagem = "Conselho Excluido com sucesso";
             return resposta;
 
@@ -96,7 +100,7 @@ public class ConselhoService : IConselhoInterface
         }
     }
 
-    public async Task<ResponseModel<List<ConselhoModel>>> Editar(ConselhoEdicaoDto conselhoEdicaoDto)
+    public async Task<ResponseModel<List<ConselhoModel>>> Editar(ConselhoEdicaoDto conselhoEdicaoDto, int pageNumber = 1, int pageSize = 10)
     {
         ResponseModel<List<ConselhoModel>> resposta = new ResponseModel<List<ConselhoModel>>();
 
@@ -116,7 +120,9 @@ public class ConselhoService : IConselhoInterface
             _context.Update(conselho);
             await _context.SaveChangesAsync();
 
-            resposta.Dados = await _context.Conselho.ToListAsync();
+            var query = _context.Conselho.AsQueryable();
+
+            resposta.Dados = (await PaginationHelper.PaginateAsync(query, pageNumber, pageSize)).Dados;
             resposta.Mensagem = "Conselho Atualizado com sucesso";
             return resposta;
         }
@@ -129,15 +135,23 @@ public class ConselhoService : IConselhoInterface
         }
     }
 
-    public async Task<ResponseModel<List<ConselhoModel>>> Listar()
+    public async Task<ResponseModel<List<ConselhoModel>>> Listar(int pageNumber = 1, int pageSize = 10, int? codigoFiltro = null, string? nomeFiltro = null, string? siglaFiltro = null, bool paginar = true)
     {
         ResponseModel<List<ConselhoModel>> resposta = new ResponseModel<List<ConselhoModel>>();
 
         try
         {
-            var conselho = await _context.Conselho.ToListAsync();
+            var query = _context.Conselho.AsQueryable();
 
-            resposta.Dados = conselho;
+            query = query.Where(x =>
+                (!codigoFiltro.HasValue || x.Id == codigoFiltro) &&
+                (string.IsNullOrEmpty(nomeFiltro) || x.Nome == nomeFiltro) &&
+                (string.IsNullOrEmpty(siglaFiltro) || x.Sigla == siglaFiltro)
+            );
+
+            query = query.OrderBy(x => x.Id);
+
+            resposta.Dados = paginar ? (await PaginationHelper.PaginateAsync(query, pageNumber, pageSize)).Dados : await query.ToListAsync();
             resposta.Mensagem = "Todos os Conselho foram encontrados";
             return resposta;
         }

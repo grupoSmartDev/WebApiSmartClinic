@@ -93,6 +93,12 @@ public class AppDbContext : IdentityDbContext<User>
             .HasForeignKey<PacienteModel>(p => p.PlanoId)
             .OnDelete(DeleteBehavior.Restrict); // Ou Cascade, conforme necessidade
 
+        modelBuilder.Entity<PacienteModel>()
+            .HasMany(p => p.Evolucoes)
+            .WithOne(e => e.Paciente)
+            .HasForeignKey(e => e.PacienteId)
+            .OnDelete(DeleteBehavior.Restrict);
+
 
         modelBuilder.Entity<EvolucaoModel>()
              .HasMany(e => e.Exercicios) // Evolu��o tem v�rios exerc�cios

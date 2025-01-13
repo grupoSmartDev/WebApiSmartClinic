@@ -54,7 +54,7 @@ namespace WebApiSmartClinic.Models
         [JsonIgnore]
         public PlanoModel? Plano { get; set; }
 
-        public List<Evolucao>? Evolucoes { get; set; } // Relacionamento com evoluções
+        public List<EvolucaoModel>? Evolucoes { get; set; } // Relacionamento com evoluções
 
         [DataType(DataType.Date)]
         public DateTime? DataUltimoAtendimento { get; set; } // Ultima data de atendimento
@@ -63,5 +63,10 @@ namespace WebApiSmartClinic.Models
         public DateTime? DataCadastro { get; set; } // Ultima data de atendimento
 
         public List<Financ_ReceberModel>? FinancReceber { get; set; } // Relacionamento com financeiro
+
+        public PacienteModel()
+        {
+            Evolucoes = new List<EvolucaoModel>();  // Inicialização da lista no construtor
+        }
     }
 }

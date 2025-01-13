@@ -104,25 +104,22 @@ var builder = WebApplication.CreateBuilder(args);
     });
 
     // Configure JWT Authentication
+    // Configuração JWT
     var appSettingsSection = builder.Configuration.GetSection("AppSettings");
-    services.Configure<AppSettings>(appSettingsSection);
+    builder.Services.Configure<AppSettings>(appSettingsSection);
     var appSettings = appSettingsSection.Get<AppSettings>();
 
-    if (string.IsNullOrWhiteSpace(appSettings.JwtSecretKey))
+    var key = Encoding.UTF8.GetBytes(appSettings.JwtSecretKey);
+    builder.Services.AddAuthentication(x =>
     {
-        throw new InvalidOperationException("JWT SecretKey deve ser definido nas configurações");
-    }
-    var key = Encoding.ASCII.GetBytes(appSettings.JwtSecretKey);
-    builder.Services.AddAuthentication(options =>
-    {
-        options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-        options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+        x.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+        x.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
     })
-    .AddJwtBearer(options =>
+    .AddJwtBearer(x =>
     {
-        options.RequireHttpsMetadata = false;
-        options.SaveToken = true;
-        options.TokenValidationParameters = new TokenValidationParameters
+        x.RequireHttpsMetadata = false;
+        x.SaveToken = true;
+        x.TokenValidationParameters = new TokenValidationParameters
         {
             ValidateIssuerSigningKey = true,
             IssuerSigningKey = new SymmetricSecurityKey(key),
@@ -130,6 +127,7 @@ var builder = WebApplication.CreateBuilder(args);
             ValidateAudience = true,
             ValidIssuer = appSettings.JwtIssuer,
             ValidAudience = appSettings.JwtAudience,
+            ValidateLifetime = true,
             ClockSkew = TimeSpan.Zero
         };
     });
@@ -187,6 +185,7 @@ builder.Services.AddCors(options =>
         policy.WithOrigins("http://localhost:4200")
               .AllowAnyMethod()
               .AllowAnyHeader()
+              .WithExposedHeaders("Authorization")
               .AllowCredentials();
     });
 });
@@ -234,26 +233,26 @@ builder.Services.AddSwaggerGen(c =>
 
 var app = builder.Build();
 
-// Ordem correta dos middlewares
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
 }
 
-// CORS deve vir antes dos outros middlewares
-app.UseCors("AllowFrontend"); // Corrigido para usar a política correta
-
 app.UseHttpsRedirection();
+
+// CORS antes da autenticação
+app.UseCors("AllowFrontend");
+
 app.UseRouting();
 
-// Middlewares personalizados após o routing
+// Autenticação antes da autorização
+app.UseAuthentication();
+app.UseAuthorization();
+
+// Seus middlewares personalizados depois
 app.UseMiddleware<ErrorHandlerMiddleware>();
 app.UseMiddleware<ConnectionStringMiddleware>();
-
-
-app.UseAuthentication(); // Adicionar esta linha
-app.UseAuthorization();
 
 app.MapControllers();
 

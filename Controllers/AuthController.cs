@@ -321,57 +321,47 @@ public class AuthController : ControllerBase
     private async Task<object> GenerateJwtAsync(string email, string userKey)
     {
         var user = await _userManager.FindByEmailAsync(email);
-        var roles = await _userManager.GetRolesAsync(user!);
-        var claims = await _userManager.GetClaimsAsync(user!);
+        var roles = await _userManager.GetRolesAsync(user);
 
-        var identityClaims = new ClaimsIdentity();
-        identityClaims.AddClaims(claims);
-        identityClaims.AddClaim(new Claim(ClaimTypes.NameIdentifier, user!.Id));
-        identityClaims.AddClaim(new Claim(ClaimTypes.Name, user!.UserName!));
-        identityClaims.AddClaim(new Claim("UserKey", userKey));
+        var claims = new List<Claim>
+    {
+        new Claim(JwtRegisteredClaimNames.Sub, user.Id),
+        new Claim(JwtRegisteredClaimNames.Email, user.Email),
+        new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+        new Claim("UserKey", userKey) // Garanta que esta claim está sendo adicionada
+    };
 
-        if (roles.Count > 0)
-        {
-            foreach (var role in roles)
-            {
-                identityClaims.AddClaim(new Claim(ClaimTypes.Role, role));
-            }
-        }
+        // Adiciona roles às claims
+        claims.AddRange(roles.Select(role => new Claim(ClaimTypes.Role, role)));
 
-        var tokenHandler = new JwtSecurityTokenHandler();
-        var tokenKey = Encoding.ASCII.GetBytes(_appSettings.JwtSecretKey!);
+        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_appSettings.JwtSecretKey));
+        var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
-        var tokenDescriptor = new SecurityTokenDescriptor
-        {
-            Subject = identityClaims,
-            Expires = DateTime.UtcNow.AddHours(_appSettings.JwtExpiresHours),
-            Issuer = _appSettings.JwtIssuer,
-            Audience = _appSettings.JwtAudience,
-            SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(tokenKey),
-                SecurityAlgorithms.HmacSha256Signature)
-        };
+        var token = new JwtSecurityToken(
+            issuer: _appSettings.JwtIssuer,
+            audience: _appSettings.JwtAudience,
+            claims: claims,
+            expires: DateTime.UtcNow.AddHours(_appSettings.JwtExpiresHours),
+            signingCredentials: creds
+        );
 
-        var token = tokenHandler.CreateToken(tokenDescriptor);
-        var encodedToken = tokenHandler.WriteToken(token);
+        // Log para debug
+        Console.WriteLine($"Token gerado com claims: {string.Join(", ", token.Claims.Select(c => $"{c.Type}: {c.Value}"))}");
 
-        // Construir o objeto de retorno
         return new
         {
             success = true,
             data = new
             {
-                key = user.UserKey,
-                accessToken = encodedToken,
-                expiresIn = _appSettings.JwtExpiresHours * 3600, // Tempo em segundos
+                key = userKey,
+                accessToken = new JwtSecurityTokenHandler().WriteToken(token),
+                expiresIn = _appSettings.JwtExpiresHours * 3600,
                 userToken = new
                 {
                     id = user.Id,
                     email = user.Email,
-                    firstName = user.FirstName,
-                    lastName = user.LastName,
-                    profilePicture = ConvertBlobToBase64(user.ProfilePicture),
-                    claims = claims.Select(c => new { value = c.Value, type = c.Type }).ToList(),
-                    role = roles.FirstOrDefault() ?? string.Empty // Assume que cada usuário tem um role
+                    claims = claims.Select(c => new { type = c.Type, value = c.Value }).ToList(),
+                    role = roles.FirstOrDefault() ?? string.Empty
                 }
             }
         };

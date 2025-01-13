@@ -1,6 +1,7 @@
 
 using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
+using WebApiSmartClinic.Dto.Evolucao;
 using WebApiSmartClinic.Models;
 
 namespace WebApiSmartClinic.Dto.Paciente
@@ -43,5 +44,12 @@ namespace WebApiSmartClinic.Dto.Paciente
         public string? Sexo { get; set; }
         public string? Telefone { get; set; }
         public int? PlanoId { get; set; }
+
+        public virtual ICollection<EvolucaoEdicaoDto> Evolucoes { get; set; }
+
+        public PacienteEdicaoDto()
+        {
+            Evolucoes = new List<EvolucaoEdicaoDto>();
+        }
     }
 }

@@ -10,11 +10,8 @@ namespace WebApiSmartClinic.Models
         public string Observacao { get; set; }
         public DateTime DataEvolucao { get; set; }
         public int? PacienteId { get; set; }
-        [JsonIgnore]
-        public PacienteModel Paciente { get; set; }
-        [JsonIgnore]
-        public List<ExercicioModel>? Exercicios { get; set; }
-        [JsonIgnore]
-        public List<AtividadeModel>? Atividades { get; set; }
+        public virtual PacienteModel Paciente { get; set; }
+        public virtual List<ExercicioModel>? Exercicios { get; set; }
+        public virtual List<AtividadeModel>? Atividades { get; set; }
     }
 }

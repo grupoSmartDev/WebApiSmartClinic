@@ -49,11 +49,11 @@ public class ExercicioService : IExercicioInterface
             var exercicio = new ExercicioModel();
             
             exercicio.Descricao =  exercicioCreateDto.Descricao;
-            exercicio.Peso = exercicioCreateDto.Peso;
+            exercicio.Peso = (int)exercicioCreateDto.Peso;
             exercicio.Obs =  exercicioCreateDto.Obs;
-            exercicio.Tempo = exercicioCreateDto.Tempo;
-            exercicio.Repeticoes =  exercicioCreateDto.Repeticoes;
-            exercicio.Series =  exercicioCreateDto.Series;
+            exercicio.Tempo = (int)exercicioCreateDto.Tempo;
+            exercicio.Repeticoes = (int)exercicioCreateDto.Repeticoes;
+            exercicio.Series = (int)exercicioCreateDto.Series;
             exercicio.EvolucaoId = exercicioCreateDto.EvolucaoId;
 
             _context.Add(exercicio);

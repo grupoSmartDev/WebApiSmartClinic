@@ -1,11 +1,23 @@
 using Microsoft.EntityFrameworkCore;
 using WebApiSmartClinic.Models;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using WebApiSmartClinic.Helpers;
+using Microsoft.Extensions.Options;
 
 namespace WebApiSmartClinic.Data;
 
-public class AppDbContext : DbContext
+public class AppDbContext : IdentityDbContext<User>
 {
-    public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
+    private readonly ConnectionStringConfig _connectionStringConfig;
+    private readonly IConnectionStringProvider _connectionStringProvider;
+
+    public AppDbContext(DbContextOptions<AppDbContext> options, IOptions<ConnectionStringConfig> connectionStringConfig, IConnectionStringProvider connectionStringProvider)
+     : base(options)
+    {
+        _connectionStringConfig = connectionStringConfig.Value;
+        _connectionStringProvider = connectionStringProvider;
+    }
 
     public DbSet<AutorModel> Autores { get; set; }
     public DbSet<LivroModel> Livros { get; set; }
@@ -42,9 +54,27 @@ public class AppDbContext : DbContext
     public DbSet<EmpresaModel> Empresa { get; set; }
     public DbSet<PlanoContaModel> PlanoConta { get; set; }
     public DbSet<PlanoContaSubModel> PlanoContaSub { get; set; }
+    public DbSet<User> Users { get; set; }
 
+
+    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+    {
+        if (!optionsBuilder.IsConfigured)
+        {
+            optionsBuilder.UseSqlServer(_connectionStringProvider.GetConnectionString());
+        }
+    }
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        var roles = new List<IdentityRole>
+        {
+            new IdentityRole { Id = "1", Name = "User", NormalizedName = "USER" },
+            new IdentityRole { Id = "2", Name = "Support", NormalizedName = "SUPPORT" },
+            new IdentityRole { Id = "3", Name = "Admin", NormalizedName = "ADMIN" }
+        };
+
+        modelBuilder.Entity<IdentityRole>().HasData(roles);
+
         // Configura a entidade CentroCustoModel para ter uma rela��o de um para muitos com SubCentroCustoModel
         modelBuilder.Entity<CentroCustoModel>()  // Inicia a configura��o para a entidade CentroCustoModel
             .HasMany(c => c.SubCentrosCusto)  // Um CentroCustoModel pode ter muitos SubCentroCustoModel associados
@@ -62,6 +92,12 @@ public class AppDbContext : DbContext
             .WithOne()
             .HasForeignKey<PacienteModel>(p => p.PlanoId)
             .OnDelete(DeleteBehavior.Restrict); // Ou Cascade, conforme necessidade
+
+        modelBuilder.Entity<PacienteModel>()
+            .HasMany(p => p.Evolucoes)
+            .WithOne(e => e.Paciente)
+            .HasForeignKey(e => e.PacienteId)
+            .OnDelete(DeleteBehavior.Restrict);
 
 
         modelBuilder.Entity<EvolucaoModel>()

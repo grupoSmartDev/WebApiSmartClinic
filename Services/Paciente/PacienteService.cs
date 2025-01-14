@@ -1,4 +1,3 @@
-
 using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
@@ -23,7 +22,13 @@ public class PacienteService : IPacienteInterface
         ResponseModel<PacienteModel> resposta = new ResponseModel<PacienteModel>();
         try
         {
-            var paciente = await _context.Paciente.FirstOrDefaultAsync(x => x.Id == idPaciente);
+            var paciente = await _context.Paciente
+                .Include(p => p.Evolucoes)
+                    .ThenInclude(e => e.Exercicios)
+                .Include(p => p.Evolucoes)
+                    .ThenInclude(e => e.Atividades)
+                .FirstOrDefaultAsync(x => x.Id == idPaciente);
+
             if (paciente == null)
             {
                 resposta.Mensagem = "Nenhum Paciente encontrado";
@@ -36,7 +41,6 @@ public class PacienteService : IPacienteInterface
         }
         catch (Exception ex)
         {
-
             resposta.Mensagem = "Erro ao buscar Paciente";
             resposta.Status = false;
             return resposta;
@@ -51,7 +55,6 @@ public class PacienteService : IPacienteInterface
         {
             var cpfLimpo = Funcoes.RemoverCaracteres(pacienteCreateDto.Cpf);
 
-            // Verificação de duplicidade do CPF no banco
             var cpfExistente = await _context.Paciente
                 .AnyAsync(p => p.Cpf == cpfLimpo);
 
@@ -61,7 +64,6 @@ public class PacienteService : IPacienteInterface
                 return resposta;
             }
 
-            // Criação do paciente com dados limpos
             var paciente = new PacienteModel
             {
                 Bairro = pacienteCreateDto.Bairro,
@@ -91,13 +93,48 @@ public class PacienteService : IPacienteInterface
                 Telefone = pacienteCreateDto.Telefone,
                 PlanoId = pacienteCreateDto.PlanoId,
                 DataCadastro = DateTime.Now,
-                ConvenioId = pacienteCreateDto.ConvenioId
+                ConvenioId = pacienteCreateDto.ConvenioId,
+                Evolucoes = new List<EvolucaoModel>()
             };
+
+            if (pacienteCreateDto.Evolucoes != null && pacienteCreateDto.Evolucoes.Any())
+            {
+                foreach (var evolucaoDto in pacienteCreateDto.Evolucoes)
+                {
+                    var evolucao = new EvolucaoModel
+                    {
+                        Observacao = evolucaoDto.Observacao,
+                        DataEvolucao = evolucaoDto.DataEvolucao,
+                        PacienteId = paciente.Id,
+                        Exercicios = evolucaoDto.Exercicios?.Select(e => new ExercicioModel
+                        {
+                            Obs = e.Obs,
+                            Peso = (int)e.Peso,
+                            Repeticoes = (int)e.Repeticoes,
+                            Series = (int)e.Series,
+                            Tempo = (int)e.Tempo,
+                            Descricao = e.Descricao
+                        }).ToList(),
+                        Atividades = evolucaoDto.Atividades?.Select(a => new AtividadeModel
+                        {
+                            Tempo = a.Tempo,
+                            Titulo = a.Titulo,
+                            Descricao = a.Descricao
+                        }).ToList()
+                    };
+                    paciente.Evolucoes.Add(evolucao);
+                }
+            }
 
             _context.Add(paciente);
             await _context.SaveChangesAsync();
 
-            var query = _context.Paciente.AsQueryable();
+            var query = _context.Paciente
+                .Include(p => p.Evolucoes)
+                    .ThenInclude(e => e.Exercicios)
+                .Include(p => p.Evolucoes)
+                    .ThenInclude(e => e.Atividades)
+                .AsQueryable();
 
             resposta.Dados = (await PaginationHelper.PaginateAsync(query, pageNumber, pageSize)).Dados;
             resposta.Mensagem = "Paciente criado com sucesso";
@@ -111,15 +148,19 @@ public class PacienteService : IPacienteInterface
         }
     }
 
-
-
     public async Task<ResponseModel<List<PacienteModel>>> Delete(int idPaciente, int pageNumber = 1, int pageSize = 10)
     {
         ResponseModel<List<PacienteModel>> resposta = new ResponseModel<List<PacienteModel>>();
 
         try
         {
-            var paciente = await _context.Paciente.FirstOrDefaultAsync(x => x.Id == idPaciente);
+            var paciente = await _context.Paciente
+                .Include(p => p.Evolucoes)
+                    .ThenInclude(e => e.Exercicios)
+                .Include(p => p.Evolucoes)
+                    .ThenInclude(e => e.Atividades)
+                .FirstOrDefaultAsync(x => x.Id == idPaciente);
+
             if (paciente == null)
             {
                 resposta.Mensagem = "Nenhum Paciente encontrado";
@@ -129,16 +170,19 @@ public class PacienteService : IPacienteInterface
             _context.Remove(paciente);
             await _context.SaveChangesAsync();
 
-            var query = _context.Paciente.AsQueryable();
+            var query = _context.Paciente
+                .Include(p => p.Evolucoes)
+                    .ThenInclude(e => e.Exercicios)
+                .Include(p => p.Evolucoes)
+                    .ThenInclude(e => e.Atividades)
+                .AsQueryable();
 
             resposta.Dados = (await PaginationHelper.PaginateAsync(query, pageNumber, pageSize)).Dados;
             resposta.Mensagem = "Paciente Excluido com sucesso";
             return resposta;
-
         }
         catch (Exception ex)
         {
-
             resposta.Mensagem = ex.Message;
             resposta.Status = false;
             return resposta;
@@ -151,7 +195,13 @@ public class PacienteService : IPacienteInterface
 
         try
         {
-            var paciente = _context.Paciente.FirstOrDefault(x => x.Id == pacienteEdicaoDto.Id);
+            var paciente = await _context.Paciente
+                .Include(p => p.Evolucoes)
+                    .ThenInclude(e => e.Exercicios)
+                .Include(p => p.Evolucoes)
+                    .ThenInclude(e => e.Atividades)
+                .FirstOrDefaultAsync(x => x.Id == pacienteEdicaoDto.Id);
+
             if (paciente == null)
             {
                 resposta.Mensagem = "Paciente não encontrado";
@@ -159,16 +209,6 @@ public class PacienteService : IPacienteInterface
             }
 
             var cpfLimpo = Funcoes.RemoverCaracteres(pacienteEdicaoDto.Cpf);
-
-            // Verificação de duplicidade do CPF no banco
-            var cpfExistente = await _context.Paciente
-                .AnyAsync(p => p.Cpf == cpfLimpo);
-
-            //if (cpfExistente)
-            //{
-            //    resposta.Mensagem = "CPF já cadastrado, verifique.";
-            //    return resposta;
-            //}
 
             paciente.Id = pacienteEdicaoDto.Id;
             paciente.Bairro = pacienteEdicaoDto.Bairro;
@@ -186,7 +226,7 @@ public class PacienteService : IPacienteInterface
             paciente.Logradouro = pacienteEdicaoDto.Logradouro;
             paciente.Medicamento = pacienteEdicaoDto.Medicamento;
             paciente.ProfissionalId = pacienteEdicaoDto.ProfissionalId;
-            paciente.Nome = pacienteEdicaoDto.Nome;           
+            paciente.Nome = pacienteEdicaoDto.Nome;
             paciente.Numero = pacienteEdicaoDto.Numero;
             paciente.Pais = pacienteEdicaoDto.Pais;
             paciente.PermitirLembretes = pacienteEdicaoDto.PermitirLembretes;
@@ -199,10 +239,49 @@ public class PacienteService : IPacienteInterface
             paciente.PlanoId = pacienteEdicaoDto.PlanoId;
             paciente.ConvenioId = pacienteEdicaoDto.ConvenioId;
 
+            // Atualizar evolucoes se existirem no DTO
+            if (pacienteEdicaoDto.Evolucoes != null)
+            {
+                // Limpar evolucoes existentes
+                paciente.Evolucoes.Clear();
+
+                // Adicionar novas evolucoes
+                foreach (var evolucaoDto in pacienteEdicaoDto.Evolucoes)
+                {
+                    var evolucao = new EvolucaoModel
+                    {
+                        Observacao = evolucaoDto.Observacao,
+                        DataEvolucao = evolucaoDto.DataEvolucao,
+                        PacienteId = paciente.Id,
+                        Exercicios = evolucaoDto.Exercicios?.Select(e => new ExercicioModel
+                        {
+                            Obs = e.Obs,
+                            Peso = e.Peso,
+                            Repeticoes = e.Repeticoes,
+                            Series = e.Series,
+                            Tempo = e.Tempo,
+                            Descricao = e.Descricao
+                        }).ToList(),
+                        Atividades = evolucaoDto.Atividades?.Select(a => new AtividadeModel
+                        {
+                            Tempo = a.Tempo,
+                            Titulo = a.Titulo,
+                            Descricao = a.Descricao
+                        }).ToList()
+                    };
+                    paciente.Evolucoes.Add(evolucao);
+                }
+            }
+
             _context.Update(paciente);
             await _context.SaveChangesAsync();
 
-            var query = _context.Paciente.AsQueryable();
+            var query = _context.Paciente
+                    .Include(p => p.Evolucoes)
+                    .ThenInclude(e => e.Exercicios)
+                    .Include(p => p.Evolucoes)
+                    .ThenInclude(e => e.Atividades)
+                    .AsQueryable();
 
             resposta.Dados = (await PaginationHelper.PaginateAsync(query, pageNumber, pageSize)).Dados;
             resposta.Mensagem = "Paciente Atualizado com sucesso";
@@ -210,7 +289,6 @@ public class PacienteService : IPacienteInterface
         }
         catch (Exception ex)
         {
-
             resposta.Mensagem = ex.Message;
             resposta.Status = false;
             return resposta;
@@ -223,7 +301,12 @@ public class PacienteService : IPacienteInterface
 
         try
         {
-            var query = _context.Paciente.AsQueryable();
+            var query = _context.Paciente
+                .Include(p => p.Evolucoes)
+                    .ThenInclude(e => e.Exercicios)
+                .Include(p => p.Evolucoes)
+                    .ThenInclude(e => e.Atividades)
+                .AsQueryable();
 
             query = query.Where(x =>
                 (!codigoFiltro.HasValue || x.Id == codigoFiltro) &&
@@ -231,14 +314,12 @@ public class PacienteService : IPacienteInterface
                 (string.IsNullOrEmpty(cpfFiltro) || x.Cpf == cpfFiltro) &&
                 (string.IsNullOrEmpty(celularFiltro) || x.Celular == celularFiltro)
             );
-            
-            query.OrderBy(x => x.Id);
-            
+
+            query = query.OrderBy(x => x.Id);
+
             resposta.Dados = paginar ? (await PaginationHelper.PaginateAsync(query, pageNumber, pageSize)).Dados : await query.ToListAsync();
-            resposta.Mensagem = "Todos os Paciente foram encontrados";
+            resposta.Mensagem = "Todos os Pacientes foram encontrados";
             return resposta;
-
-
         }
         catch (Exception e)
         {

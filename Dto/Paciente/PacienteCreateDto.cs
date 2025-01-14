@@ -1,6 +1,8 @@
 
 using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
+using WebApiSmartClinic.Dto.Evolucao;
+using WebApiSmartClinic.Migrations;
 using WebApiSmartClinic.Models;
 
 namespace WebApiSmartClinic.Dto.Paciente;
@@ -47,4 +49,11 @@ public class PacienteCreateDto
 
     [DataType(DataType.Date)]
     public DateTime DataCadastro { get; set; }
+    public virtual ICollection<EvolucaoCreateDto> Evolucoes { get; set; }
+
+    public PacienteCreateDto()
+    {
+        Evolucoes = new List<EvolucaoCreateDto>();
+    }
+
 }

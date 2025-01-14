@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using WebApiSmartClinic.Data;
 
@@ -11,9 +12,11 @@ using WebApiSmartClinic.Data;
 namespace WebApiSmartClinic.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250104135809_attDbgeral")]
+    partial class attDbgeral
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -47,26 +50,6 @@ namespace WebApiSmartClinic.Migrations
                         .HasFilter("[NormalizedName] IS NOT NULL");
 
                     b.ToTable("AspNetRoles", (string)null);
-
-                    b.HasData(
-                        new
-                        {
-                            Id = "1",
-                            Name = "User",
-                            NormalizedName = "USER"
-                        },
-                        new
-                        {
-                            Id = "2",
-                            Name = "Support",
-                            NormalizedName = "SUPPORT"
-                        },
-                        new
-                        {
-                            Id = "3",
-                            Name = "Admin",
-                            NormalizedName = "ADMIN"
-                        });
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -589,6 +572,31 @@ namespace WebApiSmartClinic.Migrations
                     b.ToTable("Empresa");
                 });
 
+            modelBuilder.Entity("WebApiSmartClinic.Models.Evolucao", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("DataEvolucao")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Observacao")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("PacienteId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PacienteId");
+
+                    b.ToTable("Evolucao");
+                });
+
             modelBuilder.Entity("WebApiSmartClinic.Models.EvolucaoModel", b =>
                 {
                     b.Property<int>("Id")
@@ -626,10 +634,10 @@ namespace WebApiSmartClinic.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int?>("EvolucaoId")
+                    b.Property<int>("EvolucaoId")
                         .HasColumnType("int");
 
-                    b.Property<int?>("EvolucaoId1")
+                    b.Property<int>("EvolucaoId1")
                         .HasColumnType("int");
 
                     b.Property<string>("Obs")
@@ -1879,11 +1887,9 @@ namespace WebApiSmartClinic.Migrations
                         .HasForeignKey("EvolucaoId")
                         .OnDelete(DeleteBehavior.Cascade);
 
-                    b.HasOne("WebApiSmartClinic.Models.EvolucaoModel", "Evolucao")
-                        .WithMany()
+                    b.HasOne("WebApiSmartClinic.Models.Evolucao", null)
+                        .WithMany("atividades")
                         .HasForeignKey("EvolucaoId1");
-
-                    b.Navigation("Evolucao");
                 });
 
             modelBuilder.Entity("WebApiSmartClinic.Models.BoletoModel", b =>
@@ -1916,12 +1922,20 @@ namespace WebApiSmartClinic.Migrations
                     b.Navigation("Profissional");
                 });
 
+            modelBuilder.Entity("WebApiSmartClinic.Models.Evolucao", b =>
+                {
+                    b.HasOne("WebApiSmartClinic.Models.PacienteModel", "paciente")
+                        .WithMany("Evolucoes")
+                        .HasForeignKey("PacienteId");
+
+                    b.Navigation("paciente");
+                });
+
             modelBuilder.Entity("WebApiSmartClinic.Models.EvolucaoModel", b =>
                 {
                     b.HasOne("WebApiSmartClinic.Models.PacienteModel", "Paciente")
-                        .WithMany("Evolucoes")
-                        .HasForeignKey("PacienteId")
-                        .OnDelete(DeleteBehavior.Restrict);
+                        .WithMany()
+                        .HasForeignKey("PacienteId");
 
                     b.Navigation("Paciente");
                 });
@@ -1931,13 +1945,14 @@ namespace WebApiSmartClinic.Migrations
                     b.HasOne("WebApiSmartClinic.Models.EvolucaoModel", null)
                         .WithMany("Exercicios")
                         .HasForeignKey("EvolucaoId")
-                        .OnDelete(DeleteBehavior.Cascade);
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
-                    b.HasOne("WebApiSmartClinic.Models.EvolucaoModel", "Evolucao")
-                        .WithMany()
-                        .HasForeignKey("EvolucaoId1");
-
-                    b.Navigation("Evolucao");
+                    b.HasOne("WebApiSmartClinic.Models.Evolucao", null)
+                        .WithMany("exercicios")
+                        .HasForeignKey("EvolucaoId1")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("WebApiSmartClinic.Models.Financ_PagarModel", b =>
@@ -2170,6 +2185,13 @@ namespace WebApiSmartClinic.Migrations
             modelBuilder.Entity("WebApiSmartClinic.Models.EmpresaModel", b =>
                 {
                     b.Navigation("Usuarios");
+                });
+
+            modelBuilder.Entity("WebApiSmartClinic.Models.Evolucao", b =>
+                {
+                    b.Navigation("atividades");
+
+                    b.Navigation("exercicios");
                 });
 
             modelBuilder.Entity("WebApiSmartClinic.Models.EvolucaoModel", b =>

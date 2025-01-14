@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using WebApiSmartClinic.Data;
 
@@ -11,9 +12,11 @@ using WebApiSmartClinic.Data;
 namespace WebApiSmartClinic.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250111144350_AddEvolucaoPacienteRelationship")]
+    partial class AddEvolucaoPacienteRelationship
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -262,9 +265,6 @@ namespace WebApiSmartClinic.Migrations
                     b.Property<int?>("EvolucaoId")
                         .HasColumnType("int");
 
-                    b.Property<int?>("EvolucaoId1")
-                        .HasColumnType("int");
-
                     b.Property<string>("Tempo")
                         .HasColumnType("nvarchar(max)");
 
@@ -274,8 +274,6 @@ namespace WebApiSmartClinic.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("EvolucaoId");
-
-                    b.HasIndex("EvolucaoId1");
 
                     b.ToTable("Atividade");
                 });
@@ -626,10 +624,7 @@ namespace WebApiSmartClinic.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int?>("EvolucaoId")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("EvolucaoId1")
+                    b.Property<int>("EvolucaoId")
                         .HasColumnType("int");
 
                     b.Property<string>("Obs")
@@ -651,8 +646,6 @@ namespace WebApiSmartClinic.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("EvolucaoId");
-
-                    b.HasIndex("EvolucaoId1");
 
                     b.ToTable("Exercicio");
                 });
@@ -1878,12 +1871,6 @@ namespace WebApiSmartClinic.Migrations
                         .WithMany("Atividades")
                         .HasForeignKey("EvolucaoId")
                         .OnDelete(DeleteBehavior.Cascade);
-
-                    b.HasOne("WebApiSmartClinic.Models.EvolucaoModel", "Evolucao")
-                        .WithMany()
-                        .HasForeignKey("EvolucaoId1");
-
-                    b.Navigation("Evolucao");
                 });
 
             modelBuilder.Entity("WebApiSmartClinic.Models.BoletoModel", b =>
@@ -1931,13 +1918,8 @@ namespace WebApiSmartClinic.Migrations
                     b.HasOne("WebApiSmartClinic.Models.EvolucaoModel", null)
                         .WithMany("Exercicios")
                         .HasForeignKey("EvolucaoId")
-                        .OnDelete(DeleteBehavior.Cascade);
-
-                    b.HasOne("WebApiSmartClinic.Models.EvolucaoModel", "Evolucao")
-                        .WithMany()
-                        .HasForeignKey("EvolucaoId1");
-
-                    b.Navigation("Evolucao");
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("WebApiSmartClinic.Models.Financ_PagarModel", b =>

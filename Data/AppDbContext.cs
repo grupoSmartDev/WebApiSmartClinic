@@ -149,6 +149,12 @@ public class AppDbContext : IdentityDbContext<User>
             .WithMany(f => f.SubPlanos)
             .HasForeignKey(s => s.PlanoContaId);
 
+        modelBuilder.Entity<AtividadeModel>()
+          .HasOne(a => a.Evolucao)
+          .WithMany(e => e.Atividades)
+          .HasForeignKey(a => a.EvolucaoId)
+          .OnDelete(DeleteBehavior.Cascade);
+
 
         base.OnModelCreating(modelBuilder);
     }

@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace WebApiSmartClinic.Migrations
 {
     /// <inheritdoc />
-    public partial class primeirgdfgda : Migration
+    public partial class AjustesDbContext : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -735,7 +735,7 @@ namespace WebApiSmartClinic.Migrations
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     Titulo = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Descricao = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Descricao = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Tempo = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     EvolucaoId = table.Column<int>(type: "int", nullable: true)
                 },
@@ -766,12 +766,12 @@ namespace WebApiSmartClinic.Migrations
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     Descricao = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Obs = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Peso = table.Column<int>(type: "int", nullable: false),
-                    Tempo = table.Column<int>(type: "int", nullable: false),
-                    Repeticoes = table.Column<int>(type: "int", nullable: false),
-                    Series = table.Column<int>(type: "int", nullable: false),
-                    EvolucaoId = table.Column<int>(type: "int", nullable: true),
+                    Obs = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Peso = table.Column<int>(type: "int", nullable: true),
+                    Tempo = table.Column<int>(type: "int", nullable: true),
+                    Repeticoes = table.Column<int>(type: "int", nullable: true),
+                    Series = table.Column<int>(type: "int", nullable: true),
+                    EvolucaoId = table.Column<int>(type: "int", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -781,7 +781,7 @@ namespace WebApiSmartClinic.Migrations
                         column: x => x.EvolucaoId,
                         principalTable: "Evolucoes",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade); 
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -1267,7 +1267,7 @@ namespace WebApiSmartClinic.Migrations
                 column: "PacienteId",
                 principalTable: "Paciente",
                 principalColumn: "Id",
-                onDelete: ReferentialAction.Restrict);
+                onDelete: ReferentialAction.Cascade);
 
             migrationBuilder.AddForeignKey(
                 name: "FK_Financ_Pagar_Paciente_PacienteId",

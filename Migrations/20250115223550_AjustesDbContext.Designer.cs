@@ -12,8 +12,8 @@ using WebApiSmartClinic.Data;
 namespace WebApiSmartClinic.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250115012924_primeirgdfgda")]
-    partial class primeirgdfgda
+    [Migration("20250115223550_AjustesDbContext")]
+    partial class AjustesDbContext
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -260,6 +260,7 @@ namespace WebApiSmartClinic.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Descricao")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<int?>("EvolucaoId")
@@ -627,30 +628,24 @@ namespace WebApiSmartClinic.Migrations
                     b.Property<int?>("EvolucaoId")
                         .HasColumnType("int");
 
-                    b.Property<int?>("EvolucaoId1")
-                        .HasColumnType("int");
-
                     b.Property<string>("Obs")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("Peso")
+                    b.Property<int?>("Peso")
                         .HasColumnType("int");
 
-                    b.Property<int>("Repeticoes")
+                    b.Property<int?>("Repeticoes")
                         .HasColumnType("int");
 
-                    b.Property<int>("Series")
+                    b.Property<int?>("Series")
                         .HasColumnType("int");
 
-                    b.Property<int>("Tempo")
+                    b.Property<int?>("Tempo")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
 
                     b.HasIndex("EvolucaoId");
-
-                    b.HasIndex("EvolucaoId1");
 
                     b.ToTable("Exercicio");
                 });
@@ -1915,21 +1910,17 @@ namespace WebApiSmartClinic.Migrations
                     b.HasOne("WebApiSmartClinic.Models.PacienteModel", "Paciente")
                         .WithMany("Evolucoes")
                         .HasForeignKey("PacienteId")
-                        .OnDelete(DeleteBehavior.Restrict);
+                        .OnDelete(DeleteBehavior.Cascade);
 
                     b.Navigation("Paciente");
                 });
 
             modelBuilder.Entity("WebApiSmartClinic.Models.ExercicioModel", b =>
                 {
-                    b.HasOne("WebApiSmartClinic.Models.EvolucaoModel", null)
+                    b.HasOne("WebApiSmartClinic.Models.EvolucaoModel", "Evolucao")
                         .WithMany("Exercicios")
                         .HasForeignKey("EvolucaoId")
                         .OnDelete(DeleteBehavior.Cascade);
-
-                    b.HasOne("WebApiSmartClinic.Models.EvolucaoModel", "Evolucao")
-                        .WithMany()
-                        .HasForeignKey("EvolucaoId1");
 
                     b.Navigation("Evolucao");
                 });

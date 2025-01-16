@@ -15,5 +15,5 @@ public class ExercicioModel
     public int? EvolucaoId { get; set; } // Opcional, quando vinculado a uma evolução
     
     [JsonIgnore]
-    public virtual EvolucaoModel? Evolucao { get; set; }
+    public EvolucaoModel? Evolucao { get; set; }
 }

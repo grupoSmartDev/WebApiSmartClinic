@@ -54,7 +54,7 @@ public class ExercicioService : IExercicioInterface
             exercicio.Tempo = (int)exercicioCreateDto.Tempo;
             exercicio.Repeticoes = (int)exercicioCreateDto.Repeticoes;
             exercicio.Series = (int)exercicioCreateDto.Series;
-            exercicio.EvolucaoId = exercicioCreateDto.EvolucaoId;
+            //exercicio.EvolucaoId = exercicioCreateDto.EvolucaoId;
 
             _context.Add(exercicio);
             await _context.SaveChangesAsync();

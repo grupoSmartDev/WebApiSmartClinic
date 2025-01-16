@@ -49,7 +49,7 @@ public class AtividadeService : IAtividadeInterface
             var atividade = new AtividadeModel();
 
             atividade.Descricao = atividadeCreateDto.Descricao;
-            atividade.EvolucaoId = atividadeCreateDto.EvolucaoId;
+            //atividade.EvolucaoId = atividadeCreateDto.EvolucaoId;
 
             _context.Add(atividade);
             await _context.SaveChangesAsync();

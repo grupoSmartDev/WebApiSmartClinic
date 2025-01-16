@@ -62,10 +62,10 @@ public class EvolucaoService : IEvolucaoInterface
                     var exercicio = new ExercicioModel
                     {
                         Obs = exercicioDto.Obs,
-                        Peso = (int)exercicioDto.Peso,
-                        Repeticoes = (int)exercicioDto.Repeticoes,
-                        Series = (int)exercicioDto.Series,
-                        Tempo = (int)exercicioDto.Tempo,
+                        Peso = (int?)exercicioDto.Peso,
+                        Repeticoes = (int?)exercicioDto.Repeticoes,
+                        Series = (int?)exercicioDto.Series,
+                        Tempo = (int?)exercicioDto.Tempo,
                         Descricao = exercicioDto.Descricao
                     };
                     evolucao.Exercicios.Add(exercicio);

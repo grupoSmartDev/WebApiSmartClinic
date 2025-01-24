@@ -37,6 +37,13 @@ namespace WebApiSmartClinic.Controllers
             return Ok(plano);
         }
 
+        [HttpPost("PlanoParaPaciente")]
+        public async Task<ActionResult<ResponseModel<List<PlanoModel>>>> PlanoParaPaciente(PlanoCreateDto planoCreateDto)
+        {
+            var plano = await _plano.PlanoParaPaciente(planoCreateDto);
+            return Ok(plano);
+        }
+
         [HttpPut("Editar")]
         public async Task<ActionResult<ResponseModel<List<PlanoModel>>>> Editar(PlanoEdicaoDto planoEdicaoDto, int pageNumber = 1, int pageSize = 10)
         {

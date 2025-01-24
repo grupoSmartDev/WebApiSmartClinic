@@ -20,7 +20,7 @@ namespace WebApiSmartClinic.Models
         [Range(1, 7, ErrorMessage = "Os dias da semana devem estar entre 1 e 7.")]
         public int DiasSemana { get; set; }
 
-        public int? CentroCustoId { get; set; } // Relacionamento opcional com centro de custo
+        public int? CentroCustoId { get; set; }
 
         [Range(0, double.MaxValue, ErrorMessage = "O valor deve ser maior ou igual a zero.")]
         public decimal? ValorBimestral { get; set; }
@@ -38,16 +38,16 @@ namespace WebApiSmartClinic.Models
 
         public bool Ativo { get; set; }
 
-        public int? PacienteId { get; set; } // Relacionamento opcional com paciente
+        public int? PacienteId { get; set; }
         [JsonIgnore]
         public PacienteModel? Paciente { get; set; }
 
-        public int? FinanceiroId { get; set; } // Relacionamento opcional com financeiro
+        public int? FinanceiroId { get; set; }
         [JsonIgnore]
         public Financ_ReceberModel? Financeiro { get; set; }
 
         [Required(ErrorMessage = "O tipo de mês é obrigatório.")]
         [StringLength(1, ErrorMessage = "O tipo de mês deve ter apenas um caractere.")]
-        public string TipoMes { get; set; } = string.Empty; // Usado como enum no front-end
+        public string TipoMes { get; set; } = string.Empty;
     }
 }

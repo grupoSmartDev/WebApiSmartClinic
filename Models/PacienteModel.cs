@@ -6,7 +6,6 @@ namespace WebApiSmartClinic.Models
     public class PacienteModel
     {
         public int Id { get; set; }
-
         public string? Bairro { get; set; }
         public string? BreveDiagnostico { get; set; }
         public string? Celular { get; set; }
@@ -14,8 +13,7 @@ namespace WebApiSmartClinic.Models
         public string? Cidade { get; set; }
         public string? ComoConheceu { get; set; }
         public string? Complemento { get; set; }
-
-        public int? ConvenioId { get; set; } // Relacionamento com a tabela de convenio
+        public int? ConvenioId { get; set; }
         [JsonIgnore]
         public ConvenioModel? Convenio { get; set; }
 
@@ -27,13 +25,12 @@ namespace WebApiSmartClinic.Models
 
         [EmailAddress(ErrorMessage = "O email deve ser válido.")]
         public string? Email { get; set; }
-
         public string? Uf { get; set; }
         public string? EstadoCivil { get; set; }
         public string? Logradouro { get; set; }
         public string? Medicamento { get; set; }
+        public int? ProfissionalId { get; set; }
 
-        public int? ProfissionalId { get; set; } // Relacionamento com profissional
         [JsonIgnore]
         public ProfissionalModel? Profissional { get; set; }
 
@@ -41,8 +38,7 @@ namespace WebApiSmartClinic.Models
         public string? Nome { get; set; }
         public string? Numero { get; set; }
         public string? Pais { get; set; }
-
-        public bool PermitirLembretes { get; set; } // Suporte para booleano
+        public bool PermitirLembretes { get; set; }
         public string? PreferenciaDeContato { get; set; }
         public string? Profissao { get; set; }
         public bool Responsavel { get; set; }
@@ -50,23 +46,24 @@ namespace WebApiSmartClinic.Models
         public string? Sexo { get; set; }
         public string? Telefone { get; set; }
 
-        public int? PlanoId { get; set; } // Relacionamento com plano
-        [JsonIgnore]
+        public int? PlanoId { get; set; }
+   
         public PlanoModel? Plano { get; set; }
 
-        public List<EvolucaoModel>? Evolucoes { get; set; } // Relacionamento com evoluções
+        public List<EvolucaoModel>? Evolucoes { get; set; }
 
         [DataType(DataType.Date)]
-        public DateTime? DataUltimoAtendimento { get; set; } // Ultima data de atendimento
+        public DateTime? DataUltimoAtendimento { get; set; }
 
         [DataType(DataType.Date)]
-        public DateTime? DataCadastro { get; set; } // Ultima data de atendimento
+        public DateTime? DataCadastro { get; set; }
 
-        public List<Financ_ReceberModel>? FinancReceber { get; set; } // Relacionamento com financeiro
+        public List<Financ_ReceberModel>? FinancReceber { get; set; }
 
         public PacienteModel()
         {
-            Evolucoes = new List<EvolucaoModel>();  // Inicialização da lista no construtor
+            Evolucoes = new List<EvolucaoModel>();
+           // Plano = new PlanoModel();
         }
     }
 }

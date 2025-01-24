@@ -199,4 +199,75 @@ public class PlanoService : IPlanoInterface
         }
     }
 
+    public async Task<ResponseModel<PlanoModel>> PlanoParaPaciente(PlanoCreateDto planoCreateDto)
+    {
+        ResponseModel<PlanoModel> resposta = new ResponseModel<PlanoModel>();
+
+        try
+        {
+            using var transaction = await _context.Database.BeginTransactionAsync();
+            try
+            {
+                var paciente = await _context.Paciente
+                    .FirstOrDefaultAsync(p => p.Id == planoCreateDto.PacienteId);
+                  
+
+                if (paciente == null)
+                {
+                    resposta.Mensagem = "Paciente não encontrado";
+                    resposta.Status = false;
+                    return resposta;
+                }
+
+                if (paciente.Plano != null && paciente.Plano.Ativo)
+                {
+                    paciente.Plano.Ativo = false;
+                    paciente.Plano.DataFim = DateTime.Now;
+                }
+
+                var plano = new PlanoModel
+                {
+                    Descricao = planoCreateDto.Descricao,
+                    TempoMinutos = planoCreateDto.TempoMinutos,
+                    CentroCustoId = planoCreateDto.CentroCustoId,
+                    DiasSemana = planoCreateDto.DiasSemana,
+                    ValorBimestral = planoCreateDto.ValorBimestral,
+                    ValorMensal = planoCreateDto.ValorMensal,
+                    ValorTrimestral = planoCreateDto.ValorTrimestral,
+                    ValorQuadrimestral = planoCreateDto.ValorQuadrimestral,
+                    ValorSemestral = planoCreateDto.ValorSemestral,
+                    ValorAnual = planoCreateDto.ValorAnual,
+                    DataInicio = planoCreateDto.DataInicio,
+                    DataFim = planoCreateDto.DataFim,
+                    Ativo = planoCreateDto.Ativo,
+                    PacienteId = planoCreateDto.PacienteId,
+                    FinanceiroId = planoCreateDto.FinanceiroId,
+                    TipoMes = planoCreateDto.TipoMes
+                };
+
+                _context.Add(plano);
+                await _context.SaveChangesAsync();
+
+                paciente.PlanoId = plano.Id;
+                await _context.SaveChangesAsync();
+                await transaction.CommitAsync();
+
+                resposta.Dados = plano;
+                resposta.Mensagem = "Plano vinculado ao paciente com sucesso";
+                return resposta;
+            }
+            catch
+            {
+                await transaction.RollbackAsync();
+                throw;
+            }
+        }
+        catch (Exception ex)
+        {
+            resposta.Mensagem = $"Erro ao vincular plano ao paciente: {ex.Message}";
+            resposta.Status = false;
+            return resposta;
+        }
+    }
+
 }

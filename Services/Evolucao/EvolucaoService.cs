@@ -50,6 +50,7 @@ public class EvolucaoService : IEvolucaoInterface
                 Observacao = evolucaoCreateDto.Observacao,
                 DataEvolucao = evolucaoCreateDto.DataEvolucao,
                 PacienteId = evolucaoCreateDto.PacienteId,
+                ProfissionalId = evolucaoCreateDto.ProfissionalId,
                 Exercicios = new List<ExercicioModel>(),
                 Atividades = new List<AtividadeModel>()
             };
@@ -156,7 +157,7 @@ public class EvolucaoService : IEvolucaoInterface
             evolucao.Observacao = evolucaoEdicaoDto.Observacao;
             evolucao.DataEvolucao = evolucaoEdicaoDto.DataEvolucao;
             evolucao.PacienteId = evolucaoEdicaoDto.PacienteId;
-
+            evolucao.ProfissionalId = evolucaoEdicaoDto.ProfissionalId;
             // Limpar as listas existentes
             if (evolucao.Exercicios != null)
             {

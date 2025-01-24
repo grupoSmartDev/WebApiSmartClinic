@@ -77,12 +77,11 @@ public class AppDbContext : IdentityDbContext<User>
 
         modelBuilder.Entity<IdentityRole>().HasData(roles);
 
-        // Relacionamento: Paciente -> Plano
-        modelBuilder.Entity<PacienteModel>()
-            .HasOne(p => p.Plano)
-            .WithOne() // Sem navegação reversa
-            .HasForeignKey<PacienteModel>(p => p.PlanoId)
-            .OnDelete(DeleteBehavior.Restrict); // Impede exclusão em cascata
+        modelBuilder.Entity<PlanoModel>()
+          .HasOne(p => p.Paciente)
+          .WithOne(p => p.Plano)
+          .HasForeignKey<PacienteModel>(p => p.PlanoId)
+          .IsRequired(false);
 
         // Relacionamento: Paciente -> Evoluções
         modelBuilder.Entity<PacienteModel>()

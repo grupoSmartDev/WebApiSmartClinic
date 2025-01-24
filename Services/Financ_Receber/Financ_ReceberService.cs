@@ -49,8 +49,8 @@ public class Financ_ReceberService : IFinanc_ReceberInterface
             // Criação do cabeçalho (pai)
             var financ_receber = new Financ_ReceberModel
             {
-                IdOrigem = financ_receberCreateDto.IdOrigem,
-                NrDocto = financ_receberCreateDto.NrDocto,
+                IdOrigem = financ_receberCreateDto.IdOrigem ?? 0,
+                NrDocto = financ_receberCreateDto.NrDocto ?? 0,
                 DataEmissao = financ_receberCreateDto.DataEmissao,
                 ValorOriginal = financ_receberCreateDto.ValorOriginal,
                 ValorPago = financ_receberCreateDto.ValorPago,
@@ -63,14 +63,15 @@ public class Financ_ReceberService : IFinanc_ReceberInterface
                 Observacao = financ_receberCreateDto.Observacao,
                 FornecedorId = financ_receberCreateDto.FornecedorId,
                 CentroCustoId = financ_receberCreateDto.CentroCustoId,
-                BancoId = financ_receberCreateDto.BancoId
+                BancoId = financ_receberCreateDto.BancoId,
+                subFinancReceber = new List<Financ_ReceberSubModel>()
             };
 
             _context.Add(financ_receber);
             await _context.SaveChangesAsync();
 
             // Adicionando subitens (filhos)
-            if (financ_receberCreateDto.subFinancReceber != null && financ_receberCreateDto.subFinancReceber.Any())
+            if (financ_receberCreateDto != null)
             {
                 foreach (var parcela in financ_receberCreateDto.subFinancReceber)
                 {
@@ -89,12 +90,13 @@ public class Financ_ReceberService : IFinanc_ReceberInterface
                         Observacao = parcela.Observacao
                     };
 
-                    _context.Add(subItem);
+                    financ_receber.subFinancReceber.Add(subItem);
                 }
-
-                await _context.SaveChangesAsync();
             }
 
+
+
+            await _context.SaveChangesAsync();
             var query = _context.Financ_Receber
                 .Include(x => x.subFinancReceber)
                 .AsQueryable();

@@ -11,5 +11,7 @@ namespace WebApiSmartClinic.Services.Paciente
         Task<ResponseModel<PacienteModel>> BuscarPorId(int idPaciente);
         Task<ResponseModel<List<PacienteModel>>> Criar(PacienteCreateDto pacienteCreateDto, int pageNumber = 1, int pageSize = 10);
         Task<ResponseModel<List<PacienteModel>>> Editar(PacienteEdicaoDto pacienteEdicaoDto, int pageNumber = 1, int pageSize = 10);
+        Task<ResponseModel<PacienteModel>> ObterPorCpf(string cpf);
+        Task<ResponseModel<List<PacienteModel>>> ObterPorNome(string nome);
     }
 }

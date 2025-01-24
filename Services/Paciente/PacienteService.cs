@@ -6,6 +6,7 @@ using WebApiSmartClinic.Helpers;
 using WebApiSmartClinic.Dto.Paciente;
 using WebApiSmartClinic.Models;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
+using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace WebApiSmartClinic.Services.Paciente;
 
@@ -420,6 +421,68 @@ public class PacienteService : IPacienteInterface
             resposta.Mensagem = e.Message;
             resposta.Status = false;
             return resposta;
+        }
+    }
+
+    
+
+   public async Task<ResponseModel<PacienteModel>> ObterPorCpf(string cpf)
+    {
+        ResponseModel<PacienteModel> resposta = new ResponseModel<PacienteModel>();
+        try
+        {
+            var paciente = await _context.Paciente.FirstOrDefaultAsync(x => x.Cpf == cpf);
+
+            if(paciente == null)
+            {
+                resposta.Status = true;
+                resposta.Mensagem = "Nenhum paciente encontrado";
+                return resposta;
+            }
+
+            resposta.Dados = paciente;
+            resposta.Mensagem = "Sucesso, paciente encontrado";
+            return resposta;
+        }
+        catch (Exception)
+        {
+            resposta.Status = false;
+            resposta.Mensagem = "Erro ao procurar por paciente";
+            return resposta;
+            throw;
+
+        }
+    }
+
+   public async Task<ResponseModel<List<PacienteModel>>> ObterPorNome(string nome)
+    {
+         ResponseModel<List<PacienteModel>> resposta = new ResponseModel<List<PacienteModel>>();
+        try
+        {
+
+            var paciente = await _context.Paciente.ToListAsync();
+            paciente.Select(
+                n => n.Nome.Contains(nome)
+                );
+
+            if(paciente == null)
+            {
+                resposta.Status = true;
+                resposta.Mensagem = "Nenhum paciente com esse nome";
+                return resposta;
+            }
+
+            resposta.Status = true;
+            resposta.Mensagem = "Pacientes encontrado";
+            resposta.Dados = paciente;
+            return resposta;
+        }
+        catch (Exception)
+        {
+            resposta.Status = false;
+            resposta.Mensagem = "Erro ao buscar paciente";
+            return resposta;
+            throw;
         }
     }
 }

@@ -171,18 +171,13 @@ var builder = WebApplication.CreateBuilder(args);
 
     // Registrar IConnectionsService e ConnectionsService
     builder.Services.AddScoped<IConnectionsService, ConnectionsService>();
-
-
-
-
-
 }
 
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowFrontend", policy =>
     {
-        policy.WithOrigins("http://localhost:4200")
+        policy.WithOrigins("http://localhost:4200", "https://smart-clinic-angular-it7o.vercel.app/")
               .AllowAnyMethod()
               .AllowAnyHeader()
               .WithExposedHeaders("Authorization")
@@ -243,6 +238,7 @@ app.UseHttpsRedirection();
 
 // CORS antes da autenticação
 app.UseCors("AllowFrontend");
+app.UseCors("AllowVercel");
 
 app.UseRouting();
 

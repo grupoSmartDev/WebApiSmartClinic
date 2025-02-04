@@ -43,6 +43,7 @@ using WebApiSmartClinic;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using WebApiSmartClinic.Services.ConnectionsService;
+using Npgsql.EntityFrameworkCore.PostgreSQL;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -53,13 +54,13 @@ var builder = WebApplication.CreateBuilder(args);
 
     // Adiciona o contexto do Entity Framework Core
     builder.Services.AddDbContext<DataConnectionContext>(options =>
-        options.UseSqlServer(builder.Configuration.GetConnectionString("ConnectionsContext")));
+        options.UseNpgsql(builder.Configuration.GetConnectionString("ConnectionsContext")));
 
     builder.Services.AddDbContext<AppDbContext>((serviceProvider, options) =>
     {
         var connectionStringProvider = serviceProvider.GetRequiredService<IConnectionStringProvider>();
         var connectionString = connectionStringProvider.GetConnectionString() ?? builder.Configuration.GetConnectionString("DefaultContext");
-        options.UseSqlServer(connectionString);
+        options.UseNpgsql(connectionString);
     });
 
     services.AddIdentity<User, IdentityRole>(options => options.SignIn.RequireConfirmedAccount = true)

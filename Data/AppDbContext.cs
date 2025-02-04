@@ -59,7 +59,7 @@ public class AppDbContext : IdentityDbContext<User>
     {
         if (!optionsBuilder.IsConfigured)
         {
-            optionsBuilder.UseSqlServer(_connectionStringProvider.GetConnectionString());
+            optionsBuilder.UseNpgsql(_connectionStringProvider.GetConnectionString());
         }
     }
 

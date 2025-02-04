@@ -1,5 +1,4 @@
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Identity.Client.Extensions.Msal;
 using WebApiSmartClinic.Data;
 using WebApiSmartClinic.Dto.Plano;
 using WebApiSmartClinic.Models;

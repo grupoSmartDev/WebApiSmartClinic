@@ -1,7 +1,8 @@
-﻿using Microsoft.Data.SqlClient;
+﻿using Npgsql.EntityFrameworkCore.PostgreSQL;
 using Microsoft.EntityFrameworkCore;
 using WebApiSmartClinic.Data;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
+using Npgsql;
 
 namespace WebApiSmartClinic.Services.Empresa;
 
@@ -25,7 +26,7 @@ public class EmpresaService
         var newDbName = $"CompanyDb_{companyName}";
         var connectionString = $"Server=.;Database={newDbName};Trusted_Connection=True;";
 
-        using (var connection = new SqlConnection(connectionString))
+        using (var connection = new NpgsqlConnection(connectionString))
         {
             await connection.OpenAsync();
             var command = connection.CreateCommand();

@@ -1,11 +1,12 @@
 ﻿using Microsoft.EntityFrameworkCore.Migrations;
+using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
 namespace WebApiSmartClinic.Migrations.DataConnection
 {
     /// <inheritdoc />
-    public partial class novodbContext : Migration
+    public partial class PostgreeConversao : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -14,10 +15,10 @@ namespace WebApiSmartClinic.Migrations.DataConnection
                 name: "DataConnection",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    Key = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: false),
-                    StringConnection = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    Key = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: false),
+                    StringConnection = table.Column<string>(type: "text", nullable: false)
                 },
                 constraints: table =>
                 {

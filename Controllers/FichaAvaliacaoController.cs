@@ -30,6 +30,13 @@ namespace WebApiSmartClinic.Controllers
             return Ok(fichaavaliacao);
         }
 
+        [HttpGet("BuscarPorIdPaciente")]
+        public async Task<ActionResult<ResponseModel<List<FichaAvaliacaoModel>>>> BuscarPorIdPaciente([FromQuery] int pacienteId)
+        {
+            var fichaavaliacao = await _fichaavaliacao.BuscarPorIdPaciente(pacienteId);
+            return Ok(fichaavaliacao);
+        }
+
         [HttpPost("Criar")]
         public async Task<ActionResult<ResponseModel<List<FichaAvaliacaoModel>>>> Criar(FichaAvaliacaoCreateDto fichaavaliacaoCreateDto)
         {

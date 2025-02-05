@@ -59,6 +59,8 @@ namespace WebApiSmartClinic.Models
         public DateTime? DataCadastro { get; set; }
 
         public List<Financ_ReceberModel>? FinancReceber { get; set; }
+        public int? FichaAvaliacaoId { get; set; }
+        public FichaAvaliacaoModel? FichaAvaliacao { get; set; }
 
         public PacienteModel()
         {

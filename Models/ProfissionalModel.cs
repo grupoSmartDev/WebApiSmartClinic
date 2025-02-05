@@ -31,4 +31,6 @@ public class ProfissionalModel
 
     // Opcional: Data de cadastro para rastrear a criação do registro
     public DateTime? DataCadastro { get; set; } = DateTime.Now;
+    public List<FichaAvaliacaoModel>? FichasAvaliacao { get; set; }
+
 }

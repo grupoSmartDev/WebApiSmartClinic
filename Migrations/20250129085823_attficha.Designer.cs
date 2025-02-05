@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using WebApiSmartClinic.Data;
 
@@ -11,9 +12,11 @@ using WebApiSmartClinic.Data;
 namespace WebApiSmartClinic.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250129085823_attficha")]
+    partial class attficha
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1364,6 +1367,8 @@ namespace WebApiSmartClinic.Migrations
 
                     b.HasIndex("ConvenioId");
 
+                    b.HasIndex("FichaAvaliacaoId");
+
                     b.HasIndex("PlanoId")
                         .IsUnique()
                         .HasFilter("[PlanoId] IS NOT NULL");
@@ -1989,15 +1994,15 @@ namespace WebApiSmartClinic.Migrations
             modelBuilder.Entity("WebApiSmartClinic.Models.FichaAvaliacaoModel", b =>
                 {
                     b.HasOne("WebApiSmartClinic.Models.PacienteModel", "Paciente")
-                        .WithOne("FichaAvaliacao")
+                        .WithOne()
                         .HasForeignKey("WebApiSmartClinic.Models.FichaAvaliacaoModel", "PacienteId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("WebApiSmartClinic.Models.ProfissionalModel", "Profissional")
-                        .WithMany("FichasAvaliacao")
+                        .WithMany()
                         .HasForeignKey("ProfissionalId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Paciente");
@@ -2135,6 +2140,10 @@ namespace WebApiSmartClinic.Migrations
                         .WithMany("Pacientes")
                         .HasForeignKey("ConvenioId");
 
+                    b.HasOne("WebApiSmartClinic.Models.FichaAvaliacaoModel", "FichaAvaliacao")
+                        .WithMany()
+                        .HasForeignKey("FichaAvaliacaoId");
+
                     b.HasOne("WebApiSmartClinic.Models.PlanoModel", "Plano")
                         .WithOne("Paciente")
                         .HasForeignKey("WebApiSmartClinic.Models.PacienteModel", "PlanoId");
@@ -2144,6 +2153,8 @@ namespace WebApiSmartClinic.Migrations
                         .HasForeignKey("ProfissionalId");
 
                     b.Navigation("Convenio");
+
+                    b.Navigation("FichaAvaliacao");
 
                     b.Navigation("Plano");
 
@@ -2251,8 +2262,6 @@ namespace WebApiSmartClinic.Migrations
                 {
                     b.Navigation("Evolucoes");
 
-                    b.Navigation("FichaAvaliacao");
-
                     b.Navigation("FinancReceber");
                 });
 
@@ -2264,11 +2273,6 @@ namespace WebApiSmartClinic.Migrations
             modelBuilder.Entity("WebApiSmartClinic.Models.PlanoModel", b =>
                 {
                     b.Navigation("Paciente");
-                });
-
-            modelBuilder.Entity("WebApiSmartClinic.Models.ProfissionalModel", b =>
-                {
-                    b.Navigation("FichasAvaliacao");
                 });
 #pragma warning restore 612, 618
         }

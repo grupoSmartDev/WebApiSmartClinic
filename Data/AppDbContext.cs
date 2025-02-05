@@ -83,6 +83,20 @@ public class AppDbContext : IdentityDbContext<User>
           .HasForeignKey<PacienteModel>(p => p.PlanoId)
           .IsRequired(false);
 
+        modelBuilder.Entity<FichaAvaliacaoModel>()
+            .HasOne(f => f.Paciente)
+            .WithOne(p => p.FichaAvaliacao)
+            .HasForeignKey<FichaAvaliacaoModel>(f => f.PacienteId)
+            .OnDelete(DeleteBehavior.Restrict); // Evita a exclusão em cascata
+
+        // Configuração da relação 1:N entre Profissional e FichaAvaliacao
+        modelBuilder.Entity<FichaAvaliacaoModel>()
+            .HasOne(f => f.Profissional)
+            .WithMany(p => p.FichasAvaliacao)
+            .HasForeignKey(f => f.ProfissionalId)
+            .OnDelete(DeleteBehavior.Restrict); // Evita a exclusão em cascata
+
+
         // Relacionamento: Paciente -> Evoluções
         modelBuilder.Entity<PacienteModel>()
             .HasMany(p => p.Evolucoes)

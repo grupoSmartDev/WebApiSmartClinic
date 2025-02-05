@@ -1,5 +1,6 @@
 
 using Microsoft.EntityFrameworkCore;
+using System;
 using WebApiSmartClinic.Data;
 using WebApiSmartClinic.Dto.Financ_Receber;
 using WebApiSmartClinic.Models;
@@ -66,6 +67,8 @@ public class Financ_ReceberService : IFinanc_ReceberInterface
                 BancoId = financ_receberCreateDto.BancoId,
                 subFinancReceber = new List<Financ_ReceberSubModel>()
             };
+
+            financ_receber.PacienteId = 9;
 
             _context.Add(financ_receber);
             await _context.SaveChangesAsync();
@@ -265,6 +268,126 @@ public class Financ_ReceberService : IFinanc_ReceberInterface
         {
             resposta.Mensagem = ex.Message;
             resposta.Status = false;
+
+            return resposta;
+        }
+    }
+
+    public async Task<ResponseModel<List<Financ_ReceberModel>>> Listara(
+    int pageNumber = 1,
+    int pageSize = 10,
+    int? codigoFiltro = null,
+    string? descricaoFiltro = null,
+    DateTime? dataEmissaoInicio = null,
+    DateTime? dataEmissaoFim = null,
+    decimal? valorMinimoFiltro = null,
+    decimal? valorMaximoFiltro = null,
+    int? parcelaNumeroFiltro = null,
+    DateTime? vencimentoInicio = null,
+    DateTime? vencimentoFim = null,
+    bool paginar = true)
+    {
+        ResponseModel<List<Financ_ReceberModel>> resposta = new ResponseModel<List<Financ_ReceberModel>>();
+        try
+        {
+            // 1. Query base
+            var query = _context.Financ_Receber.AsQueryable();
+
+            // 2. Aplicando filtros principais um por um
+            if (codigoFiltro.HasValue)
+            {
+                query = query.Where(x => x.Id == codigoFiltro);
+            }
+
+            if (!string.IsNullOrEmpty(descricaoFiltro))
+            {
+                query = query.Where(x => x.Descricao.Contains(descricaoFiltro));
+            }
+
+            if (dataEmissaoInicio.HasValue)
+            {
+                query = query.Where(x => x.DataEmissao >= dataEmissaoInicio.Value);
+            }
+
+            if (dataEmissaoFim.HasValue)
+            {
+                query = query.Where(x => x.DataEmissao <= dataEmissaoFim.Value);
+            }
+
+            if (valorMinimoFiltro.HasValue)
+            {
+                query = query.Where(x => x.Valor >= valorMinimoFiltro);
+            }
+
+            if (valorMaximoFiltro.HasValue)
+            {
+                query = query.Where(x => x.Valor <= valorMaximoFiltro);
+            }
+
+            // 3. Aplicando filtros relacionados à subFinancReceber
+            if (parcelaNumeroFiltro.HasValue || vencimentoInicio.HasValue || vencimentoFim.HasValue)
+            {
+                query = query.Where(x => x.subFinancReceber.Any(p =>
+                    (!parcelaNumeroFiltro.HasValue || p.Parcela == parcelaNumeroFiltro) &&
+                    (!vencimentoInicio.HasValue || p.DataVencimento >= vencimentoInicio) &&
+                    (!vencimentoFim.HasValue || p.DataVencimento <= vencimentoFim)
+                ));
+            }
+
+            // 4. Incluindo relacionamentos
+            query = query.Include(x => x.subFinancReceber);
+
+            // 5. Aplicando ordenação
+            query = query.OrderBy(x => x.Id);
+
+            // 6. Executando a query com ou sem paginação
+            List<Financ_ReceberModel> resultado;
+
+            if (paginar)
+            {
+                try
+                {
+                    var paginado = await PaginationHelper.PaginateAsync(query, pageNumber, pageSize);
+                    resultado = paginado.Dados;
+                }
+                catch (Exception ex)
+                {
+                    throw new Exception($"Erro na paginação: {ex.Message}", ex);
+                }
+            }
+            else
+            {
+                try
+                {
+                    resultado = await query.ToListAsync();
+                }
+                catch (Exception ex)
+                {
+                    throw new Exception($"Erro ao executar query sem paginação: {ex.Message}", ex);
+                }
+            }
+
+            // 7. Montando a resposta
+            resposta.Dados = resultado;
+            resposta.Status = true;
+            resposta.Mensagem = "Dados encontrados com sucesso";
+
+            return resposta;
+        }
+        catch (Exception ex)
+        {
+            // Log detalhado do erro
+            var errorMessage = $"Erro ao listar Financ_Receber: {ex.Message}";
+            if (ex.InnerException != null)
+            {
+                errorMessage += $"\nInner Exception: {ex.InnerException.Message}";
+            }
+            errorMessage += $"\nStack Trace: {ex.StackTrace}";
+
+            // Configurando a resposta de erro
+            resposta.Mensagem = errorMessage;
+            resposta.Status = false;
+            resposta.Dados = null;
 
             return resposta;
         }

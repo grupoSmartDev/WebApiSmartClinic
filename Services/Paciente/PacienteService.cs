@@ -76,6 +76,9 @@ public class PacienteService : IPacienteInterface
 
                     if (planoTemplate != null)
                     {
+                        var dataConvertida = DateTime.Now;
+                        dataConvertida.ToUniversalTime();
+
                         novoPlano = new PlanoModel
                         {
                             Descricao = planoTemplate.Descricao,
@@ -88,7 +91,7 @@ public class PacienteService : IPacienteInterface
                             ValorSemestral = planoTemplate.ValorSemestral,
                             ValorAnual = planoTemplate.ValorAnual,
                             ValorMensal = planoTemplate.ValorMensal,
-                            DataInicio = DateTime.Now,
+                            DataInicio = dataConvertida,
                             Ativo = true,
                             TipoMes = planoTemplate.TipoMes,
                             FinanceiroId = planoTemplate.FinanceiroId
@@ -127,7 +130,7 @@ public class PacienteService : IPacienteInterface
                     Sexo = pacienteCreateDto.Sexo,
                     Telefone = pacienteCreateDto.Telefone,
                     PlanoId = novoPlano?.Id,
-                    DataCadastro = DateTime.Now,
+                    DataCadastro = DateTime.Now.ToUniversalTime(),
                     ConvenioId = pacienteCreateDto.ConvenioId,
                     Evolucoes = new List<EvolucaoModel>()
                 };

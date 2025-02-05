@@ -11,8 +11,8 @@ namespace WebApiSmartClinic.Dto.Procedimento
         public decimal Preco { get; set; } // Preço do Procedimento
         public string? Duracao { get; set; } // Duração estimada do Procedimento (horas/minutos)
         public bool Ativo { get; set; } // Indica se o procedimento está ativo ou não no sistema
-        public int? CategoriaId { get; set; } = 0;
-        public decimal PercentualComissao { get; set; }
+        public int? CategoriaId { get; set; }
+        public decimal? PercentualComissao { get; set; }
 
         // Informações sobre materiais/equipamentos ---- criar uma relação com o model "Produtos" depois
         public string? MateriaisNecessarios { get; set; } // Lista de materiais/equipamentos necessários (se aplicável)

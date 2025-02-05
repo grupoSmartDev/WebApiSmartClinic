@@ -20,8 +20,14 @@ namespace WebApiSmartClinic.Models
         [Required(ErrorMessage = "O CPF é obrigatório.")]
         public string? Cpf { get; set; }
 
+        private DateTime? _dataNascimento;
+
         [DataType(DataType.Date)]
-        public DateTime? DataNascimento { get; set; }
+        public DateTime? DataNascimento
+        {
+            get => _dataNascimento;
+            set => _dataNascimento = value.HasValue ? DateTime.SpecifyKind(value.Value, DateTimeKind.Utc) : null;
+        }
 
         [EmailAddress(ErrorMessage = "O email deve ser válido.")]
         public string? Email { get; set; }
@@ -52,11 +58,22 @@ namespace WebApiSmartClinic.Models
 
         public List<EvolucaoModel>? Evolucoes { get; set; }
 
-        [DataType(DataType.Date)]
-        public DateTime? DataUltimoAtendimento { get; set; }
+        private DateTime? _dataUltimoAtendimento;
+        private DateTime? _dataCadastro;
 
         [DataType(DataType.Date)]
-        public DateTime? DataCadastro { get; set; }
+        public DateTime? DataUltimoAtendimento 
+        { 
+            get => _dataUltimoAtendimento; 
+            set => _dataUltimoAtendimento = value.HasValue ? DateTime.SpecifyKind(value.Value, DateTimeKind.Utc) : null;
+        }
+
+        [DataType(DataType.Date)]
+        public DateTime? DataCadastro
+        {
+            get => _dataCadastro;
+            set => _dataCadastro = value.HasValue ? DateTime.SpecifyKind(value.Value, DateTimeKind.Utc) : null;
+        }
 
         public List<Financ_ReceberModel>? FinancReceber { get; set; }
 

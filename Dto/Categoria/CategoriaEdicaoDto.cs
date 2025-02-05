@@ -10,6 +10,6 @@ namespace WebApiSmartClinic.Dto.Categoria
         public string Nome { get; set; }
 
         [JsonIgnore]
-        public virtual ICollection<ProcedimentoModel> Procedimentos { get; set; }
+        public virtual ICollection<ProcedimentoModel>? Procedimentos { get; set; }
     }
 }

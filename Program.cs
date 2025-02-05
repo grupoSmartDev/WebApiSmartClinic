@@ -171,18 +171,13 @@ var builder = WebApplication.CreateBuilder(args);
 
     // Registrar IConnectionsService e ConnectionsService
     builder.Services.AddScoped<IConnectionsService, ConnectionsService>();
-
-
-
-
-
 }
 
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowFrontend", policy =>
     {
-        policy.WithOrigins("http://localhost:4200")
+        policy.WithOrigins("http://localhost:4200", "https://smart-clinic-angular-it7o.vercel.app", "https://viacep.com.br/ws/")
               .AllowAnyMethod()
               .AllowAnyHeader()
               .WithExposedHeaders("Authorization")
@@ -213,19 +208,19 @@ builder.Services.AddSwaggerGen(c =>
     });
 
     c.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
         {
+            new OpenApiSecurityScheme
             {
-                new OpenApiSecurityScheme
+                Reference = new OpenApiReference
                 {
-                    Reference = new OpenApiReference
-                    {
-                        Type = ReferenceType.SecurityScheme,
-                        Id = "Bearer"
-                    }
-                },
-                Array.Empty<string>()
-            }
-        });
+                    Type = ReferenceType.SecurityScheme,
+                    Id = "Bearer"
+                }
+            },
+            Array.Empty<string>()
+        }
+    });
 });
 
 

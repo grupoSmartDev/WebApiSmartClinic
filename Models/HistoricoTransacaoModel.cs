@@ -6,7 +6,12 @@ namespace WebApiSmartClinic.Models
         public int Id { get; set; }
         public int BancoId { get; set; }  // Relacionamento com a conta bancária associada
         public BancoModel Banco { get; set; }  // Propriedade de navegação para a conta bancária
-        public DateTime DataTransacao { get; set; }  // Data e hora da transação
+        private DateTime? _DataTransacao;
+        public DateTime? DataTransacao
+        {
+            get => _DataTransacao;
+            set => _DataTransacao = value.HasValue ? DateTime.SpecifyKind(value.Value, DateTimeKind.Utc) : null;
+        }  // Data e hora da transação
         public string TipoTransacao { get; set; }  // Tipo da transação: "Débito", "Crédito", "Estorno", etc.
         public decimal Valor { get; set; }  // Valor da transação (positiva ou negativa, dependendo do tipo)
         public string Descricao { get; set; }  // Descrição ou observação sobre a transação

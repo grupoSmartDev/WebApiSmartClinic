@@ -30,5 +30,10 @@ public class ProfissionalModel
     public bool EhUsuario { get; set; } = false; // Identifica se o profissional é um usuário do sistema
 
     // Opcional: Data de cadastro para rastrear a criação do registro
-    public DateTime? DataCadastro { get; set; } = DateTime.Now;
+    private DateTime? _DataCadastro;
+    public DateTime? DataCadastro 
+    {
+        get => _DataCadastro;
+        set => _DataCadastro = value.HasValue ? DateTime.SpecifyKind(value.Value, DateTimeKind.Utc) : DateTime.UtcNow;
+    } 
 }

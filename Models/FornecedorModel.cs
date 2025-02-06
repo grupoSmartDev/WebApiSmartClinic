@@ -29,7 +29,12 @@ public class FornecedorModel
     public string TipoPIX { get; set; }
     public string ChavePIX { get; set; }
     public string Email { get; set; }
-    public DateTime? DataNascimento { get; set; }
+    private DateTime? _DataNascimento;
+    public DateTime? DataNascimento 
+    {
+        get => _DataNascimento;
+        set => _DataNascimento = value.HasValue ? DateTime.SpecifyKind(value.Value, DateTimeKind.Utc) : null;
+    }
     public string nome { get; set; }
     public string Observacao { get; set; }
 

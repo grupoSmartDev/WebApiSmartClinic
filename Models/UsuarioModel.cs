@@ -11,7 +11,12 @@ public class UsuarioModel
     public string Senha { get; set; }
     public ICollection<Permissao> Permissao { get; set; }
     public string CPF { get; set; }
-    public DateTime DataCriacao { get; set; } = DateTime.Now;
+    private DateTime? _DataCriacao;
+    public DateTime? DataCriacao 
+    {
+        get => _DataCriacao;
+        set => _DataCriacao = value.HasValue ? DateTime.SpecifyKind(value.Value, DateTimeKind.Utc) : DateTime.UtcNow;
+    }
     public bool Ativo { get; set; } = true;
     public int? ProfissionalId { get; set; } // Relacionamento com Profissional
 

@@ -8,9 +8,16 @@ namespace WebApiSmartClinic.Models
     public class AgendaModel
     {
         public int Id { get; set; }
-        
+
+
+        private DateTime? _date;
+
         [DataType(DataType.Date)]
-        public DateTime Data { get; set; }
+        public DateTime? Data 
+        {
+            get => _date;
+            set => _date = value.HasValue ? DateTime.SpecifyKind(value.Value, DateTimeKind.Utc) : null;
+        }
         public TimeSpan HoraInicio { get; set; }
         public TimeSpan HoraFim { get; set; }
         public int PacienteId { get; set; }

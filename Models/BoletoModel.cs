@@ -7,7 +7,12 @@ namespace WebApiSmartClinic.Models
         public string NossoNumero { get; set; } // Número único do boleto
         public string NumeroDocumento { get; set; } // Número do documento
         public decimal Valor { get; set; } // Valor do boleto
-        public DateTime DataVencimento { get; set; } // Data de vencimento do boleto
+        private DateTime? _DataVencimento;
+        public DateTime? DataVencimento 
+        {
+            get => _DataVencimento;
+            set => _DataVencimento = value.HasValue ? DateTime.SpecifyKind(value.Value, DateTimeKind.Utc) : null;
+        } // Data de vencimento do boleto
         public decimal Juros { get; set; } // Valor de juros (se aplicável)
         public decimal Multa { get; set; } // Valor de multa (se aplicável)
 
@@ -21,7 +26,13 @@ namespace WebApiSmartClinic.Models
 
         // Informações de status do boleto
         public bool Pago { get; set; }
-        public DateTime? DataPagamento { get; set; }
+
+        private DateTime? _dataPagamento;
+        public DateTime? DataPagamento 
+        {
+            get => _dataPagamento;
+            set => _dataPagamento = value.HasValue ? DateTime.SpecifyKind(value.Value, DateTimeKind.Utc) : null;
+        }
 
         // Propriedades adicionais para homologação
         public string CodigoDeBarras { get; set; } // Código de barras gerado pelo banco

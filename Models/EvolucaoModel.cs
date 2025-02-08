@@ -9,7 +9,12 @@ namespace WebApiSmartClinic.Models
 
         public int Id { get; set; }
         public string Observacao { get; set; }
-        public DateTime DataEvolucao { get; set; }
+        private DateTime? _DataEvolucao;
+        public DateTime? DataEvolucao 
+        {
+            get => _DataEvolucao;
+            set => _DataEvolucao = value.HasValue ? DateTime.SpecifyKind(value.Value, DateTimeKind.Utc) : null;
+        }
         public int? PacienteId { get; set; }
 
         [JsonIgnore]

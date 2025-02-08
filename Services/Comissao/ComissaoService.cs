@@ -93,7 +93,7 @@ public class ComissaoService : IComissaoInterface
 
         // Retorna o percentual de comissão configurado no procedimento
         // Se o valor for zero, podemos retornar um valor padrão (ex.: 20%)
-        return procedimento.PercentualComissao > 0 ? procedimento.PercentualComissao : 20;
+        return (decimal)(procedimento.PercentualComissao > 0 ? procedimento.PercentualComissao : 20);
     }
 
     public async Task<ResponseModel<List<ComissaoModel>>> ObterComissoesPendentes(int profissionalId)

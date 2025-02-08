@@ -8,7 +8,13 @@ namespace WebApiSmartClinic.Models
         public int Id { get; set; }
         public int? IdOrigem { get; set; } = 0;
         public int? NrDocto { get; set; }
-        public DateTime DataEmissao { get; set; }
+        private DateTime? _DataEmissao;
+        public DateTime? DataEmissao
+        {
+            get => _DataEmissao;
+            set => _DataEmissao = value.HasValue ? DateTime.SpecifyKind(value.Value, DateTimeKind.Utc) : null;
+
+        }
         public decimal? ValorOriginal { get; set; }
         public decimal? ValorPago { get; set; }
         public decimal? Valor { get; set; }
@@ -61,8 +67,19 @@ namespace WebApiSmartClinic.Models
 
         [JsonIgnore]
         public FormaPagamentoModel? FormaPagamento { get; set; }
-        public DateTime? DataPagamento { get; set; }
-        public DateTime? DataVencimento { get; set; }
+
+        private DateTime? _dataPagamento;
+        public DateTime? DataPagamento
+        {
+            get => _dataPagamento;
+            set => _dataPagamento = value.HasValue ? DateTime.SpecifyKind(value.Value, DateTimeKind.Utc) : null;
+        }
+        private DateTime? _DataVencimento;
+        public DateTime? DataVencimento 
+        {
+            get => _DataVencimento;
+            set => _DataVencimento = value.HasValue ? DateTime.SpecifyKind(value.Value, DateTimeKind.Utc) : null;
+        }
         public string? Observacao { get; set; }
     }
 }

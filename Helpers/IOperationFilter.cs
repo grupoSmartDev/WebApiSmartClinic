@@ -26,7 +26,7 @@ public class AddRequiredHeaderParameter : IOperationFilter
                 In = ParameterLocation.Header,
                 Description = "Chave de acesso",
                 Required = true, // Defina como true se a chave for obrigatória em todas as requisições
-                Schema = new OpenApiSchema { Type = "string", Default = new OpenApiString("datamentor") }
+                Schema = new OpenApiSchema { Type = "string", Default = new OpenApiString("SmartClinic") }
             });
         }
         else

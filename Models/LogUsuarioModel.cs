@@ -8,6 +8,11 @@ namespace WebApiSmartClinic.Models
         public string Descricao { get; set; }
         public string Rotina { get; set; }
         public int UsuarioId { get; set; }
-        public DateTime DataMovimentacao { get; set; } = DateTime.Now;
+        private DateTime? _DataMovimentacao;
+        public DateTime? DataMovimentacao 
+        {
+            get => _DataMovimentacao;
+            set => _DataMovimentacao = value.HasValue ? DateTime.SpecifyKind(value.Value, DateTimeKind.Utc) : DateTime.UtcNow;
+        }
     }
 }

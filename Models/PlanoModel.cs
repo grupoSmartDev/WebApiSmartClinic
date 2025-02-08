@@ -4,6 +4,7 @@ using System.Text.Json.Serialization;
 
 namespace WebApiSmartClinic.Models
 {
+
     public class PlanoModel
     {
         public int Id { get; set; }
@@ -30,11 +31,22 @@ namespace WebApiSmartClinic.Models
         public decimal? ValorAnual { get; set; }
         public decimal? ValorMensal { get; set; }
 
-        [DataType(DataType.Date)]
-        public DateTime? DataInicio { get; set; }
+        private DateTime? _dataInicio;
+        private DateTime? _dataFim;
 
         [DataType(DataType.Date)]
-        public DateTime? DataFim { get; set; }
+        public DateTime? DataInicio
+        {
+            get => _dataInicio;
+            set => _dataInicio = value.HasValue ? DateTime.SpecifyKind(value.Value, DateTimeKind.Utc) : null;
+        }
+
+        [DataType(DataType.Date)]
+        public DateTime? DataFim
+        {
+            get => _dataFim;
+            set => _dataFim = value.HasValue ? DateTime.SpecifyKind(value.Value, DateTimeKind.Utc) : null;
+        }
 
         public bool Ativo { get; set; }
 

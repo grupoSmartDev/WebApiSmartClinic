@@ -90,6 +90,19 @@ public class AppDbContext : IdentityDbContext<User>
             .HasForeignKey(e => e.PacienteId)
             .OnDelete(DeleteBehavior.Cascade); // Exclusão em cascata: remove evoluções ao excluir paciente
 
+        modelBuilder.Entity<FichaAvaliacaoModel>()
+         .HasOne(f => f.Paciente)
+         .WithOne(p => p.FichaAvaliacao)
+         .HasForeignKey<FichaAvaliacaoModel>(f => f.PacienteId);
+
+        // Configuração Profissional-FichaAvaliacao
+        modelBuilder.Entity<FichaAvaliacaoModel>()
+            .HasOne(f => f.Profissional)
+            .WithMany(p => p.FichasAvaliacao)
+            .HasForeignKey(f => f.ProfissionalId)
+            .IsRequired(false)  // Temporariamente opcional
+            .OnDelete(DeleteBehavior.SetNull);
+
         // Relacionamento: Evolução -> Exercícios
         modelBuilder.Entity<EvolucaoModel>()
             .HasMany(e => e.Exercicios)

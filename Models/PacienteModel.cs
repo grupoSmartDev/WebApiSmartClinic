@@ -82,5 +82,8 @@ namespace WebApiSmartClinic.Models
             Evolucoes = new List<EvolucaoModel>();
            // Plano = new PlanoModel();
         }
+
+        public int? FichaAvaliacaoId { get; set; }
+        public FichaAvaliacaoModel? FichaAvaliacao { get; set; }
     }
 }

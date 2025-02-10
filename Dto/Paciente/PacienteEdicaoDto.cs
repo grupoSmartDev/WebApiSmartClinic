@@ -51,5 +51,8 @@ namespace WebApiSmartClinic.Dto.Paciente
         {
             Evolucoes = new List<EvolucaoEdicaoDto>();
         }
+
+        public int? FichaAvaliacaoId { get; set; }
+        public FichaAvaliacaoModel? FichaAvaliacao { get; set; }
     }
 }

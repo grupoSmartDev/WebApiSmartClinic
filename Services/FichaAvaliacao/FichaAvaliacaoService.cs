@@ -41,43 +41,92 @@ public class FichaAvaliacaoService : IFichaAvaliacaoInterface
         }
     }
 
+    public async Task<ResponseModel<FichaAvaliacaoModel>> BuscarPorIdPaciente(int pacienteId)
+    {
+        ResponseModel<FichaAvaliacaoModel> resposta = new ResponseModel<FichaAvaliacaoModel>();
+        try
+        {
+            var fichaAvaliacao = await _context.FichaAvaliacao
+                .Include(f => f.Profissional)  // Inclui os dados do Profissional
+                .Include(f => f.Paciente)
+                .FirstOrDefaultAsync(x => x.PacienteId == pacienteId);
+            if (fichaAvaliacao == null)
+            {
+                resposta.Mensagem = "Nenhuma Ficha de Avaliacao encontrado";
+                return resposta;
+            }
+
+            resposta.Dados = fichaAvaliacao;
+            resposta.Mensagem = "Ficha de Avaliacao Encontrado";
+            return resposta;
+        }
+        catch (Exception ex)
+        {
+
+            resposta.Mensagem = "Erro ao buscar Ficha de Avaliacao";
+            resposta.Status = false;
+
+            return resposta;
+        }
+    }
+
     public async Task<ResponseModel<List<FichaAvaliacaoModel>>> Criar(FichaAvaliacaoCreateDto fichaavaliacaoCreateDto)
     {
         ResponseModel<List<FichaAvaliacaoModel>> resposta = new ResponseModel<List<FichaAvaliacaoModel>>();
-
         try
         {
-            var fichaavaliacao = new FichaAvaliacaoModel();
-
-            fichaavaliacao.QueixaPrincipal = fichaavaliacaoCreateDto.QueixaPrincipal;
-            fichaavaliacao.HistoriaPregressa = fichaavaliacaoCreateDto.HistoriaPregressa;
-            fichaavaliacao.HistoriaAtual = fichaavaliacaoCreateDto.HistoriaAtual;
-            fichaavaliacao.TipoDor = fichaavaliacaoCreateDto.TipoDor;
-            fichaavaliacao.SinaisVitais = fichaavaliacaoCreateDto.SinaisVitais;
-            fichaavaliacao.Medicamentos = fichaavaliacaoCreateDto.Medicamentos;
-            fichaavaliacao.DoencasCronicas = fichaavaliacaoCreateDto.DoencasCronicas;
-            fichaavaliacao.Cirurgia = fichaavaliacaoCreateDto.Cirurgia;
-            fichaavaliacao.DoencaNeurodegenerativa = fichaavaliacaoCreateDto.DoencaNeurodegenerativa;
-            fichaavaliacao.TratamentosRealizados = fichaavaliacaoCreateDto.TratamentosRealizados;
-            fichaavaliacao.AlergiaMedicamentos = fichaavaliacaoCreateDto.AlergiaMedicamentos;
-            fichaavaliacao.Tabagista = fichaavaliacaoCreateDto.Tabagista;
-            fichaavaliacao.FrequenciaConsumoAlcool = fichaavaliacaoCreateDto.FrequenciaConsumoAlcool;
-            fichaavaliacao.PraticaAtividade = fichaavaliacaoCreateDto.PraticaAtividade;
-            fichaavaliacao.ObjetivoTratamento = fichaavaliacaoCreateDto.ObjetivoTratamento;
+            var fichaavaliacao = new FichaAvaliacaoModel
+            {
+                PacienteId = fichaavaliacaoCreateDto.PacienteId,
+                DataAvaliacao = fichaavaliacaoCreateDto.DataAvaliacao,
+                Profissional = fichaavaliacaoCreateDto.Profissional,
+                Especialidade = fichaavaliacaoCreateDto.Especialidade,
+                Idade = fichaavaliacaoCreateDto.Idade,
+                Altura = fichaavaliacaoCreateDto.Altura,
+                Peso = fichaavaliacaoCreateDto.Peso,
+                Sexo = fichaavaliacaoCreateDto.Sexo,
+                ObservacoesGerais = fichaavaliacaoCreateDto.ObservacoesGerais,
+                HistoricoDoencas = fichaavaliacaoCreateDto.HistoricoDoencas,
+                DoencasPreExistentes = fichaavaliacaoCreateDto.DoencasPreExistentes,
+                MedicacaoUsoContinuo = fichaavaliacaoCreateDto.MedicacaoUsoContinuo,
+                Medicacao = fichaavaliacaoCreateDto.Medicacao,
+                CirurgiasPrevias = fichaavaliacaoCreateDto.CirurgiasPrevias,
+                DetalheCirurgias = fichaavaliacaoCreateDto.DetalheCirurgias,
+                Alergias = fichaavaliacaoCreateDto.Alergias,
+                QueixaPrincipal = fichaavaliacaoCreateDto.QueixaPrincipal,
+                ObjetivosDoTratamento = fichaavaliacaoCreateDto.ObjetivosDoTratamento,
+                IMC = fichaavaliacaoCreateDto.IMC,
+                AvaliacaoPostural = fichaavaliacaoCreateDto.AvaliacaoPostural,
+                AmplitudeMovimento = fichaavaliacaoCreateDto.AmplitudeMovimento,
+                AssinaturaProfissional = fichaavaliacaoCreateDto.AssinaturaProfissional,
+                AssinaturaCliente = fichaavaliacaoCreateDto.AssinaturaCliente,
+                HistoriaPregressa = fichaavaliacaoCreateDto.HistoriaPregressa,
+                HistoriaAtual = fichaavaliacaoCreateDto.HistoriaAtual,
+                TipoDor = fichaavaliacaoCreateDto.TipoDor,
+                SinaisVitais = fichaavaliacaoCreateDto.SinaisVitais,
+                DoencasCronicas = fichaavaliacaoCreateDto.DoencasCronicas,
+                Cirurgia = fichaavaliacaoCreateDto.Cirurgia,
+                DoencaNeurodegenerativa = fichaavaliacaoCreateDto.DoencaNeurodegenerativa,
+                TratamentosRealizados = fichaavaliacaoCreateDto.TratamentosRealizados,
+                AlergiaMedicamentos = fichaavaliacaoCreateDto.AlergiaMedicamentos,
+                FrequenciaConsumoAlcool = fichaavaliacaoCreateDto.FrequenciaConsumoAlcool,
+                PraticaAtividade = fichaavaliacaoCreateDto.PraticaAtividade,
+                Tabagista = fichaavaliacaoCreateDto.Tabagista,
+                ProfissionalId = fichaavaliacaoCreateDto.ProfissionalId
+            };
 
             _context.Add(fichaavaliacao);
             await _context.SaveChangesAsync();
-
             resposta.Dados = await _context.FichaAvaliacao.ToListAsync();
-            resposta.Mensagem = "FichaAvaliacao criado com sucesso";
-            
+            resposta.Mensagem = "Ficha de avaliação criada com sucesso";
+
             return resposta;
         }
         catch (Exception ex)
         {
             resposta.Mensagem = ex.Message;
             resposta.Status = false;
-            
+
             return resposta;
         }
     }
@@ -91,7 +140,7 @@ public class FichaAvaliacaoService : IFichaAvaliacaoInterface
             var fichaavaliacao = await _context.FichaAvaliacao.FirstOrDefaultAsync(x => x.Id == idFichaAvaliacao);
             if (fichaavaliacao == null)
             {
-                resposta.Mensagem = "Nenhum FichaAvaliacao encontrado";
+                resposta.Mensagem = "Nenhum Ficha de avaliação  encontrado";
                 return resposta;
             }
 
@@ -99,7 +148,7 @@ public class FichaAvaliacaoService : IFichaAvaliacaoInterface
             await _context.SaveChangesAsync();
 
             resposta.Dados = await _context.FichaAvaliacao.ToListAsync();
-            resposta.Mensagem = "FichaAvaliacao Excluido com sucesso";
+            resposta.Mensagem = "Ficha de avaliação  Excluido com sucesso";
          
             return resposta;
         }
@@ -116,46 +165,62 @@ public class FichaAvaliacaoService : IFichaAvaliacaoInterface
     public async Task<ResponseModel<List<FichaAvaliacaoModel>>> Editar(FichaAvaliacaoEdicaoDto fichaavaliacaoEdicaoDto)
     {
         ResponseModel<List<FichaAvaliacaoModel>> resposta = new ResponseModel<List<FichaAvaliacaoModel>>();
-
         try
         {
-            var fichaavaliacao = _context.FichaAvaliacao.FirstOrDefault(x => x.Id == fichaavaliacaoEdicaoDto.Id);
+            var fichaavaliacao = await _context.FichaAvaliacao.FirstOrDefaultAsync(x => x.Id == fichaavaliacaoEdicaoDto.Id);
             if (fichaavaliacao == null)
             {
-                resposta.Mensagem = "FichaAvaliacao não encontrado";
+                resposta.Mensagem = "Ficha de avaliação não encontrada";
                 return resposta;
             }
 
+            fichaavaliacao.PacienteId = fichaavaliacaoEdicaoDto.PacienteId;
+            fichaavaliacao.DataAvaliacao = fichaavaliacaoEdicaoDto.DataAvaliacao;
+            fichaavaliacao.Profissional = fichaavaliacaoEdicaoDto.Profissional;
+            fichaavaliacao.Especialidade = fichaavaliacaoEdicaoDto.Especialidade;
+            fichaavaliacao.Idade = fichaavaliacaoEdicaoDto.Idade;
+            fichaavaliacao.Altura = fichaavaliacaoEdicaoDto.Altura;
+            fichaavaliacao.Peso = fichaavaliacaoEdicaoDto.Peso;
+            fichaavaliacao.Sexo = fichaavaliacaoEdicaoDto.Sexo;
+            fichaavaliacao.ObservacoesGerais = fichaavaliacaoEdicaoDto.ObservacoesGerais;
+            fichaavaliacao.HistoricoDoencas = fichaavaliacaoEdicaoDto.HistoricoDoencas;
+            fichaavaliacao.DoencasPreExistentes = fichaavaliacaoEdicaoDto.DoencasPreExistentes;
+            fichaavaliacao.MedicacaoUsoContinuo = fichaavaliacaoEdicaoDto.MedicacaoUsoContinuo;
+            fichaavaliacao.Medicacao = fichaavaliacaoEdicaoDto.Medicacao;
+            fichaavaliacao.CirurgiasPrevias = fichaavaliacaoEdicaoDto.CirurgiasPrevias;
+            fichaavaliacao.DetalheCirurgias = fichaavaliacaoEdicaoDto.DetalheCirurgias;
+            fichaavaliacao.Alergias = fichaavaliacaoEdicaoDto.Alergias;
             fichaavaliacao.QueixaPrincipal = fichaavaliacaoEdicaoDto.QueixaPrincipal;
+            fichaavaliacao.ObjetivosDoTratamento = fichaavaliacaoEdicaoDto.ObjetivosDoTratamento;
+            fichaavaliacao.IMC = fichaavaliacaoEdicaoDto.IMC;
+            fichaavaliacao.AvaliacaoPostural = fichaavaliacaoEdicaoDto.AvaliacaoPostural;
+            fichaavaliacao.AmplitudeMovimento = fichaavaliacaoEdicaoDto.AmplitudeMovimento;
+            fichaavaliacao.AssinaturaProfissional = fichaavaliacaoEdicaoDto.AssinaturaProfissional;
+            fichaavaliacao.AssinaturaCliente = fichaavaliacaoEdicaoDto.AssinaturaCliente;
             fichaavaliacao.HistoriaPregressa = fichaavaliacaoEdicaoDto.HistoriaPregressa;
             fichaavaliacao.HistoriaAtual = fichaavaliacaoEdicaoDto.HistoriaAtual;
             fichaavaliacao.TipoDor = fichaavaliacaoEdicaoDto.TipoDor;
             fichaavaliacao.SinaisVitais = fichaavaliacaoEdicaoDto.SinaisVitais;
-            fichaavaliacao.Medicamentos = fichaavaliacaoEdicaoDto.Medicamentos;
             fichaavaliacao.DoencasCronicas = fichaavaliacaoEdicaoDto.DoencasCronicas;
             fichaavaliacao.Cirurgia = fichaavaliacaoEdicaoDto.Cirurgia;
             fichaavaliacao.DoencaNeurodegenerativa = fichaavaliacaoEdicaoDto.DoencaNeurodegenerativa;
             fichaavaliacao.TratamentosRealizados = fichaavaliacaoEdicaoDto.TratamentosRealizados;
             fichaavaliacao.AlergiaMedicamentos = fichaavaliacaoEdicaoDto.AlergiaMedicamentos;
-            fichaavaliacao.Tabagista = fichaavaliacaoEdicaoDto.Tabagista;
             fichaavaliacao.FrequenciaConsumoAlcool = fichaavaliacaoEdicaoDto.FrequenciaConsumoAlcool;
             fichaavaliacao.PraticaAtividade = fichaavaliacaoEdicaoDto.PraticaAtividade;
-            fichaavaliacao.ObjetivoTratamento = fichaavaliacaoEdicaoDto.ObjetivoTratamento;
+            fichaavaliacao.Tabagista = fichaavaliacaoEdicaoDto.Tabagista;
+            fichaavaliacao.ProfissionalId = fichaavaliacaoEdicaoDto.ProfissionalId;
 
             _context.Update(fichaavaliacao);
             await _context.SaveChangesAsync();
-
             resposta.Dados = await _context.FichaAvaliacao.ToListAsync();
-            resposta.Mensagem = "FichaAvaliacao Atualizado com sucesso";
-
+            resposta.Mensagem = "Ficha de Avaliação atualizada com sucesso";
             return resposta;
         }
         catch (Exception ex)
         {
-
             resposta.Mensagem = ex.Message;
             resposta.Status = false;
-            
             return resposta;
         }
     }
@@ -169,7 +234,7 @@ public class FichaAvaliacaoService : IFichaAvaliacaoInterface
             var fichaavaliacao = await _context.FichaAvaliacao.ToListAsync();
 
             resposta.Dados = fichaavaliacao;
-            resposta.Mensagem = "Todos os FichaAvaliacao foram encontrados";
+            resposta.Mensagem = "Todas as fichas de avaliação foram encontrados";
          
             return resposta;
         }

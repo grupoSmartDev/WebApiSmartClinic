@@ -9,7 +9,7 @@ namespace WebApiSmartClinic.Services.FichaAvaliacao
         Task<ResponseModel<List<FichaAvaliacaoModel>>> Listar();
         Task<ResponseModel<List<FichaAvaliacaoModel>>> Delete(int idFichaAvaliacao);
         Task<ResponseModel<FichaAvaliacaoModel>> BuscarPorId(int idFichaAvaliacao);
-        Task<ResponseModel<FichaAvaliacaoModel>> BuscarPorIdPaciente(int pacienteId);
+        Task<ResponseModel<FichaAvaliacaoModel>> BuscarPorIdPaciente(int PacienteId);
         Task<ResponseModel<List<FichaAvaliacaoModel>>> Criar(FichaAvaliacaoCreateDto fichaavaliacaoCreateDto);
         Task<ResponseModel<List<FichaAvaliacaoModel>>> Editar(FichaAvaliacaoEdicaoDto fichaavaliacaoEdicaoDto);
     }

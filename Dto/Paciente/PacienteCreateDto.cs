@@ -56,4 +56,7 @@ public class PacienteCreateDto
         Evolucoes = new List<EvolucaoCreateDto>();
     }
 
+    public int? FichaAvaliacaoId { get; set; }
+    public FichaAvaliacaoModel? FichaAvaliacao { get; set; }
+
 }

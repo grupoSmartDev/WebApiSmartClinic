@@ -1,8 +1,10 @@
 
-namespace WebApiSmartClinic.Dto.FichaAvaliacao;
+using WebApiSmartClinic.Models;
 
-public class FichaAvaliacaoEdicaoDto : FichaAvaliacaoCreateDto
+namespace WebApiSmartClinic.Dto.FichaAvaliacao
 {
-    public int Id { get; set; } 
-
+    public class FichaAvaliacaoEdicaoDto : FichaAvaliacaoModel
+    {
+       
+    }
 }

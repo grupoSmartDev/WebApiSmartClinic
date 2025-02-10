@@ -9,10 +9,12 @@ public class Financ_PagarModel
     public int? IdOrigem { get; set; }
     public int? NrDocto { get; set; }
     private DateTime? _DataEmissao;
-    public DateTime? DataEmissao 
+    public DateTime? DataEmissao
     {
-        get => _DataEmissao;
-        set => _DataEmissao = value.HasValue ? DateTime.SpecifyKind(value.Value, DateTimeKind.Utc) : null;
+        get => _DataEmissao?.ToLocalTime();
+        set => _DataEmissao = value.HasValue
+            ? DateTime.SpecifyKind(value.Value.ToUniversalTime(), DateTimeKind.Utc)
+            : null;
     }
     public decimal? ValorOriginal { get; set; }
     public decimal? ValorPago { get; set; }

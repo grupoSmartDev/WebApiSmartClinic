@@ -64,7 +64,8 @@ public class Financ_PagarService : IFinanc_PagarInterface
                 Observacao = financ_pagarCreateDto.Observacao,
                 FornecedorId = financ_pagarCreateDto.FornecedorId,
                 CentroCustoId = financ_pagarCreateDto.CentroCustoId,
-                BancoId = financ_pagarCreateDto.BancoId
+                BancoId = financ_pagarCreateDto.BancoId,
+                PacienteId = financ_pagarCreateDto.PacienteId
             };
 
             _context.Add(financ_pagar);
@@ -150,16 +151,19 @@ public class Financ_PagarService : IFinanc_PagarInterface
     public async Task<ResponseModel<List<Financ_PagarModel>>> Editar(Financ_PagarEdicaoDto financ_pagarEdicaoDto, int pageNumber = 1, int pageSize = 10)
     {
         ResponseModel<List<Financ_PagarModel>> resposta = new ResponseModel<List<Financ_PagarModel>>();
-
         try
         {
-            var financ_pagar = _context.Financ_Pagar.FirstOrDefault(x => x.Id == financ_pagarEdicaoDto.Id);
+            var financ_pagar = await _context.Financ_Pagar
+                .Include(x => x.subFinancPagar)
+                .FirstOrDefaultAsync(x => x.Id == financ_pagarEdicaoDto.Id);
+
             if (financ_pagar == null)
             {
                 resposta.Mensagem = "Financ_Pagar não encontrado";
                 return resposta;
             }
 
+            // Atualiza dados principais
             financ_pagar.IdOrigem = financ_pagarEdicaoDto.IdOrigem;
             financ_pagar.NrDocto = financ_pagarEdicaoDto.NrDocto;
             financ_pagar.DataEmissao = financ_pagarEdicaoDto.DataEmissao;
@@ -176,34 +180,63 @@ public class Financ_PagarService : IFinanc_PagarInterface
             financ_pagar.CentroCustoId = financ_pagarEdicaoDto.CentroCustoId;
             financ_pagar.BancoId = financ_pagarEdicaoDto.BancoId;
 
-            _context.Update(financ_pagar);
-            await _context.SaveChangesAsync();
-
-            // Adicionando subitens (filhos)
-            if (financ_pagarEdicaoDto.subFinancPagar != null && financ_pagarEdicaoDto.subFinancPagar.Any())
+            // Atualiza subitens
+            if (financ_pagarEdicaoDto.subFinancPagar != null)
             {
-                foreach (var parcela in financ_pagarEdicaoDto.subFinancPagar)
+                foreach (var parcelaDto in financ_pagarEdicaoDto.subFinancPagar)
                 {
-                    var subItem = new Financ_PagarSubEdicaoDto
-                    {
-                        financPagarId = financ_pagar.Id, // Relaciona com o pai
-                        Parcela = parcela.Parcela,
-                        Valor = parcela.Valor,
-                        TipoPagamentoId = parcela.TipoPagamentoId,
-                        FormaPagamentoId = parcela.FormaPagamentoId,
-                        DataPagamento = parcela.DataPagamento,
-                        Desconto = parcela.Desconto,
-                        Juros = parcela.Juros,
-                        Multa = parcela.Multa,
-                        DataVencimento = parcela.DataVencimento,
-                        Observacao = parcela.Observacao
-                    };
+                    // Procura se já existe o subitem
+                    var subItemExistente = financ_pagar.subFinancPagar
+                        .FirstOrDefault(x => x.Id == parcelaDto.Id);
 
-                    _context.Update(subItem);
+                    if (subItemExistente != null)
+                    {
+                        // Atualiza o item existente
+                        subItemExistente.Parcela = parcelaDto.Parcela;
+                        subItemExistente.Valor = parcelaDto.Valor;
+                        subItemExistente.TipoPagamentoId = parcelaDto.TipoPagamentoId;
+                        subItemExistente.FormaPagamentoId = parcelaDto.FormaPagamentoId;
+                        subItemExistente.DataPagamento = parcelaDto.DataPagamento;
+                        subItemExistente.Desconto = parcelaDto.Desconto;
+                        subItemExistente.Juros = parcelaDto.Juros;
+                        subItemExistente.Multa = parcelaDto.Multa;
+                        subItemExistente.DataVencimento = parcelaDto.DataVencimento;
+                        subItemExistente.Observacao = parcelaDto.Observacao;
+                    }
+                    else
+                    {
+                        // Cria novo item se não existir
+                        var novoSubItem = new Financ_PagarSubModel
+                        {
+                            financPagarId = financ_pagar.Id,
+                            Parcela = parcelaDto.Parcela,
+                            Valor = parcelaDto.Valor,
+                            TipoPagamentoId = parcelaDto.TipoPagamentoId,
+                            FormaPagamentoId = parcelaDto.FormaPagamentoId,
+                            DataPagamento = parcelaDto.DataPagamento,
+                            Desconto = parcelaDto.Desconto,
+                            Juros = parcelaDto.Juros,
+                            Multa = parcelaDto.Multa,
+                            DataVencimento = parcelaDto.DataVencimento,
+                            Observacao = parcelaDto.Observacao
+                        };
+                        financ_pagar.subFinancPagar.Add(novoSubItem);
+                    }
                 }
 
-                await _context.SaveChangesAsync();
+                // Remove apenas os itens que não estão mais na lista
+                var idsParaManterAtivos = financ_pagarEdicaoDto.subFinancPagar.Select(x => x.Id).ToList();
+                var itensParaRemover = financ_pagar.subFinancPagar
+                    .Where(x => x.Id > 0 && !idsParaManterAtivos.Contains(x.Id))
+                    .ToList();
+
+                foreach (var itemRemover in itensParaRemover)
+                {
+                    _context.Remove(itemRemover);
+                }
             }
+
+            await _context.SaveChangesAsync();
 
             var query = _context.Financ_Pagar
                 .Include(x => x.subFinancPagar)

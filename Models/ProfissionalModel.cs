@@ -36,5 +36,7 @@ public class ProfissionalModel
     {
         get => _DataCadastro;
         set => _DataCadastro = value.HasValue ? DateTime.SpecifyKind(value.Value, DateTimeKind.Utc) : DateTime.UtcNow;
-    } 
+    }
+
+    public ICollection<FichaAvaliacaoModel>? FichasAvaliacao { get; set; }
 }

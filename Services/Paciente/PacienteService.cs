@@ -401,6 +401,8 @@ public class PacienteService : IPacienteInterface
                     .ThenInclude(e => e.Atividades)
                 .Include(pl => pl.Plano)
                 .Include(p => p.Plano)
+                .Include(f => f.FinancReceber)
+                    .ThenInclude(fs => fs.subFinancReceber)
                 .AsQueryable();
 
             query = query.Where(x =>

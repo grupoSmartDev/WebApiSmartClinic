@@ -29,6 +29,12 @@ namespace WebApiSmartClinic.Controllers
             var fichaavaliacao = await _fichaavaliacao.BuscarPorId(idFichaAvaliacao);
             return Ok(fichaavaliacao);
         }
+        [HttpGet("BuscarPorIdPaciente")]
+        public async Task<ActionResult<ResponseModel<List<FichaAvaliacaoModel>>>> BuscarPorIdPaciente([FromQuery] int pacienteId)
+        {
+            var fichaavaliacao = await _fichaavaliacao.BuscarPorIdPaciente(pacienteId);
+            return Ok(fichaavaliacao);
+        }
 
         [HttpGet("BuscarPorIdPaciente")]
         public async Task<ActionResult<ResponseModel<List<FichaAvaliacaoModel>>>> BuscarPorIdPaciente([FromQuery] int pacienteId)

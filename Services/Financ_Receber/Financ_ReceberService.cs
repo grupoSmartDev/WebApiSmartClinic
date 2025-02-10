@@ -1,6 +1,6 @@
 
 using Microsoft.EntityFrameworkCore;
-using System;
+using System.Linq;
 using WebApiSmartClinic.Data;
 using WebApiSmartClinic.Dto.Financ_Receber;
 using WebApiSmartClinic.Models;
@@ -64,6 +64,7 @@ public class Financ_ReceberService : IFinanc_ReceberInterface
                 Observacao = financ_receberCreateDto.Observacao,
                 FornecedorId = financ_receberCreateDto.FornecedorId,
                 CentroCustoId = financ_receberCreateDto.CentroCustoId,
+                PacienteId = financ_receberCreateDto.PacienteId,
                 BancoId = financ_receberCreateDto.BancoId,
                 subFinancReceber = new List<Financ_ReceberSubModel>()
             };
@@ -154,7 +155,6 @@ public class Financ_ReceberService : IFinanc_ReceberInterface
     public async Task<ResponseModel<List<Financ_ReceberModel>>> Editar(Financ_ReceberEdicaoDto financ_receberEdicaoDto, int pageNumber = 1, int pageSize = 10)
     {
         ResponseModel<List<Financ_ReceberModel>> resposta = new ResponseModel<List<Financ_ReceberModel>>();
-
         try
         {
             var financ_receber = await _context.Financ_Receber
@@ -167,6 +167,7 @@ public class Financ_ReceberService : IFinanc_ReceberInterface
                 return resposta;
             }
 
+            // Atualiza dados principais
             financ_receber.IdOrigem = financ_receberEdicaoDto.IdOrigem;
             financ_receber.NrDocto = financ_receberEdicaoDto.NrDocto;
             financ_receber.DataEmissao = financ_receberEdicaoDto.DataEmissao;
@@ -183,35 +184,63 @@ public class Financ_ReceberService : IFinanc_ReceberInterface
             financ_receber.CentroCustoId = financ_receberEdicaoDto.CentroCustoId;
             financ_receber.BancoId = financ_receberEdicaoDto.BancoId;
 
-            // Atualiza parcelas existentes
-            _context.Update(financ_receber);
-            await _context.SaveChangesAsync();
-
-            // Adicionando subitens (filhos)
-            if (financ_receberEdicaoDto.subFinancReceber != null && financ_receberEdicaoDto.subFinancReceber.Any())
+            // Atualiza subitens
+            if (financ_receberEdicaoDto.subFinancReceber != null)
             {
-                foreach (var parcela in financ_receberEdicaoDto.subFinancReceber)
+                foreach (var parcelaDto in financ_receberEdicaoDto.subFinancReceber)
                 {
-                    var subItem = new Financ_ReceberSubModel
-                    {
-                        financReceberId = financ_receber.Id, // Relaciona com o pai
-                        Parcela = parcela.Parcela,
-                        Valor = parcela.Valor,
-                        TipoPagamentoId = parcela.TipoPagamentoId,
-                        FormaPagamentoId = parcela.FormaPagamentoId,
-                        DataPagamento = parcela.DataPagamento,
-                        Desconto = parcela.Desconto,
-                        Juros = parcela.Juros,
-                        Multa = parcela.Multa,
-                        DataVencimento = parcela.DataVencimento,
-                        Observacao = parcela.Observacao
-                    };
+                    // Procura se já existe o subitem
+                    var subItemExistente = financ_receber.subFinancReceber
+                        .FirstOrDefault(x => x.Id == parcelaDto.Id);
 
-                    _context.Update(subItem);
+                    if (subItemExistente != null)
+                    {
+                        // Atualiza o item existente
+                        subItemExistente.Parcela = parcelaDto.Parcela;
+                        subItemExistente.Valor = parcelaDto.Valor;
+                        subItemExistente.TipoPagamentoId = parcelaDto.TipoPagamentoId;
+                        subItemExistente.FormaPagamentoId = parcelaDto.FormaPagamentoId;
+                        subItemExistente.DataPagamento = parcelaDto.DataPagamento;
+                        subItemExistente.Desconto = parcelaDto.Desconto;
+                        subItemExistente.Juros = parcelaDto.Juros;
+                        subItemExistente.Multa = parcelaDto.Multa;
+                        subItemExistente.DataVencimento = parcelaDto.DataVencimento;
+                        subItemExistente.Observacao = parcelaDto.Observacao;
+                    }
+                    else
+                    {
+                        // Cria novo item se não existir
+                        var novoSubItem = new Financ_ReceberSubModel  // Alterado para a entidade correta
+                        {
+                            financReceberId = financ_receber.Id,  // Ajustado nome da propriedade
+                            Parcela = parcelaDto.Parcela,
+                            Valor = parcelaDto.Valor,
+                            TipoPagamentoId = parcelaDto.TipoPagamentoId,
+                            FormaPagamentoId = parcelaDto.FormaPagamentoId,
+                            DataPagamento = parcelaDto.DataPagamento,
+                            Desconto = parcelaDto.Desconto,
+                            Juros = parcelaDto.Juros,
+                            Multa = parcelaDto.Multa,
+                            DataVencimento = parcelaDto.DataVencimento,
+                            Observacao = parcelaDto.Observacao
+                        };
+                        financ_receber.subFinancReceber.Add(novoSubItem);
+                    }
                 }
 
-                await _context.SaveChangesAsync();
+                // Remove apenas os itens que não estão mais na lista
+                var idsParaManterAtivos = financ_receberEdicaoDto.subFinancReceber.Select(x => x.Id).ToList();
+                var itensParaRemover = financ_receber.subFinancReceber
+                    .Where(x => x.Id > 0 && !idsParaManterAtivos.Contains((int)x.Id))
+                    .ToList();
+
+                foreach (var itemRemover in itensParaRemover)
+                {
+                    _context.Remove(itemRemover);
+                }
             }
+
+            await _context.SaveChangesAsync();
 
             var query = _context.Financ_Receber
                 .Include(x => x.subFinancReceber)

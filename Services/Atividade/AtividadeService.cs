@@ -49,6 +49,8 @@ public class AtividadeService : IAtividadeInterface
             var atividade = new AtividadeModel();
 
             atividade.Descricao = atividadeCreateDto.Descricao;
+            atividade.Tempo = atividadeCreateDto.Tempo;
+            atividade.Titulo = atividadeCreateDto.Titulo;
             //atividade.EvolucaoId = atividadeCreateDto.EvolucaoId;
 
             _context.Add(atividade);
@@ -116,6 +118,8 @@ public class AtividadeService : IAtividadeInterface
 
             atividade.Id = atividadeEdicaoDto.Id;
             atividade.Descricao = atividadeEdicaoDto.Descricao;
+            atividade.Titulo = atividadeEdicaoDto.Titulo;
+            atividade.Tempo = atividadeEdicaoDto.Tempo;
             atividade.EvolucaoId = atividadeEdicaoDto.EvolucaoId;
 
             _context.Update(atividade);

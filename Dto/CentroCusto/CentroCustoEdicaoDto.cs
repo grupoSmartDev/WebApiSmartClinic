@@ -1,9 +1,9 @@
+using WebApiSmartClinic.Models;
+
 namespace WebApiSmartClinic.Dto.CentroCusto
 {
-    public class CentroCustoEdicaoDto
+    public class CentroCustoEdicaoDto : CentroCustoModel
     {
-        public int Id { get; set; }
-        public string Tipo { get; set; }
-        public string Descricao { get; set; }
+       
     }
 }

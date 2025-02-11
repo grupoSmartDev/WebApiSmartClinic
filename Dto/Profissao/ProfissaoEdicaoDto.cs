@@ -1,9 +1,10 @@
 
+using WebApiSmartClinic.Models;
+
 namespace WebApiSmartClinic.Dto.Profissao
 {
-    public class ProfissaoEdicaoDto
+    public class ProfissaoEdicaoDto : ProfissaoModel
     {
-        public int Id { get; set; }
-        public string Descricao { get; set; }
+        
     }
 }

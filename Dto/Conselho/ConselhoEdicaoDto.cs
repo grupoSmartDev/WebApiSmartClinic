@@ -1,10 +1,10 @@
 
+using WebApiSmartClinic.Models;
+
 namespace WebApiSmartClinic.Dto.Conselho
 {
-    public class ConselhoEdicaoDto
+    public class ConselhoEdicaoDto : ConselhoModel
     {
-        public int Id { get; set; }
-        public string Nome { get; set; }
-        public string Sigla { get; set; }
+       
     }
 }

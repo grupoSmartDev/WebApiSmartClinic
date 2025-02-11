@@ -1,9 +1,8 @@
-﻿namespace WebApiSmartClinic.Dto.Status;
+﻿using WebApiSmartClinic.Models;
 
-public class StatusEdicaoDto
+namespace WebApiSmartClinic.Dto.Status;
+
+public class StatusEdicaoDto : StatusModel
 {
-    public int Id { get; set; }
-    public string Status { get; set; }
-    public string Legenda { get; set; }
-    public string Cor { get; set; }
+    
 }

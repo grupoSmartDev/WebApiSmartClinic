@@ -57,7 +57,7 @@ public class ProcedimentoService : IProcedimentoInterface
             procedimento.CategoriaId = procedimentoCreateDto.CategoriaId;
             procedimento.Ativo = procedimentoCreateDto.Ativo;
             procedimento.MateriaisNecessarios = procedimentoCreateDto.MateriaisNecessarios;
-            procedimento.PercentualComissao = (decimal)procedimentoCreateDto.PercentualComissao;
+            procedimento.PercentualComissao = (decimal?)procedimentoCreateDto.PercentualComissao;
 
             // Verificar depois a possíbilidade de fazer apenas uma verificação se é diferente de nulo e não haver necessidade de toda hora bater no banco pra ver se é válido
             var categoriaExiste = await _context.Categoria.AnyAsync(c => c.Id == procedimentoCreateDto.CategoriaId);

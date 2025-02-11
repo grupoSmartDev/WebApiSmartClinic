@@ -4,15 +4,8 @@ using WebApiSmartClinic.Models;
 
 namespace WebApiSmartClinic.Dto.Atividade
 {
-    public class AtividadeEdicaoDto
+    public class AtividadeEdicaoDto : AtividadeModel
     {
-        public int Id { get; set; }
-        public string? Titulo { get; set; }
-        public string Descricao { get; set; }
-        public string? Tempo { get; set; }
-        public int? EvolucaoId { get; set; }
-
-        [JsonIgnore]
-        public virtual EvolucaoModel? Evolucao { get; set; }
+        
     }
 }

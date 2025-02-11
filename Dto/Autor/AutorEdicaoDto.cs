@@ -1,8 +1,8 @@
-﻿namespace WebApiSmartClinic.Dto.Autor;
+﻿using WebApiSmartClinic.Models;
 
-public class AutorEdicaoDto
+namespace WebApiSmartClinic.Dto.Autor;
+
+public class AutorEdicaoDto : AutorModel
 {
-    public int Id { get; set; }
-    public string Nome { get; set; }
-    public string Sobrenome { get; set; }
+    
 }

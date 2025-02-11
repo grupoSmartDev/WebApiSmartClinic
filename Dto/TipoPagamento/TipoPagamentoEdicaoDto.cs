@@ -1,9 +1,10 @@
 
+using WebApiSmartClinic.Models;
+
 namespace WebApiSmartClinic.Dto.TipoPagamento
 {
-    public class TipoPagamentoEdicaoDto
+    public class TipoPagamentoEdicaoDto : TipoPagamentoModel
     {
-        public int Id { get; set; }
-        public string Descricao { get; set; }
+        
     }
 }

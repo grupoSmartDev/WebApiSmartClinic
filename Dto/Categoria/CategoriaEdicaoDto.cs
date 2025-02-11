@@ -4,12 +4,8 @@ using WebApiSmartClinic.Models;
 
 namespace WebApiSmartClinic.Dto.Categoria
 {
-    public class CategoriaEdicaoDto
+    public class CategoriaEdicaoDto : CategoriaModel
     {
-        public int Id { get; set; }
-        public string Nome { get; set; }
-
-        [JsonIgnore]
-        public virtual ICollection<ProcedimentoModel>? Procedimentos { get; set; }
+        
     }
 }

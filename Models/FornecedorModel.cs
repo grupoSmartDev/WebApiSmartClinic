@@ -35,7 +35,7 @@ public class FornecedorModel
         get => _DataNascimento;
         set => _DataNascimento = value.HasValue ? DateTime.SpecifyKind(value.Value, DateTimeKind.Utc) : null;
     }
-    public string nome { get; set; }
+    public string Nome { get; set; }
     public string Observacao { get; set; }
 
     //public ICollection<Financ_Pagar> Financ_Pagar { get; set; }

@@ -51,10 +51,25 @@ public class CentroCustoService : ICentroCustoInterface
             centrocusto.Descricao = centrocustoCreateDto.Descricao;
             centrocusto.Tipo = centrocustoCreateDto.Tipo;
 
+            if (centrocustoCreateDto.subCentroCusto != null)
+            {
+                foreach (var subCentro in centrocustoCreateDto.subCentroCusto)
+                {
+                    var sub = new SubCentroCustoModel();
+
+                    sub.Nome = subCentro.Nome;
+
+                    centrocusto.SubCentrosCusto.Add(sub);
+                };
+
+            }
+
             _context.CentroCusto.Add(centrocusto);
             await _context.SaveChangesAsync();
 
-            resposta.Dados = await _context.CentroCusto.ToListAsync();
+            resposta.Dados = await _context.CentroCusto
+                .Include(sb => sb.SubCentrosCusto)
+                .ToListAsync();
             resposta.Mensagem = "Centro de Custo criado com sucesso";
 
             return resposta;
@@ -98,26 +113,57 @@ public class CentroCustoService : ICentroCustoInterface
     public async Task<ResponseModel<List<CentroCustoModel>>> EditarCentroCusto(CentroCustoEdicaoDto centrocustoEdicaoDto)
     {
         ResponseModel<List<CentroCustoModel>> resposta = new ResponseModel<List<CentroCustoModel>>();
-
         try
         {
-            var centrocusto = _context.CentroCusto.FirstOrDefault(x => x.Id == centrocustoEdicaoDto.Id);
+            var centrocusto = await _context.CentroCusto
+                .Include(c => c.SubCentrosCusto)
+                .FirstOrDefaultAsync(x => x.Id == centrocustoEdicaoDto.Id);
+
             if (centrocusto == null)
             {
                 resposta.Mensagem = "Centro de custo não encontrado";
                 return resposta;
             }
 
-            centrocusto.Id = centrocustoEdicaoDto.Id;
             centrocusto.Descricao = centrocustoEdicaoDto.Descricao;
             centrocusto.Tipo = centrocustoEdicaoDto.Tipo;
+
+            if (centrocustoEdicaoDto.SubCentrosCusto != null)
+            {
+                foreach (var subCentroDto in centrocustoEdicaoDto.SubCentrosCusto)
+                {
+                    if (subCentroDto.Id != null)
+                    {
+                        // Atualiza subcentro existente
+                        var subCentroExistente = centrocusto.SubCentrosCusto
+                            .FirstOrDefault(s => s.Id == subCentroDto.Id);
+
+                        if (subCentroExistente != null)
+                        {
+                            subCentroExistente.Nome = subCentroDto.Nome;
+                            // Atualize outras propriedades necessárias
+                        }
+                    }
+                    else
+                    {
+                        // Cria novo subcentro
+                        var subCentroNovo = new SubCentroCustoModel
+                        {
+                            Nome = subCentroDto.Nome,
+                            // Outras propriedades necessárias
+                        };
+                        centrocusto.SubCentrosCusto.Add(subCentroNovo);
+                    }
+                }
+            }
 
             _context.Update(centrocusto);
             await _context.SaveChangesAsync();
 
-            resposta.Dados = await _context.CentroCusto.ToListAsync();
+            resposta.Dados = await _context.CentroCusto
+                .Include(sb => sb.SubCentrosCusto)
+                .ToListAsync();
             resposta.Mensagem = "Centro de Custo atualizado com sucesso";
-
             return resposta;
         }
         catch (Exception ex)

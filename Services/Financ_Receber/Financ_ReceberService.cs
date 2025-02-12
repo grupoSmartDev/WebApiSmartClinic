@@ -83,7 +83,6 @@ public class Financ_ReceberService : IFinanc_ReceberInterface
                         Parcela = parcela.Parcela,
                         Valor = parcela.Valor,
                         TipoPagamentoId = parcela.TipoPagamentoId,
-                        FormaPagamentoId = parcela.FormaPagamentoId,
                         DataPagamento = parcela.DataPagamento,
                         Desconto = parcela.Desconto,
                         Juros = parcela.Juros,
@@ -181,61 +180,28 @@ public class Financ_ReceberService : IFinanc_ReceberInterface
             financ_receber.FornecedorId = financ_receberEdicaoDto.FornecedorId;
             financ_receber.CentroCustoId = financ_receberEdicaoDto.CentroCustoId;
             financ_receber.BancoId = financ_receberEdicaoDto.BancoId;
+            financ_receber.PacienteId = financ_receberEdicaoDto.PacienteId;
 
-            // Atualiza subitens
-            if (financ_receberEdicaoDto.subFinancReceber != null)
+            _context.Financ_ReceberSub.RemoveRange(financ_receber.subFinancReceber);
+            financ_receber.subFinancReceber.Clear();
+
+            foreach (var parcelaDto in financ_receberEdicaoDto.subFinancReceber)
             {
-                foreach (var parcelaDto in financ_receberEdicaoDto.subFinancReceber)
+                var novaParcela = new Financ_ReceberSubModel
                 {
-                    // Procura se já existe o subitem
-                    var subItemExistente = financ_receber.subFinancReceber
-                        .FirstOrDefault(x => x.Id == parcelaDto.Id);
+                    financReceberId = financ_receber.Id,
+                    Parcela = parcelaDto.Parcela,
+                    Valor = parcelaDto.Valor,
+                    TipoPagamentoId = parcelaDto.TipoPagamentoId,
+                    DataPagamento = parcelaDto.DataPagamento,
+                    Desconto = parcelaDto.Desconto,
+                    Juros = parcelaDto.Juros,
+                    Multa = parcelaDto.Multa,
+                    DataVencimento = parcelaDto.DataVencimento,
+                    Observacao = parcelaDto.Observacao
+                };
 
-                    if (subItemExistente != null)
-                    {
-                        // Atualiza o item existente
-                        subItemExistente.Parcela = parcelaDto.Parcela;
-                        subItemExistente.Valor = parcelaDto.Valor;
-                        subItemExistente.TipoPagamentoId = parcelaDto.TipoPagamentoId;
-                        subItemExistente.FormaPagamentoId = parcelaDto.FormaPagamentoId;
-                        subItemExistente.DataPagamento = parcelaDto.DataPagamento;
-                        subItemExistente.Desconto = parcelaDto.Desconto;
-                        subItemExistente.Juros = parcelaDto.Juros;
-                        subItemExistente.Multa = parcelaDto.Multa;
-                        subItemExistente.DataVencimento = parcelaDto.DataVencimento;
-                        subItemExistente.Observacao = parcelaDto.Observacao;
-                    }
-                    else
-                    {
-                        // Cria novo item se não existir
-                        var novoSubItem = new Financ_ReceberSubModel  // Alterado para a entidade correta
-                        {
-                            financReceberId = financ_receber.Id,  // Ajustado nome da propriedade
-                            Parcela = parcelaDto.Parcela,
-                            Valor = parcelaDto.Valor,
-                            TipoPagamentoId = parcelaDto.TipoPagamentoId,
-                            FormaPagamentoId = parcelaDto.FormaPagamentoId,
-                            DataPagamento = parcelaDto.DataPagamento,
-                            Desconto = parcelaDto.Desconto,
-                            Juros = parcelaDto.Juros,
-                            Multa = parcelaDto.Multa,
-                            DataVencimento = parcelaDto.DataVencimento,
-                            Observacao = parcelaDto.Observacao
-                        };
-                        financ_receber.subFinancReceber.Add(novoSubItem);
-                    }
-                }
-
-                // Remove apenas os itens que não estão mais na lista
-                var idsParaManterAtivos = financ_receberEdicaoDto.subFinancReceber.Select(x => x.Id).ToList();
-                var itensParaRemover = financ_receber.subFinancReceber
-                    .Where(x => x.Id > 0 && !idsParaManterAtivos.Contains((int)x.Id))
-                    .ToList();
-
-                foreach (var itemRemover in itensParaRemover)
-                {
-                    _context.Remove(itemRemover);
-                }
+                financ_receber.subFinancReceber.Add(novaParcela);
             }
 
             await _context.SaveChangesAsync();

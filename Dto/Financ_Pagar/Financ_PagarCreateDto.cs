@@ -12,7 +12,7 @@ public class Financ_PagarCreateDto
     public decimal? ValorOriginal { get; set; }
     public decimal? ValorPago { get; set; }
     public decimal? Valor { get; set; }
-    public string Parcela { get; set; }
+    public int? Parcela { get; set; }
     public string? Status { get; set; } // Pendente, Pago, Atrasado, Cancelado
     public string? NotaFiscal { get; set; }
     public string? Descricao { get; set; }
@@ -32,7 +32,7 @@ public class Financ_PagarCreateDto
     public BancoModel? Banco { get; set; }
     public int? BancoId { get; set; } = 0; // Relacionamento com a tabela de Banco
 
-    public ICollection<Financ_PagarSubModel> subFinancPagar { get; set; } = new List<Financ_PagarSubModel>();
+    public ICollection<Financ_PagarSubModel>? subFinancPagar { get; set; } = new List<Financ_PagarSubModel>();
 }
 
 public class Financ_PagarSubCreateDto

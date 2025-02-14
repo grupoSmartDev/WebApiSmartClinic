@@ -212,7 +212,7 @@ public class PlanoContaService : IPlanoContaInterface
             query = query.Where(p =>
                 (string.IsNullOrEmpty(codigoFiltro) || p.Codigo.Contains(codigoFiltro)) &&
                 (string.IsNullOrEmpty(nomeFiltro) || p.Nome.Contains(nomeFiltro)) &&
-                (!tipoFiltro.HasValue || p.Tipo.Any(t => t == tipoFiltro.Value)) &&
+                (!tipoFiltro.HasValue || p.Tipo.ToString().Contains(p.Tipo.ToString())) &&
                 (!inativoFiltro.HasValue || p.Inativo == inativoFiltro)
             );
 

@@ -170,13 +170,18 @@ public class PlanoService : IPlanoInterface
         }
     }
 
-    public async Task<ResponseModel<List<PlanoModel>>> Listar(int pageNumber = 1, int pageSize = 10, int? codigoFiltro = null, string? descricaoFiltro = null, bool paginar = true)
+    public async Task<ResponseModel<List<PlanoModel>>> Listar(int pageNumber = 1, int pageSize = 10, int? codigoFiltro = null, string? descricaoFiltro = null, bool paginar = true, bool paraPaciente = false)
     {
         ResponseModel<List<PlanoModel>> resposta = new ResponseModel<List<PlanoModel>>();
 
         try
         {
             var query = _context.Plano.AsQueryable();
+
+            if (paraPaciente)
+            {
+               query = query.Where(p => p.Ativo == false);
+            }
 
             query = query.Where(x =>
                 (!codigoFiltro.HasValue || x.Id == codigoFiltro) &&

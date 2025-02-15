@@ -18,7 +18,7 @@ public class Financ_PagarCreateDto
     public string? Descricao { get; set; }
     public string? Classificacao { get; set; }
     public string? Observacao { get; set; }
-    public int? PacienteId { get; set; } = null; // Relacionamento com a tabela de Fornecedor
+    public int? PacienteId { get; set; } = null;
     [JsonIgnore]
     public PacienteModel? Paciente { get; set; }
     public int? FornecedorId { get; set; } = null; // Relacionamento com a tabela de Fornecedor

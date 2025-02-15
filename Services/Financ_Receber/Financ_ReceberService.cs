@@ -266,6 +266,81 @@ public class Financ_ReceberService : IFinanc_ReceberInterface
         }
     }
 
+    public async Task<ResponseModel<List<Financ_ReceberModel>>> ListarAnalitico(int pageNumber = 1, int pageSize = 10, int? codigoFiltro = null, string? descricaoFiltro = null, DateTime? dataEmissaoInicio = null, DateTime? dataEmissaoFim = null,
+        decimal? valorMinimoFiltro = null, decimal? valorMaximoFiltro = null, int? parcelaNumeroFiltro = null, DateTime? vencimentoInicio = null, DateTime? vencimentoFim = null, bool paginar = true)
+    {
+        ResponseModel<List<Financ_ReceberModel>> resposta = new ResponseModel<List<Financ_ReceberModel>>();
+        try
+        {
+            var query = _context.Financ_Receber
+                .Include(x => x.subFinancReceber)
+                .AsQueryable();
+
+            query = query.Where(x =>
+                (!codigoFiltro.HasValue || x.Id == codigoFiltro) &&
+                (string.IsNullOrEmpty(descricaoFiltro) || x.Descricao.Contains(descricaoFiltro)) &&
+                (!dataEmissaoInicio.HasValue || x.DataEmissao >= dataEmissaoInicio.Value) &&
+                (!dataEmissaoFim.HasValue || x.DataEmissao <= dataEmissaoFim.Value) &&
+                (!valorMinimoFiltro.HasValue || x.Valor >= valorMinimoFiltro) &&
+                (!valorMaximoFiltro.HasValue || x.Valor <= valorMaximoFiltro)
+            );
+
+            if (parcelaNumeroFiltro.HasValue || vencimentoInicio.HasValue || vencimentoFim.HasValue)
+            {
+                query = query.Where(x => x.subFinancReceber.Any(p =>
+                    (!parcelaNumeroFiltro.HasValue || p.Parcela == parcelaNumeroFiltro) &&
+                    (!vencimentoInicio.HasValue || p.DataVencimento >= vencimentoInicio) &&
+                    (!vencimentoFim.HasValue || p.DataVencimento <= vencimentoFim)
+                ));
+            }
+
+            query = query.OrderBy(x => x.Id);
+
+            resposta.Dados = paginar ? (await PaginationHelper.PaginateAsync(query, pageNumber, pageSize)).Dados : await query.ToListAsync();
+            resposta.Mensagem = "Todos os Financ_Receber foram encontrados";
+
+            return resposta;
+        }
+        catch (Exception ex)
+        {
+            resposta.Mensagem = ex.Message;
+            resposta.Status = false;
+
+            return resposta;
+        }
+    }
+
+    public async Task<ResponseModel<List<Financ_ReceberSubModel>>> ListarSintetico(int pageNumber = 1, int pageSize = 10, int? idPaiFiltro = null, int? parcelaNumeroFiltro = null, DateTime? vencimentoInicio = null, DateTime? vencimentoFim = null, bool paginar = true)
+    {
+        ResponseModel<List<Financ_ReceberSubModel>> resposta = new ResponseModel<List<Financ_ReceberSubModel>>();
+
+        try
+        {
+            var query = _context.Financ_ReceberSub.AsQueryable();
+
+            query = query.Where(p =>
+                (!idPaiFiltro.HasValue || p.financReceberId == idPaiFiltro) &&
+                (!parcelaNumeroFiltro.HasValue || p.Parcela == parcelaNumeroFiltro) &&
+                (!vencimentoInicio.HasValue || p.DataVencimento >= vencimentoInicio) &&
+                (!vencimentoFim.HasValue || p.DataVencimento <= vencimentoFim)
+            );
+
+            query = query.OrderBy(p => p.financReceberId).ThenBy(p => p.Parcela);
+
+            resposta.Dados = paginar ? (await PaginationHelper.PaginateAsync(query, pageNumber, pageSize)).Dados : await query.ToListAsync();
+            resposta.Mensagem = "Todas as parcelas foram encontradas";
+
+            return resposta;
+        }
+        catch (Exception ex)
+        {
+            resposta.Mensagem = ex.Message;
+            resposta.Status = false;
+
+            return resposta;
+        }
+    }
+
     public async Task<ResponseModel<List<Financ_ReceberModel>>> BuscarContasEmAberto()
     {
         ResponseModel<List<Financ_ReceberModel>> resposta = new ResponseModel<List<Financ_ReceberModel>>();

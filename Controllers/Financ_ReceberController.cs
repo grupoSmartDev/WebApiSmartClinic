@@ -24,6 +24,21 @@ namespace WebApiSmartClinic.Controllers
             return Ok(financ_receber);
         }
 
+        [HttpGet("ListarAnalitico")]
+        public async Task<ActionResult<ResponseModel<List<Financ_ReceberModel>>>> ListarAnalitico([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10, [FromQuery] int? codigoFiltro = null, [FromQuery] string? descricaoFiltro = null, [FromQuery] DateTime? dataEmissaoInicio = null, [FromQuery] DateTime? dataEmissaoFim = null,
+             [FromQuery] decimal? valorMinimoFiltro = null, [FromQuery] decimal? valorMaximoFiltro = null, [FromQuery] int? parcelaNumeroFiltro = null, [FromQuery] DateTime? vencimentoInicio = null, [FromQuery] DateTime? vencimentoFim = null, [FromQuery] bool paginar = true)
+        {
+            var financ_receber = await _financ_receber.ListarAnalitico(pageNumber, pageSize, codigoFiltro, descricaoFiltro, dataEmissaoInicio, dataEmissaoFim, valorMinimoFiltro, valorMaximoFiltro, parcelaNumeroFiltro, vencimentoInicio, vencimentoFim, paginar);
+            return Ok(financ_receber);
+        }
+
+        [HttpGet("ListarSintetico")]
+        public async Task<ActionResult<ResponseModel<List<Financ_ReceberModel>>>> ListarSintetico([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10, [FromQuery] int? idPaiFiltro = null, [FromQuery] int? parcelaNumeroFiltro = null, [FromQuery] DateTime? vencimentoInicio = null, [FromQuery] DateTime? vencimentoFim = null, [FromQuery] bool paginar = true)
+        {
+            var financ_receber = await _financ_receber.ListarSintetico(pageNumber, pageSize, idPaiFiltro, parcelaNumeroFiltro, vencimentoInicio, vencimentoFim, paginar);
+            return Ok(financ_receber);
+        }
+
         [HttpGet("BuscarPorId/{idFinanc_Receber}")]
         public async Task<ActionResult<ResponseModel<List<Financ_ReceberModel>>>> BuscarPorId(int idFinanc_Receber)
         {

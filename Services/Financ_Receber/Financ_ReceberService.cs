@@ -403,7 +403,7 @@ public class Financ_ReceberService : IFinanc_ReceberInterface
     }
 
 
-    public async Task<ResponseModel<Financ_ReceberSubModel>> QuitarParcela(int idParcela, decimal valorPago)
+    public async Task<ResponseModel<Financ_ReceberSubModel>> BaixarParcela(int idParcela, decimal valorPago)
     {
         var resposta = new ResponseModel<Financ_ReceberSubModel>();
 

@@ -17,9 +17,9 @@ namespace WebApiSmartClinic.Controllers
         }
 
         [HttpGet("Listar")]
-        public async Task<ActionResult<ResponseModel<List<ComissaoModel>>>> Listar()
+        public async Task<ActionResult<ResponseModel<List<ComissaoModel>>>> Listar(int pageNumber = 1, int pageSize = 10, int? codigoFiltro = null, string? profissionalFiltro = null, bool paginar = true)
         {
-            var comissao = await _comissao.Listar();
+            var comissao = await _comissao.Listar(pageNumber, pageSize, codigoFiltro, profissionalFiltro, paginar);
             return Ok(comissao);
         }
 
@@ -31,23 +31,23 @@ namespace WebApiSmartClinic.Controllers
         }
 
         [HttpPost("Criar")]
-        public async Task<ActionResult<ResponseModel<List<ComissaoModel>>>> Criar(ComissaoCreateDto comissaoCreateDto)
+        public async Task<ActionResult<ResponseModel<List<ComissaoModel>>>> Criar(ComissaoCreateDto comissaoCreateDto, int pageNumber = 1, int pageSize = 10, bool paginar = true)
         {
-            var comissao = await _comissao.Criar(comissaoCreateDto);
+            var comissao = await _comissao.Criar(comissaoCreateDto, pageNumber, pageSize, paginar);
             return Ok(comissao);
         }
 
         [HttpPut("Editar")]
-        public async Task<ActionResult<ResponseModel<List<ComissaoModel>>>> Editar(ComissaoEdicaoDto comissaoEdicaoDto)
+        public async Task<ActionResult<ResponseModel<List<ComissaoModel>>>> Editar(ComissaoEdicaoDto comissaoEdicaoDto, int pageNumber = 1, int pageSize = 10, bool paginar = true)
         {
-            var comissao = await _comissao.Editar(comissaoEdicaoDto);
+            var comissao = await _comissao.Editar(comissaoEdicaoDto, pageNumber, pageSize, paginar);
             return Ok(comissao);
         }
 
         [HttpDelete("Delete/{idComissao}")]
-        public async Task<ActionResult<ResponseModel<List<ComissaoModel>>>> Delete(int idComissao)
+        public async Task<ActionResult<ResponseModel<List<ComissaoModel>>>> Delete(int idComissao, int pageNumber = 1, int pageSize = 10, bool paginar = true)
         {
-            var comissao = await _comissao.Delete(idComissao);
+            var comissao = await _comissao.Delete(idComissao, pageNumber, pageSize, paginar);
             return Ok(comissao);
         }
 

@@ -67,10 +67,10 @@ namespace WebApiSmartClinic.Controllers
             return Ok(financ_receber);
         }
 
-        [HttpPost("QuitarParcela/{idParcela}")]
-        public async Task<ActionResult<ResponseModel<Financ_ReceberSubModel>>> QuitarParcela(int idParcela, decimal valorPago)
+        [HttpPost("BaixarParcela/{idParcela}")]
+        public async Task<ActionResult<ResponseModel<Financ_ReceberSubModel>>> BaixarParcela(int idParcela, decimal valorPago)
         {
-            var resultado = await _financ_receber.QuitarParcela(idParcela, valorPago);
+            var resultado = await _financ_receber.BaixarParcela(idParcela, valorPago);
             return Ok(resultado);
         }
 

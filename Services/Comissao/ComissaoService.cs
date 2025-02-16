@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using WebApiSmartClinic.Data;
 using WebApiSmartClinic.Dto.Comissao;
 using WebApiSmartClinic.Models;
+using WebApiSmartClinic.Services.Profissional;
 
 namespace WebApiSmartClinic.Services.Comissao;
 
@@ -39,7 +40,7 @@ public class ComissaoService : IComissaoInterface
         }
     }
 
-    public async Task<ResponseModel<List<ComissaoModel>>> Criar(ComissaoCreateDto comissaoCreateDto)
+    public async Task<ResponseModel<List<ComissaoModel>>> Criar(ComissaoCreateDto comissaoCreateDto, int pageNumber = 1, int pageSize = 10, bool paginar = true)
     {
         ResponseModel<List<ComissaoModel>> resposta = new ResponseModel<List<ComissaoModel>>();
 
@@ -66,8 +67,9 @@ public class ComissaoService : IComissaoInterface
             _context.Comissao.Add(comissao);
             await _context.SaveChangesAsync();
 
-            // Opcional: para retornar apenas a comissão recém-criada
-            resposta.Dados = await _context.Comissao.ToListAsync();
+            var query = _context.Comissao.AsQueryable();
+
+            resposta.Dados = (await PaginationHelper.PaginateAsync(query, pageNumber, pageSize)).Dados;
 
             resposta.Mensagem = "Comissão criada com sucesso";
             resposta.Status = true;
@@ -159,7 +161,7 @@ public class ComissaoService : IComissaoInterface
         }
     }
 
-    public async Task<ResponseModel<List<ComissaoModel>>> Delete(int idComissao)
+    public async Task<ResponseModel<List<ComissaoModel>>> Delete(int idComissao, int pageNumber = 1, int pageSize = 10, bool paginar = true)
     {
         ResponseModel<List<ComissaoModel>> resposta = new ResponseModel<List<ComissaoModel>>();
 
@@ -175,7 +177,9 @@ public class ComissaoService : IComissaoInterface
             _context.Remove(comissao);
             await _context.SaveChangesAsync();
 
-            resposta.Dados = await _context.Comissao.ToListAsync();
+            var query = _context.Comissao.AsQueryable();
+
+            resposta.Dados = (await PaginationHelper.PaginateAsync(query, pageNumber, pageSize)).Dados;
             resposta.Mensagem = "Comissao Excluido com sucesso";
             return resposta;
 
@@ -189,7 +193,7 @@ public class ComissaoService : IComissaoInterface
         }
     }
 
-    public async Task<ResponseModel<List<ComissaoModel>>> Editar(ComissaoEdicaoDto comissaoEdicaoDto)
+    public async Task<ResponseModel<List<ComissaoModel>>> Editar(ComissaoEdicaoDto comissaoEdicaoDto, int pageNumber = 1, int pageSize = 10, bool paginar = true)
     {
         ResponseModel<List<ComissaoModel>> resposta = new ResponseModel<List<ComissaoModel>>();
 
@@ -220,8 +224,10 @@ public class ComissaoService : IComissaoInterface
             _context.Update(comissao);
             await _context.SaveChangesAsync();
 
-            resposta.Dados = await _context.Comissao.ToListAsync();
-            resposta.Mensagem = "Comissao Atualizado com sucesso";
+            var query = _context.Comissao.AsQueryable();
+
+            resposta.Dados = (await PaginationHelper.PaginateAsync(query, pageNumber, pageSize)).Dados;
+            resposta.Mensagem = "Comissao atualizada com sucesso";
             return resposta;
         }
         catch (Exception ex)
@@ -233,16 +239,25 @@ public class ComissaoService : IComissaoInterface
         }
     }
 
-    public async Task<ResponseModel<List<ComissaoModel>>> Listar()
+    public async Task<ResponseModel<List<ComissaoModel>>> Listar(int pageNumber = 1, int pageSize = 10, int? codigoFiltro = null, string? profissionalFiltro = null, bool paginar = true)
     {
         ResponseModel<List<ComissaoModel>> resposta = new ResponseModel<List<ComissaoModel>>();
 
         try
         {
             var comissao = await _context.Comissao.ToListAsync();
+            var query = _context.Comissao.AsQueryable();
+          
+            query = query.Where(p =>
+                (!codigoFiltro.HasValue || p.Id == codigoFiltro) &&
+                (!string.IsNullOrEmpty(profissionalFiltro) || p.Profissional.Nome == profissionalFiltro)
+            );
 
-            resposta.Dados = comissao;
-            resposta.Mensagem = "Todos os Comissao foram encontrados";
+            query = query.OrderBy(p => p.Id);
+
+            resposta.Dados = paginar ? (await PaginationHelper.PaginateAsync(query, pageNumber, pageSize)).Dados : await query.ToListAsync();
+
+            resposta.Mensagem = "Todas as comissões foram encontradas";
             return resposta;
 
 

@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using WebApiSmartClinic.Data;
 using WebApiSmartClinic.Dto.TipoPagamento;
 using WebApiSmartClinic.Models;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace WebApiSmartClinic.Services.TipoPagamento;
 
@@ -14,7 +15,7 @@ public class TipoPagamentoService : ITipoPagamentoInterface
         _context = context;
     }
 
-    public async Task<ResponseModel<TipoPagamentoModel>> BuscarTipoPagamentoPorId(int idTipoPagamento)
+    public async Task<ResponseModel<TipoPagamentoModel>> BuscarPorId(int idTipoPagamento)
     {
         ResponseModel<TipoPagamentoModel> resposta = new ResponseModel<TipoPagamentoModel>();
         try
@@ -22,24 +23,24 @@ public class TipoPagamentoService : ITipoPagamentoInterface
             var tipopagamento = await _context.TipoPagamento.FirstOrDefaultAsync(x => x.Id == idTipoPagamento);
             if (tipopagamento == null)
             {
-                resposta.Mensagem = "Nenhum TipoPagamento encontrado";
+                resposta.Mensagem = "Nenhum tipo de pagamento encontrado";
                 return resposta;
             }
 
             resposta.Dados = tipopagamento;
-            resposta.Mensagem = "Tipo de Pagamento Encontrado";
+            resposta.Mensagem = "Tipo de pagamento encontrado";
             return resposta;
         }
         catch (Exception ex)
         {
 
-            resposta.Mensagem = "Erro ao buscar TipoPagamento";
+            resposta.Mensagem = "Erro ao buscar tipo de pagamento";
             resposta.Status = false;
             return resposta;
         }
     }
 
-    public async Task<ResponseModel<List<TipoPagamentoModel>>> CriarTipoPagamento(TipoPagamentoCreateDto tipopagamentoCreateDto)
+    public async Task<ResponseModel<List<TipoPagamentoModel>>> Criar(TipoPagamentoCreateDto tipopagamentoCreateDto, int pageNumber = 1, int pageSize = 10, bool paginar = true)
     {
         ResponseModel<List<TipoPagamentoModel>> resposta = new ResponseModel<List<TipoPagamentoModel>>();
 
@@ -53,8 +54,10 @@ public class TipoPagamentoService : ITipoPagamentoInterface
             _context.Add(tipopagamento);
             await _context.SaveChangesAsync();
 
-            resposta.Dados = await _context.TipoPagamento.ToListAsync();
-            resposta.Mensagem = "Tipo de Pagamento criado com sucesso";
+            var query = _context.TipoPagamento.AsQueryable();
+
+            resposta.Dados = paginar ? (await PaginationHelper.PaginateAsync(query, pageNumber, pageSize)).Dados : await query.ToListAsync();
+            resposta.Mensagem = "Tipo de pagamento criado com sucesso";
             return resposta;
         }
         catch (Exception ex)
@@ -66,7 +69,7 @@ public class TipoPagamentoService : ITipoPagamentoInterface
 
     }
 
-    public async Task<ResponseModel<List<TipoPagamentoModel>>> DeleteTipoPagamento(int idTipoPagamento)
+    public async Task<ResponseModel<List<TipoPagamentoModel>>> Delete(int idTipoPagamento, int pageNumber = 1, int pageSize = 10, bool paginar = true)
     {
         ResponseModel<List<TipoPagamentoModel>> resposta = new ResponseModel<List<TipoPagamentoModel>>();
 
@@ -75,15 +78,17 @@ public class TipoPagamentoService : ITipoPagamentoInterface
             var tipopagamento = await _context.TipoPagamento.FirstOrDefaultAsync(x => x.Id == idTipoPagamento);
             if (tipopagamento == null)
             {
-                resposta.Mensagem = "Nenhum TipoPagamento encontrado";
+                resposta.Mensagem = "Nenhum tipo de pagamento encontrado";
                 return resposta;
             }
 
             _context.Remove(tipopagamento);
             await _context.SaveChangesAsync();
 
-            resposta.Dados = await _context.TipoPagamento.ToListAsync();
-            resposta.Mensagem = "Tipo de Pagamento Excluido com sucesso";
+            var query = _context.TipoPagamento.AsQueryable();
+
+            resposta.Dados = paginar ? (await PaginationHelper.PaginateAsync(query, pageNumber, pageSize)).Dados : await query.ToListAsync();
+            resposta.Mensagem = "Tipo de pagamento excluído com sucesso";
             return resposta;
 
         }
@@ -96,7 +101,7 @@ public class TipoPagamentoService : ITipoPagamentoInterface
         }
     }
 
-    public async Task<ResponseModel<List<TipoPagamentoModel>>> EditarTipoPagamento(TipoPagamentoEdicaoDto tipopagamentoEdicaoDto)
+    public async Task<ResponseModel<List<TipoPagamentoModel>>> Editar(TipoPagamentoEdicaoDto tipopagamentoEdicaoDto, int pageNumber = 1, int pageSize = 10, bool paginar = true)
     {
         ResponseModel<List<TipoPagamentoModel>> resposta = new ResponseModel<List<TipoPagamentoModel>>();
 
@@ -105,7 +110,7 @@ public class TipoPagamentoService : ITipoPagamentoInterface
             var tipopagamento = _context.TipoPagamento.FirstOrDefault(x => x.Id == tipopagamentoEdicaoDto.Id);
             if (tipopagamento == null)
             {
-                resposta.Mensagem = "Tipo de Pagamento não encontrado";
+                resposta.Mensagem = "Tipo de pagamento não encontrado";
                 return resposta;
             }
 
@@ -114,9 +119,10 @@ public class TipoPagamentoService : ITipoPagamentoInterface
 
             _context.Update(tipopagamento);
             await _context.SaveChangesAsync();
+            var query = _context.TipoPagamento.AsQueryable();
 
-            resposta.Dados = await _context.TipoPagamento.ToListAsync();
-            resposta.Mensagem = "Tipo de Pagamento Atualizado com sucesso";
+            resposta.Dados = paginar ? (await PaginationHelper.PaginateAsync(query, pageNumber, pageSize)).Dados : await query.ToListAsync();
+            resposta.Mensagem = "Tipo de pagamento atualizado com sucesso";
             return resposta;
         }
         catch (Exception ex)
@@ -128,16 +134,23 @@ public class TipoPagamentoService : ITipoPagamentoInterface
         }
     }
 
-    public async Task<ResponseModel<List<TipoPagamentoModel>>> ListarTipoPagamento()
+    public async Task<ResponseModel<List<TipoPagamentoModel>>> Listar(int pageNumber = 1, int pageSize = 10, int? codigoFiltro = null, string? descricaoFiltro = null, bool paginar = true)
     {
         ResponseModel<List<TipoPagamentoModel>> resposta = new ResponseModel<List<TipoPagamentoModel>>();
 
         try
         {
-            var tipopagamento = await _context.TipoPagamento.ToListAsync();
+            var query = _context.TipoPagamento.AsQueryable();
 
-            resposta.Dados = tipopagamento;
-            resposta.Mensagem = "Todos os TipoPagamento foram encontrados";
+            query = query.Where(p =>
+               (!codigoFiltro.HasValue || p.Id == codigoFiltro) &&
+               (!string.IsNullOrEmpty(descricaoFiltro) || p.Descricao == descricaoFiltro)
+            );
+
+            query = query.OrderBy(p => p.Id);
+
+            resposta.Dados = paginar ? (await PaginationHelper.PaginateAsync(query, pageNumber, pageSize)).Dados : await query.ToListAsync();
+            resposta.Mensagem = "Todos os tipos de pagamentos foram encontrados";
             return resposta;
 
 

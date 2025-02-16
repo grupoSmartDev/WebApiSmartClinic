@@ -17,37 +17,37 @@ namespace WebApiSmartClinic.Controllers
         }
 
         [HttpGet("Listar")]
-        public async Task<ActionResult<ResponseModel<List<TipoPagamentoModel>>>> ListarTipoPagamento()
+        public async Task<ActionResult<ResponseModel<List<TipoPagamentoModel>>>> Listar(int pageNumber = 1, int pageSize = 10, int? codigoFiltro = null, string? descricaoFiltro = null, bool paginar = true)
         {
-            var tipopagamento = await _tipopagamento.ListarTipoPagamento();
+            var tipopagamento = await _tipopagamento.Listar(pageNumber, pageSize, codigoFiltro, descricaoFiltro, paginar);
             return Ok(tipopagamento);
         }
 
         [HttpGet("BuscarPorId/{idTipoPagamento}")]
-        public async Task<ActionResult<ResponseModel<List<TipoPagamentoModel>>>> BuscarTipoPagamentoPorId(int idTipoPagamento)
+        public async Task<ActionResult<ResponseModel<List<TipoPagamentoModel>>>> BuscarPorId(int idTipoPagamento, int pageNumber = 1, int pageSize = 10, bool paginar = true)
         {
-            var tipopagamento = await _tipopagamento.BuscarTipoPagamentoPorId(idTipoPagamento);
+            var tipopagamento = await _tipopagamento.BuscarPorId(idTipoPagamento);
             return Ok(tipopagamento);
         }
 
         [HttpPost("Criar")]
-        public async Task<ActionResult<ResponseModel<List<TipoPagamentoModel>>>> CriarTipoPagamento(TipoPagamentoCreateDto tipopagamentoCreateDto)
+        public async Task<ActionResult<ResponseModel<List<TipoPagamentoModel>>>> Criar(TipoPagamentoCreateDto tipopagamentoCreateDto, int pageNumber = 1, int pageSize = 10, bool paginar = true)
         {
-            var tipopagamento = await _tipopagamento.CriarTipoPagamento(tipopagamentoCreateDto);
+            var tipopagamento = await _tipopagamento.Criar(tipopagamentoCreateDto, pageNumber, pageSize, paginar);
             return Ok(tipopagamento);
         }
 
         [HttpPut("Editar")]
-        public async Task<ActionResult<ResponseModel<List<TipoPagamentoModel>>>> EditarTipoPagamento(TipoPagamentoEdicaoDto tipopagamentoEdicaoDto)
+        public async Task<ActionResult<ResponseModel<List<TipoPagamentoModel>>>> Editar(TipoPagamentoEdicaoDto tipopagamentoEdicaoDto, int pageNumber = 1, int pageSize = 10, bool paginar = true)
         {
-            var tipopagamento = await _tipopagamento.EditarTipoPagamento(tipopagamentoEdicaoDto);
+            var tipopagamento = await _tipopagamento.Editar(tipopagamentoEdicaoDto, pageNumber, pageSize, paginar);
             return Ok(tipopagamento);
         }
 
         [HttpDelete("Delete/{idTipoPagamento}")]
-        public async Task<ActionResult<ResponseModel<List<TipoPagamentoModel>>>> DeleteTipoPagamento(int idTipoPagamento)
+        public async Task<ActionResult<ResponseModel<List<TipoPagamentoModel>>>> Delete(int idTipoPagamento, int pageNumber = 1, int pageSize = 10, bool paginar = true)
         {
-            var tipopagamento = await _tipopagamento.DeleteTipoPagamento(idTipoPagamento);
+            var tipopagamento = await _tipopagamento.Delete(idTipoPagamento, pageNumber, pageSize, paginar);
             return Ok(tipopagamento);
         }
     }

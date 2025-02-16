@@ -6,10 +6,10 @@ namespace WebApiSmartClinic.Services.TipoPagamento
 {
     public interface ITipoPagamentoInterface
     {
-        Task<ResponseModel<List<TipoPagamentoModel>>> ListarTipoPagamento();
-        Task<ResponseModel<List<TipoPagamentoModel>>> DeleteTipoPagamento(int idTipoPagamento);
-        Task<ResponseModel<TipoPagamentoModel>> BuscarTipoPagamentoPorId(int idTipoPagamento);
-        Task<ResponseModel<List<TipoPagamentoModel>>> CriarTipoPagamento(TipoPagamentoCreateDto tipopagamentoCreateDto);
-        Task<ResponseModel<List<TipoPagamentoModel>>> EditarTipoPagamento(TipoPagamentoEdicaoDto tipopagamentoEdicaoDto);
+        Task<ResponseModel<List<TipoPagamentoModel>>> Listar(int pageNumber = 1, int pageSize = 10, int? codigoFiltro = null, string? descricaoFiltro = null, bool paginar = true);
+        Task<ResponseModel<List<TipoPagamentoModel>>> Delete(int idTipoPagamento, int pageNumber = 1, int pageSize = 10, bool paginar = true);
+        Task<ResponseModel<TipoPagamentoModel>> BuscarPorId(int idTipoPagamento);
+        Task<ResponseModel<List<TipoPagamentoModel>>> Criar(TipoPagamentoCreateDto tipopagamentoCreateDto, int pageNumber = 1, int pageSize = 10, bool paginar = true);
+        Task<ResponseModel<List<TipoPagamentoModel>>> Editar(TipoPagamentoEdicaoDto tipopagamentoEdicaoDto, int pageNumber = 1, int pageSize = 10, bool paginar = true);
     }
 }

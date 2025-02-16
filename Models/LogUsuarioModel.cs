@@ -1,4 +1,6 @@
 
+using System.Text.Json.Serialization;
+
 namespace WebApiSmartClinic.Models
 {
     public class LogUsuarioModel
@@ -8,6 +10,10 @@ namespace WebApiSmartClinic.Models
         public string Descricao { get; set; }
         public string Rotina { get; set; }
         public int UsuarioId { get; set; }
+
+        [JsonIgnore]
+        public UsuarioModel? Usuario { get; set; }
+
         private DateTime? _DataMovimentacao;
         public DateTime? DataMovimentacao 
         {

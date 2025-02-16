@@ -1,5 +1,6 @@
 
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using WebApiSmartClinic.Data;
 using WebApiSmartClinic.Dto.FormaPagamento;
 using WebApiSmartClinic.Models;
@@ -14,7 +15,7 @@ public class FormaPagamentoService : IFormaPagamentoInterface
         _context = context;
     }
 
-    public async Task<ResponseModel<FormaPagamentoModel>> BuscarFormaPagamentoPorId(int idFormaPagamento)
+    public async Task<ResponseModel<FormaPagamentoModel>> BuscarPorId(int idFormaPagamento)
     {
         ResponseModel<FormaPagamentoModel> resposta = new ResponseModel<FormaPagamentoModel>();
 
@@ -40,7 +41,7 @@ public class FormaPagamentoService : IFormaPagamentoInterface
         }
     }
 
-    public async Task<ResponseModel<List<FormaPagamentoModel>>> CriarFormaPagamento(FormaPagamentoCreateDto formapagamentoCreateDto)
+    public async Task<ResponseModel<List<FormaPagamentoModel>>> Criar(FormaPagamentoCreateDto formapagamentoCreateDto, int pageNumber = 1, int pageSize = 10, bool paginar = true)
     {
         ResponseModel<List<FormaPagamentoModel>> resposta = new ResponseModel<List<FormaPagamentoModel>>();
 
@@ -54,7 +55,9 @@ public class FormaPagamentoService : IFormaPagamentoInterface
             _context.Add(formapagamento);
             await _context.SaveChangesAsync();
 
-            resposta.Dados = await _context.FormaPagamento.ToListAsync();
+            var query = _context.FormaPagamento.AsQueryable();
+
+            resposta.Dados = (await PaginationHelper.PaginateAsync(query, pageNumber, pageSize)).Dados;
             resposta.Mensagem = "Forma de pagamento criada com sucesso";
 
             return resposta;
@@ -67,7 +70,7 @@ public class FormaPagamentoService : IFormaPagamentoInterface
         }
     }
 
-    public async Task<ResponseModel<List<FormaPagamentoModel>>> DeleteFormaPagamento(int idFormaPagamento)
+    public async Task<ResponseModel<List<FormaPagamentoModel>>> Delete(int idFormaPagamento, int pageNumber = 1, int pageSize = 10, bool paginar = true)
     {
         ResponseModel<List<FormaPagamentoModel>> resposta = new ResponseModel<List<FormaPagamentoModel>>();
 
@@ -83,7 +86,9 @@ public class FormaPagamentoService : IFormaPagamentoInterface
             _context.Remove(formapagamento);
             await _context.SaveChangesAsync();
 
-            resposta.Dados = await _context.FormaPagamento.ToListAsync();
+            var query = _context.FormaPagamento.AsQueryable();
+
+            resposta.Dados = (await PaginationHelper.PaginateAsync(query, pageNumber, pageSize)).Dados;
             resposta.Mensagem = "Forma de pagamento excluida com sucesso";
 
             return resposta;
@@ -96,7 +101,7 @@ public class FormaPagamentoService : IFormaPagamentoInterface
         }
     }
 
-    public async Task<ResponseModel<List<FormaPagamentoModel>>> EditarFormaPagamento(FormaPagamentoEdicaoDto formapagamentoEdicaoDto)
+    public async Task<ResponseModel<List<FormaPagamentoModel>>> Editar(FormaPagamentoEdicaoDto formapagamentoEdicaoDto, int pageNumber = 1, int pageSize = 10, bool paginar = true)
     {
         ResponseModel<List<FormaPagamentoModel>> resposta = new ResponseModel<List<FormaPagamentoModel>>();
 
@@ -116,7 +121,9 @@ public class FormaPagamentoService : IFormaPagamentoInterface
             _context.Update(formapagamento);
             await _context.SaveChangesAsync();
 
-            resposta.Dados = await _context.FormaPagamento.ToListAsync();
+            var query = _context.FormaPagamento.AsQueryable();
+
+            resposta.Dados = (await PaginationHelper.PaginateAsync(query, pageNumber, pageSize)).Dados;
             resposta.Mensagem = "Forma de pagamento atualizada com sucesso";
 
             return resposta;
@@ -129,17 +136,26 @@ public class FormaPagamentoService : IFormaPagamentoInterface
         }
     }
 
-    public async Task<ResponseModel<List<FormaPagamentoModel>>> ListarFormaPagamento()
+    public async Task<ResponseModel<List<FormaPagamentoModel>>> Listar(int pageNumber = 1, int pageSize = 10, int? codigoFiltro = null, int? parcelasFiltro = null, string? descricaoFiltro = null, bool paginar = true)
     {
         ResponseModel<List<FormaPagamentoModel>> resposta = new ResponseModel<List<FormaPagamentoModel>>();
 
         try
         {
-            var formapagamento = await _context.FormaPagamento.ToListAsync();
+            var query = _context.FormaPagamento.AsQueryable();
 
-            resposta.Dados = formapagamento;
+            query = query.Where(p =>
+               (!codigoFiltro.HasValue || p.Id == codigoFiltro) &&
+               (!parcelasFiltro.HasValue || p.Parcelas == parcelasFiltro) &&
+               (!string.IsNullOrEmpty(descricaoFiltro) || p.Descricao == descricaoFiltro)
+            );
+
+            query = query.OrderBy(p => p.Id);
+
+            resposta.Dados = paginar ? (await PaginationHelper.PaginateAsync(query, pageNumber, pageSize)).Dados : await query.ToListAsync();
+
             resposta.Mensagem = "Todas as formas de pagamentos foram encontradas";
-            
+
             return resposta;
         }
         catch (Exception e)

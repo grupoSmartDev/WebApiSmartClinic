@@ -17,37 +17,37 @@ namespace WebApiSmartClinic.Controllers
         }
 
         [HttpGet("Listar")]
-        public async Task<ActionResult<ResponseModel<List<FormaPagamentoModel>>>> ListarFormaPagamento()
+        public async Task<ActionResult<ResponseModel<List<FormaPagamentoModel>>>> Listar(int pageNumber = 1, int pageSize = 10, int? codigoFiltro = null, int? parcelasFiltro = null, string? descricaoFiltro = null, bool paginar = true)
         {
-            var formapagamento = await _formapagamento.ListarFormaPagamento();
+            var formapagamento = await _formapagamento.Listar(pageNumber, pageSize, codigoFiltro, parcelasFiltro, descricaoFiltro, paginar);
             return Ok(formapagamento);
         }
 
         [HttpGet("BuscarPorId/{idFormaPagamento}")]
-        public async Task<ActionResult<ResponseModel<List<FormaPagamentoModel>>>> BuscarFormaPagamentoPorId(int idFormaPagamento)
+        public async Task<ActionResult<ResponseModel<List<FormaPagamentoModel>>>> BuscarPorId(int idFormaPagamento)
         {
-            var formapagamento = await _formapagamento.BuscarFormaPagamentoPorId(idFormaPagamento);
+            var formapagamento = await _formapagamento.BuscarPorId(idFormaPagamento);
             return Ok(formapagamento);
         }
 
         [HttpPost("Criar")]
-        public async Task<ActionResult<ResponseModel<List<FormaPagamentoModel>>>> CriarFormaPagamento(FormaPagamentoCreateDto formapagamentoCreateDto)
+        public async Task<ActionResult<ResponseModel<List<FormaPagamentoModel>>>> Criar(FormaPagamentoCreateDto formapagamentoCreateDto, int pageNumber = 1, int pageSize = 10, bool paginar = true)
         {
-            var formapagamento = await _formapagamento.CriarFormaPagamento(formapagamentoCreateDto);
+            var formapagamento = await _formapagamento.Criar(formapagamentoCreateDto, pageNumber, pageSize, paginar);
             return Ok(formapagamento);
         }
 
         [HttpPut("Editar")]
-        public async Task<ActionResult<ResponseModel<List<FormaPagamentoModel>>>> EditarFormaPagamento(FormaPagamentoEdicaoDto formapagamentoEdicaoDto)
+        public async Task<ActionResult<ResponseModel<List<FormaPagamentoModel>>>> Editar(FormaPagamentoEdicaoDto formapagamentoEdicaoDto, int pageNumber = 1, int pageSize = 10, bool paginar = true)
         {
-            var formapagamento = await _formapagamento.EditarFormaPagamento(formapagamentoEdicaoDto);
+            var formapagamento = await _formapagamento.Editar(formapagamentoEdicaoDto, pageNumber, pageSize, paginar);
             return Ok(formapagamento);
         }
 
         [HttpDelete("Delete/{idFormaPagamento}")]
-        public async Task<ActionResult<ResponseModel<List<FormaPagamentoModel>>>> DeleteFormaPagamento(int idFormaPagamento)
+        public async Task<ActionResult<ResponseModel<List<FormaPagamentoModel>>>> Delete(int idFormaPagamento, int pageNumber = 1, int pageSize = 10, bool paginar = true)
         {
-            var formapagamento = await _formapagamento.DeleteFormaPagamento(idFormaPagamento);
+            var formapagamento = await _formapagamento.Delete(idFormaPagamento, pageNumber, pageSize, paginar);
             return Ok(formapagamento);
         }
     }

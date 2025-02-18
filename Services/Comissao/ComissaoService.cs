@@ -69,7 +69,7 @@ public class ComissaoService : IComissaoInterface
 
             var query = _context.Comissao.AsQueryable();
 
-            resposta.Dados = (await PaginationHelper.PaginateAsync(query, pageNumber, pageSize)).Dados;
+            resposta = await PaginationHelper.PaginateAsync(query, pageNumber, pageSize);
 
             resposta.Mensagem = "Comissão criada com sucesso";
             resposta.Status = true;
@@ -179,7 +179,7 @@ public class ComissaoService : IComissaoInterface
 
             var query = _context.Comissao.AsQueryable();
 
-            resposta.Dados = (await PaginationHelper.PaginateAsync(query, pageNumber, pageSize)).Dados;
+            resposta = await PaginationHelper.PaginateAsync(query, pageNumber, pageSize);
             resposta.Mensagem = "Comissao Excluido com sucesso";
             return resposta;
 
@@ -226,7 +226,7 @@ public class ComissaoService : IComissaoInterface
 
             var query = _context.Comissao.AsQueryable();
 
-            resposta.Dados = (await PaginationHelper.PaginateAsync(query, pageNumber, pageSize)).Dados;
+            resposta = await PaginationHelper.PaginateAsync(query, pageNumber, pageSize);
             resposta.Mensagem = "Comissao atualizada com sucesso";
             return resposta;
         }
@@ -255,7 +255,7 @@ public class ComissaoService : IComissaoInterface
 
             query = query.OrderBy(p => p.Id);
 
-            resposta.Dados = paginar ? (await PaginationHelper.PaginateAsync(query, pageNumber, pageSize)).Dados : await query.ToListAsync();
+            resposta = paginar ? await PaginationHelper.PaginateAsync(query, pageNumber, pageSize) : new ResponseModel<List<ComissaoModel>> { Dados = await query.ToListAsync() };
 
             resposta.Mensagem = "Todas as comissões foram encontradas";
             return resposta;

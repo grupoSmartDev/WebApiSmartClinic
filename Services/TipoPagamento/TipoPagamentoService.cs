@@ -149,7 +149,7 @@ public class TipoPagamentoService : ITipoPagamentoInterface
 
             query = query.OrderBy(p => p.Id);
 
-            resposta.Dados = paginar ? (await PaginationHelper.PaginateAsync(query, pageNumber, pageSize)).Dados : await query.ToListAsync();
+            resposta = paginar ? await PaginationHelper.PaginateAsync(query, pageNumber, pageSize) : new ResponseModel<List<TipoPagamentoModel>> { Dados = await query.ToListAsync() };
             resposta.Mensagem = "Todos os tipos de pagamentos foram encontrados";
             return resposta;
 

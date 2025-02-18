@@ -77,7 +77,7 @@ public class ProfissionalService : IProfissionalInterface
 
             var query = _context.Profissional.AsQueryable();
 
-            resposta.Dados = (await PaginationHelper.PaginateAsync(query, pageNumber, pageSize)).Dados;
+            resposta = await PaginationHelper.PaginateAsync(query, pageNumber, pageSize);
             resposta.Mensagem = "Profissional criado com sucesso";
             return resposta;
         }
@@ -106,7 +106,7 @@ public class ProfissionalService : IProfissionalInterface
             await _context.SaveChangesAsync();
             var query = _context.Profissional.AsQueryable();
 
-            resposta.Dados = (await PaginationHelper.PaginateAsync(query, pageNumber, pageSize)).Dados;
+            resposta = await PaginationHelper.PaginateAsync(query, pageNumber, pageSize);
             resposta.Mensagem = "Profissional Excluido com sucesso";
             return resposta;
 
@@ -161,7 +161,7 @@ public class ProfissionalService : IProfissionalInterface
             
             var query = _context.Profissional.AsQueryable();
 
-            resposta.Dados = (await PaginationHelper.PaginateAsync(query, pageNumber, pageSize)).Dados;
+            resposta = await PaginationHelper.PaginateAsync(query, pageNumber, pageSize);
             resposta.Mensagem = "Profissional Atualizado com sucesso";
             return resposta;
         }
@@ -194,8 +194,8 @@ public class ProfissionalService : IProfissionalInterface
             query = query.OrderBy(x => x.Id);
 
             // Paginação opcional
-            resposta.Dados = paginar ? (await PaginationHelper.PaginateAsync(query, pageNumber, pageSize)).Dados : await query.ToListAsync();
-            
+            resposta = paginar ? await PaginationHelper.PaginateAsync(query, pageNumber, pageSize) : new ResponseModel<List<ProfissionalModel>> { Dados = await query.ToListAsync() };
+
             resposta.Mensagem = "Profissionais encontrados com sucesso.";
             resposta.Status = true;
         }

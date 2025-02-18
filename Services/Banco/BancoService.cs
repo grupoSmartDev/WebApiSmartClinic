@@ -68,7 +68,7 @@ public class BancoService : IBancoInterface
 
             var query = _context.Banco.AsQueryable();
 
-            resposta.Dados = (await PaginationHelper.PaginateAsync(query, pageNumber, pageSize)).Dados;
+            resposta = await PaginationHelper.PaginateAsync(query, pageNumber, pageSize);
             resposta.Mensagem = "Banco criado com sucesso";
             return resposta;
         }
@@ -99,7 +99,7 @@ public class BancoService : IBancoInterface
 
             var query = _context.Banco.AsQueryable();
 
-            resposta.Dados = (await PaginationHelper.PaginateAsync(query, pageNumber, pageSize)).Dados;
+            resposta = await PaginationHelper.PaginateAsync(query, pageNumber, pageSize);
             resposta.Mensagem = "Banco Excluido com sucesso";
             return resposta;
 
@@ -148,7 +148,7 @@ public class BancoService : IBancoInterface
 
             var query = _context.Banco.AsQueryable();
 
-            resposta.Dados = (await PaginationHelper.PaginateAsync(query, pageNumber, pageSize)).Dados;
+            resposta = await PaginationHelper.PaginateAsync(query, pageNumber, pageSize);
             resposta.Mensagem = "Banco Atualizado com sucesso";
             return resposta;
         }
@@ -178,7 +178,7 @@ public class BancoService : IBancoInterface
 
             query.OrderBy(x => x.Id);
 
-            resposta.Dados = paginar ? (await PaginationHelper.PaginateAsync(query, pageNumber, pageSize)).Dados : await query.ToListAsync();
+            resposta = paginar ? await PaginationHelper.PaginateAsync(query, pageNumber, pageSize) : new ResponseModel<List<BancoModel>> { Dados = await query.ToListAsync() };
             resposta.Mensagem = "Todos os Banco foram encontrados";
             
             return resposta;

@@ -82,7 +82,7 @@ public class FornecedorService : IFornecedorInterface
 
             var query = _context.Fornecedor.AsQueryable();
 
-            resposta.Dados = (await PaginationHelper.PaginateAsync(query, pageNumber, pageSize)).Dados;
+            resposta = await PaginationHelper.PaginateAsync(query, pageNumber, pageSize);
             resposta.Mensagem = "Fornecedor criado com sucesso";
             return resposta;
         }
@@ -113,7 +113,7 @@ public class FornecedorService : IFornecedorInterface
             
             var query = _context.Fornecedor.AsQueryable();
 
-            resposta.Dados = (await PaginationHelper.PaginateAsync(query, pageNumber, pageSize)).Dados;
+            resposta = await PaginationHelper.PaginateAsync(query, pageNumber, pageSize);
             resposta.Mensagem = "Fornecedor excluído com sucesso";
             return resposta;
 
@@ -174,7 +174,7 @@ public class FornecedorService : IFornecedorInterface
 
             var query = _context.Fornecedor.AsQueryable();
 
-            resposta.Dados = (await PaginationHelper.PaginateAsync(query, pageNumber, pageSize)).Dados;
+            resposta = await PaginationHelper.PaginateAsync(query, pageNumber, pageSize);
             resposta.Mensagem = "Fornecedor atualizado com sucesso";
             return resposta;
         }
@@ -208,7 +208,7 @@ public class FornecedorService : IFornecedorInterface
             query = query.OrderBy(x => x.Id);
 
             // Paginação opcional
-            resposta.Dados = paginar ? (await PaginationHelper.PaginateAsync(query, pageNumber, pageSize)).Dados : await query.ToListAsync();
+            resposta = paginar ? await PaginationHelper.PaginateAsync(query, pageNumber, pageSize) : new ResponseModel<List<FornecedorModel>> { Dados = await query.ToListAsync() };
             resposta.Mensagem = "Todos os fornecedores foram encontrados";
             return resposta;
 

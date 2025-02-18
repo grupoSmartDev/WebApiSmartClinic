@@ -71,7 +71,7 @@ public class ProcedimentoService : IProcedimentoInterface
 
             var query = _context.Procedimento.AsQueryable();
 
-            resposta.Dados = (await PaginationHelper.PaginateAsync(query, pageNumber, pageSize)).Dados;
+            resposta = await PaginationHelper.PaginateAsync(query, pageNumber, pageSize);
 
             return resposta;
         }
@@ -104,7 +104,7 @@ public class ProcedimentoService : IProcedimentoInterface
             // Query do banco de dados
             var query = _context.Procedimento.AsQueryable();
 
-            resposta.Dados = (await PaginationHelper.PaginateAsync(query, pageNumber, pageSize)).Dados;
+            resposta = await PaginationHelper.PaginateAsync(query, pageNumber, pageSize);
 
             return resposta;
         }
@@ -154,7 +154,7 @@ public class ProcedimentoService : IProcedimentoInterface
             // Query do banco de dados
             var query = _context.Procedimento.AsQueryable();
 
-            resposta.Dados = (await PaginationHelper.PaginateAsync(query, pageNumber, pageSize)).Dados;
+            resposta = await PaginationHelper.PaginateAsync(query, pageNumber, pageSize);
 
             return resposta;
         }
@@ -183,9 +183,9 @@ public class ProcedimentoService : IProcedimentoInterface
                 (string.IsNullOrEmpty(descricaoFiltro) || x.Descricao == descricaoFiltro)
             );
 
-            query.OrderBy(x => x.Id);
+            query = query.OrderBy(x => x.Id);
 
-            resposta.Dados = paginar ? (await PaginationHelper.PaginateAsync(query, pageNumber, pageSize)).Dados : await query.ToListAsync();
+            resposta = paginar ? await PaginationHelper.PaginateAsync(query, pageNumber, pageSize) : new ResponseModel<List<ProcedimentoModel>> { Dados = await query.ToListAsync() };
             resposta.Mensagem = "Todos os procedimentos foram encontrados";
 
             return resposta;

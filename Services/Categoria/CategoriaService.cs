@@ -54,7 +54,7 @@ public class CategoriaService : ICategoriaInterface
 
             var query = _context.Categoria.AsQueryable();
 
-            resposta.Dados = (await PaginationHelper.PaginateAsync(query, pageNumber, pageSize)).Dados;
+            resposta = await PaginationHelper.PaginateAsync(query, pageNumber, pageSize);
             resposta.Mensagem = "Categoria criado com sucesso";
             return resposta;
         }
@@ -85,7 +85,7 @@ public class CategoriaService : ICategoriaInterface
 
             var query = _context.Categoria.AsQueryable();
 
-            resposta.Dados = (await PaginationHelper.PaginateAsync(query, pageNumber, pageSize)).Dados;
+            resposta = await PaginationHelper.PaginateAsync(query, pageNumber, pageSize);
             resposta.Mensagem = "Categoria Excluido com sucesso";
             return resposta;
 
@@ -120,7 +120,7 @@ public class CategoriaService : ICategoriaInterface
 
             var query = _context.Categoria.AsQueryable();
 
-            resposta.Dados = (await PaginationHelper.PaginateAsync(query, pageNumber, pageSize)).Dados;
+            resposta = await PaginationHelper.PaginateAsync(query, pageNumber, pageSize);
             resposta.Mensagem = "Categoria Atualizado com sucesso";
             return resposta;
         }
@@ -148,7 +148,7 @@ public class CategoriaService : ICategoriaInterface
 
             query.OrderBy(x => x.Id);
 
-            resposta.Dados = paginar ? (await PaginationHelper.PaginateAsync(query, pageNumber, pageSize)).Dados : await query.ToListAsync();
+            resposta = paginar ? await PaginationHelper.PaginateAsync(query, pageNumber, pageSize) : new ResponseModel<List<CategoriaModel>> { Dados = await query.ToListAsync() };
             resposta.Mensagem = "Todos as categorias foram encontradas";
             return resposta;
 

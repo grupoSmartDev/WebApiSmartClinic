@@ -58,7 +58,7 @@ public class AtividadeService : IAtividadeInterface
 
             var query = _context.Atividade.AsQueryable();
 
-            resposta.Dados = (await PaginationHelper.PaginateAsync(query, pageNumber, pageSize)).Dados;
+            resposta = await PaginationHelper.PaginateAsync(query, pageNumber, pageSize);
             resposta.Mensagem = "Atividade criado com sucesso";
             return resposta;
         }
@@ -89,7 +89,7 @@ public class AtividadeService : IAtividadeInterface
 
             var query = _context.Atividade.AsQueryable();
 
-            resposta.Dados = (await PaginationHelper.PaginateAsync(query, pageNumber, pageSize)).Dados;
+            resposta = await PaginationHelper.PaginateAsync(query, pageNumber, pageSize);
             resposta.Mensagem = "Atividade Excluido com sucesso";
             return resposta;
 
@@ -127,7 +127,7 @@ public class AtividadeService : IAtividadeInterface
 
             var query = _context.Atividade.AsQueryable();
 
-            resposta.Dados = (await PaginationHelper.PaginateAsync(query, pageNumber, pageSize)).Dados;
+            resposta = await PaginationHelper.PaginateAsync(query, pageNumber, pageSize);
             resposta.Mensagem = "Atividade Atualizado com sucesso";
             return resposta;
         }
@@ -155,14 +155,7 @@ public class AtividadeService : IAtividadeInterface
 
             query = query.OrderBy(x => x.Id);
 
-            resposta = paginar ? await PaginationHelper.PaginateAsync(query, pageNumber, pageSize) : new ResponseModel<List<AtividadeModel>>
-            {
-                Dados = await query.ToListAsync(),
-                TotalCount = await query.CountAsync(),
-                PageSize = pageSize,
-                Mensagem = "Todos os Atividades foram encontrados",
-                Status = true
-            };
+            resposta = paginar ? await PaginationHelper.PaginateAsync(query, pageNumber, pageSize) : new ResponseModel<List<AtividadeModel>> { Dados = await query.ToListAsync() };
 
             return resposta;
         }

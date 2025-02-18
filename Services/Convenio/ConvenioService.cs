@@ -61,7 +61,7 @@ public class ConvenioService : IConvenioInterface
 
             var query = _context.Convenio.AsQueryable();
 
-            resposta.Dados = (await PaginationHelper.PaginateAsync(query, pageNumber, pageSize)).Dados;
+            resposta = await PaginationHelper.PaginateAsync(query, pageNumber, pageSize);
             resposta.Mensagem = "Convenio criado com sucesso";
             return resposta;
         }
@@ -92,7 +92,7 @@ public class ConvenioService : IConvenioInterface
 
             var query = _context.Convenio.AsQueryable();
 
-            resposta.Dados = (await PaginationHelper.PaginateAsync(query, pageNumber, pageSize)).Dados;
+            resposta = await PaginationHelper.PaginateAsync(query, pageNumber, pageSize);
             resposta.Mensagem = "Convenio Excluido com sucesso";
             
             return resposta;
@@ -132,7 +132,7 @@ public class ConvenioService : IConvenioInterface
 
             var query = _context.Convenio.AsQueryable();
 
-            resposta.Dados = (await PaginationHelper.PaginateAsync(query, pageNumber, pageSize)).Dados;
+            resposta = await PaginationHelper.PaginateAsync(query, pageNumber, pageSize);
             resposta.Mensagem = "Convenio Atualizado com sucesso";
             return resposta;
         }
@@ -162,7 +162,7 @@ public class ConvenioService : IConvenioInterface
                 
             query = query.OrderBy(x => x.Id);
 
-            resposta.Dados = paginar ? (await PaginationHelper.PaginateAsync(query, pageNumber, pageSize)).Dados : await query.ToListAsync();
+            resposta = paginar ? await PaginationHelper.PaginateAsync(query, pageNumber, pageSize) : new ResponseModel<List<ConvenioModel>> { Dados = await query.ToListAsync() };
             resposta.Mensagem = "Todos os Convenio foram encontrados";
             
             return resposta;

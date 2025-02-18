@@ -79,7 +79,7 @@ public class PlanoContaService : IPlanoContaInterface
                 .Include(x => x.SubPlanos)
                 .AsQueryable();
 
-            resposta.Dados = (await PaginationHelper.PaginateAsync(query, pageNumber, pageSize)).Dados;
+            resposta = await PaginationHelper.PaginateAsync(query, pageNumber, pageSize);
             resposta.Mensagem = "Plano de Contas criado com sucesso.";
 
             return resposta;
@@ -113,7 +113,7 @@ public class PlanoContaService : IPlanoContaInterface
                 .Include(x => x.SubPlanos)
                 .AsQueryable();
 
-            resposta.Dados = (await PaginationHelper.PaginateAsync(query, pageNumber, pageSize)).Dados;
+            resposta = await PaginationHelper.PaginateAsync(query, pageNumber, pageSize);
             resposta.Mensagem = "PlanoConta Excluido com sucesso";
             
             return resposta;
@@ -183,7 +183,7 @@ public class PlanoContaService : IPlanoContaInterface
                 .Include(x => x.SubPlanos)
                 .AsQueryable();
 
-            resposta.Dados = (await PaginationHelper.PaginateAsync(query, pageNumber, pageSize)).Dados;
+            resposta = await PaginationHelper.PaginateAsync(query, pageNumber, pageSize);
             resposta.Mensagem = "Plano de Contas atualizado com sucesso.";
             
             return resposta;
@@ -219,7 +219,7 @@ public class PlanoContaService : IPlanoContaInterface
             // Ordenacao padrao (cuidado ao mudar a ordenacao pq pode afetar/dificultar a visualizacao de pais e filhos)
             query = query.OrderBy(p => p.Codigo);
 
-            resposta.Dados = paginar ? (await PaginationHelper.PaginateAsync(query, pageNumber, pageSize)).Dados : await query.ToListAsync();
+            resposta = paginar ? await PaginationHelper.PaginateAsync(query, pageNumber, pageSize) : new ResponseModel<List<PlanoContaModel>> { Dados = await query.ToListAsync() };
             resposta.Mensagem = "Planos de Contas listados com sucesso.";
          
             return resposta;

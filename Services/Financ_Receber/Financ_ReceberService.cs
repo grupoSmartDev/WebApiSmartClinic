@@ -102,7 +102,7 @@ public class Financ_ReceberService : IFinanc_ReceberInterface
                 .Include(x => x.subFinancReceber)
                 .AsQueryable();
 
-            resposta.Dados = (await PaginationHelper.PaginateAsync(query, pageNumber, pageSize)).Dados;
+            resposta = await PaginationHelper.PaginateAsync(query, pageNumber, pageSize);
             resposta.Mensagem = "Financ_Receber e parcelas criados com sucesso";
             return resposta;
         }
@@ -137,7 +137,7 @@ public class Financ_ReceberService : IFinanc_ReceberInterface
                 .Include(x => x.subFinancReceber)
                 .AsQueryable();
 
-            resposta.Dados = (await PaginationHelper.PaginateAsync(query, pageNumber, pageSize)).Dados;
+            resposta = await PaginationHelper.PaginateAsync(query, pageNumber, pageSize);
             resposta.Mensagem = "Financ_Receber Excluído com sucesso";
             return resposta;
         }
@@ -210,7 +210,7 @@ public class Financ_ReceberService : IFinanc_ReceberInterface
                 .Include(x => x.subFinancReceber)
                 .AsQueryable();
 
-            resposta.Dados = (await PaginationHelper.PaginateAsync(query, pageNumber, pageSize)).Dados;
+            resposta = await PaginationHelper.PaginateAsync(query, pageNumber, pageSize);
             resposta.Mensagem = "Financ_Receber Atualizado com sucesso";
             return resposta;
         }
@@ -252,8 +252,8 @@ public class Financ_ReceberService : IFinanc_ReceberInterface
 
             query = query.OrderBy(x => x.Id);
 
-            resposta.Dados = paginar ? (await PaginationHelper.PaginateAsync(query, pageNumber, pageSize)).Dados : await query.ToListAsync();
-            resposta.Mensagem = "Todos os Financ_Receber foram encontrados";
+            resposta = paginar ? await PaginationHelper.PaginateAsync(query, pageNumber, pageSize) : new ResponseModel<List<Financ_ReceberModel>> { Dados = await query.ToListAsync() };
+            resposta.Mensagem = "Todos os contas à receber foram encontrados";
 
             return resposta;
         }

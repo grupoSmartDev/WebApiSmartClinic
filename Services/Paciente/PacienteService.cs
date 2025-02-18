@@ -176,7 +176,7 @@ public class PacienteService : IPacienteInterface
                     .Include(p => p.Plano)
                     .AsQueryable();
 
-                resposta.Dados = (await PaginationHelper.PaginateAsync(query, pageNumber, pageSize)).Dados;
+                resposta = await PaginationHelper.PaginateAsync(query, pageNumber, pageSize);
                 resposta.Mensagem = "Paciente criado com sucesso";
                 return resposta;
             }
@@ -223,7 +223,7 @@ public class PacienteService : IPacienteInterface
                     .ThenInclude(e => e.Atividades)
                 .AsQueryable();
 
-            resposta.Dados = (await PaginationHelper.PaginateAsync(query, pageNumber, pageSize)).Dados;
+            resposta = await PaginationHelper.PaginateAsync(query, pageNumber, pageSize);
             resposta.Mensagem = "Paciente Excluido com sucesso";
             return resposta;
         }
@@ -370,7 +370,7 @@ public class PacienteService : IPacienteInterface
                     .Include(p => p.Plano)
                     .AsQueryable();
 
-                resposta.Dados = (await PaginationHelper.PaginateAsync(query, pageNumber, pageSize)).Dados;
+                resposta = await PaginationHelper.PaginateAsync(query, pageNumber, pageSize);
                 resposta.Mensagem = "Paciente Atualizado com sucesso";
                 return resposta;
             }
@@ -414,11 +414,9 @@ public class PacienteService : IPacienteInterface
 
             query = query.OrderBy(x => x.Id);
 
-            resposta.Dados = paginar
-                ? (await PaginationHelper.PaginateAsync(query, pageNumber, pageSize)).Dados
-                : await query.ToListAsync();
-
+            resposta = paginar ? await PaginationHelper.PaginateAsync(query, pageNumber, pageSize) : new ResponseModel<List<PacienteModel>> { Dados = await query.ToListAsync() };
             resposta.Mensagem = "Todos os Pacientes foram encontrados";
+            
             return resposta;
         }
         catch (Exception e)

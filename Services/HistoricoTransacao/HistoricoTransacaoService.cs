@@ -150,7 +150,7 @@ public class HistoricoTransacaoService : IHistoricoTransacaoInterface
             query = query.OrderByDescending(h => h.DataTransacao);
 
             // Paginação
-            resposta.Dados = paginar ? (await PaginationHelper.PaginateAsync(query, pageNumber, pageSize)).Dados : await query.ToListAsync();
+            resposta = paginar ? await PaginationHelper.PaginateAsync(query, pageNumber, pageSize) : new ResponseModel<List<HistoricoTransacaoModel>> { Dados = await query.ToListAsync() };
             resposta.Mensagem = "Histórico de transações encontrado com sucesso";
         }
         catch (Exception e)

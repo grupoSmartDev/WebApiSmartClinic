@@ -55,7 +55,7 @@ public class ConselhoService : IConselhoInterface
 
             var query = _context.Conselho.AsQueryable();
 
-            resposta.Dados = (await PaginationHelper.PaginateAsync(query, pageNumber, pageSize)).Dados;
+            resposta = await PaginationHelper.PaginateAsync(query, pageNumber, pageSize);
             resposta.Mensagem = "Conselho criado com sucesso";
             return resposta;
         }
@@ -86,7 +86,7 @@ public class ConselhoService : IConselhoInterface
 
             var query = _context.Conselho.AsQueryable();
 
-            resposta.Dados = (await PaginationHelper.PaginateAsync(query, pageNumber, pageSize)).Dados;
+            resposta = await PaginationHelper.PaginateAsync(query, pageNumber, pageSize);
             resposta.Mensagem = "Conselho Excluido com sucesso";
             return resposta;
 
@@ -122,7 +122,7 @@ public class ConselhoService : IConselhoInterface
 
             var query = _context.Conselho.AsQueryable();
 
-            resposta.Dados = (await PaginationHelper.PaginateAsync(query, pageNumber, pageSize)).Dados;
+            resposta = await PaginationHelper.PaginateAsync(query, pageNumber, pageSize);
             resposta.Mensagem = "Conselho Atualizado com sucesso";
             return resposta;
         }
@@ -151,7 +151,7 @@ public class ConselhoService : IConselhoInterface
 
             query = query.OrderBy(x => x.Id);
 
-            resposta.Dados = paginar ? (await PaginationHelper.PaginateAsync(query, pageNumber, pageSize)).Dados : await query.ToListAsync();
+            resposta = paginar ? await PaginationHelper.PaginateAsync(query, pageNumber, pageSize) : new ResponseModel<List<ConselhoModel>> { Dados = await query.ToListAsync() };
             resposta.Mensagem = "Todos os Conselho foram encontrados";
             return resposta;
         }

@@ -95,7 +95,7 @@ public class LogUsuarioService : ILogUsuarioInterface
             query = query.OrderByDescending(l => l.DataMovimentacao);
 
             // Paginação
-            resposta.Dados = paginar ? (await PaginationHelper.PaginateAsync(query, pageNumber, pageSize)).Dados : await query.ToListAsync();
+            resposta = paginar ? await PaginationHelper.PaginateAsync(query, pageNumber, pageSize) : new ResponseModel<List<LogUsuarioModel>> { Dados = await query.ToListAsync() };
             resposta.Mensagem = "Registros de log encontrados com sucesso";
         }
         catch (Exception e)

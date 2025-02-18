@@ -101,7 +101,7 @@ public class Financ_PagarService : IFinanc_PagarInterface
                 .Include(x => x.subFinancPagar)
                 .AsQueryable();
 
-            resposta.Dados = (await PaginationHelper.PaginateAsync(query, pageNumber, pageSize)).Dados;
+            resposta = await PaginationHelper.PaginateAsync(query, pageNumber, pageSize);
             resposta.Mensagem = "Financ_Pagar criado com sucesso";
 
             return resposta;
@@ -135,7 +135,7 @@ public class Financ_PagarService : IFinanc_PagarInterface
                 .Include(x => x.subFinancPagar)
                 .AsQueryable();
 
-            resposta.Dados = (await PaginationHelper.PaginateAsync(query, pageNumber, pageSize)).Dados;
+            resposta = await PaginationHelper.PaginateAsync(query, pageNumber, pageSize);
             resposta.Mensagem = "Financ_Pagar Excluido com sucesso";
             return resposta;
 
@@ -242,7 +242,7 @@ public class Financ_PagarService : IFinanc_PagarInterface
                 .Include(x => x.subFinancPagar)
                 .AsQueryable();
 
-            resposta.Dados = (await PaginationHelper.PaginateAsync(query, pageNumber, pageSize)).Dados;
+            resposta = await PaginationHelper.PaginateAsync(query, pageNumber, pageSize);
             resposta.Mensagem = "Financ_Pagar Atualizado com sucesso";
             return resposta;
         }
@@ -285,8 +285,8 @@ public class Financ_PagarService : IFinanc_PagarInterface
 
             query = query.OrderBy(x => x.Id);
 
-            resposta.Dados = paginar ? (await PaginationHelper.PaginateAsync(query, pageNumber, pageSize)).Dados : await query.ToListAsync();
-            resposta.Mensagem = "Todos os Financ_Pagar foram encontrados";
+            resposta = paginar ? await PaginationHelper.PaginateAsync(query, pageNumber, pageSize) : new ResponseModel<List<Financ_PagarModel>> { Dados = await query.ToListAsync() };
+            resposta.Mensagem = "Todos os contas à pagar foram encontrados";
             return resposta;
         }
         catch (Exception e)

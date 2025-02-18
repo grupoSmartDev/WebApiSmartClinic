@@ -57,7 +57,7 @@ public class FormaPagamentoService : IFormaPagamentoInterface
 
             var query = _context.FormaPagamento.AsQueryable();
 
-            resposta.Dados = (await PaginationHelper.PaginateAsync(query, pageNumber, pageSize)).Dados;
+            resposta = await PaginationHelper.PaginateAsync(query, pageNumber, pageSize);
             resposta.Mensagem = "Forma de pagamento criada com sucesso";
 
             return resposta;
@@ -88,7 +88,7 @@ public class FormaPagamentoService : IFormaPagamentoInterface
 
             var query = _context.FormaPagamento.AsQueryable();
 
-            resposta.Dados = (await PaginationHelper.PaginateAsync(query, pageNumber, pageSize)).Dados;
+            resposta = await PaginationHelper.PaginateAsync(query, pageNumber, pageSize);
             resposta.Mensagem = "Forma de pagamento excluida com sucesso";
 
             return resposta;
@@ -123,7 +123,7 @@ public class FormaPagamentoService : IFormaPagamentoInterface
 
             var query = _context.FormaPagamento.AsQueryable();
 
-            resposta.Dados = (await PaginationHelper.PaginateAsync(query, pageNumber, pageSize)).Dados;
+            resposta = await PaginationHelper.PaginateAsync(query, pageNumber, pageSize);
             resposta.Mensagem = "Forma de pagamento atualizada com sucesso";
 
             return resposta;
@@ -152,8 +152,7 @@ public class FormaPagamentoService : IFormaPagamentoInterface
 
             query = query.OrderBy(p => p.Id);
 
-            resposta.Dados = paginar ? (await PaginationHelper.PaginateAsync(query, pageNumber, pageSize)).Dados : await query.ToListAsync();
-
+            resposta = paginar ? await PaginationHelper.PaginateAsync(query, pageNumber, pageSize) : new ResponseModel<List<FormaPagamentoModel>> { Dados = await query.ToListAsync() };
             resposta.Mensagem = "Todas as formas de pagamentos foram encontradas";
 
             return resposta;

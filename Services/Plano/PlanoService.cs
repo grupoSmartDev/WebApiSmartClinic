@@ -73,7 +73,7 @@ public class PlanoService : IPlanoInterface
 
             var query = _context.Plano.AsQueryable();
 
-            resposta.Dados = (await PaginationHelper.PaginateAsync(query, pageNumber, pageSize)).Dados;
+            resposta = await PaginationHelper.PaginateAsync(query, pageNumber, pageSize);
             resposta.Mensagem = "Plano criado com sucesso";
             
             return resposta;
@@ -105,7 +105,7 @@ public class PlanoService : IPlanoInterface
 
             var query = _context.Plano.AsQueryable();
 
-            resposta.Dados = (await PaginationHelper.PaginateAsync(query, pageNumber, pageSize)).Dados;
+            resposta = await PaginationHelper.PaginateAsync(query, pageNumber, pageSize);
             resposta.Mensagem = "Plano Excluido com sucesso";
             
             return resposta;
@@ -156,7 +156,7 @@ public class PlanoService : IPlanoInterface
 
             var query = _context.Plano.AsQueryable();
 
-            resposta.Dados = (await PaginationHelper.PaginateAsync(query, pageNumber, pageSize)).Dados;
+            resposta = await PaginationHelper.PaginateAsync(query, pageNumber, pageSize);
             resposta.Mensagem = "Plano Atualizado com sucesso";
             
             return resposta;
@@ -190,7 +190,7 @@ public class PlanoService : IPlanoInterface
 
             query.OrderBy(x => x.Id);
 
-            resposta.Dados = paginar ? (await PaginationHelper.PaginateAsync(query, pageNumber, pageSize)).Dados : await query.ToListAsync();
+            resposta = paginar ? await PaginationHelper.PaginateAsync(query, pageNumber, pageSize) : new ResponseModel<List<PlanoModel>> { Dados = await query.ToListAsync() };
             resposta.Mensagem = "Planos listados com sucesso";
 
             return resposta;

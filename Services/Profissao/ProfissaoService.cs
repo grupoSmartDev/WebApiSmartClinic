@@ -56,7 +56,7 @@ public class ProfissaoService : IProfissaoInterface
 
             var query = _context.Profissao.AsQueryable();
 
-            resposta.Dados = (await PaginationHelper.PaginateAsync(query, pageNumber, pageSize)).Dados;
+            resposta = await PaginationHelper.PaginateAsync(query, pageNumber, pageSize);
             resposta.Mensagem = "Profissao criado com sucesso";
             
             return resposta;
@@ -88,7 +88,7 @@ public class ProfissaoService : IProfissaoInterface
 
             var query = _context.Profissao.AsQueryable();
 
-            resposta.Dados = (await PaginationHelper.PaginateAsync(query, pageNumber, pageSize)).Dados;
+            resposta = await PaginationHelper.PaginateAsync(query, pageNumber, pageSize);
             resposta.Mensagem = "Profissao Excluido com sucesso";
             
             return resposta;
@@ -126,7 +126,7 @@ public class ProfissaoService : IProfissaoInterface
 
             var query = _context.Profissao.AsQueryable();
 
-            resposta.Dados = (await PaginationHelper.PaginateAsync(query, pageNumber, pageSize)).Dados;
+            resposta = await PaginationHelper.PaginateAsync(query, pageNumber, pageSize);
             resposta.Mensagem = "Profissao Atualizado com sucesso";
             
             return resposta;
@@ -159,7 +159,7 @@ public class ProfissaoService : IProfissaoInterface
             query = query.OrderBy(x => x.Id);
 
             // Paginação opcional
-            resposta.Dados = paginar ? (await PaginationHelper.PaginateAsync(query, pageNumber, pageSize)).Dados : await query.ToListAsync();
+            resposta = paginar ? await PaginationHelper.PaginateAsync(query, pageNumber, pageSize) : new ResponseModel<List<ProfissaoModel>> { Dados = await query.ToListAsync() };
             resposta.Mensagem = "Todos os Profissao foram encontrados";
 
             return resposta;

@@ -61,7 +61,7 @@ public class ExercicioService : IExercicioInterface
 
             var query = _context.Exercicio.AsQueryable();
 
-            resposta.Dados = (await PaginationHelper.PaginateAsync(query, pageNumber, pageSize)).Dados;
+            resposta = await PaginationHelper.PaginateAsync(query, pageNumber, pageSize);
             resposta.Mensagem = "Exercicio criado com sucesso";
             return resposta;
         }
@@ -92,7 +92,7 @@ public class ExercicioService : IExercicioInterface
 
             var query = _context.Exercicio.AsQueryable();
 
-            resposta.Dados = (await PaginationHelper.PaginateAsync(query, pageNumber, pageSize)).Dados;
+            resposta = await PaginationHelper.PaginateAsync(query, pageNumber, pageSize);
             resposta.Mensagem = "Exercicio Excluido com sucesso";
             return resposta;
 
@@ -133,7 +133,7 @@ public class ExercicioService : IExercicioInterface
 
             var query = _context.Exercicio.AsQueryable();
 
-            resposta.Dados = (await PaginationHelper.PaginateAsync(query, pageNumber, pageSize)).Dados;
+            resposta = await PaginationHelper.PaginateAsync(query, pageNumber, pageSize);
             resposta.Mensagem = "Exercicio Atualizado com sucesso";
             return resposta;
         }
@@ -161,7 +161,7 @@ public class ExercicioService : IExercicioInterface
 
             query.OrderBy(x => x.Id);
 
-            resposta.Dados = paginar ? (await PaginationHelper.PaginateAsync(query, pageNumber, pageSize)).Dados : await query.ToListAsync();
+            resposta = paginar ? await PaginationHelper.PaginateAsync(query, pageNumber, pageSize) : new ResponseModel<List<ExercicioModel>> { Dados = await query.ToListAsync() };
             resposta.Mensagem = "Todos os Exercicio foram encontrados";
             return resposta;
 

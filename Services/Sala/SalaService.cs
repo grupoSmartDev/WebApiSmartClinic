@@ -65,7 +65,7 @@ public class SalaService : ISalaInterface
 
             var query = _context.Sala.AsQueryable();
 
-            resposta.Dados = (await PaginationHelper.PaginateAsync(query, pageNumber, pageSize)).Dados;
+            resposta = await PaginationHelper.PaginateAsync(query, pageNumber, pageSize);
             resposta.Mensagem = "Sala criado com sucesso";
             return resposta;
         }
@@ -96,7 +96,7 @@ public class SalaService : ISalaInterface
 
             var query = _context.Sala.AsQueryable();
 
-            resposta.Dados = (await PaginationHelper.PaginateAsync(query, pageNumber, pageSize)).Dados;
+            resposta = await PaginationHelper.PaginateAsync(query, pageNumber, pageSize);
             resposta.Mensagem = "Sala Excluido com sucesso";
             return resposta;
 
@@ -136,7 +136,7 @@ public class SalaService : ISalaInterface
 
             var query = _context.Sala.AsQueryable();
             
-            resposta.Dados = (await PaginationHelper.PaginateAsync(query, pageNumber, pageSize)).Dados;
+            resposta = await PaginationHelper.PaginateAsync(query, pageNumber, pageSize);
             resposta.Mensagem = "Sala Atualizado com sucesso";
             return resposta;
         }
@@ -165,7 +165,7 @@ public class SalaService : ISalaInterface
 
             query = query.OrderBy(x => x.Id);
 
-            resposta.Dados = paginar ? (await PaginationHelper.PaginateAsync(query, pageNumber, pageSize)).Dados : await query.ToListAsync();
+            resposta = paginar ? await PaginationHelper.PaginateAsync(query, pageNumber, pageSize) : new ResponseModel<List<SalaModel>> { Dados = await query.ToListAsync() };
             resposta.Mensagem = "Todos os Sala foram encontrados";
             return resposta;
 

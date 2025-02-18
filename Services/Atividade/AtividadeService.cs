@@ -140,7 +140,7 @@ public class AtividadeService : IAtividadeInterface
         }
     }
 
-    public async Task<ResponseModel<List<AtividadeModel>>> Listar(int pageNumber = 1, int pageSize = 10, int? codigoFiltro = null, string? tituloFiltro = null, bool paginar = true)
+    public async Task<ResponseModel<List<AtividadeModel>>> Listar(int pageNumber = 1, int pageSize = 3, int? codigoFiltro = null, string? atividadeFiltro = null, bool paginar = true)
     {
         ResponseModel<List<AtividadeModel>> resposta = new ResponseModel<List<AtividadeModel>>();
 
@@ -150,15 +150,21 @@ public class AtividadeService : IAtividadeInterface
 
             query = query.Where(x =>
                 (!codigoFiltro.HasValue || x.Id == codigoFiltro) &&
-                (string.IsNullOrEmpty(tituloFiltro) || x.Titulo == tituloFiltro)
+                (string.IsNullOrEmpty(atividadeFiltro) || x.Descricao == atividadeFiltro)
             );
-            query.OrderBy(x => x.Id);
 
-            resposta.Dados = paginar ? (await PaginationHelper.PaginateAsync(query, pageNumber, pageSize)).Dados : await query.ToListAsync();
-            resposta.Mensagem = "Todos os Atividade foram encontrados";
+            query = query.OrderBy(x => x.Id);
+
+            resposta = paginar ? await PaginationHelper.PaginateAsync(query, pageNumber, pageSize) : new ResponseModel<List<AtividadeModel>>
+            {
+                Dados = await query.ToListAsync(),
+                TotalCount = await query.CountAsync(),
+                PageSize = pageSize,
+                Mensagem = "Todos os Atividades foram encontrados",
+                Status = true
+            };
+
             return resposta;
-
-
         }
         catch (Exception e)
         {

@@ -2,21 +2,18 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
-using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using WebApiSmartClinic.Data;
 
 #nullable disable
 
-namespace WebApiSmartClinic.Migrations
+namespace WebApiSmartClinic.Migrations.AppDb
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250202200715_PostgreeConversao")]
-    partial class PostgreeConversao
+    partial class AppDbContextModelSnapshot : ModelSnapshot
     {
-        /// <inheritdoc />
-        protected override void BuildTargetModel(ModelBuilder modelBuilder)
+        protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -192,7 +189,7 @@ namespace WebApiSmartClinic.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<DateTime>("Data")
+                    b.Property<DateTime?>("Data")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<int?>("FinanceiroId")
@@ -388,7 +385,7 @@ namespace WebApiSmartClinic.Migrations
                     b.Property<DateTime?>("DataPagamento")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<DateTime>("DataVencimento")
+                    b.Property<DateTime?>("DataVencimento")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("DocumentoSacado")
@@ -476,7 +473,7 @@ namespace WebApiSmartClinic.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<DateTime>("DataAtendimento")
+                    b.Property<DateTime?>("DataAtendimento")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<DateTime?>("DataPagamento")
@@ -595,7 +592,7 @@ namespace WebApiSmartClinic.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<DateTime>("DataEvolucao")
+                    b.Property<DateTime?>("DataEvolucao")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Observacao")
@@ -663,7 +660,34 @@ namespace WebApiSmartClinic.Migrations
                     b.Property<string>("AlergiaMedicamentos")
                         .HasColumnType("text");
 
+                    b.Property<string>("Alergias")
+                        .HasColumnType("text");
+
+                    b.Property<double?>("Altura")
+                        .HasColumnType("double precision");
+
+                    b.Property<string>("AmplitudeMovimento")
+                        .HasColumnType("text");
+
+                    b.Property<string>("AssinaturaCliente")
+                        .HasColumnType("text");
+
+                    b.Property<string>("AssinaturaProfissional")
+                        .HasColumnType("text");
+
+                    b.Property<string>("AvaliacaoPostural")
+                        .HasColumnType("text");
+
                     b.Property<string>("Cirurgia")
+                        .HasColumnType("text");
+
+                    b.Property<bool>("CirurgiasPrevias")
+                        .HasColumnType("boolean");
+
+                    b.Property<DateTime?>("DataAvaliacao")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("DetalheCirurgias")
                         .HasColumnType("text");
 
                     b.Property<string>("DoencaNeurodegenerativa")
@@ -672,29 +696,58 @@ namespace WebApiSmartClinic.Migrations
                     b.Property<string>("DoencasCronicas")
                         .HasColumnType("text");
 
+                    b.Property<string>("DoencasPreExistentes")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Especialidade")
+                        .HasColumnType("text");
+
                     b.Property<string>("FrequenciaConsumoAlcool")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("HistoriaAtual")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("HistoriaPregressa")
-                        .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<string>("Medicamentos")
+                    b.Property<bool>("HistoricoDoencas")
+                        .HasColumnType("boolean");
+
+                    b.Property<double?>("IMC")
+                        .HasColumnType("double precision");
+
+                    b.Property<int?>("Idade")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Medicacao")
                         .HasColumnType("text");
 
-                    b.Property<string>("ObjetivoTratamento")
+                    b.Property<bool>("MedicacaoUsoContinuo")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("ObjetivosDoTratamento")
                         .HasColumnType("text");
+
+                    b.Property<string>("ObservacoesGerais")
+                        .HasColumnType("text");
+
+                    b.Property<int?>("PacienteId")
+                        .HasColumnType("integer");
+
+                    b.Property<double?>("Peso")
+                        .HasColumnType("double precision");
 
                     b.Property<bool>("PraticaAtividade")
                         .HasColumnType("boolean");
 
+                    b.Property<int?>("ProfissionalId")
+                        .HasColumnType("integer");
+
                     b.Property<string>("QueixaPrincipal")
-                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Sexo")
                         .HasColumnType("text");
 
                     b.Property<string>("SinaisVitais")
@@ -704,13 +757,17 @@ namespace WebApiSmartClinic.Migrations
                         .HasColumnType("boolean");
 
                     b.Property<string>("TipoDor")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("TratamentosRealizados")
                         .HasColumnType("text");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("PacienteId")
+                        .IsUnique();
+
+                    b.HasIndex("ProfissionalId");
 
                     b.ToTable("FichaAvaliacao");
                 });
@@ -732,7 +789,7 @@ namespace WebApiSmartClinic.Migrations
                     b.Property<string>("Classificacao")
                         .HasColumnType("text");
 
-                    b.Property<DateTime>("DataEmissao")
+                    b.Property<DateTime?>("DataEmissao")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Descricao")
@@ -756,9 +813,8 @@ namespace WebApiSmartClinic.Migrations
                     b.Property<int?>("PacienteId")
                         .HasColumnType("integer");
 
-                    b.Property<string>("Parcela")
-                        .IsRequired()
-                        .HasColumnType("text");
+                    b.Property<int?>("Parcela")
+                        .HasColumnType("integer");
 
                     b.Property<string>("Status")
                         .HasColumnType("text");
@@ -857,7 +913,7 @@ namespace WebApiSmartClinic.Migrations
                     b.Property<string>("Classificacao")
                         .HasColumnType("text");
 
-                    b.Property<DateTime>("DataEmissao")
+                    b.Property<DateTime?>("DataEmissao")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Descricao")
@@ -1063,6 +1119,10 @@ namespace WebApiSmartClinic.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<string>("Nome")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.Property<string>("NrLogradouro")
                         .IsRequired()
                         .HasColumnType("text");
@@ -1099,10 +1159,6 @@ namespace WebApiSmartClinic.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<string>("nome")
-                        .IsRequired()
-                        .HasColumnType("text");
-
                     b.HasKey("Id");
 
                     b.ToTable("Fornecedor");
@@ -1119,7 +1175,7 @@ namespace WebApiSmartClinic.Migrations
                     b.Property<int>("BancoId")
                         .HasColumnType("integer");
 
-                    b.Property<DateTime>("DataTransacao")
+                    b.Property<DateTime?>("DataTransacao")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Descricao")
@@ -1179,7 +1235,7 @@ namespace WebApiSmartClinic.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<DateTime>("DataMovimentacao")
+                    b.Property<DateTime?>("DataMovimentacao")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Descricao")
@@ -1197,6 +1253,8 @@ namespace WebApiSmartClinic.Migrations
                         .HasColumnType("integer");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("UsuarioId");
 
                     b.ToTable("LogUsuario");
                 });
@@ -1251,6 +1309,9 @@ namespace WebApiSmartClinic.Migrations
 
                     b.Property<string>("EstadoCivil")
                         .HasColumnType("text");
+
+                    b.Property<int?>("FichaAvaliacaoId")
+                        .HasColumnType("integer");
 
                     b.Property<string>("Logradouro")
                         .HasColumnType("text");
@@ -1332,9 +1393,9 @@ namespace WebApiSmartClinic.Migrations
                     b.Property<string>("Observacao")
                         .HasColumnType("text");
 
-                    b.Property<int[]>("Tipo")
+                    b.Property<string>("Tipo")
                         .IsRequired()
-                        .HasColumnType("integer[]");
+                        .HasColumnType("text");
 
                     b.HasKey("Id");
 
@@ -1460,18 +1521,16 @@ namespace WebApiSmartClinic.Migrations
                         .HasColumnType("text");
 
                     b.Property<string>("Duracao")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("MateriaisNecessarios")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("Nome")
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<decimal>("PercentualComissao")
+                    b.Property<decimal?>("PercentualComissao")
                         .HasColumnType("numeric");
 
                     b.Property<decimal>("Preco")
@@ -1777,7 +1836,7 @@ namespace WebApiSmartClinic.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<DateTime>("DataCriacao")
+                    b.Property<DateTime?>("DataCriacao")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Email")
@@ -1922,6 +1981,22 @@ namespace WebApiSmartClinic.Migrations
                     b.Navigation("Evolucao");
                 });
 
+            modelBuilder.Entity("WebApiSmartClinic.Models.FichaAvaliacaoModel", b =>
+                {
+                    b.HasOne("WebApiSmartClinic.Models.PacienteModel", "Paciente")
+                        .WithOne("FichaAvaliacao")
+                        .HasForeignKey("WebApiSmartClinic.Models.FichaAvaliacaoModel", "PacienteId");
+
+                    b.HasOne("WebApiSmartClinic.Models.ProfissionalModel", "Profissional")
+                        .WithMany("FichasAvaliacao")
+                        .HasForeignKey("ProfissionalId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.Navigation("Paciente");
+
+                    b.Navigation("Profissional");
+                });
+
             modelBuilder.Entity("WebApiSmartClinic.Models.Financ_PagarModel", b =>
                 {
                     b.HasOne("WebApiSmartClinic.Models.BancoModel", "Banco")
@@ -2046,6 +2121,17 @@ namespace WebApiSmartClinic.Migrations
                     b.Navigation("Autor");
                 });
 
+            modelBuilder.Entity("WebApiSmartClinic.Models.LogUsuarioModel", b =>
+                {
+                    b.HasOne("WebApiSmartClinic.Models.UsuarioModel", "Usuario")
+                        .WithMany()
+                        .HasForeignKey("UsuarioId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Usuario");
+                });
+
             modelBuilder.Entity("WebApiSmartClinic.Models.PacienteModel", b =>
                 {
                     b.HasOne("WebApiSmartClinic.Models.ConvenioModel", "Convenio")
@@ -2168,6 +2254,8 @@ namespace WebApiSmartClinic.Migrations
                 {
                     b.Navigation("Evolucoes");
 
+                    b.Navigation("FichaAvaliacao");
+
                     b.Navigation("FinancReceber");
                 });
 
@@ -2179,6 +2267,11 @@ namespace WebApiSmartClinic.Migrations
             modelBuilder.Entity("WebApiSmartClinic.Models.PlanoModel", b =>
                 {
                     b.Navigation("Paciente");
+                });
+
+            modelBuilder.Entity("WebApiSmartClinic.Models.ProfissionalModel", b =>
+                {
+                    b.Navigation("FichasAvaliacao");
                 });
 #pragma warning restore 612, 618
         }

@@ -140,7 +140,7 @@ public class AtividadeService : IAtividadeInterface
         }
     }
 
-    public async Task<ResponseModel<List<AtividadeModel>>> Listar(int pageNumber = 1, int pageSize = 3, int? codigoFiltro = null, string? atividadeFiltro = null, bool paginar = true)
+    public async Task<ResponseModel<List<AtividadeModel>>> Listar(int pageNumber = 1, int pageSize = 3, int? codigoFiltro = null, string? tituloFiltro = null, string? descricaoFiltro = null, bool paginar = true)
     {
         ResponseModel<List<AtividadeModel>> resposta = new ResponseModel<List<AtividadeModel>>();
 
@@ -150,7 +150,8 @@ public class AtividadeService : IAtividadeInterface
 
             query = query.Where(x =>
                 (!codigoFiltro.HasValue || x.Id == codigoFiltro) &&
-                (string.IsNullOrEmpty(atividadeFiltro) || x.Descricao == atividadeFiltro)
+                (string.IsNullOrEmpty(tituloFiltro) || x.Descricao == tituloFiltro) &&
+                (string.IsNullOrEmpty(descricaoFiltro) || x.Descricao == descricaoFiltro)
             );
 
             query = query.OrderBy(x => x.Id);

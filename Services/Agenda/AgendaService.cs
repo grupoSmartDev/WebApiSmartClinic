@@ -3,6 +3,7 @@ using System.Runtime.Serialization;
 using Microsoft.EntityFrameworkCore;
 using WebApiSmartClinic.Data;
 using WebApiSmartClinic.Dto.Agenda;
+using WebApiSmartClinic.Dto.Financ_Receber;
 using WebApiSmartClinic.Models;
 
 namespace WebApiSmartClinic.Services.Agenda;
@@ -48,26 +49,91 @@ public class AgendaService : IAgendaInterface
         {
             var agenda = new AgendaModel();
 
+            
             agenda.Data = agendaCreateDto.Data;
-            agenda.HoraInicio = agendaCreateDto.HoraInicio;
-            agenda.HoraFim = agendaCreateDto.HoraFim;
+            if (TimeSpan.TryParse(agendaCreateDto.HoraInicio, out TimeSpan horaInicio))
+            {
+                agenda.HoraInicio = horaInicio;
+            }
+            else
+            {
+                throw new Exception("Formato de hora inválido para HoraInicio");
+            }
+
+            if (TimeSpan.TryParse(agendaCreateDto.HoraFim, out TimeSpan horaFim))
+            {
+                agenda.HoraFim = horaFim;
+            }
+            else
+            {
+                throw new Exception("Formato de hora inválido para HoraFim");
+            }
             agenda.PacienteId = agendaCreateDto.PacienteId;
             agenda.ProfissionalId = agendaCreateDto.ProfissionalId;
             agenda.Convenio = agendaCreateDto.Convenio;
             agenda.Valor = agendaCreateDto.Valor;
             agenda.FormaPagamento = agendaCreateDto.FormaPagamento;
             agenda.Pago = agendaCreateDto.Pago;
-            agenda.FinanceiroId = agendaCreateDto.FinanceiroId;
             agenda.SalaId = agendaCreateDto.SalaId;
             agenda.PacoteId = agendaCreateDto.PacoteId;
             agenda.LembreteSms = agendaCreateDto.LembreteSms;
             agenda.LembreteWhatsapp = agendaCreateDto.LembreteWhatsapp;
             agenda.LembreteEmail = agendaCreateDto.LembreteEmail;
-            agenda.Status = agendaCreateDto.Status;
-            agenda.CorStatus = agendaCreateDto.CorStatus;
+            agenda.StatusId = agendaCreateDto.StatusId;
             agenda.IntegracaoGmail = agendaCreateDto.IntegracaoGmail;
             agenda.StatusFinal = agendaCreateDto.StatusFinal;
 
+            if(agendaCreateDto.FinancReceber != null)
+            {
+                var financ_receber = new Financ_ReceberModel();
+
+                financ_receber.IdOrigem = agendaCreateDto.FinancReceber.IdOrigem ?? 0;
+                financ_receber.NrDocto = agendaCreateDto.FinancReceber.NrDocto ?? 0;
+                financ_receber.DataEmissao = agendaCreateDto.FinancReceber.DataEmissao;
+                financ_receber.ValorOriginal = agendaCreateDto.FinancReceber.ValorOriginal;
+                financ_receber.ValorPago = agendaCreateDto.FinancReceber.ValorPago;
+                financ_receber.Valor = agendaCreateDto.FinancReceber.Valor;
+                financ_receber.Status = agendaCreateDto.FinancReceber.Status;
+                financ_receber.NotaFiscal = agendaCreateDto.FinancReceber.NotaFiscal;
+                financ_receber.Descricao = agendaCreateDto.FinancReceber.Descricao;
+                financ_receber.Parcela = agendaCreateDto.FinancReceber.Parcela;
+                financ_receber.Classificacao = agendaCreateDto.FinancReceber.Classificacao;
+                financ_receber.Observacao = agendaCreateDto.FinancReceber.Observacao;
+                financ_receber.FornecedorId = agendaCreateDto.FinancReceber.FornecedorId;
+                financ_receber.CentroCustoId = agendaCreateDto.FinancReceber.CentroCustoId;
+                financ_receber.PacienteId = agendaCreateDto.FinancReceber.PacienteId;
+                financ_receber.BancoId = agendaCreateDto.FinancReceber.BancoId;
+                financ_receber.subFinancReceber = new List<Financ_ReceberSubModel>();
+                
+                _context.Financ_Receber.Add(financ_receber);
+                await _context.SaveChangesAsync();
+
+             
+                foreach (var parcela in agendaCreateDto.FinancReceber.subFinancReceber)
+                {
+                    var subItem = new Financ_ReceberSubModel
+                    {
+                        financReceberId = financ_receber.Id, // Relaciona com o pai
+                        Parcela = parcela.Parcela,
+                        Valor = parcela.Valor,
+                        TipoPagamentoId = parcela.TipoPagamentoId,
+                        DataPagamento = parcela.DataPagamento,
+                        Desconto = parcela.Desconto,
+                        Juros = parcela.Juros,
+                        Multa = parcela.Multa,
+                        DataVencimento = parcela.DataVencimento,
+                        Observacao = parcela.Observacao
+                    };
+
+                    financ_receber.subFinancReceber.Add(subItem);
+                }
+
+                await _context.SaveChangesAsync();
+
+                agenda.FinancReceberId = financ_receber.Id;
+            }
+
+            
             _context.Add(agenda);
             await _context.SaveChangesAsync();
 
@@ -120,14 +186,14 @@ public class AgendaService : IAgendaInterface
 
         try
         {
-            var agenda = _context.Agenda.FirstOrDefault(x => x.Id == agendaEdicaoDto.Id);
+            var agenda = await _context.Agenda.FirstOrDefaultAsync(x => x.Id == agendaEdicaoDto.Id);
             if (agenda == null)
             {
-                resposta.Mensagem = "Agenda não encontrado";
+                resposta.Mensagem = "Agenda não encontrada";
+                resposta.Status = false;
                 return resposta;
             }
 
-            agenda.Id = agendaEdicaoDto.Id;
             agenda.Data = agendaEdicaoDto.Data;
             agenda.HoraInicio = agendaEdicaoDto.HoraInicio;
             agenda.HoraFim = agendaEdicaoDto.HoraFim;
@@ -137,27 +203,143 @@ public class AgendaService : IAgendaInterface
             agenda.Valor = agendaEdicaoDto.Valor;
             agenda.FormaPagamento = agendaEdicaoDto.FormaPagamento;
             agenda.Pago = agendaEdicaoDto.Pago;
-            agenda.FinanceiroId = agendaEdicaoDto.FinanceiroId;
             agenda.SalaId = agendaEdicaoDto.SalaId;
             agenda.PacoteId = agendaEdicaoDto.PacoteId;
             agenda.LembreteSms = agendaEdicaoDto.LembreteSms;
             agenda.LembreteWhatsapp = agendaEdicaoDto.LembreteWhatsapp;
             agenda.LembreteEmail = agendaEdicaoDto.LembreteEmail;
-            agenda.Status = agendaEdicaoDto.Status;
-            agenda.CorStatus = agendaEdicaoDto.CorStatus;
+            agenda.StatusId = agendaEdicaoDto.StatusId;
             agenda.IntegracaoGmail = agendaEdicaoDto.IntegracaoGmail;
             agenda.StatusFinal = agendaEdicaoDto.StatusFinal;
+
+            if (agendaEdicaoDto.FinancReceber != null)
+            {
+                Financ_ReceberModel financ_receber;
+
+                if (agenda.FinancReceberId.HasValue)
+                {
+                    // Busca o registro financeiro existente
+                    financ_receber = await _context.Financ_Receber.Include(f => f.subFinancReceber)
+                        .FirstOrDefaultAsync(f => f.Id == agenda.FinancReceberId);
+
+                    if (financ_receber != null)
+                    {
+                        // Atualiza os campos do registro financeiro
+                        financ_receber.IdOrigem = agendaEdicaoDto.FinancReceber.IdOrigem ?? 0;
+                        financ_receber.NrDocto = agendaEdicaoDto.FinancReceber.NrDocto ?? 0;
+                        financ_receber.DataEmissao = agendaEdicaoDto.FinancReceber.DataEmissao;
+                        financ_receber.ValorOriginal = agendaEdicaoDto.FinancReceber.ValorOriginal;
+                        financ_receber.ValorPago = agendaEdicaoDto.FinancReceber.ValorPago;
+                        financ_receber.Valor = agendaEdicaoDto.FinancReceber.Valor;
+                        financ_receber.Status = agendaEdicaoDto.FinancReceber.Status;
+                        financ_receber.NotaFiscal = agendaEdicaoDto.FinancReceber.NotaFiscal;
+                        financ_receber.Descricao = agendaEdicaoDto.FinancReceber.Descricao;
+                        financ_receber.Parcela = agendaEdicaoDto.FinancReceber.Parcela;
+                        financ_receber.Classificacao = agendaEdicaoDto.FinancReceber.Classificacao;
+                        financ_receber.Observacao = agendaEdicaoDto.FinancReceber.Observacao;
+                        financ_receber.FornecedorId = agendaEdicaoDto.FinancReceber.FornecedorId;
+                        financ_receber.CentroCustoId = agendaEdicaoDto.FinancReceber.CentroCustoId;
+                        financ_receber.PacienteId = agendaEdicaoDto.FinancReceber.PacienteId;
+                        financ_receber.BancoId = agendaEdicaoDto.FinancReceber.BancoId;
+
+                        // Remove as parcelas existentes
+                        if (financ_receber.subFinancReceber != null)
+                        {
+                            _context.Financ_ReceberSub.RemoveRange(financ_receber.subFinancReceber);
+                        }
+                    }
+                    else
+                    {
+                        // Se não encontrou o registro, cria um novo
+                        financ_receber = new Financ_ReceberModel
+                        {
+                            IdOrigem = agendaEdicaoDto.FinancReceber.IdOrigem ?? 0,
+                            NrDocto = agendaEdicaoDto.FinancReceber.NrDocto ?? 0,
+                            DataEmissao = agendaEdicaoDto.FinancReceber.DataEmissao,
+                            ValorOriginal = agendaEdicaoDto.FinancReceber.ValorOriginal,
+                            ValorPago = agendaEdicaoDto.FinancReceber.ValorPago,
+                            Valor = agendaEdicaoDto.FinancReceber.Valor,
+                            Status = agendaEdicaoDto.FinancReceber.Status,
+                            NotaFiscal = agendaEdicaoDto.FinancReceber.NotaFiscal,
+                            Descricao = agendaEdicaoDto.FinancReceber.Descricao,
+                            Parcela = agendaEdicaoDto.FinancReceber.Parcela,
+                            Classificacao = agendaEdicaoDto.FinancReceber.Classificacao,
+                            Observacao = agendaEdicaoDto.FinancReceber.Observacao,
+                            FornecedorId = agendaEdicaoDto.FinancReceber.FornecedorId,
+                            CentroCustoId = agendaEdicaoDto.FinancReceber.CentroCustoId,
+                            PacienteId = agendaEdicaoDto.FinancReceber.PacienteId,
+                            BancoId = agendaEdicaoDto.FinancReceber.BancoId,
+                            subFinancReceber = new List<Financ_ReceberSubModel>()
+                        };
+
+                        _context.Financ_Receber.Add(financ_receber);
+                        await _context.SaveChangesAsync();
+                    }
+                }
+                else
+                {
+                    // Cria novo registro financeiro se não existia antes
+                    financ_receber = new Financ_ReceberModel
+                    {
+                        IdOrigem = agendaEdicaoDto.FinancReceber.IdOrigem ?? 0,
+                        NrDocto = agendaEdicaoDto.FinancReceber.NrDocto ?? 0,
+                        DataEmissao = agendaEdicaoDto.FinancReceber.DataEmissao,
+                        ValorOriginal = agendaEdicaoDto.FinancReceber.ValorOriginal,
+                        ValorPago = agendaEdicaoDto.FinancReceber.ValorPago,
+                        Valor = agendaEdicaoDto.FinancReceber.Valor,
+                        Status = agendaEdicaoDto.FinancReceber.Status,
+                        NotaFiscal = agendaEdicaoDto.FinancReceber.NotaFiscal,
+                        Descricao = agendaEdicaoDto.FinancReceber.Descricao,
+                        Parcela = agendaEdicaoDto.FinancReceber.Parcela,
+                        Classificacao = agendaEdicaoDto.FinancReceber.Classificacao,
+                        Observacao = agendaEdicaoDto.FinancReceber.Observacao,
+                        FornecedorId = agendaEdicaoDto.FinancReceber.FornecedorId,
+                        CentroCustoId = agendaEdicaoDto.FinancReceber.CentroCustoId,
+                        PacienteId = agendaEdicaoDto.FinancReceber.PacienteId,
+                        BancoId = agendaEdicaoDto.FinancReceber.BancoId,
+                        subFinancReceber = new List<Financ_ReceberSubModel>()
+                    };
+
+                    _context.Financ_Receber.Add(financ_receber);
+                    await _context.SaveChangesAsync();
+                }
+
+                // Adiciona as novas parcelas
+                if (agendaEdicaoDto.FinancReceber.subFinancReceber != null)
+                {
+                    foreach (var parcela in agendaEdicaoDto.FinancReceber.subFinancReceber)
+                    {
+                        var subItem = new Financ_ReceberSubModel
+                        {
+                            financReceberId = financ_receber.Id,
+                            Parcela = parcela.Parcela,
+                            Valor = parcela.Valor,
+                            TipoPagamentoId = parcela.TipoPagamentoId,
+                            DataPagamento = parcela.DataPagamento,
+                            Desconto = parcela.Desconto,
+                            Juros = parcela.Juros,
+                            Multa = parcela.Multa,
+                            DataVencimento = parcela.DataVencimento,
+                            Observacao = parcela.Observacao
+                        };
+
+                        financ_receber.subFinancReceber.Add(subItem);
+                    }
+                }
+
+                await _context.SaveChangesAsync();
+                agenda.FinancReceberId = financ_receber.Id;
+            }
 
             _context.Update(agenda);
             await _context.SaveChangesAsync();
 
             resposta.Dados = await _context.Agenda.ToListAsync();
-            resposta.Mensagem = "Agenda Atualizado com sucesso";
+            resposta.Mensagem = "Agenda atualizada com sucesso";
             return resposta;
         }
         catch (Exception ex)
         {
-
             resposta.Mensagem = ex.Message;
             resposta.Status = false;
             return resposta;
@@ -219,7 +401,7 @@ public class AgendaService : IAgendaInterface
 
             int totalAgendas = agendas.Count;
             int agendasFinalizadas = agendas.Count(a => a.StatusFinal);
-            int agendasFuturas = agendas.Count(a => a.Status != "Finalizado" && a.Data > DateTime.Now);
+            int agendasFuturas = agendas.Count(a => a.Status != null && a.Status.Legenda != "Finalizado" && a.Data > DateTime.Now);
             int pacientesNoPeriodo = await consultaPaciente.CountAsync();
 
             var listaContadores = new List<ContadoresDashboard>

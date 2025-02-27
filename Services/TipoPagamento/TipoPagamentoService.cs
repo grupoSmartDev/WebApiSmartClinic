@@ -142,10 +142,11 @@ public class TipoPagamentoService : ITipoPagamentoInterface
         {
             var query = _context.TipoPagamento.AsQueryable();
 
-            query = query.Where(p =>
-               (!codigoFiltro.HasValue || p.Id == codigoFiltro) &&
-               (!string.IsNullOrEmpty(descricaoFiltro) || p.Descricao == descricaoFiltro)
-            );
+            if (!string.IsNullOrEmpty(descricaoFiltro))
+                query = query.Where(p => p.Descricao.Contains(descricaoFiltro));
+
+            if (!string.IsNullOrEmpty(codigoFiltro.ToString()))
+                query = query.Where(p => p.Id == codigoFiltro);
 
             query = query.OrderBy(p => p.Id);
 

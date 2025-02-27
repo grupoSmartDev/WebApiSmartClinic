@@ -33,9 +33,9 @@ namespace WebApiSmartClinic.Controllers
         }
 
         [HttpGet("ListarSintetico")]
-        public async Task<ActionResult<ResponseModel<List<Financ_ReceberModel>>>> ListarSintetico([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10, [FromQuery] int? idPaiFiltro = null, [FromQuery] int? parcelaNumeroFiltro = null, [FromQuery] DateTime? vencimentoInicio = null, [FromQuery] DateTime? vencimentoFim = null, [FromQuery] bool paginar = true)
+        public async Task<ActionResult<ResponseModel<List<Financ_ReceberModel>>>> ListarSintetico([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10, [FromQuery] int? idPaiFiltro = null, [FromQuery] int? parcelaNumeroFiltro = null, [FromQuery] string? dataBaseFiltro = "V", [FromQuery] DateTime? dataFiltroInicio = null, [FromQuery] DateTime? dataFiltroFim = null, [FromQuery] bool parcelasVencidasFiltro = false, [FromQuery] bool paginar = true)
         {
-            var financ_receber = await _financ_receber.ListarSintetico(pageNumber, pageSize, idPaiFiltro, parcelaNumeroFiltro, vencimentoInicio, vencimentoFim, paginar);
+            var financ_receber = await _financ_receber.ListarSintetico(pageNumber, pageSize, idPaiFiltro, parcelaNumeroFiltro, dataBaseFiltro, dataFiltroInicio, dataFiltroFim, parcelasVencidasFiltro, paginar);
             return Ok(financ_receber);
         }
 
@@ -67,10 +67,10 @@ namespace WebApiSmartClinic.Controllers
             return Ok(financ_receber);
         }
 
-        [HttpPost("BaixarParcela/{idParcela}")]
-        public async Task<ActionResult<ResponseModel<Financ_ReceberSubModel>>> BaixarParcela(int idParcela, decimal valorPago)
+        [HttpPut("BaixarParcela")]
+        public async Task<ActionResult<ResponseModel<Financ_ReceberSubModel>>> BaixarParcela(Financ_ReceberSubEdicaoDto financ_receberSubEdicaoDto)
         {
-            var resultado = await _financ_receber.BaixarParcela(idParcela, valorPago);
+            var resultado = await _financ_receber.BaixarParcela(financ_receberSubEdicaoDto);
             return Ok(resultado);
         }
 

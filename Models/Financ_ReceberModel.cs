@@ -51,7 +51,7 @@ namespace WebApiSmartClinic.Models
         public int? Id { get; set; }
         public int? financReceberId { get; set; }
 
-        [JsonIgnore]
+        //JsonIgnore]
         public Financ_ReceberModel? FinancReceber { get; set; }
         public int? Parcela { get; set; }
         public decimal Valor { get; set; }
@@ -69,17 +69,21 @@ namespace WebApiSmartClinic.Models
         [JsonIgnore]
         public FormaPagamentoModel? FormaPagamento { get; set; }
 
-        private DateTime? _dataPagamento;
+        private DateTime? _DataPagamento;
         public DateTime? DataPagamento
         {
-            get => _dataPagamento;
-            set => _dataPagamento = value.HasValue ? DateTime.SpecifyKind(value.Value, DateTimeKind.Utc) : null;
+            get => _DataPagamento?.ToLocalTime();
+            set => _DataPagamento = value.HasValue
+                ? DateTime.SpecifyKind(value.Value.ToUniversalTime(), DateTimeKind.Utc)
+                : null;
         }
         private DateTime? _DataVencimento;
-        public DateTime? DataVencimento 
+        public DateTime? DataVencimento
         {
-            get => _DataVencimento;
-            set => _DataVencimento = value.HasValue ? DateTime.SpecifyKind(value.Value, DateTimeKind.Utc) : null;
+            get => _DataVencimento?.ToLocalTime();
+            set => _DataVencimento = value.HasValue
+                ? DateTime.SpecifyKind(value.Value.ToUniversalTime(), DateTimeKind.Utc)
+                : null;
         }
         public string? Observacao { get; set; }
     }

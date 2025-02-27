@@ -1,5 +1,6 @@
 
 using Microsoft.EntityFrameworkCore;
+using System;
 using System.Linq;
 using WebApiSmartClinic.Data;
 using WebApiSmartClinic.Dto.Financ_Receber;
@@ -310,24 +311,89 @@ public class Financ_ReceberService : IFinanc_ReceberInterface
         }
     }
 
-    public async Task<ResponseModel<List<Financ_ReceberSubModel>>> ListarSintetico(int pageNumber = 1, int pageSize = 10, int? idPaiFiltro = null, int? parcelaNumeroFiltro = null, DateTime? vencimentoInicio = null, DateTime? vencimentoFim = null, bool paginar = true)
+    public async Task<ResponseModel<List<Financ_ReceberSubModel>>> ListarSintetico(int pageNumber = 1,
+     int pageSize = 10,
+     int? idPaiFiltro = null,
+     int? parcelaNumeroFiltro = null,
+     string? dataBaseFiltro = "V",
+     DateTime? dataFiltroInicio = null,
+     DateTime? dataFiltroFim = null,
+     bool parcelasVencidasFiltro = false,
+     bool paginar = true)
     {
         ResponseModel<List<Financ_ReceberSubModel>> resposta = new ResponseModel<List<Financ_ReceberSubModel>>();
-
         try
         {
-            var query = _context.Financ_ReceberSub.AsQueryable();
+            // Inicia a query com Include
+            var query = _context.Financ_ReceberSub
+                .Include(fp => fp.FinancReceber)
+                .Include(fp => fp.FinancReceber.Paciente)
+                .AsQueryable();
 
-            query = query.Where(p =>
-                (!idPaiFiltro.HasValue || p.financReceberId == idPaiFiltro) &&
-                (!parcelaNumeroFiltro.HasValue || p.Parcela == parcelaNumeroFiltro) &&
-                (!vencimentoInicio.HasValue || p.DataVencimento >= vencimentoInicio) &&
-                (!vencimentoFim.HasValue || p.DataVencimento <= vencimentoFim)
-            );
+            // Aplica os filtros sem cast
+            if (idPaiFiltro.HasValue)
+                query = query.Where(p => p.financReceberId == idPaiFiltro);
+            if (parcelaNumeroFiltro.HasValue)
+                query = query.Where(p => p.Parcela == parcelaNumeroFiltro);
 
-            query = query.OrderBy(p => p.financReceberId).ThenBy(p => p.Parcela);
+            if(dataBaseFiltro == "V")
+            {
+                if (dataFiltroInicio.HasValue)
+                {
+                    dataFiltroInicio = DateTime.SpecifyKind(dataFiltroInicio.Value, DateTimeKind.Utc);
+                    query = query.Where(p => p.DataVencimento >= dataFiltroInicio);
+                }
 
-            resposta.Dados = paginar ? (await PaginationHelper.PaginateAsync(query, pageNumber, pageSize)).Dados : await query.ToListAsync();
+
+                if (dataFiltroFim.HasValue)
+                {
+                    dataFiltroFim = DateTime.SpecifyKind(dataFiltroFim.Value, DateTimeKind.Utc);
+                    query = query.Where(p => p.DataVencimento <= dataFiltroFim);
+                }
+            }
+            else if (dataBaseFiltro == "P")
+            {
+                if (dataFiltroInicio.HasValue)
+                {
+                    dataFiltroInicio = DateTime.SpecifyKind(dataFiltroInicio.Value, DateTimeKind.Utc);
+                    query = query.Where(p => p.DataPagamento >= dataFiltroInicio);
+                }
+
+
+                if (dataFiltroFim.HasValue)
+                {
+                    dataFiltroFim = DateTime.SpecifyKind(dataFiltroFim.Value, DateTimeKind.Utc);
+                    query = query.Where(p => p.DataPagamento <= dataFiltroFim);
+                }
+            }
+            else
+            {
+                if (dataFiltroInicio.HasValue)
+                {
+                    dataFiltroInicio = DateTime.SpecifyKind(dataFiltroInicio.Value, DateTimeKind.Utc);
+                    query = query.Where(p => p.FinancReceber.DataEmissao >= dataFiltroInicio);
+                }
+
+                if (dataFiltroFim.HasValue)
+                {
+
+                    dataFiltroFim = DateTime.SpecifyKind(dataFiltroFim.Value, DateTimeKind.Utc);
+                    query = query.Where(p => p.FinancReceber.DataEmissao <= dataFiltroFim);
+                }
+            }
+
+            if (parcelasVencidasFiltro)
+                query = query.Where(p => p.DataVencimento <= DateTime.Now && p.DataPagamento == null);
+
+            // Aplica ordenação
+            query = query.OrderBy(p => p.financReceberId)
+                        .ThenBy(p => p.Parcela);
+
+            // Executa a query com ou sem paginação
+            resposta.Dados = paginar
+                ? (await PaginationHelper.PaginateAsync(query, pageNumber, pageSize)).Dados
+                : await query.ToListAsync();
+
             resposta.Mensagem = "Todas as parcelas foram encontradas";
 
             return resposta;
@@ -336,7 +402,6 @@ public class Financ_ReceberService : IFinanc_ReceberInterface
         {
             resposta.Mensagem = ex.Message;
             resposta.Status = false;
-
             return resposta;
         }
     }
@@ -403,13 +468,13 @@ public class Financ_ReceberService : IFinanc_ReceberInterface
     }
 
 
-    public async Task<ResponseModel<Financ_ReceberSubModel>> BaixarParcela(int idParcela, decimal valorPago)
+    public async Task<ResponseModel<Financ_ReceberSubModel>> BaixarParcela(Financ_ReceberSubEdicaoDto financ_receberSubEdicaoDto)
     {
         var resposta = new ResponseModel<Financ_ReceberSubModel>();
 
         try
         {
-            var parcela = await _context.Financ_ReceberSub.FirstOrDefaultAsync(p => p.Id == idParcela);
+            var parcela = await _context.Financ_ReceberSub.FirstOrDefaultAsync(p => p.Id == financ_receberSubEdicaoDto.Id);
 
             if (parcela == null)
             {
@@ -425,10 +490,10 @@ public class Financ_ReceberService : IFinanc_ReceberInterface
                 return resposta;
             }
 
-            if (valorPago < parcela.Valor)
+            if (financ_receberSubEdicaoDto.ValorPago < parcela.Valor)
             {
                 // Gerar nova parcela para o valor residual
-                var valorRestante = parcela.Valor - valorPago;
+                var valorRestante = parcela.Valor - financ_receberSubEdicaoDto.ValorPago;
 
                 var novaParcela = new Financ_ReceberSubModel
                 {
@@ -441,19 +506,19 @@ public class Financ_ReceberService : IFinanc_ReceberInterface
 
                 _context.Add(novaParcela);
             }
-            else if (valorPago > parcela.Valor)
+            else if (financ_receberSubEdicaoDto.ValorPago > parcela.Valor)
             {
                 resposta.Mensagem = "Valor pago excede o valor da parcela.";
                 resposta.Status = false;
                 return resposta;
             }
 
-            parcela.ValorPago = valorPago;
-            parcela.DataPagamento = DateTime.Now;
+            parcela.ValorPago = financ_receberSubEdicaoDto.ValorPago;
+            parcela.DataPagamento = financ_receberSubEdicaoDto.DataPagamento;
 
             // Atualiza o status do pai
             var financReceber = await _context.Financ_Receber.FirstOrDefaultAsync(f => f.Id == parcela.financReceberId);
-            financReceber.ValorPago += valorPago;
+            financReceber.ValorPago += financ_receberSubEdicaoDto.ValorPago;
 
             if (financReceber.ValorPago >= financReceber.ValorOriginal)
             {

@@ -8,7 +8,7 @@ using WebApiSmartClinic.Data;
 
 #nullable disable
 
-namespace WebApiSmartClinic.Migrations
+namespace WebApiSmartClinic.Migrations.AppDb
 {
     [DbContext(typeof(AppDbContext))]
     partial class AppDbContextModelSnapshot : ModelSnapshot
@@ -813,9 +813,8 @@ namespace WebApiSmartClinic.Migrations
                     b.Property<int?>("PacienteId")
                         .HasColumnType("integer");
 
-                    b.Property<string>("Parcela")
-                        .IsRequired()
-                        .HasColumnType("text");
+                    b.Property<int?>("Parcela")
+                        .HasColumnType("integer");
 
                     b.Property<string>("Status")
                         .HasColumnType("text");
@@ -1255,7 +1254,9 @@ namespace WebApiSmartClinic.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("LogUsuario", (string)null);
+                    b.HasIndex("UsuarioId");
+
+                    b.ToTable("LogUsuario");
                 });
 
             modelBuilder.Entity("WebApiSmartClinic.Models.PacienteModel", b =>
@@ -2118,6 +2119,17 @@ namespace WebApiSmartClinic.Migrations
                         .IsRequired();
 
                     b.Navigation("Autor");
+                });
+
+            modelBuilder.Entity("WebApiSmartClinic.Models.LogUsuarioModel", b =>
+                {
+                    b.HasOne("WebApiSmartClinic.Models.UsuarioModel", "Usuario")
+                        .WithMany()
+                        .HasForeignKey("UsuarioId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Usuario");
                 });
 
             modelBuilder.Entity("WebApiSmartClinic.Models.PacienteModel", b =>

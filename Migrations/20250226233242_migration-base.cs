@@ -3,10 +3,10 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
-namespace WebApiSmartClinic.Migrations.DataConnection
+namespace WebApiSmartClinic.Migrations
 {
     /// <inheritdoc />
-    public partial class PostgreeConversao : Migration
+    public partial class migrationbase : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)

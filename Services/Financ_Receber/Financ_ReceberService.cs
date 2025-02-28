@@ -267,8 +267,18 @@ public class Financ_ReceberService : IFinanc_ReceberInterface
         }
     }
 
-    public async Task<ResponseModel<List<Financ_ReceberModel>>> ListarAnalitico(int pageNumber = 1, int pageSize = 10, int? codigoFiltro = null, string? descricaoFiltro = null, DateTime? dataEmissaoInicio = null, DateTime? dataEmissaoFim = null,
-        decimal? valorMinimoFiltro = null, decimal? valorMaximoFiltro = null, int? parcelaNumeroFiltro = null, DateTime? vencimentoInicio = null, DateTime? vencimentoFim = null, bool paginar = true)
+    public async Task<ResponseModel<List<Financ_ReceberModel>>> ListarAnalitico(
+        int pageNumber = 1,
+        int pageSize = 10,
+        int? idFiltro = null,
+        string? descricaoFiltro = null,
+        int? pacienteIdFiltro = null,
+        string? dataBaseFiltro = "E",
+        string? ccFiltro = null,
+        DateTime? dataFiltroInicio = null,
+        DateTime? dataFiltroFim = null,
+        bool paginar = true
+        )
     {
         ResponseModel<List<Financ_ReceberModel>> resposta = new ResponseModel<List<Financ_ReceberModel>>();
         try
@@ -277,23 +287,33 @@ public class Financ_ReceberService : IFinanc_ReceberInterface
                 .Include(x => x.subFinancReceber)
                 .AsQueryable();
 
-            query = query.Where(x =>
-                (!codigoFiltro.HasValue || x.Id == codigoFiltro) &&
-                (string.IsNullOrEmpty(descricaoFiltro) || x.Descricao.Contains(descricaoFiltro)) &&
-                (!dataEmissaoInicio.HasValue || x.DataEmissao >= dataEmissaoInicio.Value) &&
-                (!dataEmissaoFim.HasValue || x.DataEmissao <= dataEmissaoFim.Value) &&
-                (!valorMinimoFiltro.HasValue || x.Valor >= valorMinimoFiltro) &&
-                (!valorMaximoFiltro.HasValue || x.Valor <= valorMaximoFiltro)
-            );
+            if(idFiltro.HasValue)
+                query = query.Where(i => i.Id == idFiltro.Value);
 
-            if (parcelaNumeroFiltro.HasValue || vencimentoInicio.HasValue || vencimentoFim.HasValue)
+            dataBaseFiltro = "E"; //estou forçando de proposito a ficar assim, para depois ter outros filtros com base na data do filho
+
+            if(dataBaseFiltro == "E")
             {
-                query = query.Where(x => x.subFinancReceber.Any(p =>
-                    (!parcelaNumeroFiltro.HasValue || p.Parcela == parcelaNumeroFiltro) &&
-                    (!vencimentoInicio.HasValue || p.DataVencimento >= vencimentoInicio) &&
-                    (!vencimentoFim.HasValue || p.DataVencimento <= vencimentoFim)
-                ));
+                if (dataFiltroInicio.HasValue)
+                {
+                    dataFiltroInicio = DateTime.SpecifyKind(dataFiltroInicio.Value, DateTimeKind.Utc);
+                    query = query.Where(p => p.DataEmissao >= dataFiltroInicio);
+                }
+
+                if (dataFiltroFim.HasValue)
+                {
+
+                    dataFiltroFim = DateTime.SpecifyKind(dataFiltroFim.Value, DateTimeKind.Utc);
+                    query = query.Where(p => p.DataEmissao <= dataFiltroFim);
+                }
+
             }
+
+            if (!string.IsNullOrEmpty(descricaoFiltro))
+                query = query.Where(p => p.Descricao.Contains(descricaoFiltro));
+
+            if (pacienteIdFiltro.HasValue)
+                query = query.Where(p => p.PacienteId == pacienteIdFiltro);
 
             query = query.OrderBy(x => x.Id);
 

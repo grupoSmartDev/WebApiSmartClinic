@@ -19,7 +19,17 @@ namespace WebApiSmartClinic.Services.Financ_Receber
         Task<ResponseModel<List<Financ_ReceberSubModel>>> ListarSintetico(int pageNumber = 1, int pageSize = 10,
             int? idPaiFiltro = null, int? parcelaNumeroFiltro = null, string? dataBaseFiltro = "V",
             DateTime? dataFiltroInicio = null, DateTime? dataFiltroFim = null, bool parcelasVencidasFiltro = false, bool paginar = true);
-        Task<ResponseModel<List<Financ_ReceberModel>>> ListarAnalitico(int pageNumber = 1, int pageSize = 10, int? codigoFiltro = null, string? descricaoFiltro = null, DateTime? dataEmissaoInicio = null, DateTime? dataEmissaoFim = null,
-            decimal? valorMinimoFiltro = null, decimal? valorMaximoFiltro = null, int? parcelaNumeroFiltro = null, DateTime? vencimentoInicio = null, DateTime? vencimentoFim = null, bool paginar = true);
+        Task<ResponseModel<List<Financ_ReceberModel>>> ListarAnalitico(
+        int pageNumber = 1,
+        int pageSize = 10,
+        int? idFiltro = null,
+        string? descricaoFiltro = null,
+        int? pacienteIdFiltro = null,
+        string? dataBaseFiltro = "E",
+        string? ccFiltro = null,
+        DateTime? dataFiltroInicio = null,
+        DateTime? dataFiltroFim = null,
+        bool paginar = true
+        );
     }
 }

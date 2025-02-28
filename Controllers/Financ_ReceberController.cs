@@ -25,10 +25,10 @@ namespace WebApiSmartClinic.Controllers
         }
 
         [HttpGet("ListarAnalitico")]
-        public async Task<ActionResult<ResponseModel<List<Financ_ReceberModel>>>> ListarAnalitico([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10, [FromQuery] int? codigoFiltro = null, [FromQuery] string? descricaoFiltro = null, [FromQuery] DateTime? dataEmissaoInicio = null, [FromQuery] DateTime? dataEmissaoFim = null,
-             [FromQuery] decimal? valorMinimoFiltro = null, [FromQuery] decimal? valorMaximoFiltro = null, [FromQuery] int? parcelaNumeroFiltro = null, [FromQuery] DateTime? vencimentoInicio = null, [FromQuery] DateTime? vencimentoFim = null, [FromQuery] bool paginar = true)
+        public async Task<ActionResult<ResponseModel<List<Financ_ReceberModel>>>> ListarAnalitico([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10, [FromQuery] int? idFiltro = null, [FromQuery] string? descricaoFiltro = null, [FromQuery] int? pacienteIdFiltro = null, [FromQuery] string? dataBaseFiltro = "E",
+             [FromQuery] string? ccFiltro = null, [FromQuery] DateTime? dataFiltroInicio = null, [FromQuery] DateTime? dataFiltroFim = null,[FromQuery] bool paginar = true)
         {
-            var financ_receber = await _financ_receber.ListarAnalitico(pageNumber, pageSize, codigoFiltro, descricaoFiltro, dataEmissaoInicio, dataEmissaoFim, valorMinimoFiltro, valorMaximoFiltro, parcelaNumeroFiltro, vencimentoInicio, vencimentoFim, paginar);
+            var financ_receber = await _financ_receber.ListarAnalitico(pageNumber, pageSize, idFiltro, descricaoFiltro, pacienteIdFiltro, dataBaseFiltro, ccFiltro, dataFiltroInicio, dataFiltroFim, paginar);
             return Ok(financ_receber);
         }
 

@@ -54,6 +54,7 @@ public class AppDbContext : IdentityDbContext<User>
     public DbSet<PlanoContaModel> PlanoConta { get; set; }
     public DbSet<PlanoContaSubModel> PlanoContaSub { get; set; }
     public DbSet<User> Users { get; set; }
+    public DbSet<RecorrenciaPacienteModel> RecorrenciaPaciente { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {

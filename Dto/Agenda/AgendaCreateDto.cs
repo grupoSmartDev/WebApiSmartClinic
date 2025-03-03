@@ -39,5 +39,8 @@ namespace WebApiSmartClinic.Dto.Agenda
         public StatusModel? Status { get; set; }
         public bool IntegracaoGmail { get; set; } = false;
         public bool StatusFinal { get; set; } = false;
+
+        public DateTime? DataFimRecorrencia { get; set; }
+        public List<DayOfWeek>? DiasRecorrencia { get; set; }
     }
 }

@@ -58,5 +58,6 @@ public class PacienteCreateDto
 
     public int? FichaAvaliacaoId { get; set; }
     public FichaAvaliacaoModel? FichaAvaliacao { get; set; }
-
+    public List<RecorrenciaPacienteDto>? Recorrencias { get; set; } = new List<RecorrenciaPacienteDto>();
+    public DateTime? DataFimRecorrencia { get; set; }
 }

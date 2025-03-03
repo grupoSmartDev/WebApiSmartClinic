@@ -7,15 +7,20 @@ using WebApiSmartClinic.Dto.Paciente;
 using WebApiSmartClinic.Models;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 using Microsoft.AspNetCore.Http.HttpResults;
+using WebApiSmartClinic.Services.Agenda;
+using WebApiSmartClinic.Dto.Agenda;
 
 namespace WebApiSmartClinic.Services.Paciente;
 
 public class PacienteService : IPacienteInterface
 {
     private readonly AppDbContext _context;
-    public PacienteService(AppDbContext context)
+    private readonly AgendaService _agendaService; // 🔹 Adicione esta linha
+
+    public PacienteService(AppDbContext context, AgendaService agendaService) // 🔹 Injetar no construtor
     {
         _context = context;
+        _agendaService = agendaService; // 🔹 Armazena a referência ao serviço
     }
 
     public async Task<ResponseModel<PacienteModel>> BuscarPorId(int idPaciente)
@@ -55,35 +60,34 @@ public class PacienteService : IPacienteInterface
         try
         {
             using var transaction = await _context.Database.BeginTransactionAsync();
+
             try
             {
                 var cpfLimpo = Funcoes.RemoverCaracteres(pacienteCreateDto.Cpf);
-
-                var cpfExistente = await _context.Paciente
-                    .AnyAsync(p => p.Cpf == cpfLimpo);
+                var cpfExistente = await _context.Paciente.AnyAsync(p => p.Cpf == cpfLimpo);
+                DateTime? dataFimRecorrencia = null;
 
                 if (cpfExistente)
                 {
                     resposta.Mensagem = "CPF já cadastrado, verifique.";
                     return resposta;
                 }
+                
+                if (pacienteCreateDto.DataFimRecorrencia.HasValue)
+                {
+                    dataFimRecorrencia = pacienteCreateDto.DataFimRecorrencia.Value;
+                }
 
                 PlanoModel? novoPlano = null;
                 if (pacienteCreateDto.PlanoId.HasValue)
                 {
-                    var planoTemplate = await _context.Plano
-                        .FirstOrDefaultAsync(p => p.Id == pacienteCreateDto.PlanoId.Value);
-
+                    var planoTemplate = await _context.Plano.FirstOrDefaultAsync(p => p.Id == pacienteCreateDto.PlanoId.Value);
                     if (planoTemplate != null)
                     {
-                        var dataConvertida = DateTime.Now;
-                        dataConvertida.ToUniversalTime();
-
                         novoPlano = new PlanoModel
                         {
                             Descricao = planoTemplate.Descricao,
                             TempoMinutos = planoTemplate.TempoMinutos,
-                            DiasSemana = planoTemplate.DiasSemana,
                             CentroCustoId = planoTemplate.CentroCustoId,
                             ValorBimestral = planoTemplate.ValorBimestral,
                             ValorTrimestral = planoTemplate.ValorTrimestral,
@@ -91,7 +95,8 @@ public class PacienteService : IPacienteInterface
                             ValorSemestral = planoTemplate.ValorSemestral,
                             ValorAnual = planoTemplate.ValorAnual,
                             ValorMensal = planoTemplate.ValorMensal,
-                            DataInicio = dataConvertida,
+                            DataInicio = DateTime.UtcNow,
+                            DataFim = dataFimRecorrencia,
                             Ativo = true,
                             TipoMes = planoTemplate.TipoMes,
                             FinanceiroId = planoTemplate.FinanceiroId
@@ -130,42 +135,40 @@ public class PacienteService : IPacienteInterface
                     Sexo = pacienteCreateDto.Sexo,
                     Telefone = pacienteCreateDto.Telefone,
                     PlanoId = novoPlano?.Id,
-                    DataCadastro = DateTime.Now.ToUniversalTime(),
+                    DataCadastro = DateTime.UtcNow,
                     ConvenioId = pacienteCreateDto.ConvenioId,
                     Evolucoes = new List<EvolucaoModel>()
                 };
 
-                if (pacienteCreateDto.Evolucoes != null && pacienteCreateDto.Evolucoes.Any())
+                _context.Paciente.Add(paciente);
+                await _context.SaveChangesAsync();
+
+                // Criar agendamentos recorrentes
+                if (pacienteCreateDto.Recorrencias != null && pacienteCreateDto.Recorrencias.Any())
                 {
-                    foreach (var evolucaoDto in pacienteCreateDto.Evolucoes)
+                    foreach (var recorrencia in pacienteCreateDto.Recorrencias)
                     {
-                        var evolucao = new EvolucaoModel
+                        var agendaDto = new AgendaCreateDto
                         {
-                            Observacao = evolucaoDto.Observacao,
-                            DataEvolucao = evolucaoDto.DataEvolucao,
+                            Data = DateTime.UtcNow,
+                            DataFimRecorrencia = dataFimRecorrencia,
+                            DiasRecorrencia = new List<DayOfWeek> { recorrencia.DiaSemana },
+                            HoraInicio = recorrencia.HoraInicio.ToString(),
+                            HoraFim = recorrencia.HoraFim.ToString(),
                             PacienteId = paciente.Id,
-                            Exercicios = evolucaoDto.Exercicios?.Select(e => new ExercicioModel
-                            {
-                                Obs = e.Obs,
-                                Peso = (int)e.Peso,
-                                Repeticoes = (int)e.Repeticoes,
-                                Series = (int)e.Series,
-                                Tempo = (int)e.Tempo,
-                                Descricao = e.Descricao
-                            }).ToList(),
-                            Atividades = evolucaoDto.Atividades?.Select(a => new AtividadeModel
-                            {
-                                Tempo = a.Tempo,
-                                Titulo = a.Titulo,
-                                Descricao = a.Descricao
-                            }).ToList()
+                            ProfissionalId = recorrencia.ProfissionalId,
+                            SalaId = recorrencia.SalaId,
+                            Convenio = false,
+                            FormaPagamento = "Indefinido",
+                            LembreteSms = true,
+                            LembreteWhatsapp = true,
+                            LembreteEmail = true
                         };
-                        paciente.Evolucoes.Add(evolucao);
+
+                        await _agendaService.Criar(agendaDto);
                     }
                 }
 
-                _context.Add(paciente);
-                await _context.SaveChangesAsync();
                 await transaction.CommitAsync();
 
                 var query = _context.Paciente
@@ -177,7 +180,7 @@ public class PacienteService : IPacienteInterface
                     .AsQueryable();
 
                 resposta = await PaginationHelper.PaginateAsync(query, pageNumber, pageSize);
-                resposta.Mensagem = "Paciente criado com sucesso";
+                resposta.Mensagem = "Paciente criado com sucesso e agendamentos gerados!";
                 return resposta;
             }
             catch
@@ -193,6 +196,9 @@ public class PacienteService : IPacienteInterface
             return resposta;
         }
     }
+
+
+
 
     public async Task<ResponseModel<List<PacienteModel>>> Delete(int idPaciente, int pageNumber = 1, int pageSize = 10)
     {
@@ -416,7 +422,7 @@ public class PacienteService : IPacienteInterface
 
             resposta = paginar ? await PaginationHelper.PaginateAsync(query, pageNumber, pageSize) : new ResponseModel<List<PacienteModel>> { Dados = await query.ToListAsync() };
             resposta.Mensagem = "Todos os Pacientes foram encontrados";
-            
+
             return resposta;
         }
         catch (Exception e)
@@ -427,16 +433,16 @@ public class PacienteService : IPacienteInterface
         }
     }
 
-    
 
-   public async Task<ResponseModel<PacienteModel>> ObterPorCpf(string cpf)
+
+    public async Task<ResponseModel<PacienteModel>> ObterPorCpf(string cpf)
     {
         ResponseModel<PacienteModel> resposta = new ResponseModel<PacienteModel>();
         try
         {
             var paciente = await _context.Paciente.FirstOrDefaultAsync(x => x.Cpf == cpf);
 
-            if(paciente == null)
+            if (paciente == null)
             {
                 resposta.Status = true;
                 resposta.Mensagem = "Nenhum paciente encontrado";
@@ -457,9 +463,9 @@ public class PacienteService : IPacienteInterface
         }
     }
 
-   public async Task<ResponseModel<List<PacienteModel>>> ObterPorNome(string nome)
+    public async Task<ResponseModel<List<PacienteModel>>> ObterPorNome(string nome)
     {
-         ResponseModel<List<PacienteModel>> resposta = new ResponseModel<List<PacienteModel>>();
+        ResponseModel<List<PacienteModel>> resposta = new ResponseModel<List<PacienteModel>>();
         try
         {
 
@@ -468,7 +474,7 @@ public class PacienteService : IPacienteInterface
                 n => n.Nome.Contains(nome)
                 );
 
-            if(paciente == null)
+            if (paciente == null)
             {
                 resposta.Status = true;
                 resposta.Mensagem = "Nenhum paciente com esse nome";

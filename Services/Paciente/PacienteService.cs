@@ -14,13 +14,21 @@ namespace WebApiSmartClinic.Services.Paciente;
 
 public class PacienteService : IPacienteInterface
 {
-    private readonly AppDbContext _context;
-    private readonly AgendaService _agendaService; // 🔹 Adicione esta linha
 
-    public PacienteService(AppDbContext context, AgendaService agendaService) // 🔹 Injetar no construtor
+    private readonly AppDbContext _context;
+    private readonly IServiceProvider _serviceProvider;
+
+    public PacienteService(AppDbContext context, IServiceProvider serviceProvider)
     {
         _context = context;
-        _agendaService = agendaService; // 🔹 Armazena a referência ao serviço
+        _serviceProvider = serviceProvider;
+    }
+
+    public async Task CriarAgendamentos(AgendaCreateDto agendaCreateDto)
+    {
+        // Resolver `AgendaService` dinamicamente para evitar dependência circular
+        var agendaService = _serviceProvider.GetRequiredService<AgendaService>();
+        await agendaService.Criar(agendaCreateDto);
     }
 
     public async Task<ResponseModel<PacienteModel>> BuscarPorId(int idPaciente)
@@ -165,7 +173,9 @@ public class PacienteService : IPacienteInterface
                             LembreteEmail = true
                         };
 
-                        await _agendaService.Criar(agendaDto);
+                        var agendaService = _serviceProvider.GetRequiredService<AgendaService>();
+                        await agendaService.Criar(agendaDto);
+                        //await _agendaService.Criar(agendaDto);
                     }
                 }
 

@@ -26,10 +26,10 @@ public class Financ_PagarModel
     public string? Classificacao { get; set; }
     public string? Observacao { get; set; }
     public int? PacienteId { get; set; } = null;
-    [JsonIgnore]
+    
     public PacienteModel? Paciente { get; set; }
     public int? FornecedorId { get; set; } = null; // Relacionamento com a tabela de Fornecedor
-    [JsonIgnore]
+    
     public FornecedorModel? Fornecedor { get; set; }
     public int? CentroCustoId { get; set; } = null; // Relacionamento com a tabela de CentroCusto
     [JsonIgnore]
@@ -60,17 +60,21 @@ public class Financ_PagarSubModel
     public int? FormaPagamentoId { get; set; } = null; // Relacionamento com a tabela de FormaPagamento
     [JsonIgnore]
     public FormaPagamentoModel? FormaPagamento { get; set; }
-    private DateTime? _dataPagamento;
+    private DateTime? _DataPagamento;
     public DateTime? DataPagamento
     {
-        get => _dataPagamento;
-        set => _dataPagamento = value.HasValue ? DateTime.SpecifyKind(value.Value, DateTimeKind.Utc) : null;
+        get => _DataPagamento?.ToLocalTime();
+        set => _DataPagamento = value.HasValue
+            ? DateTime.SpecifyKind(value.Value.ToUniversalTime(), DateTimeKind.Utc)
+            : null;
     }
     private DateTime? _DataVencimento;
-    public DateTime? DataVencimento 
+    public DateTime? DataVencimento
     {
-        get => _DataVencimento;
-        set => _DataVencimento = value.HasValue ? DateTime.SpecifyKind(value.Value, DateTimeKind.Utc) : null;
+        get => _DataVencimento?.ToLocalTime();
+        set => _DataVencimento = value.HasValue
+            ? DateTime.SpecifyKind(value.Value.ToUniversalTime(), DateTimeKind.Utc)
+            : null;
     }
     public string? Observacao { get; set; }
 }

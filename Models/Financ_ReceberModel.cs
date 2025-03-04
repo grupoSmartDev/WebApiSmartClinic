@@ -27,11 +27,11 @@ namespace WebApiSmartClinic.Models
         public string? Observacao { get; set; }
         public int? PacienteId { get; set; } = null; // Relacionamento com a tabela de Fornecedor
 
-        [JsonIgnore]
+        
         public PacienteModel? Paciente { get; set; }
         public int? FornecedorId { get; set; } = null; // Relacionamento com a tabela de Fornecedor
 
-        [JsonIgnore]
+        
         public FornecedorModel? Fornecedor { get; set; }
         public int? CentroCustoId { get; set; } = null; // Relacionamento com a tabela de CentroCusto
 

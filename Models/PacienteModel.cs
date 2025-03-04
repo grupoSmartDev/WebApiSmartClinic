@@ -26,8 +26,8 @@ namespace WebApiSmartClinic.Models
         [DataType(DataType.Date)]
         public DateTime? DataNascimento
         {
-            get => _dataNascimento;
-            set => _dataNascimento = value.HasValue ? DateTime.SpecifyKind(value.Value, DateTimeKind.Utc) : null;
+            get => _dataNascimento?.ToLocalTime();
+            set => _dataNascimento = value.HasValue ? DateTime.SpecifyKind(value.Value.ToUniversalTime(), DateTimeKind.Utc) : null;
         }
 
         [EmailAddress(ErrorMessage = "O email deve ser válido.")]
@@ -65,15 +65,15 @@ namespace WebApiSmartClinic.Models
         [DataType(DataType.Date)]
         public DateTime? DataUltimoAtendimento 
         { 
-            get => _dataUltimoAtendimento; 
-            set => _dataUltimoAtendimento = value.HasValue ? DateTime.SpecifyKind(value.Value, DateTimeKind.Utc) : null;
+            get => _dataUltimoAtendimento?.ToLocalTime(); 
+            set => _dataUltimoAtendimento = value.HasValue ? DateTime.SpecifyKind(value.Value.ToUniversalTime(), DateTimeKind.Utc) : null;
         }
 
         [DataType(DataType.Date)]
         public DateTime? DataCadastro
         {
-            get => _dataCadastro;
-            set => _dataCadastro = value.HasValue ? DateTime.SpecifyKind(value.Value, DateTimeKind.Utc) : null;
+            get => _dataCadastro?.ToLocalTime();
+            set => _dataCadastro = value.HasValue ? DateTime.SpecifyKind(value.Value.ToUniversalTime(), DateTimeKind.Utc) : null;
         }
 
         public List<Financ_ReceberModel>? FinancReceber { get; set; }

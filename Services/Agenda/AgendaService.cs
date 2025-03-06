@@ -54,6 +54,11 @@ public class AgendaService : IAgendaInterface
                 DateTime? dataAtual = agendaCreateDto.Data;
                 DateTime? dataFim = agendaCreateDto.DataFimRecorrencia ?? dataAtual;
 
+                if (agendaCreateDto.FinancReceber != null)
+                {
+                    dataFim = dataAtual;
+                }
+
                 while (dataAtual <= dataFim)
                 {
                     if (agendaCreateDto.DiasRecorrencia == null || agendaCreateDto.DiasRecorrencia.Contains(dataAtual.Value.DayOfWeek))

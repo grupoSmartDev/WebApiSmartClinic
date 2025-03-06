@@ -6,17 +6,8 @@ namespace WebApiSmartClinic.Dto.Agenda
 {
     public class AgendaCreateDto
     {
-        
         public string Titulo { get; set; }
-
-        private DateTime? _date;
-
-        [DataType(DataType.Date)]
-        public DateTime? Data
-        {
-            get => _date;
-            set => _date = value.HasValue ? DateTime.SpecifyKind(value.Value, DateTimeKind.Utc) : null;
-        }
+        public DateTime? Data { get; set; }
         public string HoraInicio { get; set; }
         public string HoraFim { get; set; }
         public int? PacienteId { get; set; }
@@ -39,7 +30,6 @@ namespace WebApiSmartClinic.Dto.Agenda
         public StatusModel? Status { get; set; }
         public bool IntegracaoGmail { get; set; } = false;
         public bool StatusFinal { get; set; } = false;
-
         public DateTime? DataFimRecorrencia { get; set; }
         public List<DayOfWeek>? DiasRecorrencia { get; set; }
     }

@@ -11,14 +11,33 @@ namespace WebApiSmartClinic.Models
 
         public string Titulo { get; set; }
 
-        private DateTime? _date;
+        //private DateTime? _date;
 
-        [DataType(DataType.Date)]
+        //[DataType(DataType.Date)]
+        //public DateTime? Data
+        //{
+        //    get => _date;
+        //    set => _date = value.HasValue ? DateTime.SpecifyKind(value.Value, DateTimeKind.Utc) : null;
+        //}
+
+        private DateTime? _Data;
         public DateTime? Data
         {
-            get => _date;
-            set => _date = value.HasValue ? DateTime.SpecifyKind(value.Value, DateTimeKind.Utc) : null;
+            get => _Data?.ToLocalTime();
+            set => _Data = value.HasValue
+                ? DateTime.SpecifyKind(value.Value.ToUniversalTime(), DateTimeKind.Utc)
+                : null;
         }
+
+        private DateTime? _DataFimRecorrencia;
+        public DateTime? DataFimRecorrencia
+        {
+            get => _DataFimRecorrencia?.ToLocalTime();
+            set => _DataFimRecorrencia = value.HasValue
+                ? DateTime.SpecifyKind(value.Value.ToUniversalTime(), DateTimeKind.Utc)
+                : null;
+        }
+
         public TimeSpan HoraInicio { get; set; }
         public TimeSpan HoraFim { get; set; }
         public int? PacienteId { get; set; }
@@ -41,7 +60,6 @@ namespace WebApiSmartClinic.Models
         public StatusModel? Status { get; set; }
         public bool IntegracaoGmail { get; set; } = false;
         public bool StatusFinal { get; set; } = false;
-        public DateTime? DataFimRecorrencia { get; set; }
         public List<DayOfWeek>? DiasRecorrencia { get; set; }
     }
 }

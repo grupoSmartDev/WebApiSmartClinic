@@ -11,7 +11,7 @@ namespace WebApiSmartClinic.Models
         public string PeriodoCarencia { get; set; }
         public string Telefone { get; set; }
         public string Email { get; set; }
-        public bool Ativo { get; set; }
+        public bool Ativo { get; set; } = true;
 
         [JsonIgnore]
         public ICollection<PacienteModel> Pacientes { get; set; }

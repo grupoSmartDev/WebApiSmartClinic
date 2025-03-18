@@ -12,7 +12,7 @@ namespace WebApiSmartClinic.Models
         public string NomeTitular { get; set; } // Nome do Titular da Conta
         public string DocumentoTitular { get; set; } // Documento (CPF/CNPJ) do Titular da Conta
         public decimal SaldoInicial { get; set; } // Saldo inicial ao cadastrar a conta
-        public bool Ativo { get; set; } // Indica se a conta bancária está ativa ou desativada
+        public bool Ativo { get; set; } = true; // Indica se a conta bancária está ativa ou desativada
 
         // Dados para homologação e emissão de boletos
         public string CodigoConvenio { get; set; } // Código do Convênio fornecido pelo banco

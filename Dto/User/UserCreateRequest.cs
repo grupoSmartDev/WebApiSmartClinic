@@ -25,4 +25,6 @@ public class UserCreateRequest
 
     [Required(ErrorMessage = "O campo {0} é obrigatório")]
     public bool AcceptTerms { get; set; }
+
+    public bool UserMaster { get; set; } = false;
 }

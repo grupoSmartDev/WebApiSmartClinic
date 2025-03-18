@@ -48,7 +48,7 @@ namespace WebApiSmartClinic.Models
             set => _dataFim = value.HasValue ? DateTime.SpecifyKind(value.Value, DateTimeKind.Utc) : null;
         }
 
-        public bool Ativo { get; set; }
+        public bool Ativo { get; set; } = true;
 
         public int? PacienteId { get; set; }
         [JsonIgnore]

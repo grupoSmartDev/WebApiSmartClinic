@@ -46,19 +46,20 @@ namespace WebApiSmartClinic.Models
         public ProfissionalModel? Profissional { get; set; }
         public bool Convenio { get; set; } = false;
         public decimal? Valor { get; set; }
-        public string FormaPagamento { get; set; }
+        public string? FormaPagamento { get; set; }
         public bool Pago { get; set; }
         public int? FinancReceberId { get; set; }
         public Financ_ReceberModel? FinancReceber { get; set; }
         public int? SalaId { get; set; }
         public int? PacoteId { get; set; }
-        public PacienteModel Pacote {get; set;}
+        public PacienteModel? Pacote {get; set;}
         public bool LembreteSms { get; set; } = false;
         public bool LembreteWhatsapp { get; set; } = false;
         public bool LembreteEmail { get; set; } = false;
         public int? StatusId { get; set; }
         public StatusModel? Status { get; set; }
         public bool IntegracaoGmail { get; set; } = false;
+        public bool Avulso { get; set; } = false;
         public bool StatusFinal { get; set; } = false;
         public List<DayOfWeek>? DiasRecorrencia { get; set; }
     }

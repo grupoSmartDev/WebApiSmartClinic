@@ -160,7 +160,18 @@ public class PacienteService : IPacienteInterface
                         {
                             Data = DateTime.UtcNow,
                             DataFimRecorrencia = dataFimRecorrencia,
-                            DiasRecorrencia = new List<DayOfWeek> { recorrencia.DiaSemana },
+                            // Use a nova classe DiaRecorrenciaDto
+                            DiasRecorrencia = new List<DiaRecorrenciaDto>
+            {
+                new DiaRecorrenciaDto
+                {
+                    DiaSemana = recorrencia.DiaSemana,
+                    HoraInicio = recorrencia.HoraInicio.ToString(),
+                    HoraFim = recorrencia.HoraFim.ToString(),
+                    ProfissionalId = recorrencia.ProfissionalId,
+                    SalaId = recorrencia.SalaId
+                }
+            },
                             HoraInicio = recorrencia.HoraInicio.ToString(),
                             HoraFim = recorrencia.HoraFim.ToString(),
                             PacienteId = paciente.Id,

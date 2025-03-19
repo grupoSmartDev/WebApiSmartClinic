@@ -1,4 +1,5 @@
 
+using System.Linq;
 using System.Runtime.Serialization;
 using Microsoft.EntityFrameworkCore;
 using WebApiSmartClinic.Data;
@@ -52,26 +53,44 @@ public class AgendaService : IAgendaInterface
                 List<AgendaModel> agendamentos = new List<AgendaModel>();
 
                 DateTime? dataAtual = agendaCreateDto.Data;
-                DateTime? dataFim = agendaCreateDto.DataFimRecorrencia ?? dataAtual;
-
-                if (agendaCreateDto.FinancReceber != null)
-                {
-                    dataFim = dataAtual;
-                }
+                DateTime? dataFim = agendaCreateDto.DiasRecorrencia.Count > 0 ? agendaCreateDto.DataFimRecorrencia : dataAtual;
 
                 while (dataAtual <= dataFim)
                 {
-                    if (agendaCreateDto.DiasRecorrencia == null || agendaCreateDto.DiasRecorrencia.Contains(dataAtual.Value.DayOfWeek))
+                   
+                    bool criarAgendamento = false;
+
+                    if (agendaCreateDto.DiasRecorrencia.Count == 0)
+                    {
+                        // Se não tem recorrência, cria apenas um agendamento na data original
+                        criarAgendamento = true;
+                    }
+                    else
+                    {
+                        // Verificando se algum dos dias selecionados corresponde ao dia atual
+                        foreach (var diaSemana in agendaCreateDto.DiasRecorrencia)
+                        {
+                            // Verifica se o dia da semana selecionado corresponde ao dia atual
+                            if ((int)diaSemana.DiaSemana == (int)dataAtual.Value.DayOfWeek)
+                            {
+                                criarAgendamento = true;
+                                break;
+                            }
+                        }
+                    }
+
+                    if (criarAgendamento)
                     {
                         var agenda = new AgendaModel
                         {
+                            Titulo = agendaCreateDto.Titulo,
                             Data = dataAtual,
                             PacienteId = agendaCreateDto.PacienteId,
                             ProfissionalId = agendaCreateDto.ProfissionalId,
                             SalaId = agendaCreateDto.SalaId,
                             Convenio = agendaCreateDto.Convenio,
                             Valor = agendaCreateDto.Valor,
-                            FormaPagamento = agendaCreateDto.FormaPagamento,
+                            FormaPagamento = "teste",
                             Pago = agendaCreateDto.Pago,
                             PacoteId = agendaCreateDto.PacoteId,
                             LembreteSms = agendaCreateDto.LembreteSms,
@@ -79,9 +98,11 @@ public class AgendaService : IAgendaInterface
                             LembreteEmail = agendaCreateDto.LembreteEmail,
                             StatusId = agendaCreateDto.StatusId,
                             IntegracaoGmail = agendaCreateDto.IntegracaoGmail,
-                            StatusFinal = agendaCreateDto.StatusFinal
+                            StatusFinal = agendaCreateDto.StatusFinal,
+                            Avulso = agendaCreateDto.Avulso,
                         };
 
+                        // Processamento das horas
                         if (TimeSpan.TryParse(agendaCreateDto.HoraInicio, out TimeSpan horaInicio))
                         {
                             agenda.HoraInicio = horaInicio;
@@ -152,6 +173,7 @@ public class AgendaService : IAgendaInterface
                         _context.Agenda.Add(agenda);
                         agendamentos.Add(agenda);
                     }
+
                     dataAtual = dataAtual.Value.AddDays(1);
                 }
 
@@ -234,6 +256,7 @@ public class AgendaService : IAgendaInterface
             agenda.StatusId = agendaEdicaoDto.StatusId;
             agenda.IntegracaoGmail = agendaEdicaoDto.IntegracaoGmail;
             agenda.StatusFinal = agendaEdicaoDto.StatusFinal;
+            agenda.Avulso = agendaEdicaoDto.Avulso;
 
             if (agendaEdicaoDto.FinancReceber != null)
             {
@@ -375,7 +398,13 @@ public class AgendaService : IAgendaInterface
 
         try
         {
-            var agenda = await _context.Agenda.ToListAsync();
+            var agenda = await _context.Agenda
+                .Include(x => x.Paciente)
+                .Include(a => a.Profissional)
+                .Include(y => y.FinancReceber)
+                .ThenInclude(z => z.subFinancReceber)
+
+                .ToListAsync();
 
             resposta.Dados = agenda;
             resposta.Mensagem = "Todos os Agenda foram encontrados";

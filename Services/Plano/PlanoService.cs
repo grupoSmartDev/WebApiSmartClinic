@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using WebApiSmartClinic.Data;
+using WebApiSmartClinic.Dto.Financ_Receber;
 using WebApiSmartClinic.Dto.Plano;
 using WebApiSmartClinic.Models;
 
@@ -248,6 +249,58 @@ public class PlanoService : IPlanoInterface
                     FinanceiroId = planoCreateDto.FinanceiroId,
                     TipoMes = planoCreateDto.TipoMes
                 };
+
+                if (planoCreateDto.Financeiro != null)
+                {
+                    var financ_receber = new Financ_ReceberModel
+                    {
+                        IdOrigem = planoCreateDto.Financeiro.IdOrigem ?? 0,
+                        NrDocto = planoCreateDto.Financeiro.NrDocto ?? 0,
+                        DataEmissao = planoCreateDto.DataInicio,
+                        ValorOriginal = planoCreateDto.Financeiro.Valor,
+                        ValorPago = planoCreateDto.Financeiro.ValorPago,
+                        Valor = planoCreateDto.Financeiro.Valor,
+                        Status = planoCreateDto.Financeiro.Status,
+                        NotaFiscal = planoCreateDto.Financeiro.NotaFiscal,
+                        Descricao = planoCreateDto.Descricao + $" {paciente.Nome} ", 
+                        Parcela = planoCreateDto.Financeiro.Parcela,
+                        Classificacao = planoCreateDto.Financeiro.Classificacao,
+                        Observacao = planoCreateDto.Descricao + "Criado pelo Gerenciamento do paciente",
+                        FornecedorId = planoCreateDto.Financeiro.FornecedorId,
+                        CentroCustoId = planoCreateDto.Financeiro.CentroCustoId,
+                        PacienteId = planoCreateDto.PacienteId,
+                        BancoId = planoCreateDto.Financeiro.BancoId == 0 ? null : planoCreateDto.Financeiro.BancoId,
+                        subFinancReceber = new List<Financ_ReceberSubModel>()
+                    };
+
+                    _context.Add(financ_receber);
+                    await _context.SaveChangesAsync();
+
+                    // Adicionando subitens (filhos)
+                    if (planoCreateDto.Financeiro != null)
+                    {
+                        foreach (var parcela in planoCreateDto.Financeiro.subFinancReceber)
+                        {
+                            var subItem = new Financ_ReceberSubModel
+                            {
+                                financReceberId = financ_receber.Id, // Relaciona com o pai
+                                Parcela = parcela.Parcela,
+                                Valor = parcela.Valor,
+                                TipoPagamentoId = parcela.TipoPagamentoId,
+                                DataPagamento = parcela.DataPagamento,
+                                Desconto = parcela.Desconto,
+                                Juros = parcela.Juros,
+                                Multa = parcela.Multa,
+                                DataVencimento = parcela.DataVencimento,
+                                Observacao = parcela.Observacao
+                            };
+
+                            financ_receber.subFinancReceber.Add(subItem);
+                        }
+                    }
+
+                    plano.FinanceiroId = financ_receber.Id;
+                }
 
                 _context.Add(plano);
                 await _context.SaveChangesAsync();

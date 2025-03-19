@@ -1,5 +1,6 @@
 
 using System.ComponentModel.DataAnnotations;
+using WebApiSmartClinic.Dto.Financ_Receber;
 using WebApiSmartClinic.Models;
 
 namespace WebApiSmartClinic.Dto.Agenda
@@ -19,7 +20,7 @@ namespace WebApiSmartClinic.Dto.Agenda
         public string? FormaPagamento { get; set; }
         public bool Pago { get; set; }
         public int? FinancReceberId { get; set; }
-        public Financ_ReceberModel? FinancReceber { get; set; }
+        public Financ_ReceberCreateDto? FinancReceber { get; set; }
         public int? SalaId { get; set; }
         public int? PacoteId { get; set; }
         public PlanoModel? Pacote { get; set; }
@@ -30,7 +31,17 @@ namespace WebApiSmartClinic.Dto.Agenda
         public StatusModel? Status { get; set; }
         public bool IntegracaoGmail { get; set; } = false;
         public bool StatusFinal { get; set; } = false;
+        public bool Avulso { get; set; } = false;
         public DateTime? DataFimRecorrencia { get; set; }
-        public List<DayOfWeek>? DiasRecorrencia { get; set; }
+        public List<DiaRecorrenciaDto>? DiasRecorrencia { get; set; }
+    }
+
+    public class DiaRecorrenciaDto
+    {
+        public DayOfWeek DiaSemana { get; set; }
+        public string HoraInicio { get; set; }
+        public string HoraFim { get; set; }
+        public int? ProfissionalId { get; set; }
+        public int? SalaId { get; set; }
     }
 }

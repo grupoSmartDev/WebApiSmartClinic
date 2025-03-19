@@ -39,11 +39,11 @@ public class PlanoCreateDto
     public bool Ativo { get; set; }
 
     public int? PacienteId { get; set; } // Relacionamento opcional com paciente
-    [JsonIgnore]
+    
     public PacienteModel? Paciente { get; set; }
 
     public int? FinanceiroId { get; set; } // Relacionamento opcional com financeiro
-    [JsonIgnore]
+    
     public Financ_ReceberModel? Financeiro { get; set; }
 
     [Required(ErrorMessage = "O tipo de mês é obrigatório.")]

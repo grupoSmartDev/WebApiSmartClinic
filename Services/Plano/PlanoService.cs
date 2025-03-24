@@ -1,17 +1,22 @@
+using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 using WebApiSmartClinic.Data;
+using WebApiSmartClinic.Dto.Agenda;
 using WebApiSmartClinic.Dto.Financ_Receber;
 using WebApiSmartClinic.Dto.Plano;
 using WebApiSmartClinic.Models;
+using WebApiSmartClinic.Services.Agenda;
 
 namespace WebApiSmartClinic.Services.Plano;
 
 public class PlanoService : IPlanoInterface
 {
     private readonly AppDbContext _context;
-    public PlanoService(AppDbContext context)
+    private readonly AgendaService _agendaService;
+    public PlanoService(AppDbContext context, AgendaService agendaService)
     {
         _context = context;
+        _agendaService = agendaService;
     }
 
     public async Task<ResponseModel<PlanoModel>> BuscarPorId(int idPlano)
@@ -215,7 +220,6 @@ public class PlanoService : IPlanoInterface
             {
                 var paciente = await _context.Paciente
                     .FirstOrDefaultAsync(p => p.Id == planoCreateDto.PacienteId);
-                  
 
                 if (paciente == null)
                 {
@@ -250,6 +254,7 @@ public class PlanoService : IPlanoInterface
                     TipoMes = planoCreateDto.TipoMes
                 };
 
+                // Criar financeiro se necessário
                 if (planoCreateDto.Financeiro != null)
                 {
                     var financ_receber = new Financ_ReceberModel
@@ -262,10 +267,10 @@ public class PlanoService : IPlanoInterface
                         Valor = planoCreateDto.Financeiro.Valor,
                         Status = planoCreateDto.Financeiro.Status,
                         NotaFiscal = planoCreateDto.Financeiro.NotaFiscal,
-                        Descricao = planoCreateDto.Descricao + $" {paciente.Nome} ", 
+                        Descricao = planoCreateDto.Descricao + $" {paciente.Nome} ",
                         Parcela = planoCreateDto.Financeiro.Parcela,
                         Classificacao = planoCreateDto.Financeiro.Classificacao,
-                        Observacao = planoCreateDto.Descricao + "Criado pelo Gerenciamento do paciente",
+                        Observacao = planoCreateDto.Descricao + " - Criado pelo Gerenciamento do paciente",
                         FornecedorId = planoCreateDto.Financeiro.FornecedorId,
                         CentroCustoId = planoCreateDto.Financeiro.CentroCustoId,
                         PacienteId = planoCreateDto.PacienteId,
@@ -277,7 +282,7 @@ public class PlanoService : IPlanoInterface
                     await _context.SaveChangesAsync();
 
                     // Adicionando subitens (filhos)
-                    if (planoCreateDto.Financeiro != null)
+                    if (planoCreateDto.Financeiro.subFinancReceber != null && planoCreateDto.Financeiro.subFinancReceber.Any())
                     {
                         foreach (var parcela in planoCreateDto.Financeiro.subFinancReceber)
                         {
@@ -305,6 +310,85 @@ public class PlanoService : IPlanoInterface
                 _context.Add(plano);
                 await _context.SaveChangesAsync();
 
+                // Criar agendamentos se necessário
+                if (planoCreateDto.Agendamento != null)
+                {
+                    List<AgendaModel> agendamentos = new List<AgendaModel>();
+
+                    // Configurar dados do agendamento
+                    DateTime? dataAtual = planoCreateDto.DataInicio;
+                    DateTime? dataFim = planoCreateDto.DataFim;
+
+                    // Verificar se há dias de recorrência configurados
+                    if (planoCreateDto.Agendamento.DiasRecorrencia != null && planoCreateDto.Agendamento.DiasRecorrencia.Count > 0)
+                    {
+                        // Processar cada dia entre a data inicial e final
+                        while (dataAtual <= dataFim)
+                        {
+                            // Verificar se o dia atual corresponde a algum dia de recorrência configurado
+                            foreach (var diaSemana in planoCreateDto.Agendamento.DiasRecorrencia)
+                            {
+                                if ((int)diaSemana.DiaSemana == (int)dataAtual.Value.DayOfWeek)
+                                {
+                                    // Criar agendamento para este dia
+                                    var agenda = new AgendaModel
+                                    {
+                                        Titulo = $"Atendimento - {paciente.Nome}",
+                                        Data = dataAtual,
+                                        PacienteId = paciente.Id,
+                                        ProfissionalId = diaSemana.ProfissionalId, // Usar o profissional configurado para este dia
+                                        SalaId = diaSemana.SalaId, // Usar a sala configurada para este dia
+                                        Convenio = planoCreateDto.Agendamento.Convenio,
+                                        Valor = 0, // Valor zero pois está no plano
+                                        FormaPagamento = "Plano",
+                                        Pago = true, // Já está pago pelo plano
+                                        PacoteId = null,
+                                        LembreteSms = true,
+                                        LembreteWhatsapp = true,
+                                        LembreteEmail = true,
+                                        StatusId = 1, // Status inicial
+                                        IntegracaoGmail = true,
+                                        StatusFinal = false,
+                                        Avulso = false, // Não é avulso pois faz parte do plano
+                                    };
+
+                                    // Processar horários específicos para este dia da semana
+                                    if (TimeSpan.TryParse(diaSemana.HoraInicio, out TimeSpan horaInicio))
+                                    {
+                                        agenda.HoraInicio = horaInicio;
+                                    }
+                                    else
+                                    {
+                                        throw new Exception($"Formato de hora inválido para HoraInicio do dia {diaSemana.DiaSemana}");
+                                    }
+
+                                    if (TimeSpan.TryParse(diaSemana.HoraFim, out TimeSpan horaFim))
+                                    {
+                                        agenda.HoraFim = horaFim;
+                                    }
+                                    else
+                                    {
+                                        throw new Exception($"Formato de hora inválido para HoraFim do dia {diaSemana.DiaSemana}");
+                                    }
+
+                                    _context.Agenda.Add(agenda);
+                                    agendamentos.Add(agenda);
+
+                                    // Só criar um agendamento por dia
+                                    break;
+                                }
+                            }
+
+                            // Avançar para o próximo dia
+                            dataAtual = dataAtual.Value.AddDays(1);
+                        }
+
+                        // Salvar todos os agendamentos criados
+                        await _context.SaveChangesAsync();
+                    }
+                }
+
+                // Vincular o plano ao paciente
                 paciente.PlanoId = plano.Id;
                 await _context.SaveChangesAsync();
                 await transaction.CommitAsync();
@@ -313,10 +397,12 @@ public class PlanoService : IPlanoInterface
                 resposta.Mensagem = "Plano vinculado ao paciente com sucesso";
                 return resposta;
             }
-            catch
+            catch (Exception ex)
             {
                 await transaction.RollbackAsync();
-                throw;
+                resposta.Mensagem = $"Erro ao vincular plano ao paciente: {ex.InnerException?.Message ?? ex.Message}";
+                resposta.Status = false;
+                return resposta;
             }
         }
         catch (Exception ex)
@@ -327,4 +413,214 @@ public class PlanoService : IPlanoInterface
         }
     }
 
+    public async Task<ResponseModel<PlanoModel>> RenovarPlano(PlanoRenovacaoDto renovacaoDto)
+    {
+        ResponseModel<PlanoModel> resposta = new ResponseModel<PlanoModel>();
+
+        try
+        {
+            using var transaction = await _context.Database.BeginTransactionAsync();
+            try
+            {
+                // Buscar o plano atual
+                var planoAtual = await _context.Plano
+                    .Include(p => p.Paciente)
+                    .FirstOrDefaultAsync(p => p.Id == renovacaoDto.PlanoId);
+
+                if (planoAtual == null)
+                {
+                    resposta.Mensagem = "Plano não encontrado";
+                    resposta.Status = false;
+                    return resposta;
+                }
+
+                var paciente = planoAtual.Paciente;
+                if (paciente == null)
+                {
+                    resposta.Mensagem = "Paciente não encontrado";
+                    resposta.Status = false;
+                    return resposta;
+                }
+
+                // Inativar o plano atual
+                planoAtual.Ativo = false;
+                planoAtual.DataFim = DateTime.Now;
+
+                // Criar o novo plano com base no atual
+                var novoPlano = new PlanoModel
+                {
+                    Descricao = renovacaoDto.Descricao ?? planoAtual.Descricao,
+                    TempoMinutos = planoAtual.TempoMinutos,
+                    CentroCustoId = planoAtual.CentroCustoId,
+                    DiasSemana = planoAtual.DiasSemana,
+                    ValorBimestral = planoAtual.ValorBimestral,
+                    ValorMensal = planoAtual.ValorMensal,
+                    ValorTrimestral = planoAtual.ValorTrimestral,
+                    ValorQuadrimestral = planoAtual.ValorQuadrimestral,
+                    ValorSemestral = planoAtual.ValorSemestral,
+                    ValorAnual = planoAtual.ValorAnual,
+                    DataInicio = renovacaoDto.DataInicio,
+                    DataFim = renovacaoDto.DataFim,
+                    Ativo = true,
+                    PacienteId = paciente.Id,
+                    TipoMes = renovacaoDto.TipoMes
+                };
+
+                // Gerar financeiro se solicitado
+                if (renovacaoDto.GerarFinanceiro && renovacaoDto.Financeiro != null)
+                {
+                    var financ_receber = new Financ_ReceberModel
+                    {
+                        IdOrigem = 0,
+                        NrDocto = 0,
+                        DataEmissao = renovacaoDto.DataInicio,
+                        ValorOriginal = renovacaoDto.Financeiro.Valor,
+                        ValorPago = 0,
+                        Valor = renovacaoDto.Financeiro.Valor,
+                        Status = "Pendente",
+                        NotaFiscal = "",
+                        Descricao = $"Renovação de Plano - {paciente.Nome}",
+                        Parcela = renovacaoDto.Financeiro.Parcela,
+                        Classificacao = "Receita",
+                        Observacao = renovacaoDto.Financeiro.Observacao ?? "Renovação de plano",
+                        CentroCustoId = renovacaoDto.Financeiro.CentroCustoId,
+                        PacienteId = paciente.Id,
+                        BancoId = null,
+                        subFinancReceber = new List<Financ_ReceberSubModel>()
+                    };
+
+                    _context.Add(financ_receber);
+                    await _context.SaveChangesAsync();
+
+                    // Adicionar parcelas
+                    if (renovacaoDto.Financeiro.subFinancReceber != null && renovacaoDto.Financeiro.subFinancReceber.Any())
+                    {
+                        foreach (var parcela in renovacaoDto.Financeiro.subFinancReceber)
+                        {
+                            var subItem = new Financ_ReceberSubModel
+                            {
+                                financReceberId = financ_receber.Id,
+                                Parcela = parcela.Parcela,
+                                Valor = parcela.Valor,
+                                TipoPagamentoId = parcela.TipoPagamentoId,
+                                DataPagamento = parcela.DataPagamento,
+                                Desconto = parcela.Desconto,
+                                Juros = parcela.Juros,
+                                Multa = parcela.Multa,
+                                DataVencimento = parcela.DataVencimento,
+                                Observacao = parcela.Observacao
+                            };
+
+                            financ_receber.subFinancReceber.Add(subItem);
+                        }
+                    }
+
+                    novoPlano.FinanceiroId = financ_receber.Id;
+                }
+
+                _context.Add(novoPlano);
+                await _context.SaveChangesAsync();
+
+                // Gerar agendamentos se solicitado
+                if (renovacaoDto.GerarAgendamento && renovacaoDto.Agendamento != null)
+                {
+                    List<AgendaModel> agendamentos = new List<AgendaModel>();
+
+                    // Configurar dados do agendamento
+                    DateTime? dataAtual = renovacaoDto.DataInicio;
+                    DateTime? dataFim = renovacaoDto.DataFim;
+
+                    // Verificar se há dias de recorrência configurados
+                    if (renovacaoDto.Agendamento.DiasRecorrencia != null && renovacaoDto.Agendamento.DiasRecorrencia.Count > 0)
+                    {
+                        // Processar cada dia entre a data inicial e final
+                        while (dataAtual <= dataFim)
+                        {
+                            // Verificar se o dia atual corresponde a algum dia de recorrência configurado
+                            foreach (var diaSemana in renovacaoDto.Agendamento.DiasRecorrencia)
+                            {
+                                if ((int)diaSemana.DiaSemana == (int)dataAtual.Value.DayOfWeek)
+                                {
+                                    // Criar agendamento para este dia
+                                    var agenda = new AgendaModel
+                                    {
+                                        Titulo = $"Atendimento - {paciente.Nome}",
+                                        Data = dataAtual,
+                                        PacienteId = paciente.Id,
+                                        ProfissionalId = diaSemana.ProfissionalId,
+                                        SalaId = diaSemana.SalaId,
+                                        Convenio = renovacaoDto.Agendamento.Convenio,
+                                        Valor = 0, // Valor zero pois está no plano
+                                        FormaPagamento = "Plano",
+                                        Pago = true, // Já está pago pelo plano
+                                        PacoteId = null,
+                                        LembreteSms = true,
+                                        LembreteWhatsapp = true,
+                                        LembreteEmail = true,
+                                        StatusId = 1, // Status inicial
+                                        IntegracaoGmail = true,
+                                        StatusFinal = false,
+                                        Avulso = false, // Não é avulso pois faz parte do plano
+                                    };
+
+                                    // Processar horários específicos para este dia da semana
+                                    if (TimeSpan.TryParse(diaSemana.HoraInicio, out TimeSpan horaInicio))
+                                    {
+                                        agenda.HoraInicio = horaInicio;
+                                    }
+                                    else
+                                    {
+                                        throw new Exception($"Formato de hora inválido para HoraInicio do dia {diaSemana.DiaSemana}");
+                                    }
+
+                                    if (TimeSpan.TryParse(diaSemana.HoraFim, out TimeSpan horaFim))
+                                    {
+                                        agenda.HoraFim = horaFim;
+                                    }
+                                    else
+                                    {
+                                        throw new Exception($"Formato de hora inválido para HoraFim do dia {diaSemana.DiaSemana}");
+                                    }
+
+                                    _context.Agenda.Add(agenda);
+                                    agendamentos.Add(agenda);
+
+                                    // Só criar um agendamento por dia
+                                    break;
+                                }
+                            }
+
+                            // Avançar para o próximo dia
+                            dataAtual = dataAtual.Value.AddDays(1);
+                        }
+
+                        // Salvar todos os agendamentos criados
+                        await _context.SaveChangesAsync();
+                    }
+                }
+
+                // Atualizar o plano do paciente
+                paciente.PlanoId = novoPlano.Id;
+                await _context.SaveChangesAsync();
+                await transaction.CommitAsync();
+
+                resposta.Dados = novoPlano;
+                resposta.Mensagem = "Plano renovado com sucesso";
+                return resposta;
+            }
+            catch (Exception ex)
+            {
+                await transaction.RollbackAsync();
+                resposta.Mensagem = $"Erro ao renovar plano: {ex.InnerException?.Message ?? ex.Message}";
+                resposta.Status = false;
+                return resposta;
+            }
+        }
+        catch (Exception ex)
+        {
+            resposta.Mensagem = $"Erro ao renovar plano: {ex.Message}";
+            resposta.Status = false;
+            return resposta;
+        }
+    }
 }

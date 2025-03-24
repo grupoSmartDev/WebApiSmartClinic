@@ -165,6 +165,7 @@ var builder = WebApplication.CreateBuilder(args);
     builder.Services.AddScoped<IFichaAvaliacaoInterface, FichaAvaliacaoService>();
     builder.Services.AddScoped<IPlanoContaInterface, PlanoContaService>();
     builder.Services.AddScoped<IConnectionStringProvider, ConnectionStringProvider>();
+    builder.Services.AddScoped<AgendaService>();
 
     builder.Services.AddScoped<IConnectionsRepository, ConnectionsRepository>();
     // Registrar IConnectionsRepository e ConnectionsRepository

@@ -1,6 +1,8 @@
 
 using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
+using WebApiSmartClinic.Dto.Agenda;
+using WebApiSmartClinic.Dto.Financ_Receber;
 using WebApiSmartClinic.Models;
 
 namespace WebApiSmartClinic.Dto.Plano;
@@ -44,9 +46,25 @@ public class PlanoCreateDto
 
     public int? FinanceiroId { get; set; } // Relacionamento opcional com financeiro
     
-    public Financ_ReceberModel? Financeiro { get; set; }
+    public Financ_ReceberCreateDto? Financeiro { get; set; }
 
     [Required(ErrorMessage = "O tipo de mês é obrigatório.")]
     [StringLength(1, ErrorMessage = "O tipo de mês deve ter apenas um caractere.")]
     public string TipoMes { get; set; } = string.Empty; // Usado como enum no front-end
+    
+    public AgendaCreateDto? Agendamento { get; set; }
+}
+
+
+public class PlanoRenovacaoDto
+{
+    public int PlanoId { get; set; }
+    public string Descricao { get; set; }
+    public string TipoMes { get; set; }
+    public DateTime DataInicio { get; set; }
+    public DateTime DataFim { get; set; }
+    public bool GerarFinanceiro { get; set; }
+    public bool GerarAgendamento { get; set; }
+    public Financ_ReceberCreateDto Financeiro { get; set; }
+    public AgendaCreateDto Agendamento { get; set; }
 }

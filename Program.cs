@@ -44,6 +44,8 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using WebApiSmartClinic.Services.ConnectionsService;
 using Npgsql.EntityFrameworkCore.PostgreSQL;
+using WebApiSmartClinic.Services.CadastroCliente;
+using WebApiSmartClinic.Services.Auth;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -81,25 +83,36 @@ var builder = WebApplication.CreateBuilder(args);
         x.JsonSerializerOptions.WriteIndented = true;
 
     });
-    // Configure a política padrão de autorização para exigir autenticação do usuário
+
     services.AddAuthorization(options =>
     {
         options.FallbackPolicy = new AuthorizationPolicyBuilder()
-            .RequireAuthenticatedUser()
+            .RequireAssertion(context =>
+            {
+                // Recupera o endpoint atual (só funciona em .NET 5+ com endpoint routing)
+                var endpoint = context.Resource as Microsoft.AspNetCore.Http.Endpoint;
+
+                // Verifica se existe algum atributo [AllowAnonymous]
+                var allowAnonymous = endpoint?.Metadata?.GetMetadata<IAllowAnonymous>() != null;
+
+                // Se tiver [AllowAnonymous], libera
+                if (allowAnonymous) return true;
+
+                // Senão, exige que esteja autenticado
+                return context.User.Identity?.IsAuthenticated == true;
+            })
             .Build();
     });
 
     services.Configure<ConnectionStringConfig>(builder.Configuration);
-
     services.Configure<RequestLocalizationOptions>(options =>
     {
         var supportedCultures = new[]
         {
-        new CultureInfo("pt-BR"), // Adicione outras culturas conforme necessário
-        // ... outras culturas
+        new CultureInfo("pt-BR"),
     };
 
-        options.DefaultRequestCulture = new RequestCulture("pt-BR"); // Cultura padrão
+        options.DefaultRequestCulture = new RequestCulture("pt-BR");
         options.SupportedCultures = supportedCultures;
         options.SupportedUICultures = supportedCultures;
     });
@@ -133,7 +146,6 @@ var builder = WebApplication.CreateBuilder(args);
         };
     });
 
-
     // Vincular interface com os servicos
     builder.Services.AddScoped<IAutorInterface, AutorService>();
     builder.Services.AddScoped<ISalaInterface, SalaService>();
@@ -164,8 +176,10 @@ var builder = WebApplication.CreateBuilder(args);
     builder.Services.AddScoped<IProfissaoInterface, ProfissaoService>();
     builder.Services.AddScoped<IFichaAvaliacaoInterface, FichaAvaliacaoService>();
     builder.Services.AddScoped<IPlanoContaInterface, PlanoContaService>();
+    builder.Services.AddScoped<ICadastroClienteInterface, CadastroClienteService>();
     builder.Services.AddScoped<IConnectionStringProvider, ConnectionStringProvider>();
     builder.Services.AddScoped<AgendaService>();
+    builder.Services.AddScoped<IAuthInterface, AuthService>();
 
     builder.Services.AddScoped<IConnectionsRepository, ConnectionsRepository>();
     // Registrar IConnectionsRepository e ConnectionsRepository
@@ -254,5 +268,3 @@ app.UseMiddleware<ConnectionStringMiddleware>();
 app.MapControllers();
 
 app.Run();
-
-

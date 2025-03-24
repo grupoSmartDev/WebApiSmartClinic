@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
 
 namespace WebApiSmartClinic.Helpers;
 
@@ -32,6 +33,19 @@ public class RequisitoClaimFilter : IAuthorizationFilter
 
     public void OnAuthorization(AuthorizationFilterContext context)
     {
+        // 1. Verifica se o endpoint atual tem [AllowAnonymous]
+        var endpoint = context.HttpContext.GetEndpoint();
+        if (endpoint != null)
+        {
+            var allowAnonymous = endpoint.Metadata.GetMetadata<IAllowAnonymous>();
+            if (allowAnonymous != null)
+            {
+                // Se tiver [AllowAnonymous], não faz validação alguma e retorna
+                return;
+            }
+        }
+
+        // 2. Se chegou aqui, aplica sua lógica normal:
         if (!context.HttpContext.User.Identity!.IsAuthenticated)
         {
             context.Result = new StatusCodeResult(401);

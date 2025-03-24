@@ -480,6 +480,95 @@ namespace WebApiSmartClinic.Migrations.AppDb
                     b.ToTable("Boleto");
                 });
 
+            modelBuilder.Entity("WebApiSmartClinic.Models.CadastroClienteModel", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<bool>("Ativo")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("CNPJEmpresaMatriz")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Celular")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<bool>("CelularComWhatsApp")
+                        .HasColumnType("boolean");
+
+                    b.Property<DateTime?>("DataFim")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime?>("DataInicio")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime?>("DataInicioTeste")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime?>("DataNascimentoTitular")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Especialidade")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Nome")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<bool>("PeriodoTeste")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("PlanoEscolhido")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int>("QtdeLicencaEmpresaPermitida")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("QtdeLicencaEmpresaUtilizada")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("QtdeLicencaUsuarioPermitida")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("QtdeLicencaUsuarioUtilizada")
+                        .HasColumnType("integer");
+
+                    b.Property<bool>("ReceberNotificacoes")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("Sobrenome")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("TelefoneFixo")
+                        .HasColumnType("text");
+
+                    b.Property<int>("TipoPagamentoId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("TitularCPF")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TipoPagamentoId");
+
+                    b.ToTable("CadastroCliente");
+                });
+
             modelBuilder.Entity("WebApiSmartClinic.Models.CategoriaModel", b =>
                 {
                     b.Property<int>("Id")
@@ -1672,6 +1761,9 @@ namespace WebApiSmartClinic.Migrations.AppDb
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<string>("Password")
+                        .HasColumnType("text");
+
                     b.Property<int?>("ProfissaoId")
                         .HasColumnType("integer");
 
@@ -1682,6 +1774,10 @@ namespace WebApiSmartClinic.Migrations.AppDb
                         .HasColumnType("text");
 
                     b.Property<string>("Sexo")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Sobrenome")
+                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("TipoPagamento")
@@ -2067,6 +2163,17 @@ namespace WebApiSmartClinic.Migrations.AppDb
                         .IsRequired();
 
                     b.Navigation("Banco");
+                });
+
+            modelBuilder.Entity("WebApiSmartClinic.Models.CadastroClienteModel", b =>
+                {
+                    b.HasOne("WebApiSmartClinic.Models.TipoPagamentoModel", "TipoPagamento")
+                        .WithMany()
+                        .HasForeignKey("TipoPagamentoId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("TipoPagamento");
                 });
 
             modelBuilder.Entity("WebApiSmartClinic.Models.ComissaoModel", b =>

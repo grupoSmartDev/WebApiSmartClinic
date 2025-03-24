@@ -10,7 +10,7 @@ namespace WebApiSmartClinic.Models
         public string Descricao { get; set; } // Descrição detalhada do Procedimento
         public decimal Preco { get; set; } // Preço do Procedimento
         public string? Duracao { get; set; } // Duração estimada do Procedimento (minutos)
-        public bool Ativo { get; set; } // Indica se o procedimento está ativo ou não no sistema
+        public bool Ativo { get; set; } = true; // Indica se o procedimento está ativo ou não no sistema
         public int? CategoriaId { get; set; }
         public decimal? PercentualComissao { get; set; }
 

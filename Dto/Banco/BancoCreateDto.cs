@@ -11,7 +11,7 @@ namespace WebApiSmartClinic.Dto.Banco
         public string NomeTitular { get; set; }
         public string DocumentoTitular { get; set; } 
         public decimal SaldoInicial { get; set; } 
-        public bool Ativo { get; set; }
+        public bool Ativo { get; set; } = true;
 
         // Dados para homologação e emissão de boletos
         public string CodigoConvenio { get; set; } 

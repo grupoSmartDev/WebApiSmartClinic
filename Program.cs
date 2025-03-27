@@ -236,6 +236,8 @@ builder.Services.AddSwaggerGen(c =>
             Array.Empty<string>()
         }
     });
+
+    //c.OperationFilter<AllowAnonymousOperationFilter>();
 });
 
 

@@ -12,6 +12,7 @@ namespace WebApiSmartClinic.Models
         public string Telefone { get; set; }
         public string Email { get; set; }
         public bool Ativo { get; set; } = true;
+        public bool IsSystemDefault { get; internal set; }
 
         [JsonIgnore]
         public ICollection<PacienteModel> Pacientes { get; set; }

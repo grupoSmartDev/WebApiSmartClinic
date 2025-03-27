@@ -69,15 +69,46 @@ public class AppDbContext : IdentityDbContext<User>
     {
         base.OnModelCreating(modelBuilder);
 
-        // Papéis para o Identity
-        var roles = new List<IdentityRole>
-        {
-            new IdentityRole { Id = "1", Name = "User", NormalizedName = "USER" },
-            new IdentityRole { Id = "2", Name = "Support", NormalizedName = "SUPPORT" },
-            new IdentityRole { Id = "3", Name = "Admin", NormalizedName = "ADMIN" }
-        };
+        modelBuilder.Entity<IdentityRole>().HasData(
+            new List<IdentityRole>
+            {
+                new IdentityRole { Id = "1", Name = "User", NormalizedName = "USER" },
+                new IdentityRole { Id = "2", Name = "Support", NormalizedName = "SUPPORT" },
+                new IdentityRole { Id = "3", Name = "Admin", NormalizedName = "ADMIN" }
+            }
+        );
 
-        modelBuilder.Entity<IdentityRole>().HasData(roles);
+        modelBuilder.Entity<ConselhoModel>().HasData(
+            new ConselhoModel { Id = 1, Nome = "Conselho Regional de Fisioterapia e Terapia Ocupacional", Sigla = "CREFITO", IsSystemDefault = true }
+        );
+
+        modelBuilder.Entity<ProfissaoModel>().HasData(
+            new ProfissaoModel { Id = 1, Descricao = "Psicólogo", IsSystemDefault = true }
+        );
+
+        modelBuilder.Entity<StatusModel>().HasData(
+            new StatusModel { Id = 1, Cor = "#00FF00", Legenda = "Agendamento realizado com sucesso!", Status = "Agendado", IsSystemDefault = true }
+        );
+
+        modelBuilder.Entity<FormaPagamentoModel>().HasData(
+            new FormaPagamentoModel { Id = 1, Descricao = "À Vista", Parcelas = 1, IsSystemDefault = true },
+            new FormaPagamentoModel { Id = 2, Descricao = "A Prazo - 2x", Parcelas = 2, IsSystemDefault = true },
+            new FormaPagamentoModel { Id = 3, Descricao = "A Prazo - 3x", Parcelas = 3, IsSystemDefault = true }
+        );
+
+        modelBuilder.Entity<TipoPagamentoModel>().HasData(
+            new TipoPagamentoModel { Id = 1, Descricao = "Dinheiro", IsSystemDefault = true },
+            new TipoPagamentoModel { Id = 2, Descricao = "Cartão de Crédito", IsSystemDefault = true },
+            new TipoPagamentoModel { Id = 3, Descricao = "Cartão de Débito", IsSystemDefault = true },
+            new TipoPagamentoModel { Id = 4, Descricao = "Boleto", IsSystemDefault = true },
+            new TipoPagamentoModel { Id = 5, Descricao = "Pix", IsSystemDefault = true },
+            new TipoPagamentoModel { Id = 6, Descricao = "Depósito", IsSystemDefault = true }
+        );
+
+        modelBuilder.Entity<ConvenioModel>().HasData(
+            new ConvenioModel { Id = 1, Nome = "Unimed", PeriodoCarencia = "0", Ativo = true, RegistroAvs = "ABC", Telefone = "3434-3434", Email = "email@email.com", IsSystemDefault = true },
+            new ConvenioModel { Id = 2, Nome = "Santa Casa", PeriodoCarencia = "0", Ativo = true, RegistroAvs = "ABC", Telefone = "3434-3434", Email = "email@email.com", IsSystemDefault = true }
+        );
 
         modelBuilder.Entity<PlanoModel>()
           .HasOne(p => p.Paciente)

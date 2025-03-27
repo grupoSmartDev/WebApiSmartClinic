@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using WebApiSmartClinic.Data;
@@ -11,9 +12,11 @@ using WebApiSmartClinic.Data;
 namespace WebApiSmartClinic.Migrations.AppDb
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250327010351_FixForeignKeyRecorrencia")]
+    partial class FixForeignKeyRecorrencia
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -215,6 +218,9 @@ namespace WebApiSmartClinic.Migrations.AppDb
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
+                    b.Property<bool>("Avulso")
+                        .HasColumnType("boolean");
+
                     b.Property<bool>("Convenio")
                         .HasColumnType("boolean");
 
@@ -231,7 +237,6 @@ namespace WebApiSmartClinic.Migrations.AppDb
                         .HasColumnType("integer");
 
                     b.Property<string>("FormaPagamento")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<TimeSpan>("HoraFim")

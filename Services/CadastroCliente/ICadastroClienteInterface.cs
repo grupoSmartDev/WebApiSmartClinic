@@ -9,7 +9,8 @@ namespace WebApiSmartClinic.Services.CadastroCliente
         Task<ResponseModel<List<CadastroClienteModel>>> Listar();
         Task<ResponseModel<List<CadastroClienteModel>>> Delete(int idCadastroCliente);
         Task<ResponseModel<CadastroClienteModel>> BuscarPorId(int idCadastroCliente);
-        Task<ResponseModel<List<CadastroClienteModel>>> Criar(CadastroClienteCreateDto cadastroclienteCreateDto);
+        Task<ResponseModel<CadastroClienteModel>> Criar(CadastroClienteCreateDto dto);
+        //Task<ResponseModel<List<CadastroClienteModel>>> Criar(CadastroClienteCreateDto cadastroclienteCreateDto);
         Task<ResponseModel<List<CadastroClienteModel>>> Editar(CadastroClienteEdicaoDto cadastroclienteEdicaoDto);
     }
 }

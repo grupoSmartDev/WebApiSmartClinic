@@ -57,5 +57,12 @@ namespace WebApiSmartClinic.Controllers
             var plano = await _plano.Delete(idPlano, pageNumber, pageSize);
             return Ok(plano);
         }
+
+        [HttpPost("RenovarPlano")]
+        public async Task<ActionResult<ResponseModel<List<PlanoModel>>>> RenovarPlano([FromBody] PlanoRenovacaoDto renovacaoDto)
+        {
+            var resultado = await _plano.RenovarPlano(renovacaoDto);
+            return Ok(resultado);
+        }
     }
 }

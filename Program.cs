@@ -178,6 +178,7 @@ var builder = WebApplication.CreateBuilder(args);
     builder.Services.AddScoped<IPlanoContaInterface, PlanoContaService>();
     builder.Services.AddScoped<ICadastroClienteInterface, CadastroClienteService>();
     builder.Services.AddScoped<IConnectionStringProvider, ConnectionStringProvider>();
+    builder.Services.AddScoped<AgendaService>();
     builder.Services.AddScoped<IAuthInterface, AuthService>();
 
     builder.Services.AddScoped<IConnectionsRepository, ConnectionsRepository>();

@@ -239,6 +239,7 @@ public class EvolucaoService : IEvolucaoInterface
             var evolucao = await _context.Evolucoes.ToListAsync();
 
             resposta.Dados = evolucao;
+            resposta.TotalCount = evolucao.Count;
             resposta.Mensagem = "Todos os Evolucao foram encontrados";
             return resposta;
 

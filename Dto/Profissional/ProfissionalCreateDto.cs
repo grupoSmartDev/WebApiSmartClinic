@@ -5,7 +5,7 @@ namespace WebApiSmartClinic.Dto.Profissional
     {
         public string Email { get; set; }
         public string Nome { get; set; }
-        public string Sobrenome { get; set; }
+        public string? Sobrenome { get; set; }
         public string? Password { get; set; }
         public string? Cpf { get; set; }
         public string Celular { get; set; }
@@ -28,7 +28,7 @@ namespace WebApiSmartClinic.Dto.Profissional
         public string? BancoCpfTitular { get; set; } // CPF do titular da conta para confirmação
 
         // Propriedade para controle de acesso
-        public bool EhUsuario { get; set; } = false; // Identifica se o profissional é um usuário do sistema
+        public bool? EhUsuario { get; set; } = false; // Identifica se o profissional é um usuário do sistema
 
         // Opcional: Data de cadastro para rastrear a criação do registro
         public DateTime? DataCadastro { get; set; } = DateTime.Now;

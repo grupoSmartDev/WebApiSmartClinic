@@ -1,4 +1,5 @@
 
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json.Serialization;
 
 namespace WebApiSmartClinic.Models;
@@ -31,15 +32,19 @@ public class Financ_PagarModel
     public int? FornecedorId { get; set; } = null; // Relacionamento com a tabela de Fornecedor
     
     public FornecedorModel? Fornecedor { get; set; }
-    public int? CentroCustoId { get; set; } = null; // Relacionamento com a tabela de CentroCusto
-    [JsonIgnore]
+    public int? CentroCustoId { get; set; } = null; // Relacionamento com a tabela de CentroCusto    
     public CentroCustoModel? CentroCusto { get; set; }
-
-    [JsonIgnore]
     public BancoModel? Banco { get; set; }
     public int? BancoId { get; set; } = 0; // Relacionamento com a tabela de Banco
 
     public ICollection<Financ_PagarSubModel>? subFinancPagar { get; set; } = new List<Financ_PagarSubModel>();
+
+
+    public int? PlanoContaId { get; internal set; }
+    public PlanoContaModel? PlanoConta { get; set; }
+
+    [NotMapped]
+    public int? DespesaFixaId { get; set; }
 }
 
 public class Financ_PagarSubModel
@@ -53,6 +58,9 @@ public class Financ_PagarSubModel
     public decimal? Desconto { get; set; }
     public decimal? Juros { get; set; }
     public decimal? Multa { get; set; }
+
+    public int? DespesaFixaId { get; set; }
+    public DespesaFixaModel? DespesaFixa { get; set; }
 
     public int? TipoPagamentoId { get; set; } = null; // Relacionamento com a tabela de TipoPagamento
     [JsonIgnore]

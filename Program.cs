@@ -46,6 +46,7 @@ using WebApiSmartClinic.Services.ConnectionsService;
 using Npgsql.EntityFrameworkCore.PostgreSQL;
 using WebApiSmartClinic.Services.CadastroCliente;
 using WebApiSmartClinic.Services.Auth;
+using WebApiSmartClinic.Services.DespesaFixa;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -176,6 +177,7 @@ var builder = WebApplication.CreateBuilder(args);
     builder.Services.AddScoped<IProfissaoInterface, ProfissaoService>();
     builder.Services.AddScoped<IFichaAvaliacaoInterface, FichaAvaliacaoService>();
     builder.Services.AddScoped<IPlanoContaInterface, PlanoContaService>();
+    builder.Services.AddScoped<IDespesaFixaInterface, DespesaFixaService>();
     builder.Services.AddScoped<ICadastroClienteInterface, CadastroClienteService>();
     builder.Services.AddScoped<IConnectionStringProvider, ConnectionStringProvider>();
     builder.Services.AddScoped<AgendaService>();

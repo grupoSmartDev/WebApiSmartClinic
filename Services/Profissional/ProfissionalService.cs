@@ -58,7 +58,7 @@ public class ProfissionalService : IProfissionalInterface
             profissional.EhUsuario = profissionalCreateDto.EhUsuario;
             profissional.DataCadastro = profissionalCreateDto.DataCadastro;
 
-            if (profissionalCreateDto.EhUsuario)
+            if (profissionalCreateDto.EhUsuario == true)
             {
                 var userCreateRequest = new UserCreateRequest
                 {

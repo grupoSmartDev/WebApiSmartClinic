@@ -292,22 +292,12 @@ public class Financ_ReceberService : IFinanc_ReceberInterface
 
             dataBaseFiltro = "E"; //estou forçando de proposito a ficar assim, para depois ter outros filtros com base na data do filho
 
-            if(dataBaseFiltro == "E")
+            //if adicionado para que se tiver um id não levar em consideração a data 
+            if (idFiltro == null)
             {
-                if (dataFiltroInicio.HasValue)
-                {
-                    dataFiltroInicio = DateTime.SpecifyKind(dataFiltroInicio.Value, DateTimeKind.Utc);
-                    query = query.Where(p => p.DataEmissao >= dataFiltroInicio);
-                }
-
-                if (dataFiltroFim.HasValue)
-                {
-
-                    dataFiltroFim = DateTime.SpecifyKind(dataFiltroFim.Value, DateTimeKind.Utc);
-                    query = query.Where(p => p.DataEmissao <= dataFiltroFim);
-                }
-
+                if (dataBaseFiltro == "E");
             }
+
 
             if (!string.IsNullOrEmpty(descricaoFiltro))
                 query = query.Where(p => p.Descricao.Contains(descricaoFiltro));
@@ -356,51 +346,58 @@ public class Financ_ReceberService : IFinanc_ReceberInterface
             if (parcelaNumeroFiltro.HasValue)
                 query = query.Where(p => p.Parcela == parcelaNumeroFiltro);
 
-            if(dataBaseFiltro == "V")
+            //if adicionado para que se tiver id pai ou id filho nao pegar por data. 
+
+            if (idPaiFiltro == null && idPaiFiltro == null)
             {
-                if (dataFiltroInicio.HasValue)
+
+                if(dataBaseFiltro == "V")
                 {
-                    dataFiltroInicio = DateTime.SpecifyKind(dataFiltroInicio.Value, DateTimeKind.Utc);
-                    query = query.Where(p => p.DataVencimento >= dataFiltroInicio);
+                    if (dataFiltroInicio.HasValue)
+                    {
+                        dataFiltroInicio = DateTime.SpecifyKind(dataFiltroInicio.Value, DateTimeKind.Utc);
+                        query = query.Where(p => p.DataVencimento >= dataFiltroInicio);
+                    }
+
+
+                    if (dataFiltroFim.HasValue)
+                    {
+                        dataFiltroFim = DateTime.SpecifyKind(dataFiltroFim.Value, DateTimeKind.Utc);
+                        query = query.Where(p => p.DataVencimento <= dataFiltroFim);
+                    }
                 }
-
-
-                if (dataFiltroFim.HasValue)
+                else if (dataBaseFiltro == "P")
                 {
-                    dataFiltroFim = DateTime.SpecifyKind(dataFiltroFim.Value, DateTimeKind.Utc);
-                    query = query.Where(p => p.DataVencimento <= dataFiltroFim);
+                    if (dataFiltroInicio.HasValue)
+                    {
+                        dataFiltroInicio = DateTime.SpecifyKind(dataFiltroInicio.Value, DateTimeKind.Utc);
+                        query = query.Where(p => p.DataPagamento >= dataFiltroInicio);
+                    }
+
+
+                    if (dataFiltroFim.HasValue)
+                    {
+                        dataFiltroFim = DateTime.SpecifyKind(dataFiltroFim.Value, DateTimeKind.Utc);
+                        query = query.Where(p => p.DataPagamento <= dataFiltroFim);
+                    }
+                }
+                else
+                {
+                    if (dataFiltroInicio.HasValue)
+                    {
+                        dataFiltroInicio = DateTime.SpecifyKind(dataFiltroInicio.Value, DateTimeKind.Utc);
+                        query = query.Where(p => p.FinancReceber.DataEmissao >= dataFiltroInicio);
+                    }
+
+                    if (dataFiltroFim.HasValue)
+                    {
+
+                        dataFiltroFim = DateTime.SpecifyKind(dataFiltroFim.Value, DateTimeKind.Utc);
+                        query = query.Where(p => p.FinancReceber.DataEmissao <= dataFiltroFim);
+                    }
                 }
             }
-            else if (dataBaseFiltro == "P")
-            {
-                if (dataFiltroInicio.HasValue)
-                {
-                    dataFiltroInicio = DateTime.SpecifyKind(dataFiltroInicio.Value, DateTimeKind.Utc);
-                    query = query.Where(p => p.DataPagamento >= dataFiltroInicio);
-                }
 
-
-                if (dataFiltroFim.HasValue)
-                {
-                    dataFiltroFim = DateTime.SpecifyKind(dataFiltroFim.Value, DateTimeKind.Utc);
-                    query = query.Where(p => p.DataPagamento <= dataFiltroFim);
-                }
-            }
-            else
-            {
-                if (dataFiltroInicio.HasValue)
-                {
-                    dataFiltroInicio = DateTime.SpecifyKind(dataFiltroInicio.Value, DateTimeKind.Utc);
-                    query = query.Where(p => p.FinancReceber.DataEmissao >= dataFiltroInicio);
-                }
-
-                if (dataFiltroFim.HasValue)
-                {
-
-                    dataFiltroFim = DateTime.SpecifyKind(dataFiltroFim.Value, DateTimeKind.Utc);
-                    query = query.Where(p => p.FinancReceber.DataEmissao <= dataFiltroFim);
-                }
-            }
 
             if (parcelasVencidasFiltro)
                 query = query.Where(p => p.DataVencimento <= DateTime.Now && p.DataPagamento == null);

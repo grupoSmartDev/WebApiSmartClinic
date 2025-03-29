@@ -56,6 +56,7 @@ public class AppDbContext : IdentityDbContext<User>
     public DbSet<User> Users { get; set; }
     public DbSet<RecorrenciaPacienteModel> RecorrenciaPaciente { get; set; }
     public DbSet<CadastroClienteModel> CadastroCliente { get; set; }
+    public DbSet<DespesaFixaModel> Despesas { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
@@ -137,10 +138,59 @@ public class AppDbContext : IdentityDbContext<User>
             .WithOne(s => s.FinancPagar)
             .HasForeignKey(s => s.financPagarId);
 
+            
+
         // Relacionamento: PlanoConta -> SubPlanoConta
         modelBuilder.Entity<PlanoContaModel>()
             .HasMany(f => f.SubPlanos)
             .WithOne(s => s.PlanoConta)
             .HasForeignKey(s => s.PlanoContaId);
+
+        modelBuilder.Entity<DespesaFixaModel>(entity =>
+        {
+            entity.ToTable("DespesasFixas");
+
+            // Relacionamento removido daqui, agora a despesa fixa se relaciona com o subitem, não com o cabeçalho
+
+            // Outros relacionamentos da despesa fixa
+            entity.HasOne(d => d.PlanoConta)
+                .WithMany()
+                .HasForeignKey(d => d.PlanoContaId);
+
+            entity.HasOne(d => d.CentroCusto)
+                .WithMany()
+                .HasForeignKey(d => d.CentroCustoId);
+
+            entity.HasOne(d => d.Fornecedor)
+                .WithMany()
+                .HasForeignKey(d => d.FornecedorId);
+        });
+
+
+        modelBuilder.Entity<Financ_PagarSubModel>(entity =>
+        {
+            entity.ToTable("Financ_PagarSub");
+
+            // Relacionamento com a despesa fixa - NOVO
+            entity.HasOne(s => s.DespesaFixa)
+                .WithMany(d => d.FinancPagar) // Vincula com a coleção em DespesaFixaModel se existir
+                .HasForeignKey(s => s.DespesaFixaId);
+
+            // Relacionamento com o cabeçalho continua
+            entity.HasOne(s => s.FinancPagar)
+                .WithMany(f => f.subFinancPagar)
+                .HasForeignKey(s => s.financPagarId);
+
+            // Outros relacionamentos do sub item
+            entity.HasOne(s => s.TipoPagamento)
+                .WithMany()
+                .HasForeignKey(s => s.TipoPagamentoId);
+
+            entity.HasOne(s => s.FormaPagamento)
+                .WithMany()
+                .HasForeignKey(s => s.FormaPagamentoId);
+        });
     }
+
+
 }

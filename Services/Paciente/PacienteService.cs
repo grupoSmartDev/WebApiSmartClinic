@@ -515,4 +515,73 @@ public class PacienteService : IPacienteInterface
             throw;
         }
     }
+
+    public async Task<ResponseModel<PacienteModel>> CadastroRapido(PacienteCreateDto pacienteCreateDto, int pageNumber = 1, int pageSize = 10)
+    {
+        ResponseModel<PacienteModel> resposta = new ResponseModel<PacienteModel>();
+        try
+        {
+            using var transaction = await _context.Database.BeginTransactionAsync();
+
+            try
+            {
+                var cpfLimpo = Funcoes.RemoverCaracteres(pacienteCreateDto.Cpf);
+                var cpfExistente = await _context.Paciente.AnyAsync(p => p.Cpf == cpfLimpo);
+                DateTime? dataFimRecorrencia = null;
+
+                if (cpfExistente)
+                {
+                    resposta.Mensagem = "CPF já cadastrado, verifique.";
+                    return resposta;
+                }
+
+                if (pacienteCreateDto.DataFimRecorrencia.HasValue)
+                {
+                    dataFimRecorrencia = pacienteCreateDto.DataFimRecorrencia.Value;
+                }
+
+               
+                var paciente = new PacienteModel
+                {
+                   
+                    Nome = pacienteCreateDto.Nome,                   
+                    Cpf = cpfLimpo,
+                    Celular = pacienteCreateDto.Celular,                   
+                    Email = pacienteCreateDto.Email,                   
+                    ProfissionalId = pacienteCreateDto.ProfissionalId,
+                    DataNascimento = pacienteCreateDto.DataNascimento,
+                    Responsavel = pacienteCreateDto.Responsavel ?? false,
+                    DataCadastro = DateTime.UtcNow,
+                    Evolucoes = new List<EvolucaoModel>()
+                };
+
+                _context.Paciente.Add(paciente);
+                await _context.SaveChangesAsync();
+                await transaction.CommitAsync();
+
+                var query = _context.Paciente
+                    .Include(p => p.Evolucoes)
+                        .ThenInclude(e => e.Exercicios)
+                    .Include(p => p.Evolucoes)
+                        .ThenInclude(e => e.Atividades)
+                    .Include(p => p.Plano)
+                    .AsQueryable();
+
+                resposta.Dados = paciente;
+                resposta.Mensagem = "Paciente criado com sucesso!";
+                return resposta;
+            }
+            catch
+            {
+                await transaction.RollbackAsync();
+                throw;
+            }
+        }
+        catch (Exception ex)
+        {
+            resposta.Mensagem = ex.Message;
+            resposta.Status = false;
+            return resposta;
+        }
+    }
 }

@@ -53,14 +53,14 @@ public class AgendaService : IAgendaInterface
                 List<AgendaModel> agendamentos = new List<AgendaModel>();
 
                 DateTime? dataAtual = agendaCreateDto.Data;
-                DateTime? dataFim = agendaCreateDto.DiasRecorrencia.Count > 0 ? agendaCreateDto.DataFimRecorrencia : dataAtual;
+                DateTime? dataFim = agendaCreateDto.DiasRecorrencia != null && agendaCreateDto.DiasRecorrencia.Count > 0  ? agendaCreateDto.DataFimRecorrencia : dataAtual;
 
                 while (dataAtual <= dataFim)
                 {
                    
                     bool criarAgendamento = false;
 
-                    if (agendaCreateDto.DiasRecorrencia.Count == 0)
+                    if (agendaCreateDto.DiasRecorrencia == null)
                     {
                         // Se não tem recorrência, cria apenas um agendamento na data original
                         criarAgendamento = true;

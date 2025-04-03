@@ -50,5 +50,12 @@ namespace WebApiSmartClinic.Controllers
             var paciente = await _paciente.Delete(idPaciente, pageNumber, pageSize);
             return Ok(paciente);
         }
+
+        [HttpPost("CadastroRapido")]
+        public async Task<ActionResult<ResponseModel<PacienteModel>>> CadastroRapido(PacienteCreateDto pacienteCreateDto, int pageNumber = 1, int pageSize = 10)
+        {
+            var paciente = await _paciente.CadastroRapido(pacienteCreateDto, pageNumber, pageSize);
+            return Ok(paciente);
+        }
     }
 }

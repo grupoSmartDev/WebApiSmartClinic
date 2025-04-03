@@ -182,7 +182,9 @@ var builder = WebApplication.CreateBuilder(args);
     builder.Services.AddSingleton<IConnectionStringProvider, ConnectionStringProvider>();
 
     builder.Services.AddScoped<AgendaService>();
+    builder.Services.AddScoped<AuthService>();
     builder.Services.AddScoped<IAuthInterface, AuthService>();
+
 
     builder.Services.AddScoped<IConnectionsRepository, ConnectionsRepository>();
     // Registrar IConnectionsRepository e ConnectionsRepository

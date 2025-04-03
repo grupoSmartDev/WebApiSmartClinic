@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using WebApiSmartClinic.Helpers;
 using Microsoft.Extensions.Options;
+using WebApiSmartClinic.Dto.User;
 
 namespace WebApiSmartClinic.Data;
 

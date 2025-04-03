@@ -126,18 +126,20 @@ public class CadastroClienteService : ICadastroClienteInterface
             await dbContext.CadastroCliente.AddAsync(cliente);
             await dbContext.SaveChangesAsync();
 
-            // * CONTINUAR DAQUI, ESTÁ DANDO PAU NO GETREQUIREDSERVICE *
-            //var userCreateRequest = new UserCreateRequest
-            //{
-            //    FirstName = "Clinic",
-            //    LastName = "Smart",
-            //    Email = "administrador@clinicsmart.com.br",
-            //    Password = "clinicsmart01@ABJ",
-            //    AcceptTerms = true,
-            //};
+            var userCreateRequest = new UserCreateRequest
+            {
+                FirstName = dto.Nome,
+                LastName = dto.Sobrenome,
+                Email = dto.Email,
+                Password = "Admin@123",
+                ConfirmPassword = "Admin@123",
+                AcceptTerms = true,
+            };
 
-            //var authService = _serviceProvider.GetRequiredService<AuthService>();
-            //await authService.RegisterAsync(userCreateRequest, cpfKey);
+            using var authService = _scopeFactory.CreateAsyncScope();
+            var cu = authService.ServiceProvider.GetRequiredService<AuthService>();
+            
+            await cu.RegisterAsync(userCreateRequest, cpfKey);
 
             resposta.Status = true;
             resposta.Dados = cliente;

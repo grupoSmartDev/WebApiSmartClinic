@@ -25,19 +25,18 @@ public class ProfissionalModel
     public string? BancoNome { get; set; }
     public string? BancoAgencia { get; set; }
     public string? BancoConta { get; set; }
-    public string? BancoTipoConta { get; set; } // Ex: "Conta Corrente", "Conta Poupança"
-    public string? BancoCpfTitular { get; set; } // CPF do titular da conta para confirmação
+    public string? BancoTipoConta { get; set; } // Ex: "Conta Corrente", "Conta Poupanï¿½a"
+    public string? BancoCpfTitular { get; set; } // CPF do titular da conta para confirmaï¿½ï¿½o
 
     // Propriedade para controle de acesso
-    public bool EhUsuario { get; set; } = false; // Identifica se o profissional é um usuário do sistema
+    public bool EhUsuario { get; set; } = false; // Identifica se o profissional ï¿½ um usuï¿½rio do sistema
 
-    // Opcional: Data de cadastro para rastrear a criação do registro
+    public List<FichaAvaliacaoModel>? FichasAvaliacao { get; set; }
+
     private DateTime? _DataCadastro;
     public DateTime? DataCadastro 
     {
         get => _DataCadastro;
         set => _DataCadastro = value.HasValue ? DateTime.SpecifyKind(value.Value, DateTimeKind.Utc) : DateTime.UtcNow;
     }
-
-    public ICollection<FichaAvaliacaoModel>? FichasAvaliacao { get; set; }
 }

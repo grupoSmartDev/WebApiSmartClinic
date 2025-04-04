@@ -13,6 +13,8 @@ namespace WebApiSmartClinic.Services.Agenda
         Task<ResponseModel<List<AgendaModel>>> Criar(AgendaCreateDto agendaCreateDto);
         Task<ResponseModel<List<AgendaModel>>> CriarPeloPlano(AgendaCreateDto agendaCreateDto);
         Task<ResponseModel<List<AgendaModel>>> Editar(AgendaEdicaoDto agendaEdicaoDto);
+        Task<ResponseModel<List<AgendaModel>>> AtualizarStatus(int id, int satusNovo);
+        Task<ResponseModel<List<AgendaModel>>> Reagendar(int id, int statusNovo, DateTime dataNova, string horaInicioNovo, string horaFimNovo);
         Task<ResponseModel<List<ContadoresDashboard>>> ObterContadoresDashboard(int? profissionalId, DateTime? dataInicio = null, DateTime? dataFim = null);
     }
 }

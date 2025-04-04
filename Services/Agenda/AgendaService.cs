@@ -633,6 +633,117 @@ public class AgendaService : IAgendaInterface
             }
         };
     }
+
+    public async Task<ResponseModel<List<AgendaModel>>> AtualizarStatus(int id, int statusNovo)
+    {
+        ResponseModel<List<AgendaModel>> resposta = new ResponseModel<List<AgendaModel>>();
+        try
+        {
+            var agendaAlterada = _context.Agenda.FirstOrDefault(a => a.Id == id);
+            if (agendaAlterada == null)
+            {
+                resposta.Mensagem = "Agendamento não encontrado";
+                return resposta;
+            }
+
+            //1 Agendado
+            //2 Confirmado
+            //3 Em atendimento
+            //4 Concluído
+            //5 Cancelado pelo paciente
+            //6 Cancelado pela clínica
+            //7 Remarcado
+            //8 Não compareceu
+
+            if (statusNovo > 8)
+            {
+                var status = _context.Status.FirstOrDefaultAsync(a => a.Id ==  statusNovo);
+                if (status == null)
+                {
+                    resposta.Mensagem = "Status não encontrado";
+                    return resposta;
+
+                }
+
+            }
+
+            agendaAlterada.StatusId = statusNovo;
+
+            _context.Update(agendaAlterada);
+            await _context.SaveChangesAsync();
+
+            var listaAtualizada = await _context.Agenda.ToListAsync();
+
+            resposta.Dados =  listaAtualizada;
+            resposta.TotalCount = listaAtualizada.Count();
+            resposta.Mensagem = "Agendamento atualizado com sucesso!";
+            return resposta;
+        }
+        catch (Exception ex)
+        {
+            resposta.Status = false;
+            resposta.Mensagem = ex.Message;
+            return resposta;
+        }
+    }
+
+    public async Task<ResponseModel<List<AgendaModel>>> Reagendar(int id, int statusNovo, DateTime dataNova, string horaInicioNovo, string horaFimNovo)
+    {
+        ResponseModel<List<AgendaModel>> resposta = new ResponseModel<List<AgendaModel>>();
+        try
+        {
+            var agendaAlterada = _context.Agenda.FirstOrDefault(a => a.Id == id);
+            if (agendaAlterada == null)
+            {
+                resposta.Mensagem = "Agendamento não encontrado";
+                return resposta;
+            }
+
+            //1 Agendado
+            //2 Confirmado
+            //3 Em atendimento
+            //4 Concluído
+            //5 Cancelado pelo paciente
+            //6 Cancelado pela clínica
+            //7 Remarcado
+            //8 Não compareceu
+
+            if (statusNovo != 7)
+            {              
+                    resposta.Mensagem = "Status não encontrado";
+                    return resposta;
+             
+            }
+            agendaAlterada.Data = dataNova;
+            agendaAlterada.StatusId = statusNovo;
+
+            if (TimeSpan.TryParse(horaInicioNovo, out TimeSpan horaInicio))
+            {
+                agendaAlterada.HoraInicio = horaInicio;
+            }
+            if (TimeSpan.TryParse(horaFimNovo, out TimeSpan horaFim))
+            {
+                agendaAlterada.HoraFim = horaFim;
+            }
+
+
+            _context.Update(agendaAlterada);
+            await _context.SaveChangesAsync();
+
+            var listaAtualizada = await _context.Agenda.ToListAsync();
+
+            resposta.Dados = listaAtualizada;
+            resposta.TotalCount = listaAtualizada.Count();
+            resposta.Mensagem = "Agendamento atualizado com sucesso!";
+            return resposta;
+        }
+        catch (Exception ex)
+        {
+            resposta.Status = false;
+            resposta.Mensagem = ex.Message;
+            return resposta;
+        }
+    }
 }
 
 public class ContadoresDashboard

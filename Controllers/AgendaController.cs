@@ -44,6 +44,20 @@ namespace WebApiSmartClinic.Controllers
             return Ok(agenda);
         }
 
+        [HttpPut("AtualizarStatus")]
+        public async Task<ActionResult<ResponseModel<List<AgendaModel>>>> AtualizarStatus([FromQuery] int id, [FromQuery] int statusNovo)
+        {
+            var agenda = await _agenda.AtualizarStatus(id, statusNovo);
+            return Ok(agenda);
+        } 
+        
+        [HttpPut("Reagendar")]
+        public async Task<ActionResult<ResponseModel<List<AgendaModel>>>> Reagendar([FromQuery] int id, [FromQuery] int statusNovo, [FromQuery] DateTime dataNova, [FromQuery] string horaInicioNovo, [FromQuery] string horaFimNovo)
+        {
+            var agenda = await _agenda.Reagendar(id, statusNovo, dataNova, horaInicioNovo, horaFimNovo);
+            return Ok(agenda);
+        }
+
         [HttpDelete("Delete/{idAgenda}")]
         public async Task<ActionResult<ResponseModel<List<AgendaModel>>>> Delete(int idAgenda)
         {

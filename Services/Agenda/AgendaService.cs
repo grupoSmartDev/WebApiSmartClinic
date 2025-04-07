@@ -708,7 +708,9 @@ public class AgendaService : IAgendaInterface
             //7 Remarcado
             //8 Não compareceu
 
-            if (statusNovo != 7)
+            var consultaStatus = _context.Status.FirstOrDefaultAsync(s => s.Id == statusNovo);
+
+            if (consultaStatus == null)
             {              
                     resposta.Mensagem = "Status não encontrado";
                     return resposta;

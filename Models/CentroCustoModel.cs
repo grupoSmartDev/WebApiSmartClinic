@@ -11,4 +11,5 @@ public class CentroCustoModel
     //public List<SubCentroCustoModel> SubCentrosCusto { get; set; } = new List<SubCentroCustoModel>();
 
     public List<SubCentroCustoModel>? SubCentrosCusto { get; set; } = new List<SubCentroCustoModel>();
+    public bool IsSystemDefault { get; internal set; }
 }

@@ -6,4 +6,5 @@ public class StatusModel
   public string Status { get; set; }
   public string Legenda { get; set; }
   public string Cor { get; set; }
+    public bool IsSystemDefault { get; internal set; }
 }

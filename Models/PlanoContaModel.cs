@@ -10,6 +10,7 @@ namespace WebApiSmartClinic.Models
         public bool? Inativo { get; set; } = false; // Ativo, Inativo
         public string? Observacao { get; set; } // Observações sobre o plano
         public ICollection<PlanoContaSubModel>? SubPlanos { get; set; } = new List<PlanoContaSubModel>(); // Subcontas associadas
+        public bool IsSystemDefault { get; internal set; }
     }
 
     public class PlanoContaSubModel

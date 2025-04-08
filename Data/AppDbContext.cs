@@ -78,6 +78,67 @@ public class AppDbContext : IdentityDbContext<User>
             new IdentityRole { Id = "3", Name = "Admin", NormalizedName = "ADMIN" }
         };
 
+        modelBuilder.Entity<ConselhoModel>().HasData(
+            new ConselhoModel { Id = 1, Nome = "Conselho Regional de Fisioterapia e Terapia Ocupacional", Sigla = "CREFITO", IsSystemDefault = true },
+            new ConselhoModel { Id = 2, Nome = "Conselho Federal de Psicologia", Sigla = "CFP", IsSystemDefault = true }
+        );
+
+        modelBuilder.Entity<ProfissaoModel>().HasData(
+            new ProfissaoModel { Id = 1, Descricao = "Administrador(a)", IsSystemDefault = true },
+            new ProfissaoModel { Id = 2, Descricao = "psicólogo(a)", IsSystemDefault = true },
+            new ProfissaoModel { Id = 3, Descricao = "Fisioterapeuta", IsSystemDefault = true },
+            new ProfissaoModel { Id = 4, Descricao = "Dentista", IsSystemDefault = true }
+        );
+
+        modelBuilder.Entity<StatusModel>().HasData(
+            new StatusModel { Id = 1, Cor = "#4B89DC", Legenda = "Agendamento realizado com sucesso!", Status = "Agendado", IsSystemDefault = true },
+            new StatusModel { Id = 2, Cor = "#3498DB", Legenda = "Confirmado", Status = "Confirmado", IsSystemDefault = true },
+            new StatusModel { Id = 3, Cor = "#5D9CEC", Legenda = "Em atendimento", Status = "em_atendimento", IsSystemDefault = true },
+            new StatusModel { Id = 4, Cor = "#2ECC71", Legenda = "Concluído", Status = "concluido", IsSystemDefault = true },
+            new StatusModel { Id = 5, Cor = "#E74C3C", Legenda = "Cancelado pelo paciente", Status = "cancelado_paciente", IsSystemDefault = true },
+            new StatusModel { Id = 6, Cor = "#E57373", Legenda = "Cancelado pela clínica", Status = "cancelado_clinica", IsSystemDefault = true },
+            new StatusModel { Id = 7, Cor = "#F9A825", Legenda = "Remarcado", Status = "remarcado", IsSystemDefault = true },
+            new StatusModel { Id = 8, Cor = "#E67E22", Legenda = "Não compareceu", Status = "nao_compareceu", IsSystemDefault = true }
+        );
+
+        modelBuilder.Entity<FormaPagamentoModel>().HasData(
+            new FormaPagamentoModel { Id = 1, Descricao = "Dinheiro", Parcelas = 1, IsSystemDefault = true },
+            new FormaPagamentoModel { Id = 2, Descricao = "Cartão de Crédito", Parcelas = 1, IsSystemDefault = true },
+            new FormaPagamentoModel { Id = 3, Descricao = "Cartão de Débito", Parcelas = 1, IsSystemDefault = true },
+            new FormaPagamentoModel { Id = 4, Descricao = "Boleto", Parcelas = 1, IsSystemDefault = true },
+            new FormaPagamentoModel { Id = 5, Descricao = "Pix", Parcelas = 1, IsSystemDefault = true },
+            new FormaPagamentoModel { Id = 6, Descricao = "Depósito", Parcelas = 1, IsSystemDefault = true }
+        );
+
+        modelBuilder.Entity<TipoPagamentoModel>().HasData(
+            new TipoPagamentoModel { Id = 1, Descricao = "À Vista", IsSystemDefault = true },
+            new TipoPagamentoModel { Id = 2, Descricao = "Parcelado", IsSystemDefault = true },
+            new TipoPagamentoModel { Id = 3, Descricao = "Convênio", IsSystemDefault = true },
+            new TipoPagamentoModel { Id = 4, Descricao = "Recorrente", IsSystemDefault = true }
+        );
+
+        modelBuilder.Entity<SalaModel>().HasData(
+        new SalaModel { Id = 1, Nome = "Principal", Capacidade = 10, Tipo = "Geral", local = "Principal", Status = "Ativo", IsSystemDefault = true }
+    );
+
+
+        modelBuilder.Entity<ConvenioModel>().HasData(
+            new ConvenioModel { Id = 1, Nome = "Unimed", PeriodoCarencia = "0", Ativo = true, RegistroAvs = "ABC", Telefone = "3434-3434", Email = "email@email.com", IsSystemDefault = true }
+        );
+
+
+        modelBuilder.Entity<CentroCustoModel>().HasData(
+            new CentroCustoModel { Id = 1, Descricao = "Geral - Receita", Tipo = "R", IsSystemDefault = true },
+            new CentroCustoModel { Id = 2, Descricao = "Geral - Despesa", Tipo = "D", IsSystemDefault = true }
+        );
+
+        modelBuilder.Entity<PlanoContaModel>().HasData(
+        new PlanoContaModel { Id = 1, Nome = "Geral - Ativo", Tipo = "A", Codigo = "1", IsSystemDefault = true },
+        new PlanoContaModel { Id = 2, Nome = "Geral - Passívo", Tipo = "P", Codigo = "2",IsSystemDefault = true },
+        new PlanoContaModel { Id = 3, Nome = "Geral - Receita", Tipo = "R", Codigo = "3",IsSystemDefault = true },
+        new PlanoContaModel { Id = 4, Nome = "Geral - Despesa", Tipo = "D", Codigo = "4", IsSystemDefault = true }
+    );
+
         modelBuilder.Entity<IdentityRole>().HasData(roles);
 
         modelBuilder.Entity<PlanoModel>()

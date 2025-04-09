@@ -120,8 +120,8 @@ public class AppDbContext : IdentityDbContext<User>
         );
 
         modelBuilder.Entity<SalaModel>().HasData(
-        new SalaModel { Id = 1, Nome = "Principal", Capacidade = 10, Tipo = "Geral", local = "Principal", Status = "Ativo", IsSystemDefault = true }
-    );
+            new SalaModel { Id = 1, Nome = "Principal", Capacidade = 10, Tipo = "Geral", local = "Principal", Status = "Ativo", IsSystemDefault = true }
+        );
 
 
         modelBuilder.Entity<ConvenioModel>().HasData(
@@ -135,13 +135,11 @@ public class AppDbContext : IdentityDbContext<User>
         );
 
         modelBuilder.Entity<PlanoContaModel>().HasData(
-        new PlanoContaModel { Id = 1, Nome = "Geral - Ativo", Tipo = "A", Codigo = "1", IsSystemDefault = true },
-        new PlanoContaModel { Id = 2, Nome = "Geral - Passívo", Tipo = "P", Codigo = "2",IsSystemDefault = true },
-        new PlanoContaModel { Id = 3, Nome = "Geral - Receita", Tipo = "R", Codigo = "3",IsSystemDefault = true },
-        new PlanoContaModel { Id = 4, Nome = "Geral - Despesa", Tipo = "D", Codigo = "4", IsSystemDefault = true }
-    );
-
-        modelBuilder.Entity<IdentityRole>().HasData(roles);
+            new PlanoContaModel { Id = 1, Nome = "Geral - Ativo", Tipo = "A", Codigo = "1", IsSystemDefault = true },
+            new PlanoContaModel { Id = 2, Nome = "Geral - Passívo", Tipo = "P", Codigo = "2", IsSystemDefault = true },
+            new PlanoContaModel { Id = 3, Nome = "Geral - Receita", Tipo = "R", Codigo = "3", IsSystemDefault = true },
+            new PlanoContaModel { Id = 4, Nome = "Geral - Despesa", Tipo = "D", Codigo = "4", IsSystemDefault = true }
+        );
 
         modelBuilder.Entity<PlanoModel>()
           .HasOne(p => p.Paciente)
@@ -215,7 +213,7 @@ public class AppDbContext : IdentityDbContext<User>
             .WithOne(s => s.FinancPagar)
             .HasForeignKey(s => s.financPagarId);
 
-            
+
 
         // Relacionamento: PlanoConta -> SubPlanoConta
         modelBuilder.Entity<PlanoContaModel>()
@@ -268,6 +266,4 @@ public class AppDbContext : IdentityDbContext<User>
                 .HasForeignKey(s => s.FormaPagamentoId);
         });
     }
-
-
 }

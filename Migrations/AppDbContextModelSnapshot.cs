@@ -2,21 +2,18 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
-using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using WebApiSmartClinic.Data;
 
 #nullable disable
 
-namespace WebApiSmartClinic.Migrations.AppDb
+namespace WebApiSmartClinic.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250329130846_removerPorrasf")]
-    partial class removerPorrasf
+    partial class AppDbContextModelSnapshot : ModelSnapshot
     {
-        /// <inheritdoc />
-        protected override void BuildTargetModel(ModelBuilder modelBuilder)
+        protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -197,9 +194,6 @@ namespace WebApiSmartClinic.Migrations.AppDb
                     b.Property<int?>("PacienteId")
                         .HasColumnType("integer");
 
-                    b.Property<int?>("PacienteModelId")
-                        .HasColumnType("integer");
-
                     b.Property<int?>("ProfissionalId")
                         .HasColumnType("integer");
 
@@ -208,7 +202,7 @@ namespace WebApiSmartClinic.Migrations.AppDb
 
                     b.HasKey("Id");
 
-                    b.HasIndex("PacienteModelId");
+                    b.HasIndex("PacienteId");
 
                     b.ToTable("RecorrenciaPacienteDto");
                 });
@@ -601,6 +595,9 @@ namespace WebApiSmartClinic.Migrations.AppDb
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<bool>("IsSystemDefault")
+                        .HasColumnType("boolean");
+
                     b.Property<string>("Tipo")
                         .IsRequired()
                         .HasColumnType("text");
@@ -608,6 +605,22 @@ namespace WebApiSmartClinic.Migrations.AppDb
                     b.HasKey("Id");
 
                     b.ToTable("CentroCusto");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Descricao = "Geral - Receita",
+                            IsSystemDefault = true,
+                            Tipo = "R"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Descricao = "Geral - Despesa",
+                            IsSystemDefault = true,
+                            Tipo = "D"
+                        });
                 });
 
             modelBuilder.Entity("WebApiSmartClinic.Models.ComissaoModel", b =>
@@ -659,6 +672,9 @@ namespace WebApiSmartClinic.Migrations.AppDb
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
+                    b.Property<bool>("IsSystemDefault")
+                        .HasColumnType("boolean");
+
                     b.Property<string>("Nome")
                         .IsRequired()
                         .HasColumnType("text");
@@ -670,6 +686,22 @@ namespace WebApiSmartClinic.Migrations.AppDb
                     b.HasKey("Id");
 
                     b.ToTable("Conselho");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            IsSystemDefault = true,
+                            Nome = "Conselho Regional de Fisioterapia e Terapia Ocupacional",
+                            Sigla = "CREFITO"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            IsSystemDefault = true,
+                            Nome = "Conselho Federal de Psicologia",
+                            Sigla = "CFP"
+                        });
                 });
 
             modelBuilder.Entity("WebApiSmartClinic.Models.ConvenioModel", b =>
@@ -686,6 +718,9 @@ namespace WebApiSmartClinic.Migrations.AppDb
                     b.Property<string>("Email")
                         .IsRequired()
                         .HasColumnType("text");
+
+                    b.Property<bool>("IsSystemDefault")
+                        .HasColumnType("boolean");
 
                     b.Property<string>("Nome")
                         .IsRequired()
@@ -706,6 +741,19 @@ namespace WebApiSmartClinic.Migrations.AppDb
                     b.HasKey("Id");
 
                     b.ToTable("Convenio");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Ativo = true,
+                            Email = "email@email.com",
+                            IsSystemDefault = true,
+                            Nome = "Unimed",
+                            PeriodoCarencia = "0",
+                            RegistroAvs = "ABC",
+                            Telefone = "3434-3434"
+                        });
                 });
 
             modelBuilder.Entity("WebApiSmartClinic.Models.DespesaFixaModel", b =>
@@ -1243,12 +1291,59 @@ namespace WebApiSmartClinic.Migrations.AppDb
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<bool>("IsSystemDefault")
+                        .HasColumnType("boolean");
+
                     b.Property<int>("Parcelas")
                         .HasColumnType("integer");
 
                     b.HasKey("Id");
 
                     b.ToTable("FormaPagamento");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Descricao = "Dinheiro",
+                            IsSystemDefault = true,
+                            Parcelas = 1
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Descricao = "Cartão de Crédito",
+                            IsSystemDefault = true,
+                            Parcelas = 1
+                        },
+                        new
+                        {
+                            Id = 3,
+                            Descricao = "Cartão de Débito",
+                            IsSystemDefault = true,
+                            Parcelas = 1
+                        },
+                        new
+                        {
+                            Id = 4,
+                            Descricao = "Boleto",
+                            IsSystemDefault = true,
+                            Parcelas = 1
+                        },
+                        new
+                        {
+                            Id = 5,
+                            Descricao = "Pix",
+                            IsSystemDefault = true,
+                            Parcelas = 1
+                        },
+                        new
+                        {
+                            Id = 6,
+                            Descricao = "Depósito",
+                            IsSystemDefault = true,
+                            Parcelas = 1
+                        });
                 });
 
             modelBuilder.Entity("WebApiSmartClinic.Models.FornecedorModel", b =>
@@ -1600,6 +1695,9 @@ namespace WebApiSmartClinic.Migrations.AppDb
                     b.Property<bool?>("Inativo")
                         .HasColumnType("boolean");
 
+                    b.Property<bool>("IsSystemDefault")
+                        .HasColumnType("boolean");
+
                     b.Property<string>("Nome")
                         .IsRequired()
                         .HasColumnType("text");
@@ -1614,6 +1712,44 @@ namespace WebApiSmartClinic.Migrations.AppDb
                     b.HasKey("Id");
 
                     b.ToTable("PlanoConta");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Codigo = "1",
+                            Inativo = false,
+                            IsSystemDefault = true,
+                            Nome = "Geral - Ativo",
+                            Tipo = "A"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Codigo = "2",
+                            Inativo = false,
+                            IsSystemDefault = true,
+                            Nome = "Geral - Passívo",
+                            Tipo = "P"
+                        },
+                        new
+                        {
+                            Id = 3,
+                            Codigo = "3",
+                            Inativo = false,
+                            IsSystemDefault = true,
+                            Nome = "Geral - Receita",
+                            Tipo = "R"
+                        },
+                        new
+                        {
+                            Id = 4,
+                            Codigo = "4",
+                            Inativo = false,
+                            IsSystemDefault = true,
+                            Nome = "Geral - Despesa",
+                            Tipo = "D"
+                        });
                 });
 
             modelBuilder.Entity("WebApiSmartClinic.Models.PlanoContaSubModel", b =>
@@ -1769,9 +1905,38 @@ namespace WebApiSmartClinic.Migrations.AppDb
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<bool>("IsSystemDefault")
+                        .HasColumnType("boolean");
+
                     b.HasKey("Id");
 
                     b.ToTable("Profissao");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Descricao = "Administrador(a)",
+                            IsSystemDefault = true
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Descricao = "psicólogo(a)",
+                            IsSystemDefault = true
+                        },
+                        new
+                        {
+                            Id = 3,
+                            Descricao = "Fisioterapeuta",
+                            IsSystemDefault = true
+                        },
+                        new
+                        {
+                            Id = 4,
+                            Descricao = "Dentista",
+                            IsSystemDefault = true
+                        });
                 });
 
             modelBuilder.Entity("WebApiSmartClinic.Models.ProfissionalModel", b =>
@@ -1902,32 +2067,42 @@ namespace WebApiSmartClinic.Migrations.AppDb
                         .HasColumnType("integer");
 
                     b.Property<string>("HorarioFincionamento")
-                        .IsRequired()
                         .HasColumnType("text");
+
+                    b.Property<bool>("IsSystemDefault")
+                        .HasColumnType("boolean");
 
                     b.Property<string>("Nome")
                         .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("Observacao")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("Status")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("Tipo")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("local")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.HasKey("Id");
 
                     b.ToTable("Sala");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Capacidade = 10,
+                            IsSystemDefault = true,
+                            Nome = "Principal",
+                            Status = "Ativo",
+                            Tipo = "Geral",
+                            local = "Principal"
+                        });
                 });
 
             modelBuilder.Entity("WebApiSmartClinic.Models.StatusModel", b =>
@@ -1942,6 +2117,9 @@ namespace WebApiSmartClinic.Migrations.AppDb
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<bool>("IsSystemDefault")
+                        .HasColumnType("boolean");
+
                     b.Property<string>("Legenda")
                         .IsRequired()
                         .HasColumnType("text");
@@ -1953,6 +2131,72 @@ namespace WebApiSmartClinic.Migrations.AppDb
                     b.HasKey("Id");
 
                     b.ToTable("Status");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Cor = "#4B89DC",
+                            IsSystemDefault = true,
+                            Legenda = "Agendamento realizado com sucesso!",
+                            Status = "Agendado"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Cor = "#3498DB",
+                            IsSystemDefault = true,
+                            Legenda = "Confirmado",
+                            Status = "Confirmado"
+                        },
+                        new
+                        {
+                            Id = 3,
+                            Cor = "#5D9CEC",
+                            IsSystemDefault = true,
+                            Legenda = "Em atendimento",
+                            Status = "em_atendimento"
+                        },
+                        new
+                        {
+                            Id = 4,
+                            Cor = "#2ECC71",
+                            IsSystemDefault = true,
+                            Legenda = "Concluído",
+                            Status = "concluido"
+                        },
+                        new
+                        {
+                            Id = 5,
+                            Cor = "#E74C3C",
+                            IsSystemDefault = true,
+                            Legenda = "Cancelado pelo paciente",
+                            Status = "cancelado_paciente"
+                        },
+                        new
+                        {
+                            Id = 6,
+                            Cor = "#E57373",
+                            IsSystemDefault = true,
+                            Legenda = "Cancelado pela clínica",
+                            Status = "cancelado_clinica"
+                        },
+                        new
+                        {
+                            Id = 7,
+                            Cor = "#F9A825",
+                            IsSystemDefault = true,
+                            Legenda = "Remarcado",
+                            Status = "remarcado"
+                        },
+                        new
+                        {
+                            Id = 8,
+                            Cor = "#E67E22",
+                            IsSystemDefault = true,
+                            Legenda = "Não compareceu",
+                            Status = "nao_compareceu"
+                        });
                 });
 
             modelBuilder.Entity("WebApiSmartClinic.Models.SubCentroCustoModel", b =>
@@ -1988,9 +2232,38 @@ namespace WebApiSmartClinic.Migrations.AppDb
                     b.Property<string>("Descricao")
                         .HasColumnType("text");
 
+                    b.Property<bool>("IsSystemDefault")
+                        .HasColumnType("boolean");
+
                     b.HasKey("Id");
 
                     b.ToTable("TipoPagamento");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Descricao = "À Vista",
+                            IsSystemDefault = true
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Descricao = "Parcelado",
+                            IsSystemDefault = true
+                        },
+                        new
+                        {
+                            Id = 3,
+                            Descricao = "Convênio",
+                            IsSystemDefault = true
+                        },
+                        new
+                        {
+                            Id = 4,
+                            Descricao = "Recorrente",
+                            IsSystemDefault = true
+                        });
                 });
 
             modelBuilder.Entity("WebApiSmartClinic.Models.User", b =>
@@ -2174,9 +2447,11 @@ namespace WebApiSmartClinic.Migrations.AppDb
 
             modelBuilder.Entity("WebApiSmartClinic.Dto.Paciente.RecorrenciaPacienteDto", b =>
                 {
-                    b.HasOne("WebApiSmartClinic.Models.PacienteModel", null)
+                    b.HasOne("WebApiSmartClinic.Models.PacienteModel", "Paciente")
                         .WithMany("Recorrencias")
-                        .HasForeignKey("PacienteModelId");
+                        .HasForeignKey("PacienteId");
+
+                    b.Navigation("Paciente");
                 });
 
             modelBuilder.Entity("WebApiSmartClinic.Models.AgendaModel", b =>
@@ -2308,7 +2583,8 @@ namespace WebApiSmartClinic.Migrations.AppDb
                 {
                     b.HasOne("WebApiSmartClinic.Models.PacienteModel", "Paciente")
                         .WithOne("FichaAvaliacao")
-                        .HasForeignKey("WebApiSmartClinic.Models.FichaAvaliacaoModel", "PacienteId");
+                        .HasForeignKey("WebApiSmartClinic.Models.FichaAvaliacaoModel", "PacienteId")
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.HasOne("WebApiSmartClinic.Models.ProfissionalModel", "Profissional")
                         .WithMany("FichasAvaliacao")

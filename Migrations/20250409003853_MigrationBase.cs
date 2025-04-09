@@ -6,10 +6,10 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #pragma warning disable CA1814 // Prefer jagged arrays over multidimensional
 
-namespace WebApiSmartClinic.Migrations.AppDb
+namespace WebApiSmartClinic.Migrations
 {
     /// <inheritdoc />
-    public partial class migration_base2 : Migration
+    public partial class MigrationBase : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -118,7 +118,8 @@ namespace WebApiSmartClinic.Migrations.AppDb
                     Id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     Tipo = table.Column<string>(type: "text", nullable: false),
-                    Descricao = table.Column<string>(type: "text", nullable: false)
+                    Descricao = table.Column<string>(type: "text", nullable: false),
+                    IsSystemDefault = table.Column<bool>(type: "boolean", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -132,7 +133,8 @@ namespace WebApiSmartClinic.Migrations.AppDb
                     Id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     Nome = table.Column<string>(type: "text", nullable: false),
-                    Sigla = table.Column<string>(type: "text", nullable: false)
+                    Sigla = table.Column<string>(type: "text", nullable: false),
+                    IsSystemDefault = table.Column<bool>(type: "boolean", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -150,7 +152,8 @@ namespace WebApiSmartClinic.Migrations.AppDb
                     PeriodoCarencia = table.Column<string>(type: "text", nullable: false),
                     Telefone = table.Column<string>(type: "text", nullable: false),
                     Email = table.Column<string>(type: "text", nullable: false),
-                    Ativo = table.Column<bool>(type: "boolean", nullable: false)
+                    Ativo = table.Column<bool>(type: "boolean", nullable: false),
+                    IsSystemDefault = table.Column<bool>(type: "boolean", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -178,7 +181,8 @@ namespace WebApiSmartClinic.Migrations.AppDb
                     Id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     Parcelas = table.Column<int>(type: "integer", nullable: false),
-                    Descricao = table.Column<string>(type: "text", nullable: false)
+                    Descricao = table.Column<string>(type: "text", nullable: false),
+                    IsSystemDefault = table.Column<bool>(type: "boolean", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -235,7 +239,8 @@ namespace WebApiSmartClinic.Migrations.AppDb
                     Nome = table.Column<string>(type: "text", nullable: false),
                     Tipo = table.Column<string>(type: "text", nullable: false),
                     Inativo = table.Column<bool>(type: "boolean", nullable: true),
-                    Observacao = table.Column<string>(type: "text", nullable: true)
+                    Observacao = table.Column<string>(type: "text", nullable: true),
+                    IsSystemDefault = table.Column<bool>(type: "boolean", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -248,7 +253,8 @@ namespace WebApiSmartClinic.Migrations.AppDb
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    Descricao = table.Column<string>(type: "text", nullable: false)
+                    Descricao = table.Column<string>(type: "text", nullable: false),
+                    IsSystemDefault = table.Column<bool>(type: "boolean", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -263,7 +269,7 @@ namespace WebApiSmartClinic.Migrations.AppDb
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     Email = table.Column<string>(type: "text", nullable: false),
                     Nome = table.Column<string>(type: "text", nullable: false),
-                    Sobrenome = table.Column<string>(type: "text", nullable: false),
+                    Sobrenome = table.Column<string>(type: "text", nullable: true),
                     Password = table.Column<string>(type: "text", nullable: true),
                     Cpf = table.Column<string>(type: "text", nullable: true),
                     Celular = table.Column<string>(type: "text", nullable: false),
@@ -282,7 +288,7 @@ namespace WebApiSmartClinic.Migrations.AppDb
                     BancoConta = table.Column<string>(type: "text", nullable: true),
                     BancoTipoConta = table.Column<string>(type: "text", nullable: true),
                     BancoCpfTitular = table.Column<string>(type: "text", nullable: true),
-                    EhUsuario = table.Column<bool>(type: "boolean", nullable: false),
+                    EhUsuario = table.Column<bool>(type: "boolean", nullable: true),
                     DataCadastro = table.Column<DateTime>(type: "timestamp with time zone", nullable: true)
                 },
                 constraints: table =>
@@ -316,11 +322,12 @@ namespace WebApiSmartClinic.Migrations.AppDb
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     Nome = table.Column<string>(type: "text", nullable: false),
                     Capacidade = table.Column<int>(type: "integer", nullable: false),
-                    Tipo = table.Column<string>(type: "text", nullable: false),
-                    local = table.Column<string>(type: "text", nullable: false),
-                    Status = table.Column<string>(type: "text", nullable: false),
-                    HorarioFincionamento = table.Column<string>(type: "text", nullable: false),
-                    Observacao = table.Column<string>(type: "text", nullable: false)
+                    Tipo = table.Column<string>(type: "text", nullable: true),
+                    local = table.Column<string>(type: "text", nullable: true),
+                    Status = table.Column<string>(type: "text", nullable: true),
+                    HorarioFincionamento = table.Column<string>(type: "text", nullable: true),
+                    Observacao = table.Column<string>(type: "text", nullable: true),
+                    IsSystemDefault = table.Column<bool>(type: "boolean", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -335,7 +342,8 @@ namespace WebApiSmartClinic.Migrations.AppDb
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     Status = table.Column<string>(type: "text", nullable: false),
                     Legenda = table.Column<string>(type: "text", nullable: false),
-                    Cor = table.Column<string>(type: "text", nullable: false)
+                    Cor = table.Column<string>(type: "text", nullable: false),
+                    IsSystemDefault = table.Column<bool>(type: "boolean", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -348,7 +356,8 @@ namespace WebApiSmartClinic.Migrations.AppDb
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    Descricao = table.Column<string>(type: "text", nullable: true)
+                    Descricao = table.Column<string>(type: "text", nullable: true),
+                    IsSystemDefault = table.Column<bool>(type: "boolean", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -559,6 +568,44 @@ namespace WebApiSmartClinic.Migrations.AppDb
                 });
 
             migrationBuilder.CreateTable(
+                name: "DespesasFixas",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    Descricao = table.Column<string>(type: "character varying(150)", maxLength: 150, nullable: false),
+                    Valor = table.Column<decimal>(type: "numeric(18,2)", nullable: false),
+                    DiaVencimento = table.Column<int>(type: "integer", nullable: false),
+                    DataInicio = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    DataFim = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    Ativo = table.Column<bool>(type: "boolean", nullable: true),
+                    Categoria = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
+                    Frequencia = table.Column<int>(type: "integer", nullable: false),
+                    FornecedorId = table.Column<int>(type: "integer", nullable: true),
+                    PlanoContaId = table.Column<int>(type: "integer", nullable: true),
+                    CentroCustoId = table.Column<int>(type: "integer", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_DespesasFixas", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_DespesasFixas_CentroCusto_CentroCustoId",
+                        column: x => x.CentroCustoId,
+                        principalTable: "CentroCusto",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_DespesasFixas_Fornecedor_FornecedorId",
+                        column: x => x.FornecedorId,
+                        principalTable: "Fornecedor",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_DespesasFixas_PlanoConta_PlanoContaId",
+                        column: x => x.PlanoContaId,
+                        principalTable: "PlanoConta",
+                        principalColumn: "Id");
+                });
+
+            migrationBuilder.CreateTable(
                 name: "PlanoContaSub",
                 columns: table => new
                 {
@@ -752,7 +799,7 @@ namespace WebApiSmartClinic.Migrations.AppDb
                     ProfissionalId = table.Column<int>(type: "integer", nullable: true),
                     Convenio = table.Column<bool>(type: "boolean", nullable: false),
                     Valor = table.Column<decimal>(type: "numeric", nullable: true),
-                    FormaPagamento = table.Column<string>(type: "text", nullable: false),
+                    FormaPagamento = table.Column<string>(type: "text", nullable: true),
                     Pago = table.Column<bool>(type: "boolean", nullable: false),
                     FinancReceberId = table.Column<int>(type: "integer", nullable: true),
                     SalaId = table.Column<int>(type: "integer", nullable: true),
@@ -762,6 +809,7 @@ namespace WebApiSmartClinic.Migrations.AppDb
                     LembreteEmail = table.Column<bool>(type: "boolean", nullable: false),
                     StatusId = table.Column<int>(type: "integer", nullable: true),
                     IntegracaoGmail = table.Column<bool>(type: "boolean", nullable: false),
+                    Avulso = table.Column<bool>(type: "boolean", nullable: false),
                     StatusFinal = table.Column<bool>(type: "boolean", nullable: false),
                     DiasRecorrencia = table.Column<int[]>(type: "integer[]", nullable: true)
                 },
@@ -911,7 +959,8 @@ namespace WebApiSmartClinic.Migrations.AppDb
                     PacienteId = table.Column<int>(type: "integer", nullable: true),
                     FornecedorId = table.Column<int>(type: "integer", nullable: true),
                     CentroCustoId = table.Column<int>(type: "integer", nullable: true),
-                    BancoId = table.Column<int>(type: "integer", nullable: true)
+                    BancoId = table.Column<int>(type: "integer", nullable: true),
+                    PlanoContaId = table.Column<int>(type: "integer", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -931,6 +980,11 @@ namespace WebApiSmartClinic.Migrations.AppDb
                         column: x => x.FornecedorId,
                         principalTable: "Fornecedor",
                         principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_Financ_Pagar_PlanoConta_PlanoContaId",
+                        column: x => x.PlanoContaId,
+                        principalTable: "PlanoConta",
+                        principalColumn: "Id");
                 });
 
             migrationBuilder.CreateTable(
@@ -946,6 +1000,7 @@ namespace WebApiSmartClinic.Migrations.AppDb
                     Desconto = table.Column<decimal>(type: "numeric", nullable: true),
                     Juros = table.Column<decimal>(type: "numeric", nullable: true),
                     Multa = table.Column<decimal>(type: "numeric", nullable: true),
+                    DespesaFixaId = table.Column<int>(type: "integer", nullable: true),
                     TipoPagamentoId = table.Column<int>(type: "integer", nullable: true),
                     FormaPagamentoId = table.Column<int>(type: "integer", nullable: true),
                     DataPagamento = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
@@ -955,6 +1010,11 @@ namespace WebApiSmartClinic.Migrations.AppDb
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Financ_PagarSub", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Financ_PagarSub_DespesasFixas_DespesaFixaId",
+                        column: x => x.DespesaFixaId,
+                        principalTable: "DespesasFixas",
+                        principalColumn: "Id");
                     table.ForeignKey(
                         name: "FK_Financ_PagarSub_Financ_Pagar_financPagarId",
                         column: x => x.financPagarId,
@@ -1156,15 +1216,14 @@ namespace WebApiSmartClinic.Migrations.AppDb
                     HoraInicio = table.Column<string>(type: "text", nullable: true),
                     HoraFim = table.Column<string>(type: "text", nullable: true),
                     ProfissionalId = table.Column<int>(type: "integer", nullable: true),
-                    SalaId = table.Column<int>(type: "integer", nullable: true),
-                    PacienteModelId = table.Column<int>(type: "integer", nullable: true)
+                    SalaId = table.Column<int>(type: "integer", nullable: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_RecorrenciaPacienteDto", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_RecorrenciaPacienteDto_Paciente_PacienteModelId",
-                        column: x => x.PacienteModelId,
+                        name: "FK_RecorrenciaPacienteDto_Paciente_PacienteId",
+                        column: x => x.PacienteId,
                         principalTable: "Paciente",
                         principalColumn: "Id");
                 });
@@ -1177,6 +1236,95 @@ namespace WebApiSmartClinic.Migrations.AppDb
                     { "1", null, "User", "USER" },
                     { "2", null, "Support", "SUPPORT" },
                     { "3", null, "Admin", "ADMIN" }
+                });
+
+            migrationBuilder.InsertData(
+                table: "CentroCusto",
+                columns: new[] { "Id", "Descricao", "IsSystemDefault", "Tipo" },
+                values: new object[,]
+                {
+                    { 1, "Geral - Receita", true, "R" },
+                    { 2, "Geral - Despesa", true, "D" }
+                });
+
+            migrationBuilder.InsertData(
+                table: "Conselho",
+                columns: new[] { "Id", "IsSystemDefault", "Nome", "Sigla" },
+                values: new object[,]
+                {
+                    { 1, true, "Conselho Regional de Fisioterapia e Terapia Ocupacional", "CREFITO" },
+                    { 2, true, "Conselho Federal de Psicologia", "CFP" }
+                });
+
+            migrationBuilder.InsertData(
+                table: "Convenio",
+                columns: new[] { "Id", "Ativo", "Email", "IsSystemDefault", "Nome", "PeriodoCarencia", "RegistroAvs", "Telefone" },
+                values: new object[] { 1, true, "email@email.com", true, "Unimed", "0", "ABC", "3434-3434" });
+
+            migrationBuilder.InsertData(
+                table: "FormaPagamento",
+                columns: new[] { "Id", "Descricao", "IsSystemDefault", "Parcelas" },
+                values: new object[,]
+                {
+                    { 1, "Dinheiro", true, 1 },
+                    { 2, "Cartão de Crédito", true, 1 },
+                    { 3, "Cartão de Débito", true, 1 },
+                    { 4, "Boleto", true, 1 },
+                    { 5, "Pix", true, 1 },
+                    { 6, "Depósito", true, 1 }
+                });
+
+            migrationBuilder.InsertData(
+                table: "PlanoConta",
+                columns: new[] { "Id", "Codigo", "Inativo", "IsSystemDefault", "Nome", "Observacao", "Tipo" },
+                values: new object[,]
+                {
+                    { 1, "1", false, true, "Geral - Ativo", null, "A" },
+                    { 2, "2", false, true, "Geral - Passívo", null, "P" },
+                    { 3, "3", false, true, "Geral - Receita", null, "R" },
+                    { 4, "4", false, true, "Geral - Despesa", null, "D" }
+                });
+
+            migrationBuilder.InsertData(
+                table: "Profissao",
+                columns: new[] { "Id", "Descricao", "IsSystemDefault" },
+                values: new object[,]
+                {
+                    { 1, "Administrador(a)", true },
+                    { 2, "psicólogo(a)", true },
+                    { 3, "Fisioterapeuta", true },
+                    { 4, "Dentista", true }
+                });
+
+            migrationBuilder.InsertData(
+                table: "Sala",
+                columns: new[] { "Id", "Capacidade", "HorarioFincionamento", "IsSystemDefault", "Nome", "Observacao", "Status", "Tipo", "local" },
+                values: new object[] { 1, 10, null, true, "Principal", null, "Ativo", "Geral", "Principal" });
+
+            migrationBuilder.InsertData(
+                table: "Status",
+                columns: new[] { "Id", "Cor", "IsSystemDefault", "Legenda", "Status" },
+                values: new object[,]
+                {
+                    { 1, "#4B89DC", true, "Agendamento realizado com sucesso!", "Agendado" },
+                    { 2, "#3498DB", true, "Confirmado", "Confirmado" },
+                    { 3, "#5D9CEC", true, "Em atendimento", "em_atendimento" },
+                    { 4, "#2ECC71", true, "Concluído", "concluido" },
+                    { 5, "#E74C3C", true, "Cancelado pelo paciente", "cancelado_paciente" },
+                    { 6, "#E57373", true, "Cancelado pela clínica", "cancelado_clinica" },
+                    { 7, "#F9A825", true, "Remarcado", "remarcado" },
+                    { 8, "#E67E22", true, "Não compareceu", "nao_compareceu" }
+                });
+
+            migrationBuilder.InsertData(
+                table: "TipoPagamento",
+                columns: new[] { "Id", "Descricao", "IsSystemDefault" },
+                values: new object[,]
+                {
+                    { 1, "À Vista", true },
+                    { 2, "Parcelado", true },
+                    { 3, "Convênio", true },
+                    { 4, "Recorrente", true }
                 });
 
             migrationBuilder.CreateIndex(
@@ -1267,6 +1415,21 @@ namespace WebApiSmartClinic.Migrations.AppDb
                 column: "ProfissionalId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_DespesasFixas_CentroCustoId",
+                table: "DespesasFixas",
+                column: "CentroCustoId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_DespesasFixas_FornecedorId",
+                table: "DespesasFixas",
+                column: "FornecedorId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_DespesasFixas_PlanoContaId",
+                table: "DespesasFixas",
+                column: "PlanoContaId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Evolucoes_PacienteId",
                 table: "Evolucoes",
                 column: "PacienteId");
@@ -1306,6 +1469,16 @@ namespace WebApiSmartClinic.Migrations.AppDb
                 name: "IX_Financ_Pagar_PacienteId",
                 table: "Financ_Pagar",
                 column: "PacienteId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Financ_Pagar_PlanoContaId",
+                table: "Financ_Pagar",
+                column: "PlanoContaId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Financ_PagarSub_DespesaFixaId",
+                table: "Financ_PagarSub",
+                column: "DespesaFixaId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Financ_PagarSub_financPagarId",
@@ -1409,9 +1582,9 @@ namespace WebApiSmartClinic.Migrations.AppDb
                 column: "CategoriaModelId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_RecorrenciaPacienteDto_PacienteModelId",
+                name: "IX_RecorrenciaPacienteDto_PacienteId",
                 table: "RecorrenciaPacienteDto",
-                column: "PacienteModelId");
+                column: "PacienteId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_SubCentroCusto_CentroCustoId",
@@ -1470,7 +1643,8 @@ namespace WebApiSmartClinic.Migrations.AppDb
                 table: "FichaAvaliacao",
                 column: "PacienteId",
                 principalTable: "Paciente",
-                principalColumn: "Id");
+                principalColumn: "Id",
+                onDelete: ReferentialAction.Restrict);
 
             migrationBuilder.AddForeignKey(
                 name: "FK_Financ_Pagar_Paciente_PacienteId",
@@ -1582,6 +1756,9 @@ namespace WebApiSmartClinic.Migrations.AppDb
                 name: "Evolucoes");
 
             migrationBuilder.DropTable(
+                name: "DespesasFixas");
+
+            migrationBuilder.DropTable(
                 name: "Financ_Pagar");
 
             migrationBuilder.DropTable(
@@ -1597,10 +1774,10 @@ namespace WebApiSmartClinic.Migrations.AppDb
                 name: "Usuario");
 
             migrationBuilder.DropTable(
-                name: "PlanoConta");
+                name: "Categoria");
 
             migrationBuilder.DropTable(
-                name: "Categoria");
+                name: "PlanoConta");
 
             migrationBuilder.DropTable(
                 name: "Empresa");

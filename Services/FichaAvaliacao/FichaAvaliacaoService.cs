@@ -1,4 +1,3 @@
-
 using Microsoft.EntityFrameworkCore;
 using WebApiSmartClinic.Data;
 using WebApiSmartClinic.Dto.FichaAvaliacao;
@@ -162,56 +161,56 @@ public class FichaAvaliacaoService : IFichaAvaliacaoInterface
         }
     }
 
-    public async Task<ResponseModel<List<FichaAvaliacaoModel>>> Editar(FichaAvaliacaoEdicaoDto fichaavaliacaoEdicaoDto)
+    public async Task<ResponseModel<List<FichaAvaliacaoModel>>> Editar(FichaAvaliacaoEdicaoDto fichaAvaliacaoEdicaoDto)
     {
         ResponseModel<List<FichaAvaliacaoModel>> resposta = new ResponseModel<List<FichaAvaliacaoModel>>();
         try
         {
-            var fichaavaliacao = await _context.FichaAvaliacao.FirstOrDefaultAsync(x => x.Id == fichaavaliacaoEdicaoDto.Id);
+            var fichaavaliacao = await _context.FichaAvaliacao.FirstOrDefaultAsync(x => x.Id == fichaAvaliacaoEdicaoDto.Id);
             if (fichaavaliacao == null)
             {
                 resposta.Mensagem = "Ficha de avaliação não encontrada";
                 return resposta;
             }
 
-            fichaavaliacao.PacienteId = fichaavaliacaoEdicaoDto.PacienteId;
-            fichaavaliacao.DataAvaliacao = fichaavaliacaoEdicaoDto.DataAvaliacao;
-            fichaavaliacao.Profissional = fichaavaliacaoEdicaoDto.Profissional;
-            fichaavaliacao.Especialidade = fichaavaliacaoEdicaoDto.Especialidade;
-            fichaavaliacao.Idade = fichaavaliacaoEdicaoDto.Idade;
-            fichaavaliacao.Altura = fichaavaliacaoEdicaoDto.Altura;
-            fichaavaliacao.Peso = fichaavaliacaoEdicaoDto.Peso;
-            fichaavaliacao.Sexo = fichaavaliacaoEdicaoDto.Sexo;
-            fichaavaliacao.ObservacoesGerais = fichaavaliacaoEdicaoDto.ObservacoesGerais;
-            fichaavaliacao.HistoricoDoencas = fichaavaliacaoEdicaoDto.HistoricoDoencas;
-            fichaavaliacao.DoencasPreExistentes = fichaavaliacaoEdicaoDto.DoencasPreExistentes;
-            fichaavaliacao.MedicacaoUsoContinuo = fichaavaliacaoEdicaoDto.MedicacaoUsoContinuo;
-            fichaavaliacao.Medicacao = fichaavaliacaoEdicaoDto.Medicacao;
-            fichaavaliacao.CirurgiasPrevias = fichaavaliacaoEdicaoDto.CirurgiasPrevias;
-            fichaavaliacao.DetalheCirurgias = fichaavaliacaoEdicaoDto.DetalheCirurgias;
-            fichaavaliacao.Alergias = fichaavaliacaoEdicaoDto.Alergias;
-            fichaavaliacao.QueixaPrincipal = fichaavaliacaoEdicaoDto.QueixaPrincipal;
-            fichaavaliacao.ObjetivosDoTratamento = fichaavaliacaoEdicaoDto.ObjetivosDoTratamento;
-            fichaavaliacao.IMC = fichaavaliacaoEdicaoDto.IMC;
-            fichaavaliacao.AvaliacaoPostural = fichaavaliacaoEdicaoDto.AvaliacaoPostural;
-            fichaavaliacao.AmplitudeMovimento = fichaavaliacaoEdicaoDto.AmplitudeMovimento;
-            fichaavaliacao.AssinaturaProfissional = fichaavaliacaoEdicaoDto.AssinaturaProfissional;
-            fichaavaliacao.AssinaturaCliente = fichaavaliacaoEdicaoDto.AssinaturaCliente;
-            fichaavaliacao.HistoriaPregressa = fichaavaliacaoEdicaoDto.HistoriaPregressa;
-            fichaavaliacao.HistoriaAtual = fichaavaliacaoEdicaoDto.HistoriaAtual;
-            fichaavaliacao.TipoDor = fichaavaliacaoEdicaoDto.TipoDor;
-            fichaavaliacao.SinaisVitais = fichaavaliacaoEdicaoDto.SinaisVitais;
-            fichaavaliacao.DoencasCronicas = fichaavaliacaoEdicaoDto.DoencasCronicas;
-            fichaavaliacao.Cirurgia = fichaavaliacaoEdicaoDto.Cirurgia;
-            fichaavaliacao.DoencaNeurodegenerativa = fichaavaliacaoEdicaoDto.DoencaNeurodegenerativa;
-            fichaavaliacao.TratamentosRealizados = fichaavaliacaoEdicaoDto.TratamentosRealizados;
-            fichaavaliacao.AlergiaMedicamentos = fichaavaliacaoEdicaoDto.AlergiaMedicamentos;
-            fichaavaliacao.FrequenciaConsumoAlcool = fichaavaliacaoEdicaoDto.FrequenciaConsumoAlcool;
-            fichaavaliacao.PraticaAtividade = fichaavaliacaoEdicaoDto.PraticaAtividade;
-            fichaavaliacao.Tabagista = fichaavaliacaoEdicaoDto.Tabagista;
-            fichaavaliacao.ProfissionalId = fichaavaliacaoEdicaoDto.ProfissionalId;
+            fichaavaliacao.PacienteId = fichaAvaliacaoEdicaoDto.PacienteId;
+            fichaavaliacao.DataAvaliacao = fichaAvaliacaoEdicaoDto.DataAvaliacao;
+            fichaavaliacao.Profissional = fichaAvaliacaoEdicaoDto.Profissional;
+            fichaavaliacao.Especialidade = fichaAvaliacaoEdicaoDto.Especialidade;
+            fichaavaliacao.Idade = fichaAvaliacaoEdicaoDto.Idade;
+            fichaavaliacao.Altura = fichaAvaliacaoEdicaoDto.Altura;
+            fichaavaliacao.Peso = fichaAvaliacaoEdicaoDto.Peso;
+            fichaavaliacao.Sexo = fichaAvaliacaoEdicaoDto.Sexo;
+            fichaavaliacao.ObservacoesGerais = fichaAvaliacaoEdicaoDto.ObservacoesGerais;
+            fichaavaliacao.HistoricoDoencas = fichaAvaliacaoEdicaoDto.HistoricoDoencas;
+            fichaavaliacao.DoencasPreExistentes = fichaAvaliacaoEdicaoDto.DoencasPreExistentes;
+            fichaavaliacao.MedicacaoUsoContinuo = fichaAvaliacaoEdicaoDto.MedicacaoUsoContinuo;
+            fichaavaliacao.Medicacao = fichaAvaliacaoEdicaoDto.Medicacao;
+            fichaavaliacao.CirurgiasPrevias = fichaAvaliacaoEdicaoDto.CirurgiasPrevias;
+            fichaavaliacao.DetalheCirurgias = fichaAvaliacaoEdicaoDto.DetalheCirurgias;
+            fichaavaliacao.Alergias = fichaAvaliacaoEdicaoDto.Alergias;
+            fichaavaliacao.QueixaPrincipal = fichaAvaliacaoEdicaoDto.QueixaPrincipal;
+            fichaavaliacao.ObjetivosDoTratamento = fichaAvaliacaoEdicaoDto.ObjetivosDoTratamento;
+            fichaavaliacao.IMC = fichaAvaliacaoEdicaoDto.IMC;
+            fichaavaliacao.AvaliacaoPostural = fichaAvaliacaoEdicaoDto.AvaliacaoPostural;
+            fichaavaliacao.AmplitudeMovimento = fichaAvaliacaoEdicaoDto.AmplitudeMovimento;
+            fichaavaliacao.AssinaturaProfissional = fichaAvaliacaoEdicaoDto.AssinaturaProfissional;
+            fichaavaliacao.AssinaturaCliente = fichaAvaliacaoEdicaoDto.AssinaturaCliente;
+            fichaavaliacao.HistoriaPregressa = fichaAvaliacaoEdicaoDto.HistoriaPregressa;
+            fichaavaliacao.HistoriaAtual = fichaAvaliacaoEdicaoDto.HistoriaAtual;
+            fichaavaliacao.TipoDor = fichaAvaliacaoEdicaoDto.TipoDor;
+            fichaavaliacao.SinaisVitais = fichaAvaliacaoEdicaoDto.SinaisVitais;
+            fichaavaliacao.DoencasCronicas = fichaAvaliacaoEdicaoDto.DoencasCronicas;
+            fichaavaliacao.Cirurgia = fichaAvaliacaoEdicaoDto.Cirurgia;
+            fichaavaliacao.DoencaNeurodegenerativa = fichaAvaliacaoEdicaoDto.DoencaNeurodegenerativa;
+            fichaavaliacao.TratamentosRealizados = fichaAvaliacaoEdicaoDto.TratamentosRealizados;
+            fichaavaliacao.AlergiaMedicamentos = fichaAvaliacaoEdicaoDto.AlergiaMedicamentos;
+            fichaavaliacao.FrequenciaConsumoAlcool = fichaAvaliacaoEdicaoDto.FrequenciaConsumoAlcool;
+            fichaavaliacao.PraticaAtividade = fichaAvaliacaoEdicaoDto.PraticaAtividade;
+            fichaavaliacao.Tabagista = fichaAvaliacaoEdicaoDto.Tabagista;
+            fichaavaliacao.ProfissionalId = fichaAvaliacaoEdicaoDto.ProfissionalId;
 
-            _context.Update(fichaavaliacao);
+            _context.Update(fichaAvaliacaoEdicaoDto);
             await _context.SaveChangesAsync();
             resposta.Dados = await _context.FichaAvaliacao.ToListAsync();
             resposta.Mensagem = "Ficha de Avaliação atualizada com sucesso";
@@ -245,5 +244,13 @@ public class FichaAvaliacaoService : IFichaAvaliacaoInterface
             
             return resposta;
         }
+    }
+
+    private decimal CalcularIMC(decimal peso, decimal altura)
+    {
+        if (altura <= 0)
+            return 0;
+
+        return Math.Round(peso / (altura * altura), 2);
     }
 }

@@ -1,4 +1,4 @@
-
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using WebApiSmartClinic.Dto.CadastroCliente;
 using WebApiSmartClinic.Models;
@@ -6,8 +6,8 @@ using WebApiSmartClinic.Services.CadastroCliente;
 
 namespace WebApiSmartClinic.Controllers
 {
-    [Route("api/[controller]")]
     [ApiController]
+    [Route("api/[controller]")]
     public class CadastroClienteController : ControllerBase
     {
         private readonly ICadastroClienteInterface _cadastrocliente;
@@ -16,6 +16,13 @@ namespace WebApiSmartClinic.Controllers
             _cadastrocliente = cadastrocliente;
         }
 
+        [AllowAnonymous]
+        [HttpPost("Criar")]
+        public async Task<ActionResult<ResponseModel<List<CadastroClienteModel>>>> Criar([FromBody] CadastroClienteCreateDto cadastroclienteCreateDto)
+        {
+            var cadastrocliente = await _cadastrocliente.Criar(cadastroclienteCreateDto);
+            return Ok(cadastrocliente);
+        }
         [HttpGet("Listar")]
         public async Task<ActionResult<ResponseModel<List<CadastroClienteModel>>>> Listar()
         {
@@ -27,13 +34,6 @@ namespace WebApiSmartClinic.Controllers
         public async Task<ActionResult<ResponseModel<List<CadastroClienteModel>>>> BuscarPorId(int idCadastroCliente)
         {
             var cadastrocliente = await _cadastrocliente.BuscarPorId(idCadastroCliente);
-            return Ok(cadastrocliente);
-        }
-
-        [HttpPost("Criar")]
-        public async Task<ActionResult<ResponseModel<List<CadastroClienteModel>>>> Criar(CadastroClienteCreateDto cadastroclienteCreateDto)
-        {
-            var cadastrocliente = await _cadastrocliente.Criar(cadastroclienteCreateDto);
             return Ok(cadastrocliente);
         }
 

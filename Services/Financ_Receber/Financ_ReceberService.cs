@@ -70,6 +70,8 @@ public class Financ_ReceberService : IFinanc_ReceberInterface
                 subFinancReceber = new List<Financ_ReceberSubModel>()
             };
 
+            financ_receber.PacienteId = 9;
+
             _context.Add(financ_receber);
             await _context.SaveChangesAsync();
 

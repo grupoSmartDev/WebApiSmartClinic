@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using WebApiSmartClinic.Helpers;
 using Microsoft.Extensions.Options;
+using WebApiSmartClinic.Dto.User;
 
 namespace WebApiSmartClinic.Data;
 
@@ -70,13 +71,14 @@ public class AppDbContext : IdentityDbContext<User>
     {
         base.OnModelCreating(modelBuilder);
 
-        // Papéis para o Identity
-        var roles = new List<IdentityRole>
-        {
-            new IdentityRole { Id = "1", Name = "User", NormalizedName = "USER" },
-            new IdentityRole { Id = "2", Name = "Support", NormalizedName = "SUPPORT" },
-            new IdentityRole { Id = "3", Name = "Admin", NormalizedName = "ADMIN" }
-        };
+        modelBuilder.Entity<IdentityRole>().HasData(
+            new List<IdentityRole>
+            {
+                new IdentityRole { Id = "1", Name = "User", NormalizedName = "USER" },
+                new IdentityRole { Id = "2", Name = "Support", NormalizedName = "SUPPORT" },
+                new IdentityRole { Id = "3", Name = "Admin", NormalizedName = "ADMIN" }
+            }
+        );
 
         modelBuilder.Entity<ConselhoModel>().HasData(
             new ConselhoModel { Id = 1, Nome = "Conselho Regional de Fisioterapia e Terapia Ocupacional", Sigla = "CREFITO", IsSystemDefault = true },
@@ -146,6 +148,20 @@ public class AppDbContext : IdentityDbContext<User>
           .WithOne(p => p.Plano)
           .HasForeignKey<PacienteModel>(p => p.PlanoId)
           .IsRequired(false);
+
+        modelBuilder.Entity<FichaAvaliacaoModel>()
+            .HasOne(f => f.Paciente)
+            .WithOne(p => p.FichaAvaliacao)
+            .HasForeignKey<FichaAvaliacaoModel>(f => f.PacienteId)
+            .OnDelete(DeleteBehavior.Restrict); // Evita a exclusão em cascata
+
+        // Configuração da relação 1:N entre Profissional e FichaAvaliacao
+        modelBuilder.Entity<FichaAvaliacaoModel>()
+            .HasOne(f => f.Profissional)
+            .WithMany(p => p.FichasAvaliacao)
+            .HasForeignKey(f => f.ProfissionalId)
+            .OnDelete(DeleteBehavior.Restrict); // Evita a exclusão em cascata
+
 
         // Relacionamento: Paciente -> Evoluções
         modelBuilder.Entity<PacienteModel>()

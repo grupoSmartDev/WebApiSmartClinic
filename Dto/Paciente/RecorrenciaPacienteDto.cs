@@ -1,4 +1,5 @@
 ﻿using System;
+using WebApiSmartClinic.Models;
 
 namespace WebApiSmartClinic.Dto.Paciente
 {
@@ -6,6 +7,7 @@ namespace WebApiSmartClinic.Dto.Paciente
     {
         public int Id { get; set; }
         public int? PacienteId { get; set; }
+        public PacienteModel Paciente { get; set; }
         public DayOfWeek DiaSemana { get; set; }
         public string? HoraInicio { get; set; }
         public string? HoraFim { get; set; }

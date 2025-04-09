@@ -8,7 +8,7 @@ namespace WebApiSmartClinic.Migrations.AppDb
     /// <inheritdoc />
     public partial class attAgenda : Migration
     {
-        /// <inheritdoc />
+        /// <inheritdoc  />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(

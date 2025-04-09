@@ -9,6 +9,7 @@ using SixLabors.ImageSharp.Formats.Jpeg;
 using SixLabors.ImageSharp.Formats.Png;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using System.Security.Cryptography;
 using System.Text;
 using WebApiSmartClinic.Data;
 using WebApiSmartClinic.Dto.User;
@@ -28,7 +29,7 @@ namespace WebApiSmartClinic.Services.Auth
         private readonly AppSettings _appSettings;
         private readonly IConnectionsService _connectionsService;
         private readonly IConnectionStringProvider _connectionStringProvider;
-
+        private readonly DataConnectionContext _contextDataConnection;
         private const long TamanhoMaximoFotoPerfilEmBytes = 10L * 1024 * 1024; // 10 MB
 
         public AuthService(
@@ -37,7 +38,8 @@ namespace WebApiSmartClinic.Services.Auth
             AppDbContext identityContext,
             IOptions<AppSettings> appSettings,
             IConnectionsService connectionsService,
-            IConnectionStringProvider connectionStringProvider)
+            IConnectionStringProvider connectionStringProvider, 
+            DataConnectionContext contextDataConnection)
         {
             _signInManager = signInManager;
             _userManager = userManager;
@@ -45,6 +47,7 @@ namespace WebApiSmartClinic.Services.Auth
             _appSettings = appSettings.Value;
             _connectionsService = connectionsService;
             _connectionStringProvider = connectionStringProvider;
+            _contextDataConnection = contextDataConnection;
         }
 
         public async Task<object> LoginAsync(UserLoginRequest model, string? userKey)
@@ -60,6 +63,12 @@ namespace WebApiSmartClinic.Services.Auth
                 model.Password,
                 model.RememberMe,
                 lockoutOnFailure: true);
+
+            bool existe = await _contextDataConnection.DataConnection.AnyAsync(c => c.Key == userKey);
+            if (!existe)
+            {
+                return new { success = false, errors = "Database não encontrado" };
+            }
 
             if (!result.Succeeded)
             {
@@ -88,6 +97,13 @@ namespace WebApiSmartClinic.Services.Auth
             };
 
             var result = await _userManager.CreateAsync(user, model.Password);
+
+            // 1. Verifica se já existe
+            bool existe = await _contextDataConnection.DataConnection.AnyAsync(c => c.Key == userKey);
+            if (!existe)
+            {
+                return new { success = false, errors = "Database não encontrado" };
+            }
 
             // Se o usuário foi criado com sucesso, adiciona role, claims etc.
             if (!result.Succeeded)

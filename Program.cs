@@ -179,9 +179,14 @@ var builder = WebApplication.CreateBuilder(args);
     builder.Services.AddScoped<IPlanoContaInterface, PlanoContaService>();
     builder.Services.AddScoped<IDespesaFixaInterface, DespesaFixaService>();
     builder.Services.AddScoped<ICadastroClienteInterface, CadastroClienteService>();
-    builder.Services.AddScoped<IConnectionStringProvider, ConnectionStringProvider>();
+    
+    //builder.Services.AddScoped<IConnectionStringProvider, ConnectionStringProvider>();
+    builder.Services.AddSingleton<IConnectionStringProvider, ConnectionStringProvider>();
+
     builder.Services.AddScoped<AgendaService>();
+    builder.Services.AddScoped<AuthService>();
     builder.Services.AddScoped<IAuthInterface, AuthService>();
+
 
     builder.Services.AddScoped<IConnectionsRepository, ConnectionsRepository>();
     // Registrar IConnectionsRepository e ConnectionsRepository
@@ -239,6 +244,8 @@ builder.Services.AddSwaggerGen(c =>
             Array.Empty<string>()
         }
     });
+
+    //c.OperationFilter<AllowAnonymousOperationFilter>();
 });
 
 

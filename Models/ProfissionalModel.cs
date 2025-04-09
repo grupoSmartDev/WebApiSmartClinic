@@ -30,6 +30,7 @@ public class ProfissionalModel
 
     // Propriedade para controle de acesso
     public bool? EhUsuario { get; set; } = false; // Identifica se o profissional � um usu�rio do sistema
+    public List<FichaAvaliacaoModel>? FichasAvaliacao { get; set; }
 
     private DateTime? _DataCadastro;
     public DateTime? DataCadastro 

@@ -16,6 +16,5 @@ namespace WebApiSmartClinic.Models
 
         [JsonIgnore]
         public ICollection<PacienteModel> Pacientes { get; set; }
-        public bool IsSystemDefault { get; internal set; }
     }
 }

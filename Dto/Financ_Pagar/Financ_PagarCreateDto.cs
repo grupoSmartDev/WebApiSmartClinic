@@ -31,6 +31,8 @@ public class Financ_PagarCreateDto
     [JsonIgnore]
     public BancoModel? Banco { get; set; }
     public int? BancoId { get; set; } = 0; // Relacionamento com a tabela de Banco
+    public int? TipoPagamentoId { get; set; }
+    public TipoPagamentoModel? TipoPagamento { get; set; }
 
     public ICollection<Financ_PagarSubModel>? subFinancPagar { get; set; } = new List<Financ_PagarSubModel>();
 }

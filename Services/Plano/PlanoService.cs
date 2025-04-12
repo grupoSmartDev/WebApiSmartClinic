@@ -274,6 +274,7 @@ public class PlanoService : IPlanoInterface
                         FornecedorId = planoCreateDto.Financeiro.FornecedorId,
                         CentroCustoId = planoCreateDto.Financeiro.CentroCustoId,
                         PacienteId = planoCreateDto.PacienteId,
+                        TipoPagamentoId = (int)planoCreateDto.Financeiro.TipoPagamentoId,
                         BancoId = planoCreateDto.Financeiro.BancoId == 0 ? null : planoCreateDto.Financeiro.BancoId,
                         subFinancReceber = new List<Financ_ReceberSubModel>()
                     };
@@ -292,6 +293,7 @@ public class PlanoService : IPlanoInterface
                                 Parcela = parcela.Parcela,
                                 Valor = parcela.Valor,
                                 TipoPagamentoId = parcela.TipoPagamentoId,
+                                FormaPagamentoId = parcela.FormaPagamentoId,
                                 DataPagamento = parcela.DataPagamento,
                                 Desconto = parcela.Desconto,
                                 Juros = parcela.Juros,
@@ -484,6 +486,7 @@ public class PlanoService : IPlanoInterface
                         Classificacao = "Receita",
                         Observacao = renovacaoDto.Financeiro.Observacao ?? "Renovação de plano",
                         CentroCustoId = renovacaoDto.Financeiro.CentroCustoId,
+                        TipoPagamentoId = (int)renovacaoDto.Financeiro.TipoPagamentoId,
                         PacienteId = paciente.Id,
                         BancoId = null,
                         subFinancReceber = new List<Financ_ReceberSubModel>()
@@ -503,6 +506,7 @@ public class PlanoService : IPlanoInterface
                                 Parcela = parcela.Parcela,
                                 Valor = parcela.Valor,
                                 TipoPagamentoId = parcela.TipoPagamentoId,
+                                FormaPagamentoId = parcela.FormaPagamentoId,
                                 DataPagamento = parcela.DataPagamento,
                                 Desconto = parcela.Desconto,
                                 Juros = parcela.Juros,

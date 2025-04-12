@@ -42,24 +42,24 @@ namespace WebApiSmartClinic.Dto.CadastroCliente
                 : null;
         }
 
-        public string Nome { get; set; }
-        public string TitularCPF { get; set; }
-        public string CNPJEmpresaMatriz { get; set; }
-        public string Email { get; set; }
-        public string Celular { get; set; }
-        public string Sobrenome { get; set; }
-        public string Especialidade { get; set; } // fisioterapia, psicologia, etc...) 
-        public string PlanoEscolhido { get; set; }
+        public string? Nome { get; set; }
+        public string? TitularCPF { get; set; }
+        public string? CNPJEmpresaMatriz { get; set; }
+        public string? Email { get; set; }
+        public string? Celular { get; set; }
+        public string? Sobrenome { get; set; }
+        public string? Especialidade { get; set; } // fisioterapia, psicologia, etc...) 
+        public string? PlanoEscolhido { get; set; }
         public string? TelefoneFixo { get; set; }
         public bool Ativo { get; set; } = true;
-        public bool PeriodoTeste { get; set; }
+        public bool PeriodoTeste { get; set; } = false;
         public bool CelularComWhatsApp { get; set; }
         public bool ReceberNotificacoes { get; set; } = true;
-        public int TipoPagamentoId { get; set; }
-        public int QtdeLicencaEmpresaPermitida { get; set; }
-        public int QtdeLicencaUsuarioPermitida { get; set; }
-        public int QtdeLicencaEmpresaUtilizada { get; set; }
-        public int QtdeLicencaUsuarioUtilizada { get; set; }
+        public int? TipoPagamentoId { get; set; }
+        public int? QtdeLicencaEmpresaPermitida { get; set; }
+        public int? QtdeLicencaUsuarioPermitida { get; set; }
+        public int? QtdeLicencaEmpresaUtilizada { get; set; }
+        public int? QtdeLicencaUsuarioUtilizada { get; set; }
 
         [JsonIgnore]
         public TipoPagamentoModel? TipoPagamento { get; set; }

@@ -207,12 +207,21 @@ public class AppDbContext : IdentityDbContext<User>
             .WithOne(s => s.FinancReceber)
             .HasForeignKey(s => s.financReceberId);
 
+        modelBuilder.Entity<Financ_ReceberModel>()
+           .HasOne(s => s.TipoPagamento)
+            .WithMany()
+            .HasForeignKey(s => s.TipoPagamentoId);
+
         // Relacionamento: Financ_Pagar -> SubFinanc_Pagar
         modelBuilder.Entity<Financ_PagarModel>()
             .HasMany(f => f.subFinancPagar)
             .WithOne(s => s.FinancPagar)
             .HasForeignKey(s => s.financPagarId);
 
+        modelBuilder.Entity<Financ_PagarModel>()
+            .HasOne(s => s.TipoPagamento)
+            .WithMany()
+            .HasForeignKey(s => s.TipoPagamentoId);
 
 
         // Relacionamento: PlanoConta -> SubPlanoConta

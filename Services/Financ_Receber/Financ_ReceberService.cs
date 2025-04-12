@@ -67,6 +67,7 @@ public class Financ_ReceberService : IFinanc_ReceberInterface
                 CentroCustoId = financ_receberCreateDto.CentroCustoId,
                 PacienteId = financ_receberCreateDto.PacienteId,
                 BancoId = financ_receberCreateDto.BancoId,
+                TipoPagamentoId = (int)financ_receberCreateDto.TipoPagamentoId,
                 subFinancReceber = new List<Financ_ReceberSubModel>()
             };
 
@@ -85,7 +86,7 @@ public class Financ_ReceberService : IFinanc_ReceberInterface
                         financReceberId = financ_receber.Id, // Relaciona com o pai
                         Parcela = parcela.Parcela,
                         Valor = parcela.Valor,
-                        TipoPagamentoId = parcela.TipoPagamentoId,
+                        FormaPagamentoId = parcela.FormaPagamentoId,
                         DataPagamento = parcela.DataPagamento,
                         Desconto = parcela.Desconto,
                         Juros = parcela.Juros,
@@ -184,6 +185,7 @@ public class Financ_ReceberService : IFinanc_ReceberInterface
             financ_receber.CentroCustoId = financ_receberEdicaoDto.CentroCustoId;
             financ_receber.BancoId = financ_receberEdicaoDto.BancoId;
             financ_receber.PacienteId = financ_receberEdicaoDto.PacienteId;
+            financ_receber.TipoPagamentoId = financ_receberEdicaoDto.TipoPagamentoId;
 
             _context.Financ_ReceberSub.RemoveRange(financ_receber.subFinancReceber);
             financ_receber.subFinancReceber.Clear();
@@ -195,7 +197,7 @@ public class Financ_ReceberService : IFinanc_ReceberInterface
                     financReceberId = financ_receber.Id,
                     Parcela = parcelaDto.Parcela,
                     Valor = parcelaDto.Valor,
-                    TipoPagamentoId = parcelaDto.TipoPagamentoId,
+                    FormaPagamentoId = parcelaDto.FormaPagamentoId,
                     DataPagamento = parcelaDto.DataPagamento,
                     Desconto = parcelaDto.Desconto,
                     Juros = parcelaDto.Juros,

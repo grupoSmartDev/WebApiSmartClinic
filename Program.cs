@@ -200,7 +200,7 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowFrontend", policy =>
     {
-        policy.WithOrigins("http://localhost:4200", "https://smart-clinic-angular-it7o.vercel.app", "https://viacep.com.br/ws/")
+        policy.WithOrigins("http://localhost:4200", "https://smart-clinic-angular-it7o.vercel.app", "https://smart-clinic-angular-tsxt.vercel.app", "https://viacep.com.br/ws/")
               .AllowAnyMethod()
               .AllowAnyHeader()
               .WithExposedHeaders("Authorization")

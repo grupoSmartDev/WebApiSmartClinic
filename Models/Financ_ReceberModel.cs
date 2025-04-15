@@ -41,6 +41,8 @@ namespace WebApiSmartClinic.Models
         [JsonIgnore]
         public BancoModel? Banco { get; set; }
         public int? BancoId { get; set; } = 0; // Relacionamento com a tabela de Banco
+        public int TipoPagamentoId { get; set; }
+        public TipoPagamentoModel? TipoPagamento { get; set; }
 
         public ICollection<Financ_ReceberSubModel>? subFinancReceber { get; set; } = new List<Financ_ReceberSubModel>();
 

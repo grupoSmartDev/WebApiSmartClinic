@@ -22,6 +22,8 @@ namespace WebApiSmartClinic.Dto.Financ_Receber
         public int? FornecedorId { get; set; } = null; // Relacionamento com a tabela de Fornecedor
         public int? CentroCustoId { get; set; } = null; // Relacionamento com a tabela de CentroCusto
         public int? BancoId { get; set; } = 0; // Relacionamento com a tabela de Banco
+        public int? TipoPagamentoId { get; set; }
+        public TipoPagamentoModel? TipoPagamento { get; set; }
         public ICollection<Financ_ReceberSubCreateDto>? subFinancReceber { get; set; }
 
     }

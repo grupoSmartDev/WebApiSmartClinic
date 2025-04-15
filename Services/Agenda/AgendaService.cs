@@ -141,6 +141,7 @@ public class AgendaService : IAgendaInterface
                                 CentroCustoId = agendaCreateDto.FinancReceber.CentroCustoId,
                                 PacienteId = agendaCreateDto.FinancReceber.PacienteId,
                                 BancoId = agendaCreateDto.FinancReceber.BancoId,
+                                TipoPagamentoId = (int)agendaCreateDto.FinancReceber.TipoPagamentoId,
                                 subFinancReceber = new List<Financ_ReceberSubModel>()
                             };
 
@@ -155,6 +156,7 @@ public class AgendaService : IAgendaInterface
                                     Parcela = parcela.Parcela,
                                     Valor = parcela.Valor,
                                     TipoPagamentoId = parcela.TipoPagamentoId,
+                                    FormaPagamentoId = parcela.FormaPagamentoId,
                                     DataPagamento = parcela.DataPagamento,
                                     Desconto = parcela.Desconto,
                                     Juros = parcela.Juros,
@@ -287,6 +289,7 @@ public class AgendaService : IAgendaInterface
                         financ_receber.CentroCustoId = agendaEdicaoDto.FinancReceber.CentroCustoId;
                         financ_receber.PacienteId = agendaEdicaoDto.FinancReceber.PacienteId;
                         financ_receber.BancoId = agendaEdicaoDto.FinancReceber.BancoId;
+                        financ_receber.TipoPagamentoId = agendaEdicaoDto.FinancReceber.TipoPagamentoId;
 
                         // Remove as parcelas existentes
                         if (financ_receber.subFinancReceber != null)
@@ -315,6 +318,7 @@ public class AgendaService : IAgendaInterface
                             CentroCustoId = agendaEdicaoDto.FinancReceber.CentroCustoId,
                             PacienteId = agendaEdicaoDto.FinancReceber.PacienteId,
                             BancoId = agendaEdicaoDto.FinancReceber.BancoId,
+                            TipoPagamentoId = agendaEdicaoDto.FinancReceber.TipoPagamentoId,
                             subFinancReceber = new List<Financ_ReceberSubModel>()
                         };
 
@@ -343,6 +347,7 @@ public class AgendaService : IAgendaInterface
                         CentroCustoId = agendaEdicaoDto.FinancReceber.CentroCustoId,
                         PacienteId = agendaEdicaoDto.FinancReceber.PacienteId,
                         BancoId = agendaEdicaoDto.FinancReceber.BancoId,
+                        TipoPagamentoId = agendaEdicaoDto.FinancReceber.TipoPagamentoId,
                         subFinancReceber = new List<Financ_ReceberSubModel>()
                     };
 
@@ -361,6 +366,7 @@ public class AgendaService : IAgendaInterface
                             Parcela = parcela.Parcela,
                             Valor = parcela.Valor,
                             TipoPagamentoId = parcela.TipoPagamentoId,
+                            FormaPagamentoId = parcela.FormaPagamentoId,
                             DataPagamento = parcela.DataPagamento,
                             Desconto = parcela.Desconto,
                             Juros = parcela.Juros,
@@ -581,6 +587,7 @@ public class AgendaService : IAgendaInterface
                                 CentroCustoId = agendaCreateDto.FinancReceber.CentroCustoId,
                                 PacienteId = agendaCreateDto.FinancReceber.PacienteId,
                                 BancoId = agendaCreateDto.FinancReceber.BancoId,
+                                TipoPagamentoId = (int)agendaCreateDto.FinancReceber.TipoPagamentoId,
                                 subFinancReceber = new List<Financ_ReceberSubModel>()
                             };
 
@@ -595,6 +602,7 @@ public class AgendaService : IAgendaInterface
                                     Parcela = parcela.Parcela,
                                     Valor = parcela.Valor,
                                     TipoPagamentoId = parcela.TipoPagamentoId,
+                                    FormaPagamentoId = parcela.FormaPagamentoId,
                                     DataPagamento = parcela.DataPagamento,
                                     Desconto = parcela.Desconto,
                                     Juros = parcela.Juros,

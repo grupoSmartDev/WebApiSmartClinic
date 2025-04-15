@@ -65,7 +65,8 @@ public class Financ_PagarService : IFinanc_PagarInterface
                 FornecedorId = financ_pagarCreateDto.FornecedorId,
                 CentroCustoId = financ_pagarCreateDto.CentroCustoId,
                 BancoId = financ_pagarCreateDto.BancoId,
-                PacienteId = financ_pagarCreateDto.PacienteId
+                PacienteId = financ_pagarCreateDto.PacienteId,
+                TipoPagamentoId = financ_pagarCreateDto.TipoPagamentoId
             };
 
             _context.Add(financ_pagar);
@@ -81,7 +82,7 @@ public class Financ_PagarService : IFinanc_PagarInterface
                         financPagarId = financ_pagar.Id, // Relaciona com o pai
                         Parcela = parcela.Parcela,
                         Valor = parcela.Valor,
-                        TipoPagamentoId = parcela.TipoPagamentoId,
+                        //TipoPagamentoId = parcela.TipoPagamentoId,
                         FormaPagamentoId = parcela.FormaPagamentoId,
                         DataPagamento = parcela.DataPagamento,
                         Desconto = parcela.Desconto,
@@ -179,6 +180,7 @@ public class Financ_PagarService : IFinanc_PagarInterface
             financ_pagar.FornecedorId = financ_pagarEdicaoDto.FornecedorId;
             financ_pagar.CentroCustoId = financ_pagarEdicaoDto.CentroCustoId;
             financ_pagar.BancoId = financ_pagarEdicaoDto.BancoId;
+            financ_pagar.TipoPagamentoId = financ_pagarEdicaoDto.TipoPagamentoId;
 
             // Atualiza subitens
             if (financ_pagarEdicaoDto.subFinancPagar != null)

@@ -63,8 +63,10 @@ public class CadastroClienteService : ICadastroClienteInterface
 
         var cpfKey = dto.TitularCPF;
         var novoBanco = cpfKey;
-        var novaStringConexao = $"Host=localhost;Port=5432;Database={novoBanco};Username=postgres;Password=5510;";
-        var masterConnection = "Host=localhost;Port=5432;Database=postgres;Username=postgres;Password=5510;";
+        var novaStringConexao = $"Host=clinicsmart.ddns.net;Port=5432;Database={novoBanco};Username=postgres;Password=5510;";
+        //var novaStringConexao = $"Host=localhost;Port=5432;Database={novoBanco};Username=postgres;Password=5510;";
+        var masterConnection = $"Host=clinicsmart.ddns.net;Port=5432;Database=connections;Username=postgres;Password=5510;";
+        //var masterConnection = "Host=localhost;Port=5432;Database=postgres;Username=postgres;Password=5510;";
 
         try
         {
@@ -111,7 +113,7 @@ public class CadastroClienteService : ICadastroClienteInterface
                 CNPJEmpresaMatriz = dto.CNPJEmpresaMatriz,
                 Especialidade = dto.Especialidade,
                 PlanoEscolhido = dto.PlanoEscolhido,
-                TipoPagamentoId = dto.TipoPagamentoId == null || dto.TipoPagamentoId == 0 ? 1 : dto.TipoPagamentoId,
+                TipoPagamentoId = (int)(dto.TipoPagamentoId == null || dto.TipoPagamentoId == 0 ? 1 : dto.TipoPagamentoId),
                 QtdeLicencaEmpresaPermitida = 1,
                 QtdeLicencaUsuarioPermitida = 3,
                 QtdeLicencaEmpresaUtilizada = 0,

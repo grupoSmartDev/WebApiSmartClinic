@@ -55,6 +55,16 @@ namespace WebApiSmartClinic.Services.Auth
             // Validações
             // (Normalmente, se o ModelState fosse inválido, retornaríamos no Controller;
             // mas se preferir, pode tratar aqui também.)
+            var conn = await _contextDataConnection.DataConnection
+                .Where(c => c.Key == userKey)
+                .Select(c => c.StringConnection)
+                .FirstOrDefaultAsync();
+
+            if (string.IsNullOrWhiteSpace(conn))
+                return new { success = false, errors = "Banco não encontrado" };
+
+            // Define a conexão ANTES de chamar o SignInManager
+            _connectionStringProvider.SetConnectionString(conn);
 
             model.RememberMe = true;
 

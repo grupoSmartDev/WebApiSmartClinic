@@ -63,7 +63,15 @@ public class AppDbContext : IdentityDbContext<User>
     {
         if (!optionsBuilder.IsConfigured)
         {
-            optionsBuilder.UseNpgsql(_connectionStringProvider.GetConnectionString());
+            var conn = _connectionStringProvider.GetConnectionString();
+            if (!string.IsNullOrWhiteSpace(conn))
+            {
+                optionsBuilder.UseNpgsql(conn);
+            }
+            else
+            {
+                throw new InvalidOperationException("Connection string do tenant não está definida.");
+            }
         }
     }
 

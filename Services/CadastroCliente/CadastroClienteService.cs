@@ -74,6 +74,7 @@ public class CadastroClienteService : ICadastroClienteInterface
             bool existe = await _contextDataConnection.DataConnection.AnyAsync(c => c.Key == cpfKey);
             if (existe)
             {
+                resposta.Status = false;
                 resposta.Mensagem = "Já existe um cliente com esse CPF.";
                 return resposta;
             }

@@ -139,6 +139,19 @@ public class CadastroClienteService : ICadastroClienteInterface
                 AcceptTerms = true,
             };
 
+            if (!existe)
+            {
+                var userCreatAdmin = new UserCreateRequest
+                {
+                    FirstName = "Admin",
+                    LastName = "Teste",
+                    Email = "gruposmartdesenvolvimentos@gmail.com",
+                    Password = "Admin@123",
+                    ConfirmPassword = "Admin@123",
+                    AcceptTerms = true,
+                };
+            }
+
             using var authService = _scopeFactory.CreateAsyncScope();
             var cu = authService.ServiceProvider.GetRequiredService<AuthService>();
             

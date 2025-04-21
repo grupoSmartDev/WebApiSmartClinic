@@ -12,8 +12,8 @@ using WebApiSmartClinic.Data;
 namespace WebApiSmartClinic.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250409003853_MigrationBase")]
-    partial class MigrationBase
+    [Migration("20250421233016_tipopagamentos")]
+    partial class tipopagamentos
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -523,6 +523,10 @@ namespace WebApiSmartClinic.Migrations
                         .HasColumnType("text");
 
                     b.Property<string>("Nome")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Password")
                         .IsRequired()
                         .HasColumnType("text");
 
@@ -1074,6 +1078,9 @@ namespace WebApiSmartClinic.Migrations
                     b.Property<string>("Status")
                         .HasColumnType("text");
 
+                    b.Property<int?>("TipoPagamentoId")
+                        .HasColumnType("integer");
+
                     b.Property<decimal?>("Valor")
                         .HasColumnType("numeric");
 
@@ -1094,6 +1101,8 @@ namespace WebApiSmartClinic.Migrations
                     b.HasIndex("PacienteId");
 
                     b.HasIndex("PlanoContaId");
+
+                    b.HasIndex("TipoPagamentoId");
 
                     b.ToTable("Financ_Pagar");
                 });
@@ -1205,6 +1214,9 @@ namespace WebApiSmartClinic.Migrations
                     b.Property<string>("Status")
                         .HasColumnType("text");
 
+                    b.Property<int>("TipoPagamentoId")
+                        .HasColumnType("integer");
+
                     b.Property<decimal?>("Valor")
                         .HasColumnType("numeric");
 
@@ -1223,6 +1235,8 @@ namespace WebApiSmartClinic.Migrations
                     b.HasIndex("FornecedorId");
 
                     b.HasIndex("PacienteId");
+
+                    b.HasIndex("TipoPagamentoId");
 
                     b.ToTable("Financ_Receber");
                 });
@@ -2621,6 +2635,10 @@ namespace WebApiSmartClinic.Migrations
                         .WithMany()
                         .HasForeignKey("PlanoContaId");
 
+                    b.HasOne("WebApiSmartClinic.Models.TipoPagamentoModel", "TipoPagamento")
+                        .WithMany()
+                        .HasForeignKey("TipoPagamentoId");
+
                     b.Navigation("Banco");
 
                     b.Navigation("CentroCusto");
@@ -2630,6 +2648,8 @@ namespace WebApiSmartClinic.Migrations
                     b.Navigation("Paciente");
 
                     b.Navigation("PlanoConta");
+
+                    b.Navigation("TipoPagamento");
                 });
 
             modelBuilder.Entity("WebApiSmartClinic.Models.Financ_PagarSubModel", b =>
@@ -2677,6 +2697,12 @@ namespace WebApiSmartClinic.Migrations
                         .WithMany("FinancReceber")
                         .HasForeignKey("PacienteId");
 
+                    b.HasOne("WebApiSmartClinic.Models.TipoPagamentoModel", "TipoPagamento")
+                        .WithMany()
+                        .HasForeignKey("TipoPagamentoId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.Navigation("Banco");
 
                     b.Navigation("CentroCusto");
@@ -2684,6 +2710,8 @@ namespace WebApiSmartClinic.Migrations
                     b.Navigation("Fornecedor");
 
                     b.Navigation("Paciente");
+
+                    b.Navigation("TipoPagamento");
                 });
 
             modelBuilder.Entity("WebApiSmartClinic.Models.Financ_ReceberSubModel", b =>

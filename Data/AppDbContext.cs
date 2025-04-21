@@ -216,9 +216,10 @@ public class AppDbContext : IdentityDbContext<User>
             .HasForeignKey(s => s.financReceberId);
 
         modelBuilder.Entity<Financ_ReceberModel>()
-           .HasOne(s => s.TipoPagamento)
-            .WithMany()
-            .HasForeignKey(s => s.TipoPagamentoId);
+       .HasOne(f => f.TipoPagamento)
+       .WithMany()
+       .HasForeignKey(f => f.TipoPagamentoId);
+
 
         // Relacionamento: Financ_Pagar -> SubFinanc_Pagar
         modelBuilder.Entity<Financ_PagarModel>()

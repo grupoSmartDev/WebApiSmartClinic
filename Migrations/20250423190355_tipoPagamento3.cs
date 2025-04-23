@@ -9,7 +9,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace WebApiSmartClinic.Migrations
 {
     /// <inheritdoc />
-    public partial class tipoPagamento2 : Migration
+    public partial class tipoPagamento3 : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -673,7 +673,6 @@ namespace WebApiSmartClinic.Migrations
                     TitularCPF = table.Column<string>(type: "text", nullable: false),
                     CNPJEmpresaMatriz = table.Column<string>(type: "text", nullable: false),
                     Email = table.Column<string>(type: "text", nullable: false),
-                    Password = table.Column<string>(type: "text", nullable: false),
                     Celular = table.Column<string>(type: "text", nullable: false),
                     Sobrenome = table.Column<string>(type: "text", nullable: false),
                     Especialidade = table.Column<string>(type: "text", nullable: false),

@@ -12,8 +12,8 @@ using WebApiSmartClinic.Data;
 namespace WebApiSmartClinic.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250423170351_tipoPagamento2")]
-    partial class tipoPagamento2
+    [Migration("20250423190355_tipoPagamento3")]
+    partial class tipoPagamento3
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -523,10 +523,6 @@ namespace WebApiSmartClinic.Migrations
                         .HasColumnType("text");
 
                     b.Property<string>("Nome")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("Password")
                         .IsRequired()
                         .HasColumnType("text");
 

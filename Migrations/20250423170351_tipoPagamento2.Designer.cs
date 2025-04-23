@@ -12,8 +12,8 @@ using WebApiSmartClinic.Data;
 namespace WebApiSmartClinic.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250421233016_tipopagamentos")]
-    partial class tipopagamentos
+    [Migration("20250423170351_tipoPagamento2")]
+    partial class tipoPagamento2
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

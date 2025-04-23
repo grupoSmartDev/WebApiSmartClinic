@@ -1,5 +1,4 @@
-﻿// AppDbContextFactory.cs corrigido para EF CLI
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 using Microsoft.Extensions.Configuration;
 using WebApiSmartClinic.Data;

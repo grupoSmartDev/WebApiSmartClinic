@@ -63,9 +63,9 @@ public class CadastroClienteService : ICadastroClienteInterface
 
         var cpfKey = dto.TitularCPF;
         var novoBanco = cpfKey;
-        var novaStringConexao = $"Host=192.168.1.125;Port=5432;Database={novoBanco};Username=postgres;Password=5510;";
+        var novaStringConexao = $"Host=clinicsmart.ddns.net;Port=5432;Database={novoBanco};Username=postgres;Password=5510;";
         //var novaStringConexao = $"Host=localhost;Port=5432;Database={novoBanco};Username=postgres;Password=5510;";
-        var masterConnection = $"Host=192.168.1.125;Port=5432;Database=connections;Username=postgres;Password=5510;";
+        var masterConnection = $"Host=clinicsmart.ddns.net;Port=5432;Database=connections;Username=postgres;Password=5510;";
         //var masterConnection = "Host=localhost;Port=5432;Database=postgres;Username=postgres;Password=5510;";
 
         try

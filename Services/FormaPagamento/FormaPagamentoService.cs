@@ -144,11 +144,16 @@ public class FormaPagamentoService : IFormaPagamentoInterface
         {
             var query = _context.FormaPagamento.AsQueryable();
 
-            query = query.Where(p =>
-               (!codigoFiltro.HasValue || p.Id == codigoFiltro) &&
-               (!parcelasFiltro.HasValue || p.Parcelas == parcelasFiltro) &&
-               (!string.IsNullOrEmpty(descricaoFiltro) || p.Descricao == descricaoFiltro)
-            );
+            //query = query.Where(p =>
+            //   (!codigoFiltro.HasValue || p.Id == codigoFiltro) &&
+            //   (!parcelasFiltro.HasValue || p.Parcelas == parcelasFiltro) &&
+            //   (!string.IsNullOrEmpty(descricaoFiltro) || p.Descricao == descricaoFiltro)
+            //);
+            if (!string.IsNullOrEmpty(descricaoFiltro))
+                query = query.Where(p => p.Descricao.Contains(descricaoFiltro));
+
+            if (!string.IsNullOrEmpty(codigoFiltro.ToString()))
+                query = query.Where(p => p.Id == codigoFiltro);
 
             query = query.OrderBy(p => p.Id);
 

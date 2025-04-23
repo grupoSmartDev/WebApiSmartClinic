@@ -422,22 +422,29 @@ public class PacienteService : IPacienteInterface
         try
         {
             var query = _context.Paciente
-                .Include(p => p.Evolucoes)
-                    .ThenInclude(e => e.Exercicios)
-                .Include(p => p.Evolucoes)
-                    .ThenInclude(e => e.Atividades)
-                .Include(pl => pl.Plano)
-                .Include(p => p.Plano)
-                .Include(f => f.FinancReceber)
-                    .ThenInclude(fs => fs.subFinancReceber)
-                .AsQueryable();
+           .Include(p => p.Evolucoes)
+               .ThenInclude(e => e.Exercicios)
+           .Include(p => p.Evolucoes)
+               .ThenInclude(e => e.Atividades)
+           .Include(pl => pl.Plano)
+           .Include(p => p.Plano)
+           .Include(p => p.FinancReceber)
+               .ThenInclude(f => f.subFinancReceber)
+               .ThenInclude(f => f.TipoPagamento)
+           .AsQueryable();
+           
 
-            query = query.Where(x =>
-                (!codigoFiltro.HasValue || x.Id == codigoFiltro) &&
-                (string.IsNullOrEmpty(nomeFiltro) || x.Nome.Contains(nomeFiltro)) &&
-                (string.IsNullOrEmpty(cpfFiltro) || x.Cpf == cpfFiltro) &&
-                (string.IsNullOrEmpty(celularFiltro) || x.Celular == celularFiltro)
-                );
+            if (!string.IsNullOrEmpty(codigoFiltro.ToString()))
+                query = query.Where(p => p.Id == codigoFiltro);
+
+            if (!string.IsNullOrEmpty(nomeFiltro))
+                query = query.Where(p => p.Nome == nomeFiltro);
+
+            if (!string.IsNullOrEmpty(cpfFiltro))
+                query = query.Where(p => p.Cpf == cpfFiltro);
+
+            if (!string.IsNullOrEmpty(celularFiltro))
+                query = query.Where(p => p.Celular == celularFiltro);
 
             query = query.OrderBy(x => x.Id);
 

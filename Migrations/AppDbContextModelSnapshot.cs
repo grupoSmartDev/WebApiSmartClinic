@@ -523,10 +523,6 @@ namespace WebApiSmartClinic.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<string>("Password")
-                        .IsRequired()
-                        .HasColumnType("text");
-
                     b.Property<bool>("PeriodoTeste")
                         .HasColumnType("boolean");
 

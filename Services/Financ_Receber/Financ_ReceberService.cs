@@ -1,4 +1,4 @@
-
+using WebApiSmartClinic.Helpers;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Linq;
@@ -359,14 +359,14 @@ public class Financ_ReceberService : IFinanc_ReceberInterface
                 {
                     if (dataFiltroInicio.HasValue)
                     {
-                        dataFiltroInicio = DateTime.SpecifyKind(dataFiltroInicio.Value, DateTimeKind.Utc);
+                        dataFiltroInicio = Funcoes.FormataDataTimeFiltros(dataFiltroInicio, "I");
                         query = query.Where(p => p.DataVencimento >= dataFiltroInicio);
                     }
 
 
                     if (dataFiltroFim.HasValue)
                     {
-                        dataFiltroFim = DateTime.SpecifyKind(dataFiltroFim.Value, DateTimeKind.Utc);
+                        dataFiltroFim = Funcoes.FormataDataTimeFiltros(dataFiltroFim, "F");
                         query = query.Where(p => p.DataVencimento <= dataFiltroFim);
                     }
                 }

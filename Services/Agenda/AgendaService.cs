@@ -161,7 +161,7 @@ public class AgendaService : IAgendaInterface
                                     Desconto = parcela.Desconto,
                                     Juros = parcela.Juros,
                                     Multa = parcela.Multa,
-                                    DataVencimento = parcela.DataVencimento,
+                                    DataVencimento = dataAtual,
                                     Observacao = parcela.Observacao
                                 };
 

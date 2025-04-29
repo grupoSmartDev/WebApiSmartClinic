@@ -438,13 +438,13 @@ public class PacienteService : IPacienteInterface
                 query = query.Where(p => p.Id == codigoFiltro);
 
             if (!string.IsNullOrEmpty(nomeFiltro))
-                query = query.Where(p => p.Nome == nomeFiltro);
+                query = query.Where(p => p.Nome.ToLower().Contains(nomeFiltro.ToLower()));
 
             if (!string.IsNullOrEmpty(cpfFiltro))
-                query = query.Where(p => p.Cpf == cpfFiltro);
+                query = query.Where(p => p.Cpf.Trim().Contains(cpfFiltro.Trim()));
 
             if (!string.IsNullOrEmpty(celularFiltro))
-                query = query.Where(p => p.Celular == celularFiltro);
+                query = query.Where(p => p.Celular.Trim().Contains(celularFiltro.Trim()));
 
             query = query.OrderBy(x => x.Id);
 

@@ -95,20 +95,21 @@ public class AppDbContext : IdentityDbContext<User>
 
         modelBuilder.Entity<ProfissaoModel>().HasData(
             new ProfissaoModel { Id = 1, Descricao = "Administrador(a)", IsSystemDefault = true },
-            new ProfissaoModel { Id = 2, Descricao = "psicólogo(a)", IsSystemDefault = true },
+            new ProfissaoModel { Id = 2, Descricao = "Psicólogo(a)", IsSystemDefault = true },
             new ProfissaoModel { Id = 3, Descricao = "Fisioterapeuta", IsSystemDefault = true },
-            new ProfissaoModel { Id = 4, Descricao = "Dentista", IsSystemDefault = true }
+            new ProfissaoModel { Id = 4, Descricao = "Dentista", IsSystemDefault = true },
+            new ProfissaoModel { Id = 5, Descricao = "Médico", IsSystemDefault = true }
         );
 
         modelBuilder.Entity<StatusModel>().HasData(
             new StatusModel { Id = 1, Cor = "#4B89DC", Legenda = "Agendamento realizado com sucesso!", Status = "Agendado", IsSystemDefault = true },
             new StatusModel { Id = 2, Cor = "#3498DB", Legenda = "Confirmado", Status = "Confirmado", IsSystemDefault = true },
-            new StatusModel { Id = 3, Cor = "#5D9CEC", Legenda = "Em atendimento", Status = "em_atendimento", IsSystemDefault = true },
-            new StatusModel { Id = 4, Cor = "#2ECC71", Legenda = "Concluído", Status = "concluido", IsSystemDefault = true },
-            new StatusModel { Id = 5, Cor = "#E74C3C", Legenda = "Cancelado pelo paciente", Status = "cancelado_paciente", IsSystemDefault = true },
-            new StatusModel { Id = 6, Cor = "#E57373", Legenda = "Cancelado pela clínica", Status = "cancelado_clinica", IsSystemDefault = true },
-            new StatusModel { Id = 7, Cor = "#F9A825", Legenda = "Remarcado", Status = "remarcado", IsSystemDefault = true },
-            new StatusModel { Id = 8, Cor = "#E67E22", Legenda = "Não compareceu", Status = "nao_compareceu", IsSystemDefault = true }
+            new StatusModel { Id = 3, Cor = "#5D9CEC", Legenda = "Em atendimento", Status = "Em atendimento", IsSystemDefault = true },
+            new StatusModel { Id = 4, Cor = "#2ECC71", Legenda = "Concluído", Status = "Concluído", IsSystemDefault = true },
+            new StatusModel { Id = 5, Cor = "#E74C3C", Legenda = "Cancelado pelo paciente", Status = "Cancelado pelo paciente", IsSystemDefault = true },
+            new StatusModel { Id = 6, Cor = "#E57373", Legenda = "Cancelado pela clínica", Status = "Cancelado pela clínica", IsSystemDefault = true },
+            new StatusModel { Id = 7, Cor = "#F9A825", Legenda = "Remarcado", Status = "Remarcado", IsSystemDefault = true },
+            new StatusModel { Id = 8, Cor = "#E67E22", Legenda = "Não compareceu", Status = "Não compareceu", IsSystemDefault = true }
         );
 
         modelBuilder.Entity<FormaPagamentoModel>().HasData(

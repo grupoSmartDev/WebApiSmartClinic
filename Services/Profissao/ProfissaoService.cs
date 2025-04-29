@@ -76,6 +76,8 @@ public class ProfissaoService : IProfissaoInterface
 
         try
         {
+            resposta.Status = false;
+
             var profissao = await _context.Profissao.FirstOrDefaultAsync(x => x.Id == idProfissao);
             if (profissao == null)
             {
@@ -83,13 +85,21 @@ public class ProfissaoService : IProfissaoInterface
                 return resposta;
             }
 
-            _context.Remove(profissao);
-            await _context.SaveChangesAsync();
+            var profissional = await _context.Profissional.FirstOrDefaultAsync(x => x.ProfissaoId == idProfissao);
+            if (profissional == null)
+            {
+                _context.Remove(profissao);
+                await _context.SaveChangesAsync();
+                resposta.Status = true;
+                resposta.Mensagem = "Profissão excluída com sucesso.";
+            }
+            else resposta.Mensagem = "Profissionla vinculado.";
 
+            
             var query = _context.Profissao.AsQueryable();
 
             resposta = await PaginationHelper.PaginateAsync(query, pageNumber, pageSize);
-            resposta.Mensagem = "Profissao Excluido com sucesso";
+            
             
             return resposta;
 
@@ -141,19 +151,18 @@ public class ProfissaoService : IProfissaoInterface
         }
     }
 
-    public async Task<ResponseModel<List<ProfissaoModel>>> Listar(int pageNumber = 1, int pageSize = 10, int? codigoFiltro = null, string? nomeFiltro = null, bool paginar = true)
+    public async Task<ResponseModel<List<ProfissaoModel>>> Listar(int pageNumber = 1, int pageSize = 10, int? codigoFiltro = null, string? descricaoFiltro = null, bool paginar = true)
     {
         ResponseModel<List<ProfissaoModel>> resposta = new ResponseModel<List<ProfissaoModel>>();
 
         try
         {
             var query = _context.Profissao.AsQueryable();
+          
 
-            // Aplicar filtros
-            query = query.Where(x =>
-                (!codigoFiltro.HasValue || x.Id == codigoFiltro.Value) &&
-                (string.IsNullOrEmpty(nomeFiltro) || x.Descricao.Contains(nomeFiltro))
-            );
+            if (!string.IsNullOrEmpty(descricaoFiltro))
+                query = query.Where(p => p.Descricao.ToLower().Contains(descricaoFiltro));
+
 
             // Ordenação padrão
             query = query.OrderBy(x => x.Id);

@@ -221,13 +221,17 @@ public class ProfissionalService : IProfissionalInterface
         {
             var query = _context.Profissional.AsQueryable();
 
-            // Aplicar filtros
-            query = query.Where(x =>
-                (!codigoFiltro.HasValue || x.Id == codigoFiltro.Value) &&
-                (!profissaoIdFiltro.HasValue || x.ProfissaoId == profissaoIdFiltro.Value) &&
-                (string.IsNullOrEmpty(nomeFiltro) || x.Nome.Contains(nomeFiltro)) &&
-                (string.IsNullOrEmpty(cpfFiltro) || x.Cpf.Contains(cpfFiltro))
-            );
+            if (!string.IsNullOrEmpty(codigoFiltro.ToString()))
+                query = query.Where(p => p.Id == codigoFiltro);
+
+            if (!string.IsNullOrEmpty(profissaoIdFiltro.ToString()))
+                query = query.Where(p => p.ProfissaoId == profissaoIdFiltro);
+
+            if (!string.IsNullOrEmpty(nomeFiltro))
+                query = query.Where(p => p.Nome.ToLower().Contains(nomeFiltro.ToLower()));
+
+            if (!string.IsNullOrEmpty(cpfFiltro))
+                query = query.Where(p => p.Cpf.Trim().ToLower().Contains(cpfFiltro.Trim()));
 
             // Ordenação padrão
             query = query.OrderBy(x => x.Id);

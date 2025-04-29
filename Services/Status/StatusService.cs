@@ -78,6 +78,8 @@ public class StatusService : IStatusInterface
 
         try
         {
+            resposta.Status = false; 
+
             var status = await _context.Status.FirstOrDefaultAsync(x => x.Id == idStatus);
             if (status == null)
             {
@@ -85,11 +87,16 @@ public class StatusService : IStatusInterface
                 return resposta;
             }
 
-            _context.Remove(status);
-            await _context.SaveChangesAsync();
+            if (!status.IsSystemDefault)
+            {
+                _context.Remove(status);
+                await _context.SaveChangesAsync();
+                resposta.Status = true;
+            }
 
+           
             resposta.Dados = await _context.Status.ToListAsync();
-            resposta.Mensagem = "Status Excluido com sucesso";
+            resposta.Mensagem = status.IsSystemDefault ?  "Status não pode ser excluído." : "Status Excluido com sucesso";
             return resposta;
 
         }
@@ -156,6 +163,8 @@ public class StatusService : IStatusInterface
             {
                 query = query.Where(x => x.Cor.Contains(cor));
             }
+
+            query = query.OrderBy(x => x.Id);
 
             // Contar total para paginação
             int totalItens = await query.CountAsync();

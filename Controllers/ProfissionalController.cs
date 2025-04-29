@@ -18,10 +18,10 @@ namespace WebApiSmartClinic.Controllers
 
         [HttpGet("Listar")]
         public async Task<ActionResult<ResponseModel<List<ProfissionalModel>>>> Listar([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10,
-            [FromQuery] int? codigoFiltro = null, [FromQuery] string? nomeFiltro = null,
+            [FromQuery] int? idFiltro = null, [FromQuery] string? nomeFiltro = null,
             [FromQuery] string? cpfFiltro = null, [FromQuery] int? profissaoIdFiltro = null, [FromQuery] bool paginar = true)
         {
-            var profissional = await _profissional.Listar(pageNumber, pageSize, codigoFiltro, nomeFiltro, cpfFiltro, profissaoIdFiltro, paginar);
+            var profissional = await _profissional.Listar(pageNumber, pageSize, idFiltro, nomeFiltro, cpfFiltro, profissaoIdFiltro, paginar);
             return Ok(profissional);
         }
 

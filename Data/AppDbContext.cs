@@ -129,7 +129,7 @@ public class AppDbContext : IdentityDbContext<User>
         );
 
         modelBuilder.Entity<SalaModel>().HasData(
-            new SalaModel { Id = 1, Nome = "Principal", Capacidade = 10, Tipo = "Geral", local = "Principal", Status = "Ativo", IsSystemDefault = true }
+            new SalaModel { Id = 1, Nome = "Principal", Capacidade = 10, Tipo = "Geral", local = "Principal", Status = true, IsSystemDefault = true }
         );
 
 

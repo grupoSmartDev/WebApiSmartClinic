@@ -29,6 +29,7 @@ namespace WebApiSmartClinic.Services.Auth
         private readonly AppSettings _appSettings;
         private readonly IConnectionsService _connectionsService;
         private readonly IConnectionStringProvider _connectionStringProvider;
+        private readonly IServiceScopeFactory _scopeFactory;
         private readonly DataConnectionContext _contextDataConnection;
         private const long TamanhoMaximoFotoPerfilEmBytes = 10L * 1024 * 1024; // 10 MB
 
@@ -39,7 +40,8 @@ namespace WebApiSmartClinic.Services.Auth
             IOptions<AppSettings> appSettings,
             IConnectionsService connectionsService,
             IConnectionStringProvider connectionStringProvider, 
-            DataConnectionContext contextDataConnection)
+            DataConnectionContext contextDataConnection,
+            IServiceScopeFactory scopeFactory)
         {
             _signInManager = signInManager;
             _userManager = userManager;
@@ -48,6 +50,7 @@ namespace WebApiSmartClinic.Services.Auth
             _connectionsService = connectionsService;
             _connectionStringProvider = connectionStringProvider;
             _contextDataConnection = contextDataConnection;
+            _scopeFactory = scopeFactory;
         }
 
         public async Task<object> LoginAsync(UserLoginRequest model, string? userKey)
@@ -65,6 +68,11 @@ namespace WebApiSmartClinic.Services.Auth
 
             // Define a conexão ANTES de chamar o SignInManager
             _connectionStringProvider.SetConnectionString(conn);
+            
+            
+            using var scope = _scopeFactory.CreateScope();
+            var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+            await dbContext.Database.MigrateAsync();
 
             model.RememberMe = true;
 

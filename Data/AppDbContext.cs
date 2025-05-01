@@ -134,7 +134,7 @@ public class AppDbContext : IdentityDbContext<User>
 
 
         modelBuilder.Entity<ConvenioModel>().HasData(
-            new ConvenioModel { Id = 1, Nome = "Unimed", PeriodoCarencia = "0", Ativo = true, RegistroAvs = "ABC", Telefone = "3434-3434", Email = "email@email.com", IsSystemDefault = true }
+            new ConvenioModel { Id = 1, Nome = "Unimed", PeriodoCarencia = "0", Ativo = true, RegistroAvs = "ABC", Telefone = "343434-3434", Email = "email@email.com", IsSystemDefault = true }
         );
 
 

@@ -47,6 +47,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL;
 using WebApiSmartClinic.Services.CadastroCliente;
 using WebApiSmartClinic.Services.Auth;
 using WebApiSmartClinic.Services.DespesaFixa;
+using WebApiSmartClinic.Services.MailService;
 
 var builder = WebApplication.CreateBuilder(args);
 var services = builder.Services;
@@ -116,6 +117,7 @@ services.Configure<RequestLocalizationOptions>(options =>
     options.SupportedUICultures = supportedCultures;
 });
 
+services.Configure<EmailSettings>(builder.Configuration.GetSection("EmailSettings"));
 // Swagger
 services.AddSwaggerGen(c =>
 {
@@ -170,6 +172,7 @@ services.AddScoped<IAtividadeInterface, AtividadeService>();
 services.AddScoped<IEvolucaoInterface, EvolucaoService>();
 services.AddScoped<IProfissaoInterface, ProfissaoService>();
 services.AddScoped<IFichaAvaliacaoInterface, FichaAvaliacaoService>();
+services.AddScoped<IEmailService, EmailService>();
 services.AddScoped<IPlanoContaInterface, PlanoContaService>();
 services.AddScoped<IDespesaFixaInterface, DespesaFixaService>();
 services.AddScoped<ICadastroClienteInterface, CadastroClienteService>();

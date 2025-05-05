@@ -168,7 +168,7 @@ public class ProcedimentoService : IProcedimentoInterface
         }
     }
 
-    public async Task<ResponseModel<List<ProcedimentoModel>>> Listar(int pageNumber = 1, int pageSize = 10, int? codigoFiltro = null, string? nomeFiltro = null, string? descricaoFiltro = null, bool paginar = true)
+    public async Task<ResponseModel<List<ProcedimentoModel>>> Listar(int pageNumber = 1, int pageSize = 10, int? idFiltro = null, string? nomeFiltro = null, string? descricaoFiltro = null, bool paginar = true)
     {
         ResponseModel<List<ProcedimentoModel>> resposta = new ResponseModel<List<ProcedimentoModel>>();
 
@@ -177,11 +177,15 @@ public class ProcedimentoService : IProcedimentoInterface
             // Query do banco de dados
             var query = _context.Procedimento.AsQueryable();
 
-            query = query.Where(x =>
-                (!codigoFiltro.HasValue || x.Id == codigoFiltro) &&
-                (string.IsNullOrEmpty(nomeFiltro) || x.Nome == nomeFiltro) &&
-                (string.IsNullOrEmpty(descricaoFiltro) || x.Descricao == descricaoFiltro)
-            );
+    
+            if (!string.IsNullOrEmpty(idFiltro.ToString()))
+                query = query.Where(x => x.Id == idFiltro);
+
+            if(!string.IsNullOrEmpty(nomeFiltro))
+                query = query.Where(x => x.Nome.ToLower().Contains(nomeFiltro.ToLower()));
+
+            if (!string.IsNullOrEmpty(descricaoFiltro))
+                query = query.Where(x => x.Descricao.ToLower().Contains(descricaoFiltro.ToLower()));
 
             query = query.OrderBy(x => x.Id);
 

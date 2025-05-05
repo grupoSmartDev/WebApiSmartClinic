@@ -133,7 +133,7 @@ public class CategoriaService : ICategoriaInterface
         }
     }
 
-    public async Task<ResponseModel<List<CategoriaModel>>> Listar(int pageNumber = 1, int pageSize = 10, int? codigoFiltro = null, string? nomeFiltro = null, bool paginar = true)
+    public async Task<ResponseModel<List<CategoriaModel>>> Listar(int pageNumber = 1, int pageSize = 10, int? idFiltro = null, string? descricaoFiltro = null, bool paginar = true)
     {
         ResponseModel<List<CategoriaModel>> resposta = new ResponseModel<List<CategoriaModel>>();
 
@@ -141,10 +141,12 @@ public class CategoriaService : ICategoriaInterface
         {
             var query = _context.Categoria.AsQueryable();
 
-            query = query.Where(x =>
-                (!codigoFiltro.HasValue || x.Id == codigoFiltro) &&
-                (string.IsNullOrEmpty(nomeFiltro) || x.Nome == nomeFiltro)
-            );
+          
+            if (idFiltro.HasValue)
+                query = query.Where(x => x.Id == idFiltro);
+
+            if (!string.IsNullOrEmpty(descricaoFiltro))
+                query = query.Where(x => x.Nome.ToLower().Contains(descricaoFiltro));
 
             query.OrderBy(x => x.Id);
 

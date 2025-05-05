@@ -146,7 +146,7 @@ public class ExercicioService : IExercicioInterface
         }
     }
 
-    public async Task<ResponseModel<List<ExercicioModel>>> Listar(int pageNumber = 1, int pageSize = 10, int? codigoFiltro = null, string? nomeFiltro = null, bool paginar = true)
+    public async Task<ResponseModel<List<ExercicioModel>>> Listar(int pageNumber = 1, int pageSize = 10, int? idFiltro = null, string? descricaoFiltro = null,  bool paginar = true)
     {
         ResponseModel<List<ExercicioModel>> resposta = new ResponseModel<List<ExercicioModel>>();
 
@@ -154,13 +154,13 @@ public class ExercicioService : IExercicioInterface
         {
             var query = _context.Exercicio.AsQueryable();
 
-            query = query.Where(x =>
-                (!codigoFiltro.HasValue || x.Id == codigoFiltro) &&
-                (string.IsNullOrEmpty(nomeFiltro) || x.Descricao == nomeFiltro)
-            );
+            if (!string.IsNullOrEmpty(idFiltro.ToString()))
+                query = query.Where(p => p.Id == idFiltro);
 
-            query.OrderBy(x => x.Id);
+            if (!string.IsNullOrEmpty(descricaoFiltro))
+                query = query.Where(p => p.Descricao.ToLower().Contains(descricaoFiltro.ToLower()));
 
+         
             resposta = paginar ? await PaginationHelper.PaginateAsync(query, pageNumber, pageSize) : new ResponseModel<List<ExercicioModel>> { Dados = await query.ToListAsync() };
             resposta.Mensagem = "Todos os Exercicio foram encontrados";
             return resposta;

@@ -17,9 +17,9 @@ namespace WebApiSmartClinic.Controllers
         }
 
         [HttpGet("Listar")]
-        public async Task<ActionResult> Listar([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10, [FromQuery] int? codigoFiltro = null, [FromQuery] string? nomeFiltro = null, [FromQuery] string? descricaoFiltro = null, [FromQuery] bool paginar = true)
+        public async Task<ActionResult> Listar([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10, [FromQuery] int? idFiltro = null, [FromQuery] string? nomeFiltro = null, [FromQuery] string? descricaoFiltro = null, [FromQuery] bool paginar = true)
         {
-            var response = await _procedimento.Listar(pageNumber, pageSize, codigoFiltro, nomeFiltro, descricaoFiltro, paginar);
+            var response = await _procedimento.Listar(pageNumber, pageSize, idFiltro, nomeFiltro, descricaoFiltro, paginar);
 
             if (!response.Status)
                 return BadRequest(response);

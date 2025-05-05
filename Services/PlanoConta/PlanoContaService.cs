@@ -197,7 +197,7 @@ public class PlanoContaService : IPlanoContaInterface
         }
     }
 
-    public async Task<ResponseModel<List<PlanoContaModel>>> Listar(int pageNumber = 1, int pageSize = 10, string? codigoFiltro = null, string? nomeFiltro = null, Tipo? tipoFiltro = null, bool? inativoFiltro = null, bool paginar = true)
+    public async Task<ResponseModel<List<PlanoContaModel>>> Listar(int pageNumber = 1, int pageSize = 10, string? idFiltro = null, string? nomeFiltro = null, Tipo? tipoFiltro = null, bool? inativoFiltro = null, bool paginar = true)
     {
         ResponseModel<List<PlanoContaModel>> resposta = new ResponseModel<List<PlanoContaModel>>();
 
@@ -208,13 +208,12 @@ public class PlanoContaService : IPlanoContaInterface
                 .Include(p => p.SubPlanos) // Inclui as subcontas relacionadas
                 .AsQueryable();
 
-            // Aplicacao de filtros
-            query = query.Where(p =>
-                (string.IsNullOrEmpty(codigoFiltro) || p.Codigo.Contains(codigoFiltro)) &&
-                (string.IsNullOrEmpty(nomeFiltro) || p.Nome.Contains(nomeFiltro)) &&
-                (!tipoFiltro.HasValue || p.Tipo.ToString().Contains(p.Tipo.ToString())) &&
-                (!inativoFiltro.HasValue || p.Inativo == inativoFiltro)
-            );
+            
+            if (!string.IsNullOrEmpty(idFiltro))
+                query = query.Where(x => x.Id == Convert.ToInt32(idFiltro));
+
+            if (!string.IsNullOrEmpty(nomeFiltro))
+                query = query.Where(x => x.Nome.ToLower().Contains(nomeFiltro.ToLower()));
 
             // Ordenacao padrao (cuidado ao mudar a ordenacao pq pode afetar/dificultar a visualizacao de pais e filhos)
             query = query.OrderBy(p => p.Codigo);

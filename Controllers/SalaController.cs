@@ -17,9 +17,9 @@ public class SalaController : ControllerBase
     }
 
     [HttpGet("Listar")]
-    public async Task<ActionResult<ResponseModel<List<SalaModel>>>> Listar([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10, [FromQuery] int? codigoFiltro = null, [FromQuery] string? nomeFiltro = null, [FromQuery] string? localFiltro = null, [FromQuery] int? capacidadeFiltro = null, [FromQuery] bool paginar = true)
+    public async Task<ActionResult<ResponseModel<List<SalaModel>>>> Listar([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10, [FromQuery] int? idFiltro = null, [FromQuery] string? nomeFiltro = null, [FromQuery] string? localFiltro = null, [FromQuery] int? capacidadeFiltro = null, [FromQuery] bool paginar = true)
     {
-        var sala = await _context.Listar(pageNumber, pageSize, codigoFiltro, nomeFiltro, localFiltro, capacidadeFiltro, paginar);
+        var sala = await _context.Listar(pageNumber, pageSize, idFiltro, nomeFiltro, localFiltro, capacidadeFiltro, paginar);
         return Ok(sala);
     }
 

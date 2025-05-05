@@ -16,7 +16,7 @@ namespace WebApiSmartClinic.Controllers
             _centrocusto = centrocusto;
         }
 
-        [HttpGet("Listar")]
+        [HttpGet("ListarAntigo")]
         public async Task<ActionResult<ResponseModel<List<CentroCustoModel>>>> ListarCentroCusto()
         {
             var centrocusto = await _centrocusto.ListarCentroCusto();
@@ -50,5 +50,13 @@ namespace WebApiSmartClinic.Controllers
             var centrocusto = await _centrocusto.DeleteCentroCusto(idCentroCusto);
             return Ok(centrocusto);
         }
+
+        [HttpGet("Listar")]
+        public async Task<ActionResult<ResponseModel<List<CentroCustoModel>>>> Listar(int pageNumber = 1, int pageSize = 10, string? idFiltro = null, string? descricaoFiltro = null, string? tipoFiltro = null, bool? inativoFiltro = null, bool paginar = true)
+        {
+            var centrocusto = await _centrocusto.Listar(pageNumber, pageSize, idFiltro, descricaoFiltro, tipoFiltro, inativoFiltro, paginar);
+            return Ok(centrocusto);
+        }
+
     }
 }

@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using WebApiSmartClinic.Data;
 using WebApiSmartClinic.Dto.Sala;
 using WebApiSmartClinic.Models;
@@ -149,19 +150,26 @@ public class SalaService : ISalaInterface
         }
     }
 
-    public async Task<ResponseModel<List<SalaModel>>> Listar(int pageNumber = 1, int pageSize = 10, int? codigoFiltro = null, string? nomeFiltro = null, string? localFiltro = null, int? capacidadeFiltro = null, bool paginar = true)
+    public async Task<ResponseModel<List<SalaModel>>> Listar(int pageNumber = 1, int pageSize = 10, int? idFiltro = null, string? nomeFiltro = null, string? localFiltro = null, int? capacidadeFiltro = null, bool paginar = true)
     {
         ResponseModel<List<SalaModel>> resposta = new ResponseModel<List<SalaModel>>();
 
         try
         {
             var query = _context.Sala.AsQueryable();
-            query = query.Where(x => 
-                (!codigoFiltro.HasValue || x.Id == codigoFiltro) &&
-                (!capacidadeFiltro.HasValue || x.Capacidade == capacidadeFiltro) &&
-                (string.IsNullOrEmpty(nomeFiltro) || x.Nome == nomeFiltro) &&            
-                (string.IsNullOrEmpty(localFiltro) || x.local == localFiltro)
-            );
+          
+            if(idFiltro.HasValue)
+                query = query.Where(x => x.Id == idFiltro.Value);
+
+            if (!string.IsNullOrEmpty(nomeFiltro))
+                query = query.Where(x => x.Nome.ToLower().Contains(nomeFiltro.ToLower()));
+
+            if (!string.IsNullOrEmpty(localFiltro))
+                query = query.Where(x => x.local.ToLower().Contains(localFiltro.ToLower()));
+
+            if (capacidadeFiltro.HasValue)
+                query = query.Where(x => x.Capacidade == capacidadeFiltro);
+
 
             query = query.OrderBy(x => x.Id);
 

@@ -143,11 +143,22 @@ public class ConselhoService : IConselhoInterface
         {
             var query = _context.Conselho.AsQueryable();
 
-            query = query.Where(x =>
-                (!codigoFiltro.HasValue || x.Id == codigoFiltro) &&
-                (string.IsNullOrEmpty(nomeFiltro) || x.Nome == nomeFiltro) &&
-                (string.IsNullOrEmpty(siglaFiltro) || x.Sigla == siglaFiltro)
-            );
+            //query = query.Where(x =>
+            //    (!codigoFiltro.HasValue || x.Id == codigoFiltro) &&
+            //    (string.IsNullOrEmpty(nomeFiltro) || x.Nome == nomeFiltro) &&
+            //    (string.IsNullOrEmpty(siglaFiltro) || x.Sigla == siglaFiltro)
+            //);
+
+
+            if (!string.IsNullOrEmpty(codigoFiltro.ToString()))
+                query = query.Where(p => p.Id == codigoFiltro);
+
+            if (!string.IsNullOrEmpty(nomeFiltro))
+                query = query.Where(x => x.Nome.ToLower().Contains(nomeFiltro));
+
+            if (!string.IsNullOrEmpty(siglaFiltro))
+                query = query.Where(x => x.Sigla.ToLower() == siglaFiltro.ToLower());
+
 
             query = query.OrderBy(x => x.Id);
 

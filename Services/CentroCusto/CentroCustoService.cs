@@ -174,6 +174,40 @@ public class CentroCustoService : ICentroCustoInterface
         }
     }
 
+    public async Task<ResponseModel<List<CentroCustoModel>>> Listar(int pageNumber = 1, int pageSize = 10, string? idFiltro = null, string? descricaoFiltro = null, string? tipoFiltro = null, bool? inativoFiltro = null, bool paginar = true)
+    {
+        ResponseModel<List<CentroCustoModel>> resposta = new ResponseModel<List<CentroCustoModel>>();
+        try
+        {
+            var query = _context.CentroCusto
+                .Include(sc => sc.SubCentrosCusto)
+                .AsQueryable();
+
+            if (!string.IsNullOrEmpty(idFiltro))
+                query = query.Where(x => x.Id == Convert.ToInt32(idFiltro));
+
+            if (!string.IsNullOrEmpty(descricaoFiltro))
+                query = query.Where(x => x.Descricao.ToLower().Contains(descricaoFiltro.ToLower()));
+
+            if(!string.IsNullOrEmpty(tipoFiltro))
+                query = query.Where(x => x.Tipo ==  tipoFiltro);
+
+            query = query.OrderBy(p => p.Id);
+
+            resposta = paginar ? await PaginationHelper.PaginateAsync(query, pageNumber, pageSize) : new ResponseModel<List<CentroCustoModel>> { Dados = await query.ToListAsync() };
+            resposta.Mensagem = "Centro de custo listados com sucesso.";
+
+            return resposta;
+        }
+        catch (Exception e)
+        {
+            resposta.Mensagem = e.Message;
+            resposta.Status = false;
+
+            return resposta;
+        }
+    }
+
     public async Task<ResponseModel<List<CentroCustoModel>>> ListarCentroCusto()
     {
         ResponseModel<List<CentroCustoModel>> resposta = new ResponseModel<List<CentroCustoModel>>();

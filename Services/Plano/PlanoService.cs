@@ -249,7 +249,7 @@ public class PlanoService : IPlanoInterface
                     DataInicio = planoCreateDto.DataInicio,
                     DataFim = planoCreateDto.DataFim,
                     Ativo = planoCreateDto.Ativo,
-                    PacienteId = planoCreateDto.PacienteId,
+                    PacienteId = paciente.Id,
                     FinanceiroId = planoCreateDto.FinanceiroId,
                     TipoMes = planoCreateDto.TipoMes
                 };

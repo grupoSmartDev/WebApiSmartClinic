@@ -134,7 +134,7 @@ public class TipoPagamentoService : ITipoPagamentoInterface
         }
     }
 
-    public async Task<ResponseModel<List<TipoPagamentoModel>>> Listar(int pageNumber = 1, int pageSize = 10, int? codigoFiltro = null, string? descricaoFiltro = null, bool paginar = true)
+    public async Task<ResponseModel<List<TipoPagamentoModel>>> Listar(int pageNumber = 1, int pageSize = 10, int? idFiltro = null, string? descricaoFiltro = null, bool paginar = true)
     {
         ResponseModel<List<TipoPagamentoModel>> resposta = new ResponseModel<List<TipoPagamentoModel>>();
 
@@ -143,10 +143,10 @@ public class TipoPagamentoService : ITipoPagamentoInterface
             var query = _context.TipoPagamento.AsQueryable();
 
             if (!string.IsNullOrEmpty(descricaoFiltro))
-                query = query.Where(p => p.Descricao.Contains(descricaoFiltro));
+                query = query.Where(p => p.Descricao.ToLower().Contains(descricaoFiltro.ToLower()));
 
-            if (!string.IsNullOrEmpty(codigoFiltro.ToString()))
-                query = query.Where(p => p.Id == codigoFiltro);
+            if (!string.IsNullOrEmpty(idFiltro.ToString()))
+                query = query.Where(p => p.Id == idFiltro);
 
             query = query.OrderBy(p => p.Id);
 

@@ -284,5 +284,18 @@ public class AppDbContext : IdentityDbContext<User>
                 .WithMany()
                 .HasForeignKey(s => s.FormaPagamentoId);
         });
+
+        modelBuilder.Entity<ProfissionalModel>()
+             .HasOne(p => p.Conselho)
+             .WithMany()  // Se ConselhoModel não tiver uma coleção de profissionais
+             .HasForeignKey(p => p.ConselhoId)
+             .IsRequired(false);  // Torna o relacionamento opcional
+
+        // Configuração do relacionamento entre Profissional e Profissão (opcional)
+        modelBuilder.Entity<ProfissionalModel>()
+            .HasOne(p => p.Profissao)
+            .WithMany()  // Se ProfissaoModel não tiver uma coleção de profissionais
+            .HasForeignKey(p => p.ProfissaoId)
+            .IsRequired(false);  // Torna o relacionamento opcional
     }
 }

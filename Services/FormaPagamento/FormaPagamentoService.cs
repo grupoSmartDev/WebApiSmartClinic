@@ -136,7 +136,7 @@ public class FormaPagamentoService : IFormaPagamentoInterface
         }
     }
 
-    public async Task<ResponseModel<List<FormaPagamentoModel>>> Listar(int pageNumber = 1, int pageSize = 10, int? codigoFiltro = null, int? parcelasFiltro = null, string? descricaoFiltro = null, bool paginar = true)
+    public async Task<ResponseModel<List<FormaPagamentoModel>>> Listar(int pageNumber = 1, int pageSize = 10, int? idFiltro = null, int? parcelasFiltro = null, string? descricaoFiltro = null, bool paginar = true)
     {
         ResponseModel<List<FormaPagamentoModel>> resposta = new ResponseModel<List<FormaPagamentoModel>>();
 
@@ -152,8 +152,8 @@ public class FormaPagamentoService : IFormaPagamentoInterface
             if (!string.IsNullOrEmpty(descricaoFiltro))
                 query = query.Where(p => p.Descricao.Contains(descricaoFiltro));
 
-            if (!string.IsNullOrEmpty(codigoFiltro.ToString()))
-                query = query.Where(p => p.Id == codigoFiltro);
+            if (idFiltro.HasValue)
+                query = query.Where(p => p.Id == idFiltro);
 
             query = query.OrderBy(p => p.Id);
 

@@ -1,4 +1,6 @@
 
+using WebApiSmartClinic.Models;
+
 namespace WebApiSmartClinic.Dto.Profissional
 {
     public class ProfissionalCreateDto
@@ -11,9 +13,11 @@ namespace WebApiSmartClinic.Dto.Profissional
         public string Celular { get; set; }
         public string? Sexo { get; set; }
         public int? ConselhoId { get; set; }
+        public ConselhoModel? Conselho { get; set; }
         public string? RegistroConselho { get; set; }
         public string? UfConselho { get; set; }
         public int? ProfissaoId { get; set; }
+        public ProfissaoModel? Profissao { get; set; }
         public string? Cbo { get; set; }
         public string? Rqe { get; set; }
         public string? Cnes { get; set; }

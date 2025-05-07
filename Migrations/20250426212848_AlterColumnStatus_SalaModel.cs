@@ -10,22 +10,16 @@ namespace WebApiSmartClinic.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.AlterColumn<bool>(
-                name: "Status",
-                table: "Sala",
-                type: "boolean",
-                nullable: false,
-                defaultValue: false,
-                oldClrType: typeof(string),
-                oldType: "text",
-                oldNullable: true);
+            // Passo 1: Atualizar valores existentes para TRUE/FALSE
+            migrationBuilder.Sql("UPDATE \"Sala\" SET \"Status\" = 'TRUE' WHERE \"Status\" ILIKE 'true' OR \"Status\" ILIKE 'ativo';");
+            migrationBuilder.Sql("UPDATE \"Sala\" SET \"Status\" = 'FALSE' WHERE \"Status\" IS NULL OR \"Status\" ILIKE 'false' OR \"Status\" ILIKE 'inativo';");
 
-            migrationBuilder.UpdateData(
-                table: "Sala",
-                keyColumn: "Id",
-                keyValue: 1,
-                column: "Status",
-                value: true);
+            // Passo 2: Alterar o tipo da coluna para boolean
+            migrationBuilder.Sql("ALTER TABLE \"Sala\" ALTER COLUMN \"Status\" TYPE boolean USING (\"Status\"::boolean);");
+
+            // Passo 3: Tornar NOT NULL e definir valor padrão
+            migrationBuilder.Sql("ALTER TABLE \"Sala\" ALTER COLUMN \"Status\" SET NOT NULL;");
+            migrationBuilder.Sql("ALTER TABLE \"Sala\" ALTER COLUMN \"Status\" SET DEFAULT FALSE;");
         }
 
         /// <inheritdoc />

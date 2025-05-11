@@ -228,6 +228,70 @@ namespace WebApiSmartClinic.Services.Auth
             return userResponse;
         }
 
+        public async Task<object> Editar(string id, UserUpdateRequest model)
+        {
+            var user = await _userManager.FindByIdAsync(id);
+            if (user == null)
+                return new { success = false, error = "Usuário não encontrado." };
+
+            // Atualiza dados
+            user.FirstName = model.FirstName;
+            user.LastName = model.LastName;
+            user.Email = model.Email;
+            user.UserName = model.Email;
+
+            // Se enviou a senha atual, checa e se for correto, altera
+            if (!string.IsNullOrWhiteSpace(model.Password))
+            {
+                var passwordCheck = await _userManager.CheckPasswordAsync(user, model.Password);
+                if (!passwordCheck)
+                {
+                    return new { success = false, error = "Senha atual incorreta." };
+                }
+
+                if (!string.IsNullOrWhiteSpace(model.NewPassword))
+                {
+                    if (!model.NewPassword.Equals(model.ConfirmNewPassword))
+                    {
+                        return new { success = false, error = "Nova senha e confirmação de senha não conferem." };
+                    }
+
+                    var passwordChangeResult = await _userManager.ChangePasswordAsync(user, model.Password, model.NewPassword);
+                    if (!passwordChangeResult.Succeeded)
+                    {
+                        return new { success = false, errors = passwordChangeResult.Errors };
+                    }
+                }
+            }
+
+            var result = await _userManager.UpdateAsync(user);
+            if (!result.Succeeded)
+                return new { success = false, errors = result.Errors };
+
+            // Recupera a role atual
+            var userRoles = await _userManager.GetRolesAsync(user);
+            var userRole = userRoles.FirstOrDefault() ?? string.Empty;
+
+            // Monta objeto de retorno
+            var userResponse = new UserResponseRequest
+            {
+                Id = user.Id,
+                FirstName = user.FirstName,
+                LastName = user.LastName,
+                Email = user.Email,
+                Role = userRole,
+                UserKey = user.UserKey
+            };
+
+            return new
+            {
+                success = true,
+                message = "Usuário atualizado com sucesso.",
+                user = userResponse
+            };
+        }
+
+
         public async Task<object> UpdateUserAsync(string id, UserUpdateRequest model, IFormFile? profilePicture, ClaimsPrincipal currentUser)
         {
             string tokenUserId = currentUser.FindFirstValue(ClaimTypes.NameIdentifier)!;

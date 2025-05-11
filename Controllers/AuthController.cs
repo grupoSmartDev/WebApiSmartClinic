@@ -55,17 +55,25 @@ namespace WebApiSmartClinic.Controllers
 
         //[ClaimsAuthorize("Usuário", "Visualizar")]
         [HttpGet("GetById/{id}")]
-        public async Task<IActionResult> GetById([FromQuery] string id)
+        public async Task<IActionResult> GetById([FromRoute] string id)
         {
             var result = await _authService.GetUserByIdAsync(id, User);
             return Ok(result);
         }
 
         //[ClaimsAuthorize("Usuário", "Alterar")]
-        [HttpPut("AlterarDadosUsuario/{id}"), DisableRequestSizeLimit]
-        public async Task<IActionResult> Update(string id, [FromForm] UserUpdateRequest model, IFormFile? profilePicture)
+        [HttpPut("Update/{id}"), DisableRequestSizeLimit]
+        public async Task<IActionResult> Update(string id, UserUpdateRequest model, IFormFile? profilePicture)
         {
             var result = await _authService.UpdateUserAsync(id, model, profilePicture, User);
+
+            return Ok(result);
+        }
+
+        [HttpPut("Editar/{id}")]
+        public async Task<IActionResult> Editar([FromRoute] string id, UserUpdateRequest model)
+        {
+            var result = await _authService.Editar(id, model);
             return Ok(result);
         }
 

@@ -78,6 +78,7 @@ public class PacienteService : IPacienteInterface
                 if (cpfExistente)
                 {
                     resposta.Mensagem = "CPF já cadastrado, verifique.";
+                    resposta.Status = false;
                     return resposta;
                 }
                 

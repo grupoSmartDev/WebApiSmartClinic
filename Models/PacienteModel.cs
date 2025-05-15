@@ -30,7 +30,7 @@ namespace WebApiSmartClinic.Models
             set => _dataNascimento = value.HasValue ? DateTime.SpecifyKind(value.Value.ToUniversalTime(), DateTimeKind.Utc) : null;
         }
 
-        [EmailAddress(ErrorMessage = "O email deve ser v�lido.")]
+        
         public string? Email { get; set; }
         public string? Uf { get; set; }
         public string? EstadoCivil { get; set; }

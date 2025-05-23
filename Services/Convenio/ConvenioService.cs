@@ -153,17 +153,24 @@ public class ConvenioService : IConvenioInterface
         {
             var query = _context.Convenio.AsQueryable();
 
-            query = query.Where(x =>
-                (!codigoFiltro.HasValue || x.Id == codigoFiltro) &&
-                (string.IsNullOrEmpty(nomeFiltro) || x.Nome == nomeFiltro) &&
-                (string.IsNullOrEmpty(telefoneFiltro) || x.Telefone == telefoneFiltro) &&
-                (string.IsNullOrEmpty(registroAvsFiltro) || x.RegistroAvs == registroAvsFiltro)
-            );
-                
+           
+            if (codigoFiltro.HasValue)
+                query = query.Where(c => c.Id == codigoFiltro);
+
+            if (!string.IsNullOrEmpty(nomeFiltro))
+                query = query.Where(c => c.Nome.ToLower().Contains(nomeFiltro.ToLower()));
+
+            if (!string.IsNullOrEmpty(telefoneFiltro))
+                query = query.Where(c => c.Telefone.Contains(telefoneFiltro));
+
+
+            if (!string.IsNullOrEmpty(registroAvsFiltro))
+                query = query.Where(c => c.Telefone.Contains(registroAvsFiltro));
+
             query = query.OrderBy(x => x.Id);
 
             resposta = paginar ? await PaginationHelper.PaginateAsync(query, pageNumber, pageSize) : new ResponseModel<List<ConvenioModel>> { Dados = await query.ToListAsync() };
-            resposta.Mensagem = "Todos os Convenio foram encontrados";
+            resposta.Mensagem = "Todos os Convênio foram encontrados";
             
             return resposta;
         }

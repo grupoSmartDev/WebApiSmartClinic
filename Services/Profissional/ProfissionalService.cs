@@ -1,6 +1,7 @@
 
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
+using Microsoft.IdentityModel.Tokens;
 using WebApiSmartClinic.Data;
 using WebApiSmartClinic.Dto.Agenda;
 using WebApiSmartClinic.Dto.Profissional;
@@ -34,6 +35,22 @@ public class ProfissionalService : IProfissionalInterface
 
         try
         {
+
+            var consultaProfissional = _context.Profissional.Where(x => x.Cpf == profissionalCreateDto.Cpf).ToArray();
+
+            if(!consultaProfissional.IsNullOrEmpty())
+            {
+                resposta.Mensagem = "CPF já cadastrado, verifique novamente.";
+                resposta.Status = false;
+
+    
+                var queryPesquisa = _context.Profissional.AsQueryable();
+
+                resposta = await PaginationHelper.PaginateAsync(queryPesquisa, pageNumber, pageSize);
+
+                return resposta;
+            }
+
             var profissional = new ProfissionalModel();
 
             profissional.Email = profissionalCreateDto.Email;

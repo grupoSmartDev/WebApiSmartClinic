@@ -18,7 +18,7 @@ namespace WebApiSmartClinic.Models
         [JsonIgnore]
         public ConvenioModel? Convenio { get; set; }
 
-        [Required(ErrorMessage = "O CPF � obrigat�rio.")]
+        [Required(ErrorMessage = "O CPF é obrigatório.")]
         public string? Cpf { get; set; }
 
         private DateTime? _dataNascimento;

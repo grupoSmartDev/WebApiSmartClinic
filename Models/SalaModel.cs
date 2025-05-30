@@ -1,4 +1,6 @@
-﻿namespace WebApiSmartClinic.Models;
+﻿using WebApiSmartClinic.Dto.SalaHorario;
+
+namespace WebApiSmartClinic.Models;
 
 public class SalaModel
 {
@@ -11,4 +13,5 @@ public class SalaModel
     public string? HorarioFincionamento { get; set; }
     public string? Observacao { get; set; }
     public bool IsSystemDefault { get; internal set; }
+    public virtual ICollection<SalaHorarioModel> HorariosFuncionamento { get; set; } = new List<SalaHorarioModel>();
 }

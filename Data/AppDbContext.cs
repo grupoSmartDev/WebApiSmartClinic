@@ -30,6 +30,7 @@ public class AppDbContext : IdentityDbContext<User>
     public DbSet<CentroCustoModel> CentroCusto { get; set; }  // Define uma tabela CentroCusto no banco de dados
     public DbSet<SubCentroCustoModel> SubCentroCusto { get; set; }  // Define uma tabela SubCentroCusto no banco de dados
     public DbSet<SalaModel> Sala { get; set; }
+    public DbSet<SalaHorarioModel> SalaHorario { get; set; }
     public DbSet<BancoModel> Banco { get; set; }
     public DbSet<ConselhoModel> Conselho { get; set; }
     public DbSet<ProcedimentoModel> Procedimento { get; set; }
@@ -132,7 +133,6 @@ public class AppDbContext : IdentityDbContext<User>
             new SalaModel { Id = 1, Nome = "Principal", Capacidade = 10, Tipo = "Geral", local = "Principal", Status = true, IsSystemDefault = true }
         );
 
-
         modelBuilder.Entity<ConvenioModel>().HasData(
             new ConvenioModel { Id = 1, Nome = "Unimed", PeriodoCarencia = "0", Ativo = true, RegistroAvs = "ABC", Telefone = "343434-3434", Email = "email@email.com", IsSystemDefault = true }
         );
@@ -168,7 +168,6 @@ public class AppDbContext : IdentityDbContext<User>
             .WithMany(p => p.FichasAvaliacao)
             .HasForeignKey(f => f.ProfissionalId)
             .OnDelete(DeleteBehavior.Restrict); // Evita a exclusão em cascata
-
 
         // Relacionamento: Paciente -> Evoluções
         modelBuilder.Entity<PacienteModel>()
@@ -217,10 +216,9 @@ public class AppDbContext : IdentityDbContext<User>
             .HasForeignKey(s => s.financReceberId);
 
         modelBuilder.Entity<Financ_ReceberModel>()
-       .HasOne(f => f.TipoPagamento)
-       .WithMany()
-       .HasForeignKey(f => f.TipoPagamentoId);
-
+           .HasOne(f => f.TipoPagamento)
+           .WithMany()
+           .HasForeignKey(f => f.TipoPagamentoId);
 
         // Relacionamento: Financ_Pagar -> SubFinanc_Pagar
         modelBuilder.Entity<Financ_PagarModel>()
@@ -233,7 +231,6 @@ public class AppDbContext : IdentityDbContext<User>
             .WithMany()
             .HasForeignKey(s => s.TipoPagamentoId);
 
-
         // Relacionamento: PlanoConta -> SubPlanoConta
         modelBuilder.Entity<PlanoContaModel>()
             .HasMany(f => f.SubPlanos)
@@ -243,8 +240,6 @@ public class AppDbContext : IdentityDbContext<User>
         modelBuilder.Entity<DespesaFixaModel>(entity =>
         {
             entity.ToTable("DespesasFixas");
-
-            // Relacionamento removido daqui, agora a despesa fixa se relaciona com o subitem, não com o cabeçalho
 
             // Outros relacionamentos da despesa fixa
             entity.HasOne(d => d.PlanoConta)
@@ -259,7 +254,6 @@ public class AppDbContext : IdentityDbContext<User>
                 .WithMany()
                 .HasForeignKey(d => d.FornecedorId);
         });
-
 
         modelBuilder.Entity<Financ_PagarSubModel>(entity =>
         {
@@ -297,5 +291,11 @@ public class AppDbContext : IdentityDbContext<User>
             .WithMany()  // Se ProfissaoModel não tiver uma coleção de profissionais
             .HasForeignKey(p => p.ProfissaoId)
             .IsRequired(false);  // Torna o relacionamento opcional
+
+        modelBuilder.Entity<SalaModel>()
+            .HasMany(s => s.HorariosFuncionamento)
+            .WithOne(h => h.Sala)
+            .HasForeignKey(h => h.SalaId)
+            .OnDelete(DeleteBehavior.Cascade);
     }
 }

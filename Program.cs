@@ -177,10 +177,10 @@ services.AddScoped<IPlanoContaInterface, PlanoContaService>();
 services.AddScoped<IDespesaFixaInterface, DespesaFixaService>();
 services.AddScoped<ICadastroClienteInterface, CadastroClienteService>();
 services.AddScoped<IConnectionStringProvider, ConnectionStringProvider>();
-services.AddSingleton<IConnectionStringProvider, ConnectionStringProvider>();
-services.AddScoped<AgendaService>();
 services.AddScoped<IConnectionsRepository, ConnectionsRepository>();
+services.AddScoped<AgendaService>();
 
+services.AddSingleton<IConnectionStringProvider, ConnectionStringProvider>();
 
 services.AddHttpClient();
 services.AddCors(options =>

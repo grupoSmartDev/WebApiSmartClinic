@@ -78,6 +78,7 @@ public class PacienteService : IPacienteInterface
                 if (cpfExistente)
                 {
                     resposta.Mensagem = "CPF já cadastrado, verifique.";
+                    resposta.Status = false;
                     return resposta;
                 }
                 
@@ -126,7 +127,7 @@ public class PacienteService : IPacienteInterface
                     Complemento = pacienteCreateDto.Complemento,
                     Cpf = cpfLimpo,
                     DataNascimento = pacienteCreateDto.DataNascimento,
-                    Email = pacienteCreateDto.Email,
+                    Email = string.IsNullOrEmpty(pacienteCreateDto.Email) ? "" : pacienteCreateDto.Email,
                     Uf = pacienteCreateDto.Uf,
                     EstadoCivil = pacienteCreateDto.EstadoCivil,
                     Logradouro = pacienteCreateDto.Logradouro,

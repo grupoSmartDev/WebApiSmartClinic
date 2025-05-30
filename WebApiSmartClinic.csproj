@@ -29,4 +29,8 @@
     <PackageReference Include="System.Text.Json" Version="8.0.5" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Services\SalaHorario\" />
+  </ItemGroup>
+
 </Project>

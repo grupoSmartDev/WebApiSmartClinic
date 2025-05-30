@@ -27,7 +27,6 @@ public class PacienteCreateDto
     [DataType(DataType.Date)]
     public DateTime? DataNascimento { get; set; }
 
-    [EmailAddress(ErrorMessage = "O email deve ser válido.")]
     public string? Email { get; set; }
 
     public string? Uf { get; set; }

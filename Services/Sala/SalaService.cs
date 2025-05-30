@@ -1,9 +1,11 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Org.BouncyCastle.Crypto;
 using WebApiSmartClinic.Data;
 using WebApiSmartClinic.Dto.Sala;
 using WebApiSmartClinic.Models;
 using WebApiSmartClinic.Services.Sala;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace WebApiSmartClinic.Services.Sala;
 
@@ -20,7 +22,10 @@ public class SalaService : ISalaInterface
         ResponseModel<SalaModel> resposta = new ResponseModel<SalaModel>();
         try
         {
-            var sala = await _context.Sala.FirstOrDefaultAsync(x => x.Id == idSala);
+            var sala = await _context.Sala
+                .Include(s => s.HorariosFuncionamento)
+                .FirstOrDefaultAsync(x => x.Id == idSala);
+
             if (sala == null)
             {
                 resposta.Mensagem = "Nenhuma Sala encontrada";
@@ -40,43 +45,50 @@ public class SalaService : ISalaInterface
         }
     }
 
-    public async Task<ResponseModel<List<SalaModel>>> Criar(SalaCreateDto salaCreateDto, int pageNumber = 1, int pageSize = 10)
+    public async Task<ResponseModel<List<SalaModel>>> Criar(SalaCreateDto dto, int pageNumber = 1, int pageSize = 10)
     {
-        ResponseModel<List<SalaModel>> resposta = new ResponseModel<List<SalaModel>>();
-
+        ResponseModel<List<SalaModel>> resposta = new();
         try
         {
-            var sala = new SalaModel();
-            if (salaCreateDto == null)
+            var novaSala = new SalaModel
             {
-                resposta.Mensagem = "Erro ao Criar um Status";
-                return resposta;
-            }
+                Nome = dto.Nome,
+                Capacidade = dto.Capacidade,
+                Tipo = dto.Tipo,
+                local = dto.Local,
+                Status = dto.Status,
+                Observacao = dto.Observacao,
+            };
 
-            sala.local = salaCreateDto.local;
-            sala.Capacidade = salaCreateDto.Capacidade;
-            sala.Observacao = salaCreateDto.Observacao;
-            sala.Status = salaCreateDto.Status;
-            sala.Tipo = salaCreateDto.Tipo;
-            sala.HorarioFincionamento = salaCreateDto.HorarioFincionamento;
-            sala.Nome = salaCreateDto.Nome;
-
-            _context.AddAsync(sala);
+            _context.Sala.Add(novaSala);
             await _context.SaveChangesAsync();
 
-            var query = _context.Sala.AsQueryable();
+            if (dto.HorariosFuncionamento?.Any() == true)
+            {
+                foreach (var horario in dto.HorariosFuncionamento)
+                {
+                    _context.SalaHorario.Add(new SalaHorarioModel
+                    {
+                        SalaId = novaSala.Id,
+                        DiaSemana = horario.DiaSemana,
+                        HoraInicio = TimeSpan.Parse(horario.HoraInicio),
+                        HoraFim = TimeSpan.Parse(horario.HoraFim),
+                        Ativo = true
+                    });
+                }
+                await _context.SaveChangesAsync();
+            }
 
-            resposta = await PaginationHelper.PaginateAsync(query, pageNumber, pageSize);
-            resposta.Mensagem = "Sala criado com sucesso";
-            return resposta;
+            resposta.Mensagem = "Sala cadastrada com sucesso";
+            resposta.Status = true;
+            resposta.Dados = await _context.Sala.ToListAsync();
         }
         catch (Exception ex)
         {
-            resposta.Mensagem = ex.Message;
+            resposta.Mensagem = $"Erro ao criar sala: {ex.Message}";
             resposta.Status = false;
-            return resposta;
         }
-
+        return resposta;
     }
 
     public async Task<ResponseModel<List<SalaModel>>> Delete(int idSala, int pageNumber = 1, int pageSize = 10)
@@ -111,44 +123,64 @@ public class SalaService : ISalaInterface
         }
     }
 
-    public async Task<ResponseModel<List<SalaModel>>> Editar(SalaEdicaoDto salaEdicaoDto, int pageNumber = 1, int pageSize = 10)
+    public async Task<ResponseModel<List<SalaModel>>> Editar(SalaEdicaoDto dto, int pageNumber = 1, int pageSize = 10)
     {
-        ResponseModel<List<SalaModel>> resposta = new ResponseModel<List<SalaModel>>();
-
+        ResponseModel<List<SalaModel>> resposta = new();
         try
         {
-            var sala = _context.Sala.FirstOrDefault(x => x.Id == salaEdicaoDto.Id);
+            var sala = await _context.Sala.FindAsync(dto.Id);
             if (sala == null)
             {
-                resposta.Mensagem = "Sala não encontrado";
+                resposta.Mensagem = "Sala não encontrada";
                 return resposta;
             }
 
-            sala.local = salaEdicaoDto.local;
-            sala.Capacidade = salaEdicaoDto.Capacidade;
-            sala.Observacao = salaEdicaoDto.Observacao;
-            sala.Status = salaEdicaoDto.Status;
-            sala.Tipo = salaEdicaoDto.Tipo;
-            sala.HorarioFincionamento = salaEdicaoDto.HorarioFincionamento;
-            sala.Nome = salaEdicaoDto.Nome;
+            sala.Nome = dto.Nome;
+            sala.Capacidade = dto.Capacidade;
+            sala.Tipo = dto.Tipo;
+            sala.local = dto.local;
+            sala.Status = dto.Status;
+            sala.HorarioFincionamento = dto.HorarioFincionamento;
+            sala.Observacao = dto.Observacao;
 
-            _context.Update(sala);
+            _context.Sala.Update(sala);
+            await _context.SaveChangesAsync();
+
+            // Atualizar horários
+            var antigos = _context.SalaHorario.Where(h => h.SalaId == sala.Id);
+            _context.SalaHorario.RemoveRange(antigos);
+
+            if (dto.HorariosFuncionamento?.Any() == true)
+            {
+                foreach (var horario in dto.HorariosFuncionamento)
+                {
+                    _context.SalaHorario.Add(new SalaHorarioModel
+                    {
+                        SalaId = sala.Id,
+                        DiaSemana = horario.DiaSemana,
+                        HoraInicio = horario.HoraInicio,
+                        HoraFim = horario.HoraFim,
+                        Ativo = horario.Ativo
+                    });
+                }
+            }
+
             await _context.SaveChangesAsync();
 
             var query = _context.Sala.AsQueryable();
-            
+
+            resposta.Status = true;
+            resposta.Mensagem = "Sala atualizada com sucesso";
             resposta = await PaginationHelper.PaginateAsync(query, pageNumber, pageSize);
-            resposta.Mensagem = "Sala Atualizado com sucesso";
-            return resposta;
         }
         catch (Exception ex)
         {
-
-            resposta.Mensagem = ex.Message;
+            resposta.Mensagem = $"Erro ao editar sala: {ex.Message}";
             resposta.Status = false;
-            return resposta;
         }
+        return resposta;
     }
+
 
     public async Task<ResponseModel<List<SalaModel>>> Listar(int pageNumber = 1, int pageSize = 10, int? idFiltro = null, string? nomeFiltro = null, string? localFiltro = null, int? capacidadeFiltro = null, bool paginar = true)
     {
@@ -156,8 +188,8 @@ public class SalaService : ISalaInterface
 
         try
         {
-            var query = _context.Sala.AsQueryable();
-          
+            var query = _context.Sala.Include(s => s.HorariosFuncionamento).AsQueryable();
+            var resultu = await query.ToListAsync();
             if(idFiltro.HasValue)
                 query = query.Where(x => x.Id == idFiltro.Value);
 

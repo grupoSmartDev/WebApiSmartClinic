@@ -161,7 +161,7 @@ public class ProfissaoService : IProfissaoInterface
           
 
             if (!string.IsNullOrEmpty(descricaoFiltro))
-                query = query.Where(p => p.Descricao.ToLower().Contains(descricaoFiltro));
+                query = query.Where(p => p.Descricao.ToLower().Contains(descricaoFiltro.ToLower()));
 
 
             // Ordenação padrão

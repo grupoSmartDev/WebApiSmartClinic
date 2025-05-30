@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using WebApiSmartClinic.Data;
@@ -11,9 +12,11 @@ using WebApiSmartClinic.Data;
 namespace WebApiSmartClinic.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250515000600_alteracaoemailk")]
+    partial class alteracaoemailk
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -172,36 +175,6 @@ namespace WebApiSmartClinic.Migrations
                     b.HasKey("UserId", "LoginProvider", "Name");
 
                     b.ToTable("AspNetUserTokens", (string)null);
-                });
-
-            modelBuilder.Entity("SalaHorarioModel", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<bool>("Ativo")
-                        .HasColumnType("boolean");
-
-                    b.Property<int>("DiaSemana")
-                        .HasColumnType("integer");
-
-                    b.Property<TimeSpan>("HoraFim")
-                        .HasColumnType("interval");
-
-                    b.Property<TimeSpan>("HoraInicio")
-                        .HasColumnType("interval");
-
-                    b.Property<int>("SalaId")
-                        .HasColumnType("integer");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("SalaId");
-
-                    b.ToTable("SalaHorario");
                 });
 
             modelBuilder.Entity("WebApiSmartClinic.Dto.Paciente.RecorrenciaPacienteDto", b =>
@@ -2468,17 +2441,6 @@ namespace WebApiSmartClinic.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("SalaHorarioModel", b =>
-                {
-                    b.HasOne("WebApiSmartClinic.Models.SalaModel", "Sala")
-                        .WithMany("HorariosFuncionamento")
-                        .HasForeignKey("SalaId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Sala");
-                });
-
             modelBuilder.Entity("WebApiSmartClinic.Dto.Paciente.RecorrenciaPacienteDto", b =>
                 {
                     b.HasOne("WebApiSmartClinic.Models.PacienteModel", "Paciente")
@@ -2948,11 +2910,6 @@ namespace WebApiSmartClinic.Migrations
             modelBuilder.Entity("WebApiSmartClinic.Models.ProfissionalModel", b =>
                 {
                     b.Navigation("FichasAvaliacao");
-                });
-
-            modelBuilder.Entity("WebApiSmartClinic.Models.SalaModel", b =>
-                {
-                    b.Navigation("HorariosFuncionamento");
                 });
 #pragma warning restore 612, 618
         }

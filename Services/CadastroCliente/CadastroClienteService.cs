@@ -13,6 +13,7 @@ using WebApiSmartClinic.Helpers;
 using WebApiSmartClinic.Models;
 using WebApiSmartClinic.Services.Auth;
 using WebApiSmartClinic.Services.ConnectionsService;
+using WebApiSmartClinic.Services.MailService;
 
 namespace WebApiSmartClinic.Services.CadastroCliente;
 
@@ -28,6 +29,7 @@ public class CadastroClienteService : ICadastroClienteInterface
     private readonly IConnectionStringProvider _connectionStringProvider;
     private readonly IServiceScopeFactory _scopeFactory;
     private readonly IServiceProvider _serviceProvider;
+    private readonly EmailService _mailService;
 
     public CadastroClienteService(
         SignInManager<User> signInManager,
@@ -38,7 +40,7 @@ public class CadastroClienteService : ICadastroClienteInterface
         IConnectionStringProvider connectionStringProvider, 
         DataConnectionContext contextDataConnection, 
         IServiceScopeFactory scopeFactory,
-        IServiceProvider serviceProvider)
+        IServiceProvider serviceProvider, IEmailService emailService)
     {
         _signInManager = signInManager;
         _userManager = userManager;
@@ -49,6 +51,7 @@ public class CadastroClienteService : ICadastroClienteInterface
         _connectionStringProvider = connectionStringProvider;
         _scopeFactory = scopeFactory;
         _serviceProvider = serviceProvider;
+        _mailService = (EmailService?)emailService;
     }
 
     public async Task CriarUsuario(UserCreateRequest userCreateRequest, string? userKey = null)
@@ -150,6 +153,10 @@ public class CadastroClienteService : ICadastroClienteInterface
                     ConfirmPassword = "Admin@123",
                     AcceptTerms = true,
                 };
+                using var authService2 = _scopeFactory.CreateAsyncScope();
+                var cu2 = authService2.ServiceProvider.GetRequiredService<AuthService>();
+
+                await cu2.RegisterAsync(userCreatAdmin, cpfKey);
 
                 var profissionalPadrao = new ProfissionalModel();
                 try
@@ -167,6 +174,8 @@ public class CadastroClienteService : ICadastroClienteInterface
 
                     throw;
                 }
+
+             
             }
 
             using var authService = _scopeFactory.CreateAsyncScope();
@@ -174,9 +183,31 @@ public class CadastroClienteService : ICadastroClienteInterface
             
             await cu.RegisterAsync(userCreateRequest, cpfKey);
 
+
+
             resposta.Status = true;
             resposta.Dados = cliente;
             resposta.Mensagem = "Cliente e banco criados com sucesso.";
+
+            if(resposta.Status && !existe)
+            {
+                try
+                {
+                    MailRequest mailRequest = new MailRequest();
+                    mailRequest.ToEmail = userCreateRequest.Email;
+                    mailRequest.Subject = "Conta criada com sucesso!";
+                    mailRequest.Body = GetHtmlContent(userCreateRequest.FirstName);
+
+
+                    await _mailService.SendEmailAsync(mailRequest);
+                }
+                catch (Exception)
+                {
+
+                    throw;
+                }
+            }
+      
         }
         catch (Exception ex)
         {
@@ -294,4 +325,47 @@ public class CadastroClienteService : ICadastroClienteInterface
             return resposta;
         }
     }
-}
+
+    private string GetHtmlContent(string nome)
+    {
+        string mensagem = $@"Olá {nome}. Seja bem vindo ao Clinc Smart!
+
+        Obrigado, sua senha padrão é Admin@123 e sua chave de acesso é o CPF informado para cadastro. 
+
+        Após o primeiro Login, recomendamos que você altere sua senha. 
+
+        Qualquer dúvida, entre em contato com o suporte.
+
+        Estamos felizes em ter você na Família Smart.";
+
+        string htmlContent = $@"
+                <!DOCTYPE html>
+                <html lang=""pt-BR"">
+                <head>
+                    <meta charset=""UTF-8"">
+                    <style>
+                        body {{
+                            font-family: Arial, sans-serif;
+                            line-height: 1.6;
+                            color: #333;
+                            max-width: 600px;
+                            margin: 0 auto;
+                            padding: 20px;
+                        }}
+                        .welcome-message {{
+                            background-color: #f4f4f4;
+                            border-left: 4px solid #007bff;
+                            padding: 15px;
+                        }}
+                    </style>
+                </head>
+                <body>
+                    <div class=""welcome-message"">
+                        <p>{mensagem.Replace("\n", "<br>")}</p>
+                    </div>
+                </body>
+                </html>";
+
+        return htmlContent;
+    }
+    }

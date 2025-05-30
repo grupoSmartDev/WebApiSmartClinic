@@ -31,24 +31,23 @@ public class SalaController : ControllerBase
     }
 
     [HttpPost("Criar")]
-    public async Task<ActionResult<ResponseModel<List<SalaModel>>>> Criar(SalaCreateDto salaCreateDto, int pageNumber = 1, int pageSize = 10)
+    public async Task<ActionResult<ResponseModel<List<SalaModel>>>> Criar([FromBody] SalaCreateDto salaCreateDto, int pageNumber = 1, int pageSize = 10)
     {
         var sala = await _context.Criar(salaCreateDto, pageNumber, pageSize);
         return Ok(sala);
     }
 
     [HttpPut("Editar")]
-    public async Task<ActionResult<ResponseModel<List<SalaModel>>>> Editar(SalaEdicaoDto salaEdicaoDto, int pageNumber = 1, int pageSize = 10)
+    public async Task<ActionResult<ResponseModel<List<SalaModel>>>> Editar([FromBody] SalaEdicaoDto salaEdicaoDto, int pageNumber = 1, int pageSize = 10)
     {
         var sala = await _context.Editar(salaEdicaoDto, pageNumber, pageSize);
         return Ok(sala);
     }
 
     [HttpDelete("Delete/{id}")]
-    public async Task<ActionResult<ResponseModel<List<SalaModel>>>> Delete(int id, int pageNumber = 1, int pageSize = 10)
+    public async Task<ActionResult<ResponseModel<List<SalaModel>>>> Delete([FromBody] int id, int pageNumber = 1, int pageSize = 10)
     {
         var sala = await _context.Delete(id, pageNumber, pageSize);
         return Ok(sala);
     }
-
 }

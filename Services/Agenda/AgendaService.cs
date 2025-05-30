@@ -754,6 +754,64 @@ public class AgendaService : IAgendaInterface
             return resposta;
         }
     }
+
+    public async Task<ResponseModel<List<AgendaModel>>> ListarGeral(int pageNumber = 1, int pageSize = 10, int? idFiltro = null, string? pacienteIdFiltro = null,
+        string? profissionalIdFiltro = null, string? statusIdFiltro = null, DateTime? dataFiltroInicio = null, DateTime? dataFiltroFim = null, bool paginar = true)
+    {
+        ResponseModel<List<AgendaModel>> resposta = new ResponseModel<List<AgendaModel>>();
+        try
+        {
+            var query = _context.Agenda
+                .Include(ag => ag.Paciente)
+                .Include(fp => fp.FinancReceber)
+                .Include(st => st.Status)
+                .Include(p => p.Profissional)
+                .AsQueryable();
+
+            if (dataFiltroInicio.HasValue)
+            {
+                dataFiltroInicio = DateTime.SpecifyKind(dataFiltroInicio.Value, DateTimeKind.Utc);
+                query = query.Where(p => p.Data >= dataFiltroInicio);
+            }
+
+            if (dataFiltroFim.HasValue)
+            {
+
+                dataFiltroFim = DateTime.SpecifyKind(dataFiltroFim.Value, DateTimeKind.Utc);
+                query = query.Where(p => p.Data <= dataFiltroFim);
+            }
+
+            if (!string.IsNullOrEmpty(pacienteIdFiltro))
+                query = query.Where(p => p.PacienteId.ToString() == pacienteIdFiltro);
+
+            if (!string.IsNullOrEmpty(profissionalIdFiltro))
+                query = query.Where(p => p.ProfissionalId.ToString() == profissionalIdFiltro);
+
+            if (!string.IsNullOrEmpty(statusIdFiltro))
+                query = query.Where(p => p.StatusId.ToString() == statusIdFiltro);
+
+            query = query.OrderBy(a => a.Id)
+                .ThenBy(a => a.Data);
+
+            // Executa a query com ou sem paginação
+            resposta.Dados = paginar
+                ? (await PaginationHelper.PaginateAsync(query, pageNumber, pageSize)).Dados
+                : await query.ToListAsync();
+
+            resposta.Mensagem = "Todas as agendas foram encontradas";
+
+            return resposta;
+
+        }
+        catch (Exception ex)
+        {
+
+            resposta.Mensagem = ex.Message;
+            resposta.Status = false;
+            return resposta;
+        }
+        
+    }
 }
 
 public class ContadoresDashboard

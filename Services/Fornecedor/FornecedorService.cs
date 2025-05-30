@@ -53,6 +53,7 @@ public class FornecedorService : IFornecedorInterface
             fornecedor.Fantasia = fornecedorCreateDto.Fantasia;
             fornecedor.Tipo = fornecedorCreateDto.Tipo;
             fornecedor.EstadoCivil = fornecedorCreateDto.EstadoCivil;
+            fornecedor.DataNascimento = fornecedorCreateDto.DataNascimento;
             fornecedor.Sexo = fornecedorCreateDto.Sexo;
             fornecedor.IE = fornecedorCreateDto.IE;
             fornecedor.IM = fornecedorCreateDto.IM;
@@ -145,6 +146,7 @@ public class FornecedorService : IFornecedorInterface
             fornecedor.Fantasia = fornecedorEdicaoDto.Fantasia;
             fornecedor.Tipo = fornecedorEdicaoDto.Tipo;
             fornecedor.EstadoCivil = fornecedorEdicaoDto.EstadoCivil;
+            fornecedor.DataNascimento = fornecedorEdicaoDto.DataNascimento;
             fornecedor.Sexo = fornecedorEdicaoDto.Sexo;
             fornecedor.IE = fornecedorEdicaoDto.IE;
             fornecedor.IM = fornecedorEdicaoDto.IM;

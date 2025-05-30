@@ -18,7 +18,7 @@ namespace WebApiSmartClinic.Models
         [JsonIgnore]
         public ConvenioModel? Convenio { get; set; }
 
-        [Required(ErrorMessage = "O CPF � obrigat�rio.")]
+        [Required(ErrorMessage = "O CPF é obrigatório.")]
         public string? Cpf { get; set; }
 
         private DateTime? _dataNascimento;
@@ -30,7 +30,7 @@ namespace WebApiSmartClinic.Models
             set => _dataNascimento = value.HasValue ? DateTime.SpecifyKind(value.Value.ToUniversalTime(), DateTimeKind.Utc) : null;
         }
 
-        [EmailAddress(ErrorMessage = "O email deve ser v�lido.")]
+        
         public string? Email { get; set; }
         public string? Uf { get; set; }
         public string? EstadoCivil { get; set; }

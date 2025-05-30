@@ -82,5 +82,12 @@ namespace WebApiSmartClinic.Controllers
                 return StatusCode(500, new { mensagem = "Erro interno no servidor.", detalhes = ex.Message });
             }
         }
+
+        [HttpGet("ListarGeral")]
+        public async Task<ActionResult<ResponseModel<List<AgendaModel>>>> ListarGeral([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10, [FromQuery] int? idFiltro = null, [FromQuery] string? pacienteIdFiltro = null, [FromQuery] string? profissionalIdFiltro = null, [FromQuery] string? statusIdFiltro = null, [FromQuery] DateTime? dataFiltroInicio = null, [FromQuery] DateTime? dataFiltroFim = null,[FromQuery] bool paginar = true)
+        {
+            var agenda = await _agenda.ListarGeral(pageNumber,pageSize,idFiltro,pacienteIdFiltro,profissionalIdFiltro,statusIdFiltro,dataFiltroInicio,dataFiltroFim,paginar);
+            return Ok(agenda);
+        }
     }
 }

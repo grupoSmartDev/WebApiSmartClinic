@@ -200,7 +200,7 @@ public class FornecedorService : IFornecedorInterface
             // Aplicar filtros
             query = query.Where(x =>
                 (!codigoFiltro.HasValue || x.Id == codigoFiltro.Value) &&
-                (string.IsNullOrEmpty(nomeFiltro) || x.Razao.Contains(nomeFiltro) || x.Fantasia.Contains(nomeFiltro)) &&
+                (string.IsNullOrEmpty(nomeFiltro) || x.Razao.ToLower().Contains(nomeFiltro.ToLower()) || x.Fantasia.ToLower().Contains(nomeFiltro.ToLower()) || x.Nome.ToLower().Contains(nomeFiltro.ToLower())) &&
                 (string.IsNullOrEmpty(cpfFiltro) || x.CPF.Contains(cpfFiltro)) &&
                 (string.IsNullOrEmpty(cnpjFiltro) || x.CNPJ.Contains(cnpjFiltro)) &&
                 (string.IsNullOrEmpty(celularFiltro) || x.Celular.Contains(celularFiltro))

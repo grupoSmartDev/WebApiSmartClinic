@@ -40,13 +40,14 @@ public class ProfissionalService : IProfissionalInterface
 
             if(!consultaProfissional.IsNullOrEmpty())
             {
-                resposta.Mensagem = "CPF já cadastrado, verifique novamente.";
-                resposta.Status = false;
+               
 
     
                 var queryPesquisa = _context.Profissional.AsQueryable();
 
                 resposta = await PaginationHelper.PaginateAsync(queryPesquisa, pageNumber, pageSize);
+                resposta.Mensagem = "CPF já cadastrado, verifique novamente.";
+                resposta.Status = false;
 
                 return resposta;
             }

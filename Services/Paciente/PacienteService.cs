@@ -416,7 +416,7 @@ public class PacienteService : IPacienteInterface
         }
     }
 
-    public async Task<ResponseModel<List<PacienteModel>>> Listar(int pageNumber = 1, int pageSize = 10, int? codigoFiltro = null, string? nomeFiltro = null, string? cpfFiltro = null, string? celularFiltro = null, bool paginar = true)
+    public async Task<ResponseModel<List<PacienteModel>>> Listar(int pageNumber = 1, int pageSize = 10, int? idFiltro = null, string? nomeFiltro = null, string? cpfFiltro = null, string? celularFiltro = null, bool paginar = true)
     {
         ResponseModel<List<PacienteModel>> resposta = new ResponseModel<List<PacienteModel>>();
 
@@ -435,8 +435,8 @@ public class PacienteService : IPacienteInterface
            .AsQueryable();
            
 
-            if (!string.IsNullOrEmpty(codigoFiltro.ToString()))
-                query = query.Where(p => p.Id == codigoFiltro);
+            if (!string.IsNullOrEmpty(idFiltro.ToString()))
+                query = query.Where(p => p.Id == idFiltro);
 
             if (!string.IsNullOrEmpty(nomeFiltro))
                 query = query.Where(p => p.Nome.ToLower().Contains(nomeFiltro.ToLower()));

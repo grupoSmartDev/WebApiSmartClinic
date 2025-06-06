@@ -66,10 +66,10 @@ public class CadastroClienteService : ICadastroClienteInterface
 
         var cpfKey = dto.TitularCPF;
         var novoBanco = cpfKey;
-        var novaStringConexao = $"Host=62.72.51.219;Port=3332;Database={novoBanco};Username=postgres;Password=Elefante01!;";
-        //var novaStringConexao = $"Host=localhost;Port=3332;Database={novoBanco};Username=postgres;Password=Elefante01!;";
-        var masterConnection = $"Host=62.72.51.219;Port=3332;Database=connections;Username=postgres;Password=Elefante01!;";
-        //var masterConnection = "Host=localhost;Port=3332;Database=postgres;Username=postgres;Password=Elefante01!;";
+        var novaStringConexao = $"Host=62.72.51.219;Port=5432;Database={novoBanco};Username=postgres;Password=Elefante01!;";
+        //var novaStringConexao = $"Host=localhost;Port=5432;Database={novoBanco};Username=postgres;Password=Elefante01!;";
+        var masterConnection = $"Host=62.72.51.219;Port=5432;Database=connections;Username=postgres;Password=Elefante01!;";
+        //var masterConnection = "Host=localhost;Port=5432;Database=postgres;Username=postgres;Password=Elefante01!;";
 
         try
         {

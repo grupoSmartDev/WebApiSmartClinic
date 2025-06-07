@@ -62,10 +62,7 @@ var key = Encoding.UTF8.GetBytes(appSettings.JwtSecretKey);
 // Middleware de conexão por tenant
 services.AddSingleton<IConnectionStringProvider, ConnectionStringProvider>();
 
-builder.WebHost.ConfigureKestrel(serverOptions =>
-{
-    serverOptions.ListenAnyIP(80); // Porta do container
-});
+builder.WebHost.UseUrls("http://0.0.0.0:3332");
 
 // DbContexts
 services.AddDbContext<DataConnectionContext>(options =>
@@ -188,16 +185,16 @@ services.AddScoped<AgendaService>();
 services.AddSingleton<IConnectionStringProvider, ConnectionStringProvider>();
 
 services.AddHttpClient();
+
 services.AddCors(options =>
 {
     options.AddPolicy("AllowFrontend", policy =>
     {
         policy.WithOrigins("http://localhost:4200", "https://smart-clinic-angular-it7o.vercel.app", "https://smart-clinic-angular-tsxt.vercel.app", "https://viacep.com.br/ws/")
-            .AllowAnyOrigin()
             .AllowAnyMethod()
             .AllowAnyHeader()
             .WithExposedHeaders("Authorization")
-.AllowCredentials();
+            .AllowCredentials();
     });
 });
 
@@ -214,7 +211,7 @@ app.UseHttpsRedirection();
 app.UseCors("AllowFrontend");
 app.UseRouting();
 
-// 🧠 Middleware de tenant (deve vir antes do auth)
+//  Middleware de tenant (deve vir antes do auth)
 app.UseMiddleware<TenantMiddleware>();
 
 app.UseAuthentication();

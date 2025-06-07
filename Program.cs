@@ -195,6 +195,7 @@ services.AddCors(options =>
                 "https://smart-clinic-angular-it7o.vercel.app",
                 "https://smart-clinic-angular-tsxt.vercel.app",
                 "https://clinicsmart.app.br/",
+                "https://api.clinicsmart.app.br/",
                 "https://viacep.com.br/ws/"
             )
             .AllowAnyMethod()

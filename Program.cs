@@ -62,7 +62,7 @@ var key = Encoding.UTF8.GetBytes(appSettings.JwtSecretKey);
 // Middleware de conexão por tenant
 services.AddSingleton<IConnectionStringProvider, ConnectionStringProvider>();
 
-builder.WebHost.UseUrls("http://0.0.0.0:3332");
+
 
 // DbContexts
 services.AddDbContext<DataConnectionContext>(options =>
@@ -194,8 +194,8 @@ services.AddCors(options =>
                 "http://localhost:4200",
                 "https://smart-clinic-angular-it7o.vercel.app",
                 "https://smart-clinic-angular-tsxt.vercel.app",
-                "https://clinicsmart.app.br/",
-                "https://api.clinicsmart.app.br/",
+                "https://clinicsmart.app.br",
+                "https://api.clinicsmart.app.br",
                 "https://viacep.com.br/ws/"
             )
             .AllowAnyMethod()

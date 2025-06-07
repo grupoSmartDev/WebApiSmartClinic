@@ -62,6 +62,11 @@ var key = Encoding.UTF8.GetBytes(appSettings.JwtSecretKey);
 // Middleware de conexão por tenant
 services.AddSingleton<IConnectionStringProvider, ConnectionStringProvider>();
 
+builder.WebHost.ConfigureKestrel(serverOptions =>
+{
+    serverOptions.ListenAnyIP(80); // Porta do container
+});
+
 // DbContexts
 services.AddDbContext<DataConnectionContext>(options =>
     options.UseNpgsql(config.GetConnectionString("ConnectionsContext")));
@@ -194,6 +199,7 @@ services.AddCors(options =>
               .AllowCredentials();
     });
 });
+
 
 var app = builder.Build();
 

@@ -1,5 +1,7 @@
 
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json.Serialization;
+using WebApiSmartClinic.Dto.DespesaFixa;
 using WebApiSmartClinic.Models;
 
 namespace WebApiSmartClinic.Dto.Financ_Pagar;
@@ -35,6 +37,11 @@ public class Financ_PagarCreateDto
     public TipoPagamentoModel? TipoPagamento { get; set; }
 
     public ICollection<Financ_PagarSubModel>? subFinancPagar { get; set; } = new List<Financ_PagarSubModel>();
+
+    public int? DespesaFixaId { get; set; }
+    [JsonIgnore]
+    public DespesaFixaModel? DespesaFixa { get; set; }
+
 }
 
 public class Financ_PagarSubCreateDto

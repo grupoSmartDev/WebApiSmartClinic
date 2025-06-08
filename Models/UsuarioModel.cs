@@ -1,13 +1,12 @@
 
+using Microsoft.AspNetCore.Identity;
 using System.Text.Json.Serialization;
 
 namespace WebApiSmartClinic.Models;
 
-public class UsuarioModel
+public class UsuarioModel : IdentityUser
 {
-    public int Id { get; set; }
     public string Nome { get; set; }
-    public string Email { get; set; }
     public string Senha { get; set; }
     public ICollection<Permissao> Permissao { get; set; }
     public string CPF { get; set; }
@@ -25,6 +24,9 @@ public class UsuarioModel
     public int  EmpresaId { get; set; }
     [JsonIgnore]
     public EmpresaModel? Empresa { get; set; }
+
+    [JsonIgnore]
+    public FilialModel Filial { get; set; }
 
 
 }

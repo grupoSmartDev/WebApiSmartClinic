@@ -2,6 +2,7 @@
 using WebApiSmartClinic.Data;
 using WebApiSmartClinic.Dto.DespesaFixa;
 using WebApiSmartClinic.Models;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace WebApiSmartClinic.Services.DespesaFixa;
 
@@ -41,7 +42,7 @@ public class DespesaFixaService : IDespesaFixaInterface
         }
     }
 
-    public async Task<ResponseModel<List<DespesaFixaModel>>> Criar(DespesaFixaCreateDto despesaCreateDto)
+    public async Task<ResponseModel<List<DespesaFixaModel>>> Criars(DespesaFixaCreateDto despesaCreateDto)
     {
         ResponseModel<List<DespesaFixaModel>> resposta = new ResponseModel<List<DespesaFixaModel>>();
         try
@@ -54,14 +55,12 @@ public class DespesaFixaService : IDespesaFixaInterface
                 DataInicio = despesaCreateDto.DataInicio,
                 DataFim = despesaCreateDto.DataFim,
                 Ativo = despesaCreateDto.Ativo,
-                Categoria = despesaCreateDto.Categoria,
                 Frequencia = despesaCreateDto.Frequencia,
                 CentroCustoId = despesaCreateDto.CentroCustoId,
                 PlanoContaId = despesaCreateDto.PlanoContaId,
                 FornecedorId = despesaCreateDto.FornecedorId
             };
 
-            // Validações adicionais se necessário
             if (despesa.DiaVencimento < 1 || despesa.DiaVencimento > 31)
             {
                 resposta.Mensagem = "O dia de vencimento deve estar entre 1 e 31";
@@ -69,49 +68,86 @@ public class DespesaFixaService : IDespesaFixaInterface
                 return resposta;
             }
 
-            // Verifica se fornecedor existe, se fornecedorId for informado
-            if (despesa.FornecedorId.HasValue)
+            // Verificações de integridade
+            if (despesa.FornecedorId.HasValue && await _context.Fornecedor.FindAsync(despesa.FornecedorId.Value) is null)
             {
-                var fornecedor = await _context.Fornecedor.FindAsync(despesa.FornecedorId.Value);
-                if (fornecedor == null)
-                {
-                    resposta.Mensagem = "Fornecedor não encontrado";
-                    resposta.Status = false;
-                    return resposta;
-                }
+                resposta.Mensagem = "Fornecedor não encontrado";
+                resposta.Status = false;
+                return resposta;
             }
 
-            // Verifica se plano de contas existe, se planoContaId for informado
-            if (despesa.PlanoContaId.HasValue)
+            if (despesa.PlanoContaId.HasValue && await _context.PlanoConta.FindAsync(despesa.PlanoContaId.Value) is null)
             {
-                var planoConta = await _context.PlanoConta.FindAsync(despesa.PlanoContaId.Value);
-                if (planoConta == null)
-                {
-                    resposta.Mensagem = "Plano de Contas não encontrado";
-                    resposta.Status = false;
-                    return resposta;
-                }
+                resposta.Mensagem = "Plano de Contas não encontrado";
+                resposta.Status = false;
+                return resposta;
             }
 
-            // Verifica se centro de custo existe, se centroCustoId for informado
-            if (despesa.CentroCustoId.HasValue)
+            if (despesa.CentroCustoId.HasValue && await _context.CentroCusto.FindAsync(despesa.CentroCustoId.Value) is null)
             {
-                var centroCusto = await _context.CentroCusto.FindAsync(despesa.CentroCustoId.Value);
-                if (centroCusto == null)
-                {
-                    resposta.Mensagem = "Centro de Custo não encontrado";
-                    resposta.Status = false;
-                    return resposta;
-                }
+                resposta.Mensagem = "Centro de Custo não encontrado";
+                resposta.Status = false;
+                return resposta;
             }
 
-            // Adiciona e salva no banco de dados
             await _context.Despesas.AddAsync(despesa);
             await _context.SaveChangesAsync();
 
-            // Retorna a lista atualizada de despesas
+            // Após salvar, gerar os 12 lançamentos
+            List<Financ_PagarModel> listaPagar = new();
+
+            for (int i = 0; i < 12; i++)
+            {
+                if (!despesa.DataInicio.HasValue)
+                {
+                    resposta.Mensagem = "Data de início é obrigatória";
+                    resposta.Status = false;
+                    return resposta;
+                }
+
+                var dataVencimento = new DateTime(
+                    despesa.DataInicio.Value.Year,
+                    despesa.DataInicio.Value.Month,
+                    1
+                ).AddMonths(i);
+
+                int dia = despesa.DiaVencimento > DateTime.DaysInMonth(dataVencimento.Year, dataVencimento.Month)
+                    ? DateTime.DaysInMonth(dataVencimento.Year, dataVencimento.Month)
+                    : despesa.DiaVencimento;
+
+                var dataFinal = new DateTime(dataVencimento.Year, dataVencimento.Month, dia);
+
+                var pagar = new Financ_PagarModel
+                {
+                    Descricao = despesa.Descricao,
+                    DataEmissao = DateTime.UtcNow,
+                    ValorOriginal = despesa.Valor,
+                    Valor = despesa.Valor,
+                    Status = "Pendente",
+                    FornecedorId = despesa.FornecedorId,
+                    PlanoContaId = despesa.PlanoContaId,
+                    CentroCustoId = despesa.CentroCustoId,
+                    TipoPagamentoId = despesa.TipoPagamentoId,
+                    subFinancPagar = new List<Financ_PagarSubModel>()
+                };
+
+                var sub = new Financ_PagarSubModel
+                {
+                    Parcela = 1,
+                    Valor = despesa.Valor,
+                    DataVencimento = dataFinal,
+                    FormaPagamentoId = despesa.FormaPagamentoId
+                };
+
+                pagar.subFinancPagar.Add(sub);
+                listaPagar.Add(pagar);
+            }
+
+            await _context.Financ_Pagar.AddRangeAsync(listaPagar);
+            await _context.SaveChangesAsync();
+
             resposta.Dados = await _context.Despesas.ToListAsync();
-            resposta.Mensagem = "Despesa fixa criada com sucesso";
+            resposta.Mensagem = "Despesa fixa criada e lançamentos financeiros gerados com sucesso";
             resposta.TotalCount = resposta.Dados.Count;
             return resposta;
         }
@@ -122,6 +158,8 @@ public class DespesaFixaService : IDespesaFixaInterface
             return resposta;
         }
     }
+
+
 
     public async Task<ResponseModel<List<DespesaFixaModel>>> Delete(int idDespesa)
     {
@@ -150,7 +188,7 @@ public class DespesaFixaService : IDespesaFixaInterface
         }
     }
 
-    public async Task<ResponseModel<List<DespesaFixaModel>>> Editar(DespesaFixaEdicaoDto despesaEdicaoDto)
+    public async Task<ResponseModel<List<DespesaFixaModel>>> Editars(DespesaFixaEdicaoDto despesaEdicaoDto)
     {
         ResponseModel<List<DespesaFixaModel>> resposta = new ResponseModel<List<DespesaFixaModel>>();
         try
@@ -171,7 +209,6 @@ public class DespesaFixaService : IDespesaFixaInterface
             despesa.DataInicio = despesaEdicaoDto.DataInicio;
             despesa.DataFim = despesaEdicaoDto.DataFim;
             despesa.Ativo = despesaEdicaoDto.Ativo;
-            despesa.Categoria = despesaEdicaoDto.Categoria;
             despesa.Frequencia = despesaEdicaoDto.Frequencia;
             despesa.CentroCustoId = despesaEdicaoDto.CentroCustoId;
             despesa.PlanoContaId = despesaEdicaoDto.PlanoContaId;
@@ -239,20 +276,41 @@ public class DespesaFixaService : IDespesaFixaInterface
         }
     }
 
-    public async Task<ResponseModel<List<DespesaFixaModel>>> Listar()
+
+    public async Task<ResponseModel<List<DespesaFixaModel>>> Listar(int pageNumber = 1, int pageSize = 10, int? idFiltro = null, string? descricaoFiltro = null, string? vencimentoFiltro = null, string? centroCustoFiltro = null,
+        string? planoContaFiltro = null, bool paginar = true)
     {
         ResponseModel<List<DespesaFixaModel>> resposta = new ResponseModel<List<DespesaFixaModel>>();
         try
         {
-            var despesas = await _context.Despesas
+            var query =  _context.Despesas
                 .Include(d => d.Fornecedor)
                 .Include(d => d.PlanoConta)
                 .Include(d => d.CentroCusto)
-                .ToListAsync();
+                .Include(f => f.FinancPagar)
+                    .ThenInclude(f => f.subFinancPagar)
+            .AsQueryable();
 
-            resposta.Dados = despesas;
-            resposta.TotalCount = despesas.Count;
-            resposta.Mensagem = despesas.Count > 0 ? "Todas as despesas foram encontradas" : "Nenhuma despesa encontrada";
+            if (idFiltro.HasValue)
+                query = query.Where(i => i.Id == idFiltro.Value);
+
+            if (!string.IsNullOrEmpty(descricaoFiltro))
+                query = query.Where(p => p.Descricao.Contains(descricaoFiltro));
+
+
+
+            if (!string.IsNullOrEmpty(centroCustoFiltro))
+                query = query.Where(p => p.CentroCustoId == Convert.ToInt64(centroCustoFiltro));
+
+
+            if (!string.IsNullOrEmpty(planoContaFiltro))
+                query = query.Where(p => p.PlanoContaId == Convert.ToInt64(planoContaFiltro));
+
+            query = query.OrderBy(x => x.Id);
+
+            resposta.Dados = paginar ? (await PaginationHelper.PaginateAsync(query, pageNumber, pageSize)).Dados : await query.ToListAsync();
+            resposta.Mensagem = "Consulta finalizada";
+      
             return resposta;
         }
         catch (Exception e)
@@ -263,193 +321,527 @@ public class DespesaFixaService : IDespesaFixaInterface
         }
     }
 
-    public async Task<ResponseModel<List<Financ_PagarModel>>> GerarLancamentosDoMes(DateTime dataReferencia)
+    public async Task<ResponseModel<List<DespesaFixaModel>>> Criar(DespesaFixaCreateDto despesaCreateDto)
     {
-        ResponseModel<List<Financ_PagarModel>> resposta = new ResponseModel<List<Financ_PagarModel>>();
+        ResponseModel<List<DespesaFixaModel>> resposta = new ResponseModel<List<DespesaFixaModel>>();
 
-        // Usar uma transação explícita para garantir que tudo seja salvo ou nada seja salvo
         using var transaction = await _context.Database.BeginTransactionAsync();
-
         try
         {
-            // Obtém todas as despesas fixas ativas
-            var despesasAtivas = await _context.Despesas
-                .Where(d => d.Ativo == true &&
-                       (d.DataFim == null || d.DataFim >= dataReferencia) &&
-                       d.DataInicio <= dataReferencia)
-                .ToListAsync();
-
-            // Valida o último dia do mês para tratar corretamente datas como 31 em fevereiro
-            int ultimoDiaDoMes = DateTime.DaysInMonth(dataReferencia.Year, dataReferencia.Month);
-
-            // Cria uma lista para armazenar os IDs das despesas que devem gerar lançamentos neste mês
-            var despesasIdsParaGerar = new List<int>();
-
-            // Verifica quais despesas devem gerar lançamentos neste mês com base na frequência
-            foreach (var despesa in despesasAtivas)
+            // Validações iniciais
+            var validacao = await ValidarDespesaFixa(despesaCreateDto);
+            if (!validacao.IsValid)
             {
-                if (DeveGerarLancamentoNoMes(despesa, dataReferencia))
-                {
-                    despesasIdsParaGerar.Add(despesa.Id);
-                }
-            }
-
-            // Se não houver despesas para gerar, retorna imediatamente
-            if (!despesasIdsParaGerar.Any())
-            {
-                resposta.Mensagem = "Nenhuma despesa fixa encontrada para o período selecionado";
-                resposta.Dados = new List<Financ_PagarModel>();
+                resposta.Mensagem = validacao.ErrorMessage;
+                resposta.Status = false;
                 return resposta;
             }
 
-            // Busca lançamentos existentes para evitar duplicações
-            // Agora verifica nos subitens (Financ_PagarSub) pois é aí que fica o DespesaFixaId
-            var lancamentosExistentes = await _context.Financ_PagarSub
-            .Where(s => despesasIdsParaGerar.Contains(s.DespesaFixaId ?? 0) &&
-                    s.DataVencimento != null && // Garante que não é nulo
-                    s.DataVencimento.Value.Year == dataReferencia.Year && // Usa .Value para acessar
-                    s.DataVencimento.Value.Month == dataReferencia.Month)
-            .Select(s => s.DespesaFixaId)
-            .Distinct()
-            .ToListAsync();
-
-            // Filtra apenas as despesas que ainda não têm lançamentos
-            var despesasParaGerar = despesasAtivas
-                .Where(d => despesasIdsParaGerar.Contains(d.Id) && !lancamentosExistentes.Contains(d.Id))
-                .ToList();
-
-            // Lista para armazenar os lançamentos gerados
-            var lancamentosGerados = new List<Financ_PagarModel>();
-
-            // Gera os lançamentos para as despesas filtradas
-            foreach (var despesa in despesasParaGerar)
+            var despesa = new DespesaFixaModel
             {
-                // Ajusta o dia de vencimento caso seja maior que o último dia do mês
-                int diaVencimento = Math.Min(despesa.DiaVencimento, ultimoDiaDoMes);
+                Descricao = despesaCreateDto.Descricao,
+                Valor = despesaCreateDto.Valor,
+                DiaVencimento = despesaCreateDto.DiaVencimento,
+                DataInicio = despesaCreateDto.DataInicio,
+                DataFim = despesaCreateDto.DataFim,
+                Ativo = despesaCreateDto.Ativo,
+                Frequencia = despesaCreateDto.Frequencia,
+                CentroCustoId = despesaCreateDto.CentroCustoId,
+                PlanoContaId = despesaCreateDto.PlanoContaId,
+                FornecedorId = despesaCreateDto.FornecedorId,
+                TipoPagamentoId = despesaCreateDto.TipoPagamentoId,
+                FormaPagamentoId = despesaCreateDto.FormaPagamentoId
+            };
 
-                // Cria o lançamento financeiro PAI (cabeçalho)
-                var novoLancamento = new Financ_PagarModel
-                {
-                    Descricao = despesa.Descricao,
-                    ValorOriginal = despesa.Valor,
-                    Valor = despesa.Valor, // Mesmo valor no cabeçalho
-                    DataEmissao = DateTime.Now,
-                    // DespesaFixaId foi removido do model pai
-                    FornecedorId = despesa.FornecedorId,
-                    PlanoContaId = despesa.PlanoContaId,
-                    CentroCustoId = despesa.CentroCustoId,
-                    Status = "Pendente",
-                    NrDocto = null,
-                    Classificacao = "DESPESA FIXA",
-                    Parcela = 1, // Mesmo sendo uma única parcela, mantemos consistência
-                    IdOrigem = despesa.Id, // Referência à despesa fixa que originou
-                    subFinancPagar = new List<Financ_PagarSubModel>() // Inicializa a lista de subitens
-                };
-
-                // Adiciona o lançamento PAI ao contexto
-                _context.Financ_Pagar.Add(novoLancamento);
-                await _context.SaveChangesAsync(); // Precisa salvar para obter o ID gerado
-
-                // Cria a parcela (FILHO) com a data de vencimento e DespesaFixaId
-                var subItem = new Financ_PagarSubModel
-                {
-                    financPagarId = novoLancamento.Id, // Relaciona com o pai
-                    Parcela = 1, // Como é despesa fixa, normalmente tem apenas uma parcela
-                    Valor = despesa.Valor,
-                    DataVencimento = new DateTime(dataReferencia.Year, dataReferencia.Month, diaVencimento),
-                    DespesaFixaId = despesa.Id, // AQUI está o ID da despesa fixa no subitem
-                    TipoPagamentoId = null, // Defina valores padrão conforme necessário
-                    FormaPagamentoId = null, // Defina valores padrão conforme necessário
-                    DataPagamento = null, // Ainda não foi pago
-                    Desconto = 0,
-                    Juros = 0,
-                    Multa = 0,
-                    Observacao = $"Gerado automaticamente a partir da despesa fixa #{despesa.Id}"
-                };
-
-                // Adiciona o subitem ao contexto
-                _context.Financ_PagarSub.Add(subItem);
-
-                // Também adiciona o subitem à coleção do lançamento pai para a resposta
-                novoLancamento.subFinancPagar.Add(subItem);
-
-                // Adiciona à lista de lançamentos gerados para retorno
-                lancamentosGerados.Add(novoLancamento);
-            }
-
-            // Salva todos os subitens
+            await _context.Despesas.AddAsync(despesa);
             await _context.SaveChangesAsync();
 
-            // Confirma a transação
+            // Gerar lançamentos baseado na frequência e período
+            var lancamentos = await GerarLancamentosFinanceiros(despesa);
+
+            if (lancamentos.Any())
+            {
+                await _context.Financ_Pagar.AddRangeAsync(lancamentos);
+                await _context.SaveChangesAsync();
+            }
+
             await transaction.CommitAsync();
 
-            // Prepara a resposta
-            resposta.Dados = lancamentosGerados;
-            resposta.TotalCount = lancamentosGerados.Count;
-
-            // Mensagem informativa sobre o resultado
-            var mensagem = new List<string>();
-            if (lancamentosGerados.Count > 0)
-            {
-                mensagem.Add($"Foram gerados {lancamentosGerados.Count} lançamentos financeiros");
-            }
-            else
-            {
-                mensagem.Add("Nenhum lançamento financeiro foi gerado");
-            }
-
-            if (lancamentosExistentes.Count > 0)
-            {
-                mensagem.Add($"{lancamentosExistentes.Count} lançamentos já existiam para o período");
-            }
-
-            resposta.Mensagem = string.Join(". ", mensagem);
+            resposta.Dados = await _context.Despesas.ToListAsync();
+            resposta.Mensagem = $"Despesa fixa criada com {lancamentos.Count} lançamentos financeiros gerados";
+            resposta.TotalCount = resposta.Dados.Count;
             resposta.Status = true;
 
             return resposta;
         }
         catch (Exception ex)
         {
-            // Em caso de erro, desfaz a transação
             await transaction.RollbackAsync();
-
-            resposta.Mensagem = "Erro ao gerar lançamentos: " + ex.Message;
+            resposta.Mensagem = "Erro ao criar despesa: " + ex.Message;
             resposta.Status = false;
             return resposta;
         }
     }
 
-    // Método auxiliar para determinar se deve gerar um lançamento para uma despesa fixa
-    private bool DeveGerarLancamentoNoMes(DespesaFixaModel despesa, DateTime dataReferencia)
+    // Método para validações
+    private async Task<(bool IsValid, string ErrorMessage)> ValidarDespesaFixa(DespesaFixaCreateDto dto)
     {
-        // Calcula o número de meses desde a data de início
-        int mesesDesdeInicio = ((dataReferencia.Year - despesa.DataInicio.Year) * 12) +
-                               (dataReferencia.Month - despesa.DataInicio.Month);
+        if (dto.DiaVencimento < 1 || dto.DiaVencimento > 31)
+            return (false, "O dia de vencimento deve estar entre 1 e 31");
 
-        // Verifica se o mês atual corresponde à frequência da despesa
-        switch (despesa.Frequencia)
+        if (!dto.DataInicio.HasValue)
+            return (false, "Data de início é obrigatória");
+
+        if (dto.FornecedorId.HasValue && await _context.Fornecedor.FindAsync(dto.FornecedorId.Value) is null)
+            return (false, "Fornecedor não encontrado");
+
+        if (dto.PlanoContaId.HasValue && await _context.PlanoConta.FindAsync(dto.PlanoContaId.Value) is null)
+            return (false, "Plano de Contas não encontrado");
+
+        if (dto.CentroCustoId.HasValue && await _context.CentroCusto.FindAsync(dto.CentroCustoId.Value) is null)
+            return (false, "Centro de Custo não encontrado");
+
+        return (true, string.Empty);
+    }
+
+    // Método para gerar lançamentos baseado na frequência
+    private async Task<List<Financ_PagarModel>> GerarLancamentosFinanceiros(DespesaFixaModel despesa)
+    {
+        var listaPagar = new List<Financ_PagarModel>();
+
+        if (!despesa.DataInicio.HasValue)
+            return listaPagar;
+
+        // Calcular quantas parcelas baseado na frequência e período
+        var quantidadeParcelas = CalcularQuantidadeParcelas(despesa);
+
+        for (int i = 0; i < quantidadeParcelas; i++)
         {
-            case 1:
-                return true;
+            var dataVencimento = CalcularDataVencimento(despesa.DataInicio.Value, despesa.DiaVencimento, i, despesa.Frequencia);
 
-            case 2:
-                // Verifica se o mês está na sequência bimestral desde o início
-                return mesesDesdeInicio % 2 == 0;
+            // Verificar se ainda está dentro do período (se DataFim foi informada)
+            if (despesa.DataFim.HasValue && dataVencimento > despesa.DataFim.Value)
+                break;
 
-            case 3:
-                // Verifica se o mês está na sequência trimestral desde o início
-                return mesesDesdeInicio % 3 == 0;
+            var pagar = new Financ_PagarModel
+            {
+                Descricao = $"{despesa.Descricao} - {dataVencimento:MM/yyyy}",
+                DataEmissao = DateTime.UtcNow,
+                ValorOriginal = despesa.Valor,
+                Valor = despesa.Valor,
+                Status = "Pendente",
+                FornecedorId = despesa.FornecedorId,
+                PlanoContaId = despesa.PlanoContaId,
+                CentroCustoId = despesa.CentroCustoId,
+                TipoPagamentoId = despesa.TipoPagamentoId,
+                DespesaFixaId = despesa.Id, // Link com a despesa fixa
+                subFinancPagar = new List<Financ_PagarSubModel>()
+            };
 
-            case 6:
-                // Verifica se o mês está na sequência semestral desde o início
-                return mesesDesdeInicio % 6 == 0;
+            var sub = new Financ_PagarSubModel
+            {
+                Parcela = 1,
+                Valor = despesa.Valor,
+                DataVencimento = dataVencimento,
+                FormaPagamentoId = despesa.FormaPagamentoId
+            };
 
-            case 12:
-                // Verifica se o mês está na sequência anual desde o início
-                return mesesDesdeInicio % 12 == 0;
+            pagar.subFinancPagar.Add(sub);
+            listaPagar.Add(pagar);
+        }
 
-            default:
-                return false;
+        return listaPagar;
+    }
+
+    // Calcular quantidade de parcelas baseado na frequência
+    private int CalcularQuantidadeParcelas(DespesaFixaModel despesa)
+    {
+        if (despesa.DataFim.HasValue && despesa.DataInicio.HasValue)
+        {
+            return despesa.Frequencia switch
+            {
+                1 => ((despesa.DataFim.Value.Year - despesa.DataInicio.Value.Year) * 12) +
+                           (despesa.DataFim.Value.Month - despesa.DataInicio.Value.Month) + 1,
+                3 => (int)Math.Ceiling(((despesa.DataFim.Value - despesa.DataInicio.Value).Days / 90.0)),
+                6 => (int)Math.Ceiling(((despesa.DataFim.Value - despesa.DataInicio.Value).Days / 180.0)),
+                12 => despesa.DataFim.Value.Year - despesa.DataInicio.Value.Year + 1,
+                _ => 12 // Default mensal por 12 meses
+            };
+        }
+
+        return 12; // Default se não informar data fim
+    }
+
+    // Calcular data de vencimento baseado na frequência
+    private DateTime CalcularDataVencimento(DateTime dataInicio, int diaVencimento, int indice, int frequencia = 12)
+    {
+        var dataBase = frequencia switch
+        {
+            1 => dataInicio.AddMonths(indice),
+            3 => dataInicio.AddMonths(indice * 3),
+            6 => dataInicio.AddMonths(indice * 6),
+            12 => dataInicio.AddYears(indice),
+            _ => dataInicio.AddMonths(indice) // Default mensal
+        };
+
+        // Ajustar o dia, considerando os dias do mês
+        int diaFinal = Math.Min(diaVencimento, DateTime.DaysInMonth(dataBase.Year, dataBase.Month));
+
+        return new DateTime(dataBase.Year, dataBase.Month, diaFinal);
+    }
+
+    // Método para atualizar lançamentos quando alterar a despesa fixa
+    public async Task AtualizarLancamentosFuturos(int despesaFixaId, DespesaFixaModel despesaAtualizada)
+    {
+        // Remove lançamentos futuros não pagos
+        var lancamentosFuturos = await _context.Financ_Pagar
+            .Where(x => x.DespesaFixaId == despesaFixaId &&
+                       x.Status == "Pendente" &&
+                       x.subFinancPagar.Any(s => s.DataVencimento > DateTime.Now))
+            .ToListAsync();
+
+        _context.Financ_Pagar.RemoveRange(lancamentosFuturos);
+
+        // Regera os lançamentos com os novos dados
+        var novosLancamentos = await GerarLancamentosFinanceiros(despesaAtualizada);
+
+        // Filtra apenas os futuros
+        var lancamentosFuturosNovos = novosLancamentos
+            .Where(x => x.subFinancPagar.Any(s => s.DataVencimento > DateTime.Now))
+            .ToList();
+
+        await _context.Financ_Pagar.AddRangeAsync(lancamentosFuturosNovos);
+        await _context.SaveChangesAsync();
+    }
+
+    public async Task<ResponseModel<List<DespesaFixaModel>>> Editar(DespesaFixaEdicaoDto despesaUpdateDto)
+    {
+        ResponseModel<List<DespesaFixaModel>> resposta = new ResponseModel<List<DespesaFixaModel>>();
+
+        using var transaction = await _context.Database.BeginTransactionAsync();
+        try
+        {
+            // Buscar a despesa fixa existente
+            var despesaExistente = await _context.Despesas
+                .Include(d => d.FinancPagar)
+                .ThenInclude(f => f.subFinancPagar)
+                .FirstOrDefaultAsync(d => d.Id == despesaUpdateDto.Id);
+
+            if (despesaExistente == null)
+            {
+                resposta.Mensagem = "Despesa fixa não encontrada";
+                resposta.Status = false;
+                return resposta;
+            }
+
+            // Validações
+            var validacao = await ValidarDespesaFixaEdicao(despesaUpdateDto, despesaExistente);
+            if (!validacao.IsValid)
+            {
+                resposta.Mensagem = validacao.ErrorMessage;
+                resposta.Status = false;
+                return resposta;
+            }
+
+            // Verificar se houve mudanças que afetam lançamentos futuros
+            bool afetaLancamentosFuturos = VerificarMudancasSignificativas(despesaExistente, despesaUpdateDto);
+
+            // Atualizar dados da despesa fixa
+            AtualizarDadosDespesa(despesaExistente, despesaUpdateDto);
+
+            await _context.SaveChangesAsync();
+
+            // Se mudanças afetam lançamentos futuros, reprocessar
+            if (afetaLancamentosFuturos)
+            {
+                await ReprocessarLancamentosFuturos(despesaExistente);
+            }
+
+            await transaction.CommitAsync();
+
+            // Retornar lista atualizada de todas as despesas fixas
+            var todasDespesas = await _context.Despesas.ToListAsync();
+
+            resposta.Dados = todasDespesas;
+            resposta.Mensagem = "Despesa fixa atualizada com sucesso";
+            resposta.TotalCount = todasDespesas.Count;
+            resposta.Status = true;
+
+            return resposta;
+        }
+        catch (Exception ex)
+        {
+            await transaction.RollbackAsync();
+            resposta.Mensagem = "Erro ao editar despesa: " + ex.Message;
+            resposta.Status = false;
+            return resposta;
+        }
+    }
+
+    // Validações específicas para edição
+    private async Task<(bool IsValid, string ErrorMessage)> ValidarDespesaFixaEdicao(
+        DespesaFixaEdicaoDto dto,
+        DespesaFixaModel despesaExistente)
+    {
+        if (dto.DiaVencimento < 1 || dto.DiaVencimento > 31)
+            return (false, "O dia de vencimento deve estar entre 1 e 31");
+
+        if (!dto.DataInicio.HasValue)
+            return (false, "Data de início é obrigatória");
+
+        // Validar se a nova data de início não conflita com pagamentos já realizados
+        var pagamentosRealizados = await _context.Financ_Pagar
+            .Where(x => x.DespesaFixaId == despesaExistente.Id && x.Status == "Pago")
+            .Include(x => x.subFinancPagar)
+            .ToListAsync();
+
+        if (pagamentosRealizados.Any())
+        {
+            var primeiroPagamento = pagamentosRealizados
+                .SelectMany(x => x.subFinancPagar)
+                .Min(x => x.DataVencimento);
+
+            if (dto.DataInicio.Value > primeiroPagamento)
+            {
+                return (false, "Não é possível alterar a data de início para depois de pagamentos já realizados");
+            }
+        }
+
+        // Validações de integridade referencial
+        if (dto.FornecedorId.HasValue && await _context.Fornecedor.FindAsync(dto.FornecedorId.Value) is null)
+            return (false, "Fornecedor não encontrado");
+
+        if (dto.PlanoContaId.HasValue && await _context.PlanoConta.FindAsync(dto.PlanoContaId.Value) is null)
+            return (false, "Plano de Contas não encontrado");
+
+        if (dto.CentroCustoId.HasValue && await _context.CentroCusto.FindAsync(dto.CentroCustoId.Value) is null)
+            return (false, "Centro de Custo não encontrado");
+
+        return (true, string.Empty);
+    }
+
+    // Verificar se as mudanças afetam lançamentos futuros
+    private bool VerificarMudancasSignificativas(DespesaFixaModel existente, DespesaFixaEdicaoDto dto)
+    {
+        return existente.Valor != dto.Valor ||
+               existente.DiaVencimento != dto.DiaVencimento ||
+               existente.DataInicio != dto.DataInicio ||
+               existente.DataFim != dto.DataFim ||
+               existente.Frequencia != dto.Frequencia ||
+               existente.FormaPagamentoId != dto.FormaPagamentoId ||
+               existente.TipoPagamentoId != dto.TipoPagamentoId ||
+               existente.FornecedorId != dto.FornecedorId ||
+               existente.PlanoContaId != dto.PlanoContaId ||
+               existente.CentroCustoId != dto.CentroCustoId;
+    }
+
+    // Atualizar dados da despesa fixa
+    private void AtualizarDadosDespesa(DespesaFixaModel existente, DespesaFixaEdicaoDto dto)
+    {
+        existente.Descricao = dto.Descricao;
+        existente.Valor = dto.Valor;
+        existente.DiaVencimento = dto.DiaVencimento;
+        existente.DataInicio = dto.DataInicio;
+        existente.DataFim = dto.DataFim;
+        existente.Ativo = dto.Ativo;
+        existente.Frequencia = dto.Frequencia;
+        existente.CentroCustoId = dto.CentroCustoId;
+        existente.PlanoContaId = dto.PlanoContaId;
+        existente.FornecedorId = dto.FornecedorId;
+        existente.TipoPagamentoId = dto.TipoPagamentoId;
+        existente.FormaPagamentoId = dto.FormaPagamentoId;
+        existente.DataAlteracao = DateTime.UtcNow;
+    }
+
+    // Reprocessar lançamentos futuros
+    private async Task ReprocessarLancamentosFuturos(DespesaFixaModel despesa)
+    {
+        var dataAtual = DateTime.Now.Date;
+
+        // Buscar lançamentos futuros não pagos
+        var lancamentosFuturos = await _context.Financ_Pagar
+            .Where(x => x.DespesaFixaId == despesa.Id)
+            .Include(x => x.subFinancPagar)
+            .Where(x => x.subFinancPagar.Any(s => s.DataVencimento > dataAtual) &&
+                       (x.Status == "Pendente" || x.Status == "Vencido"))
+            .ToListAsync();
+
+        // Separar lançamentos: alguns podem ter sub-parcelas pagas e outras não
+        var lancamentosParaRemover = new List<Financ_PagarModel>();
+        var lancamentosParaAtualizar = new List<Financ_PagarModel>();
+
+        foreach (var lancamento in lancamentosFuturos)
+        {
+            var subParcelas = lancamento.subFinancPagar.ToList();
+            var subParcelasPagas = subParcelas.Where(s => s.DataPagamento.HasValue).ToList();
+            var subParcelasPendentes = subParcelas.Where(s => !s.DataPagamento.HasValue && s.DataVencimento > dataAtual).ToList();
+
+            if (subParcelasPagas.Any() && subParcelasPendentes.Any())
+            {
+                // Remover apenas sub-parcelas pendentes futuras
+                foreach (var subPendente in subParcelasPendentes)
+                {
+                    _context.Entry(subPendente).State = EntityState.Deleted;
+                }
+                lancamentosParaAtualizar.Add(lancamento);
+            }
+            else if (!subParcelasPagas.Any())
+            {
+                // Remover lançamento completo se não tem nada pago
+                lancamentosParaRemover.Add(lancamento);
+            }
+        }
+
+        // Remover lançamentos completamente futuros
+        if (lancamentosParaRemover.Any())
+        {
+            _context.Financ_Pagar.RemoveRange(lancamentosParaRemover);
+        }
+
+        await _context.SaveChangesAsync();
+
+        // Gerar novos lançamentos futuros
+        var novosLancamentos = await GerarLancamentosFuturos(despesa, dataAtual);
+
+        if (novosLancamentos.Any())
+        {
+            await _context.Financ_Pagar.AddRangeAsync(novosLancamentos);
+            await _context.SaveChangesAsync();
+        }
+    }
+
+    // Gerar apenas lançamentos futuros
+    private async Task<List<Financ_PagarModel>> GerarLancamentosFuturos(DespesaFixaModel despesa, DateTime apartirDe)
+    {
+        var listaPagar = new List<Financ_PagarModel>();
+
+        if (!despesa.DataInicio.HasValue)
+            return listaPagar;
+
+        // Calcular quantas parcelas baseado na frequência e período
+        var quantidadeParcelas = CalcularQuantidadeParcelas(despesa);
+
+        // Calcular quantos lançamentos já deveriam ter sido gerados até a data atual
+        var mesesDecorridos = ((apartirDe.Year - despesa.DataInicio.Value.Year) * 12) +
+                             (apartirDe.Month - despesa.DataInicio.Value.Month);
+
+        var indiceInicio = Math.Max(0, mesesDecorridos);
+
+        for (int i = indiceInicio; i < quantidadeParcelas; i++)
+        {
+            var dataVencimento = CalcularDataVencimento(despesa.DataInicio.Value, despesa.DiaVencimento, i, despesa.Frequencia);
+
+            // Só gerar lançamentos futuros
+            if (dataVencimento <= apartirDe)
+                continue;
+
+            // Verificar se ainda está dentro do período (se DataFim foi informada)
+            if (despesa.DataFim.HasValue && dataVencimento > despesa.DataFim.Value)
+                break;
+
+            // Verificar se já existe lançamento para esta data
+            var jaExiste = await _context.Financ_Pagar
+                .AnyAsync(x => x.DespesaFixaId == despesa.Id &&
+                              x.subFinancPagar.Any(s => s.DataVencimento.Value.Date == dataVencimento.Date));
+
+            if (jaExiste)
+                continue;
+
+            var pagar = new Financ_PagarModel
+            {
+                Descricao = $"{despesa.Descricao} - {dataVencimento:MM/yyyy}",
+                DataEmissao = DateTime.UtcNow,
+                ValorOriginal = despesa.Valor,
+                Valor = despesa.Valor,
+                Status = "Pendente",
+                FornecedorId = despesa.FornecedorId,
+                PlanoContaId = despesa.PlanoContaId,
+                CentroCustoId = despesa.CentroCustoId,
+                TipoPagamentoId = despesa.TipoPagamentoId,
+                DespesaFixaId = despesa.Id,
+                subFinancPagar = new List<Financ_PagarSubModel>()
+            };
+
+            var sub = new Financ_PagarSubModel
+            {
+                Parcela = 1,
+                Valor = despesa.Valor,
+                DataVencimento = dataVencimento,
+                FormaPagamentoId = despesa.FormaPagamentoId
+            };
+
+            pagar.subFinancPagar.Add(sub);
+            listaPagar.Add(pagar);
+        }
+
+        return listaPagar;
+    }
+
+    // Método para inativar despesa fixa (soft delete)
+    public async Task<ResponseModel<bool>> Inativar(int id)
+    {
+        ResponseModel<bool> resposta = new ResponseModel<bool>();
+
+        using var transaction = await _context.Database.BeginTransactionAsync();
+        try
+        {
+            var despesa = await _context.Despesas.FindAsync(id);
+
+            if (despesa == null)
+            {
+                resposta.Mensagem = "Despesa fixa não encontrada";
+                resposta.Status = false;
+                return resposta;
+            }
+
+            // Verificar se existem lançamentos pagos
+            var temPagamentos = await _context.Financ_Pagar
+                .AnyAsync(x => x.DespesaFixaId == id && x.Status == "Pago");
+
+            if (temPagamentos)
+            {
+                // Se tem pagamentos, apenas inativar e cancelar lançamentos futuros
+                despesa.Ativo = false;
+                despesa.DataFim = DateTime.Now.Date;
+
+                // Cancelar lançamentos futuros pendentes
+                var lancamentosFuturos = await _context.Financ_Pagar
+                    .Where(x => x.DespesaFixaId == id &&
+                               x.Status == "Pendente" &&
+                               x.subFinancPagar.Any(s => s.DataVencimento > DateTime.Now))
+                    .ToListAsync();
+
+                foreach (var lancamento in lancamentosFuturos)
+                {
+                    lancamento.Status = "Cancelado";
+                }
+            }
+            else
+            {
+                // Se não tem pagamentos, pode remover tudo
+                var lancamentos = await _context.Financ_Pagar
+                    .Where(x => x.DespesaFixaId == id)
+                    .ToListAsync();
+
+                _context.Financ_Pagar.RemoveRange(lancamentos);
+                _context.Despesas.Remove(despesa);
+            }
+
+            await _context.SaveChangesAsync();
+            await transaction.CommitAsync();
+
+            resposta.Dados = true;
+            resposta.Mensagem = "Despesa fixa inativada com sucesso";
+            resposta.Status = true;
+
+            return resposta;
+        }
+        catch (Exception ex)
+        {
+            await transaction.RollbackAsync();
+            resposta.Mensagem = "Erro ao inativar despesa: " + ex.Message;
+            resposta.Status = false;
+            return resposta;
         }
     }
 }

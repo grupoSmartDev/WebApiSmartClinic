@@ -19,9 +19,10 @@ public class DespesaFixaController : ControllerBase
     }
 
     [HttpGet("Listar")]
-    public async Task<ActionResult<ResponseModel<List<DespesaFixaModel>>>> Listar()
+    public async Task<ActionResult<ResponseModel<List<DespesaFixaModel>>>> Listar([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10, [FromQuery] int? idFiltro = null, [FromQuery] string? descricaoFiltro = null,
+        [FromQuery] string? vencimentoFiltro = null, [FromQuery] string? centroCustoFiltro = null, [FromQuery] string? planoContasFiltro = null, [FromQuery] bool paginar = true)
     {
-        var despesa = await _despesaFixa.Listar();
+        var despesa = await _despesaFixa.Listar(pageNumber, pageSize, idFiltro, descricaoFiltro, vencimentoFiltro, centroCustoFiltro, planoContasFiltro, paginar);
         return Ok(despesa);
     }
 

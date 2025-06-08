@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using WebApiSmartClinic.Services.Auth;
 using WebApiSmartClinic.Dto.User;
 using WebApiSmartClinic.Helpers;
+using Stripe;
 
 namespace WebApiSmartClinic.Controllers
 {
@@ -83,6 +84,20 @@ namespace WebApiSmartClinic.Controllers
         {
             var result = await _authService.DeleteUserAsync(id);
             return Ok(result);
+        }
+
+        [AllowAnonymous]
+        [HttpGet("products")]
+        public async Task<IActionResult> Products()
+        {
+            StripeConfiguration.ApiKey = "";
+            var options = new ProductListOptions
+            {
+                Limit = 10,
+            };
+            var service = new ProductService();
+            StripeList<Product> products = service.List(options);
+            return Ok(products);
         }
     }
 }

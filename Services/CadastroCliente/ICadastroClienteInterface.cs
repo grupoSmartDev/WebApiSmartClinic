@@ -6,11 +6,11 @@ namespace WebApiSmartClinic.Services.CadastroCliente
 {
     public interface ICadastroClienteInterface
     {
-        Task<ResponseModel<List<CadastroClienteModel>>> Listar();
-        Task<ResponseModel<List<CadastroClienteModel>>> Delete(int idCadastroCliente);
-        Task<ResponseModel<CadastroClienteModel>> BuscarPorId(int idCadastroCliente);
-        Task<ResponseModel<CadastroClienteModel>> Criar(CadastroClienteCreateDto dto);
+        Task<ResponseModel<List<EmpresaModel>>> Listar();
+        Task<ResponseModel<List<EmpresaModel>>> Delete(int idCadastroCliente);
+        Task<ResponseModel<EmpresaModel>> BuscarPorId(int idCadastroCliente);
+        Task<ResponseModel<EmpresaModel>> Criar(CadastroClienteCreateDto dto);
         //Task<ResponseModel<List<CadastroClienteModel>>> Criar(CadastroClienteCreateDto cadastroclienteCreateDto);
-        Task<ResponseModel<List<CadastroClienteModel>>> Editar(CadastroClienteEdicaoDto cadastroclienteEdicaoDto);
+        Task<ResponseModel<List<EmpresaModel>>> Editar(CadastroClienteEdicaoDto cadastroclienteEdicaoDto);
     }
 }

@@ -20,7 +20,7 @@ public class UsuarioService : IUsuarioInterface
         ResponseModel<UsuarioModel> resposta = new ResponseModel<UsuarioModel>();
         try
         {
-            var usuario = await _context.Usuario.FirstOrDefaultAsync(x => x.Id == idUsuario);
+            var usuario = await _context.Usuario.FirstOrDefaultAsync(x => x.Id == idUsuario.ToString());
             if (usuario == null)
             {
                 resposta.Mensagem = "Nenhum Usuario encontrado";
@@ -84,7 +84,7 @@ public class UsuarioService : IUsuarioInterface
 
         try
         {
-            var usuario = await _context.Usuario.FirstOrDefaultAsync(x => x.Id == idUsuario);
+            var usuario = await _context.Usuario.FirstOrDefaultAsync(x => x.Id == idUsuario.ToString());
             if (usuario == null)
             {
                 resposta.Mensagem = "Nenhum Usuario encontrado";

@@ -1,6 +1,6 @@
 ﻿namespace WebApiSmartClinic.Models;
 
-public class EmpresaModel
+public class EmpresaaaaaaModel
 {
     public int Id { get; set; }
     public string Nome { get; set; }

@@ -18,34 +18,34 @@ namespace WebApiSmartClinic.Controllers
 
         [AllowAnonymous]
         [HttpPost("Criar")]
-        public async Task<ActionResult<ResponseModel<List<CadastroClienteModel>>>> Criar([FromBody] CadastroClienteCreateDto cadastroclienteCreateDto)
+        public async Task<ActionResult<ResponseModel<List<EmpresaModel>>>> Criar([FromBody] CadastroClienteCreateDto cadastroclienteCreateDto)
         {
             var cadastrocliente = await _cadastrocliente.Criar(cadastroclienteCreateDto);
             return Ok(cadastrocliente);
         }
         [HttpGet("Listar")]
-        public async Task<ActionResult<ResponseModel<List<CadastroClienteModel>>>> Listar()
+        public async Task<ActionResult<ResponseModel<List<EmpresaModel>>>> Listar()
         {
             var cadastrocliente = await _cadastrocliente.Listar();
             return Ok(cadastrocliente);
         }
 
         [HttpGet("BuscarPorId/{idCadastroCliente}")]
-        public async Task<ActionResult<ResponseModel<List<CadastroClienteModel>>>> BuscarPorId(int idCadastroCliente)
+        public async Task<ActionResult<ResponseModel<List<EmpresaModel>>>> BuscarPorId(int idCadastroCliente)
         {
             var cadastrocliente = await _cadastrocliente.BuscarPorId(idCadastroCliente);
             return Ok(cadastrocliente);
         }
 
         [HttpPut("Editar")]
-        public async Task<ActionResult<ResponseModel<List<CadastroClienteModel>>>> Editar(CadastroClienteEdicaoDto cadastroclienteEdicaoDto)
+        public async Task<ActionResult<ResponseModel<List<EmpresaModel>>>> Editar(CadastroClienteEdicaoDto cadastroclienteEdicaoDto)
         {
             var cadastrocliente = await _cadastrocliente.Editar(cadastroclienteEdicaoDto);
             return Ok(cadastrocliente);
         }
 
         [HttpDelete("Delete/{idCadastroCliente}")]
-        public async Task<ActionResult<ResponseModel<List<CadastroClienteModel>>>> Delete(int idCadastroCliente)
+        public async Task<ActionResult<ResponseModel<List<EmpresaModel>>>> Delete(int idCadastroCliente)
         {
             var cadastrocliente = await _cadastrocliente.Delete(idCadastroCliente);
             return Ok(cadastrocliente);

@@ -52,13 +52,17 @@ public class AppDbContext : IdentityDbContext<User>
     public DbSet<EvolucaoModel> Evolucoes { get; set; }
     public DbSet<ProfissaoModel> Profissao { get; set; }
     public DbSet<FichaAvaliacaoModel> FichaAvaliacao { get; set; }
-    public DbSet<EmpresaModel> Empresa { get; set; }
+   // public DbSet<EmpresaModel> Empresa { get; set; }
     public DbSet<PlanoContaModel> PlanoConta { get; set; }
     public DbSet<PlanoContaSubModel> PlanoContaSub { get; set; }
     public DbSet<User> Users { get; set; }
     public DbSet<RecorrenciaPacienteModel> RecorrenciaPaciente { get; set; }
-    public DbSet<CadastroClienteModel> CadastroCliente { get; set; }
+    public DbSet<EmpresaModel> Empresas { get; set; }
     public DbSet<DespesaFixaModel> Despesas { get; set; }
+
+    public DbSet<FilialModel> Filiais { get; set; }
+    public DbSet<SubscriptionModel> SubsCricao{ get; set; }
+    public DbSet<PaymentModel> Pagamentos{ get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
@@ -231,6 +235,7 @@ public class AppDbContext : IdentityDbContext<User>
             .WithMany()
             .HasForeignKey(s => s.TipoPagamentoId);
 
+  
         // Relacionamento: PlanoConta -> SubPlanoConta
         modelBuilder.Entity<PlanoContaModel>()
             .HasMany(f => f.SubPlanos)
@@ -253,18 +258,21 @@ public class AppDbContext : IdentityDbContext<User>
             entity.HasOne(d => d.Fornecedor)
                 .WithMany()
                 .HasForeignKey(d => d.FornecedorId);
+
+            entity.HasOne(d => d.TipoPagamento)
+                .WithMany()
+                .HasForeignKey(d => d.TipoPagamentoId);
+
+            entity.HasOne(d => d.FormaPagamento)
+                .WithMany()
+                .HasForeignKey(d => d.FormaPagamentoId);
         });
 
         modelBuilder.Entity<Financ_PagarSubModel>(entity =>
         {
             entity.ToTable("Financ_PagarSub");
 
-            // Relacionamento com a despesa fixa - NOVO
-            entity.HasOne(s => s.DespesaFixa)
-                .WithMany(d => d.FinancPagar) // Vincula com a coleção em DespesaFixaModel se existir
-                .HasForeignKey(s => s.DespesaFixaId);
-
-            // Relacionamento com o cabeçalho continua
+          // Relacionamento com o cabeçalho continua
             entity.HasOne(s => s.FinancPagar)
                 .WithMany(f => f.subFinancPagar)
                 .HasForeignKey(s => s.financPagarId);
@@ -297,5 +305,57 @@ public class AppDbContext : IdentityDbContext<User>
             .WithOne(h => h.Sala)
             .HasForeignKey(h => h.SalaId)
             .OnDelete(DeleteBehavior.Cascade);
+
+
+        modelBuilder.Entity<EmpresaModel>(entity =>
+        {
+            // Relacionamento com TipoPagamento (N:1)
+            entity.HasOne(e => e.TipoPagamento)
+                .WithMany()
+                .HasForeignKey(e => e.TipoPagamentoId);
+
+            // Relacionamento com Usuarios (1:N)
+            entity.HasMany(e => e.Usuarios)
+                .WithOne(u => u.Empresa)
+                .HasForeignKey(u => u.EmpresaId);
+
+            // Relacionamento com Filiais (1:N)
+            entity.HasMany(e => e.Filiais)
+                .WithOne(f => f.Empresa)
+                .HasForeignKey(f => f.EmpresaId);
+
+            // Relacionamento com Subscription (1:N)
+            entity.HasMany(e => e.Subscription)
+                .WithOne(s => s.Empresa)
+                .HasForeignKey(s => s.EmpresaId);
+        });
+
+        modelBuilder.Entity<PaymentModel>(entity =>
+        {
+            // Relacionamento com Empresa (N:1)
+            entity.HasOne(p => p.Empresa)
+                .WithMany()
+                .HasForeignKey(p => p.EmpresaId);
+
+            // Relacionamento com Subscription (N:1)
+            entity.HasOne(p => p.Subscription)
+                .WithMany()
+                .HasForeignKey(p => p.SubscriptionId)
+                .IsRequired(false); // Permite que SubscriptionId seja nulo
+        });
+
+        modelBuilder.Entity<SubscriptionModel>(entity =>
+        {
+            // Relacionamento com Empresa (N:1)
+            entity.HasOne(s => s.Empresa)
+                .WithMany(e => e.Subscription)
+                .HasForeignKey(s => s.EmpresaId);
+        });
+
+        modelBuilder.Entity<Financ_PagarModel>()
+        .HasOne(f => f.DespesaFixa)
+        .WithMany(d => d.FinancPagar)
+        .HasForeignKey(f => f.DespesaFixaId)
+        .OnDelete(DeleteBehavior.Cascade);
     }
 }

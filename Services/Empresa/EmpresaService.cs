@@ -17,7 +17,7 @@ public class EmpresaService
 
     public async Task<string> GetConnectionStringForCompany(int companyId)
     {
-        var company = await _context.Empresa.FindAsync(companyId);
+        var company = await _context.Empresas.FindAsync(companyId);
         return company?.DatabaseConnectionString;
     }
 
@@ -40,7 +40,7 @@ public class EmpresaService
             DatabaseConnectionString = connectionString
         };
 
-        _context.Empresa.Add(newCompany);
+        _context.Empresas.Add(newCompany);
         await _context.SaveChangesAsync();
 
         return true;

@@ -60,9 +60,9 @@ public class CadastroClienteService : ICadastroClienteInterface
         await authService.RegisterAsync(userCreateRequest, userKey);
     }
 
-    public async Task<ResponseModel<CadastroClienteModel>> Criar(CadastroClienteCreateDto dto)
+    public async Task<ResponseModel<EmpresaModel>> Criar(CadastroClienteCreateDto dto)
     {
-        var resposta = new ResponseModel<CadastroClienteModel>();
+        var resposta = new ResponseModel<EmpresaModel>();
 
         var cpfKey = dto.TitularCPF;
         var novoBanco = cpfKey;
@@ -107,7 +107,7 @@ public class CadastroClienteService : ICadastroClienteInterface
             await dbContext.Database.MigrateAsync();
 
             // 7. Cria cliente
-            var cliente = new CadastroClienteModel
+            var cliente = new EmpresaModel
             {
                 Nome = dto.Nome,
                 Sobrenome = dto.Sobrenome,
@@ -129,7 +129,7 @@ public class CadastroClienteService : ICadastroClienteInterface
                 Ativo = true
             };
 
-            await dbContext.CadastroCliente.AddAsync(cliente);
+            await dbContext.Empresas.AddAsync(cliente);
             await dbContext.SaveChangesAsync();
 
             var userCreateRequest = new UserCreateRequest
@@ -217,12 +217,12 @@ public class CadastroClienteService : ICadastroClienteInterface
         return resposta;
     }
 
-    public async Task<ResponseModel<CadastroClienteModel>> BuscarPorId(int idCadastroCliente)
+    public async Task<ResponseModel<EmpresaModel>> BuscarPorId(int idCadastroCliente)
     {
-        ResponseModel<CadastroClienteModel> resposta = new ResponseModel<CadastroClienteModel>();
+        ResponseModel<EmpresaModel> resposta = new ResponseModel<EmpresaModel>();
         try
         {
-            var cadastrocliente = await _context.CadastroCliente.FirstOrDefaultAsync(x => x.Id == idCadastroCliente);
+            var cadastrocliente = await _context.Empresas.FirstOrDefaultAsync(x => x.Id == idCadastroCliente);
             if (cadastrocliente == null)
             {
                 resposta.Mensagem = "Nenhum CadastroCliente encontrado";
@@ -242,13 +242,13 @@ public class CadastroClienteService : ICadastroClienteInterface
         }
     }
 
-    public async Task<ResponseModel<List<CadastroClienteModel>>> Delete(int idCadastroCliente)
+    public async Task<ResponseModel<List<EmpresaModel>>> Delete(int idCadastroCliente)
     {
-        ResponseModel<List<CadastroClienteModel>> resposta = new ResponseModel<List<CadastroClienteModel>>();
+        ResponseModel<List<EmpresaModel>> resposta = new ResponseModel<List<EmpresaModel>>();
 
         try
         {
-            var cadastrocliente = await _context.CadastroCliente.FirstOrDefaultAsync(x => x.Id == idCadastroCliente);
+            var cadastrocliente = await _context.Empresas.FirstOrDefaultAsync(x => x.Id == idCadastroCliente);
             if (cadastrocliente == null)
             {
                 resposta.Mensagem = "Nenhum CadastroCliente encontrado";
@@ -258,7 +258,7 @@ public class CadastroClienteService : ICadastroClienteInterface
             _context.Remove(cadastrocliente);
             await _context.SaveChangesAsync();
 
-            resposta.Dados = await _context.CadastroCliente.ToListAsync();
+            resposta.Dados = await _context.Empresas.ToListAsync();
             resposta.Mensagem = "CadastroCliente Excluido com sucesso";
             return resposta;
 
@@ -272,13 +272,13 @@ public class CadastroClienteService : ICadastroClienteInterface
         }
     }
 
-    public async Task<ResponseModel<List<CadastroClienteModel>>> Editar(CadastroClienteEdicaoDto cadastroclienteEdicaoDto)
+    public async Task<ResponseModel<List<EmpresaModel>>> Editar(CadastroClienteEdicaoDto cadastroclienteEdicaoDto)
     {
-        ResponseModel<List<CadastroClienteModel>> resposta = new ResponseModel<List<CadastroClienteModel>>();
+        ResponseModel<List<EmpresaModel>> resposta = new ResponseModel<List<EmpresaModel>>();
 
         try
         {
-            var cadastrocliente = _context.CadastroCliente.FirstOrDefault(x => x.Id == cadastroclienteEdicaoDto.Id);
+            var cadastrocliente = _context.Empresas.FirstOrDefault(x => x.Id == cadastroclienteEdicaoDto.Id);
             if (cadastrocliente == null)
             {
                 resposta.Mensagem = "CadastroCliente não encontrado";
@@ -291,7 +291,7 @@ public class CadastroClienteService : ICadastroClienteInterface
             _context.Update(cadastrocliente);
             await _context.SaveChangesAsync();
 
-            resposta.Dados = await _context.CadastroCliente.ToListAsync();
+            resposta.Dados = await _context.Empresas.ToListAsync();
             resposta.Mensagem = "CadastroCliente Atualizado com sucesso";
             return resposta;
         }
@@ -304,13 +304,13 @@ public class CadastroClienteService : ICadastroClienteInterface
         }
     }
 
-    public async Task<ResponseModel<List<CadastroClienteModel>>> Listar()
+    public async Task<ResponseModel<List<EmpresaModel>>> Listar()
     {
-        ResponseModel<List<CadastroClienteModel>> resposta = new ResponseModel<List<CadastroClienteModel>>();
+        ResponseModel<List<EmpresaModel>> resposta = new ResponseModel<List<EmpresaModel>>();
 
         try
         {
-            var cadastrocliente = await _context.CadastroCliente.ToListAsync();
+            var cadastrocliente = await _context.Empresas.ToListAsync();
 
             resposta.Dados = cadastrocliente;
             resposta.Mensagem = "Todos os CadastroCliente foram encontrados";

@@ -27,10 +27,10 @@ public class Financ_PagarModel
     public string? Classificacao { get; set; }
     public string? Observacao { get; set; }
     public int? PacienteId { get; set; } = null;
-    
+
     public PacienteModel? Paciente { get; set; }
     public int? FornecedorId { get; set; } = null; // Relacionamento com a tabela de Fornecedor
-    
+
     public FornecedorModel? Fornecedor { get; set; }
     public int? CentroCustoId { get; set; } = null; // Relacionamento com a tabela de CentroCusto    
     public CentroCustoModel? CentroCusto { get; set; }
@@ -45,8 +45,11 @@ public class Financ_PagarModel
     public int? PlanoContaId { get; internal set; }
     public PlanoContaModel? PlanoConta { get; set; }
 
-    [NotMapped]
     public int? DespesaFixaId { get; set; }
+    [JsonIgnore]
+    public DespesaFixaModel? DespesaFixa{ get; set; }
+
+
 }
 
 public class Financ_PagarSubModel
@@ -60,9 +63,6 @@ public class Financ_PagarSubModel
     public decimal? Desconto { get; set; }
     public decimal? Juros { get; set; }
     public decimal? Multa { get; set; }
-
-    public int? DespesaFixaId { get; set; }
-    public DespesaFixaModel? DespesaFixa { get; set; }
 
     public int? TipoPagamentoId { get; set; } = null; // Relacionamento com a tabela de TipoPagamento
     [JsonIgnore]

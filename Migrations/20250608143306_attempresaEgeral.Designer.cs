@@ -12,8 +12,8 @@ using WebApiSmartClinic.Data;
 namespace WebApiSmartClinic.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250423190355_tipoPagamento3")]
-    partial class tipoPagamento3
+    [Migration("20250608143306_attempresaEgeral")]
+    partial class attempresaEgeral
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -175,6 +175,36 @@ namespace WebApiSmartClinic.Migrations
                     b.HasKey("UserId", "LoginProvider", "Name");
 
                     b.ToTable("AspNetUserTokens", (string)null);
+                });
+
+            modelBuilder.Entity("SalaHorarioModel", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<bool>("Ativo")
+                        .HasColumnType("boolean");
+
+                    b.Property<int>("DiaSemana")
+                        .HasColumnType("integer");
+
+                    b.Property<TimeSpan>("HoraFim")
+                        .HasColumnType("interval");
+
+                    b.Property<TimeSpan>("HoraInicio")
+                        .HasColumnType("interval");
+
+                    b.Property<int>("SalaId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("SalaId");
+
+                    b.ToTable("SalaHorario");
                 });
 
             modelBuilder.Entity("WebApiSmartClinic.Dto.Paciente.RecorrenciaPacienteDto", b =>
@@ -480,95 +510,6 @@ namespace WebApiSmartClinic.Migrations
                     b.ToTable("Boleto");
                 });
 
-            modelBuilder.Entity("WebApiSmartClinic.Models.CadastroClienteModel", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<bool>("Ativo")
-                        .HasColumnType("boolean");
-
-                    b.Property<string>("CNPJEmpresaMatriz")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("Celular")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<bool>("CelularComWhatsApp")
-                        .HasColumnType("boolean");
-
-                    b.Property<DateTime?>("DataFim")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<DateTime?>("DataInicio")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<DateTime?>("DataInicioTeste")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<DateTime?>("DataNascimentoTitular")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("Email")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("Especialidade")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("Nome")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<bool>("PeriodoTeste")
-                        .HasColumnType("boolean");
-
-                    b.Property<string>("PlanoEscolhido")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<int>("QtdeLicencaEmpresaPermitida")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("QtdeLicencaEmpresaUtilizada")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("QtdeLicencaUsuarioPermitida")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("QtdeLicencaUsuarioUtilizada")
-                        .HasColumnType("integer");
-
-                    b.Property<bool>("ReceberNotificacoes")
-                        .HasColumnType("boolean");
-
-                    b.Property<string>("Sobrenome")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("TelefoneFixo")
-                        .HasColumnType("text");
-
-                    b.Property<int>("TipoPagamentoId")
-                        .HasColumnType("integer");
-
-                    b.Property<string>("TitularCPF")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("TipoPagamentoId");
-
-                    b.ToTable("CadastroCliente");
-                });
-
             modelBuilder.Entity("WebApiSmartClinic.Models.CategoriaModel", b =>
                 {
                     b.Property<int>("Id")
@@ -755,7 +696,7 @@ namespace WebApiSmartClinic.Migrations
                             Nome = "Unimed",
                             PeriodoCarencia = "0",
                             RegistroAvs = "ABC",
-                            Telefone = "3434-3434"
+                            Telefone = "343434-3434"
                         });
                 });
 
@@ -770,18 +711,16 @@ namespace WebApiSmartClinic.Migrations
                     b.Property<bool?>("Ativo")
                         .HasColumnType("boolean");
 
-                    b.Property<string>("Categoria")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("character varying(50)");
-
                     b.Property<int?>("CentroCustoId")
                         .HasColumnType("integer");
+
+                    b.Property<DateTime>("DataAlteracao")
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<DateTime?>("DataFim")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<DateTime>("DataInicio")
+                    b.Property<DateTime?>("DataInicio")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Descricao")
@@ -790,6 +729,9 @@ namespace WebApiSmartClinic.Migrations
                         .HasColumnType("character varying(150)");
 
                     b.Property<int>("DiaVencimento")
+                        .HasColumnType("integer");
+
+                    b.Property<int?>("FormaPagamentoId")
                         .HasColumnType("integer");
 
                     b.Property<int?>("FornecedorId")
@@ -801,6 +743,9 @@ namespace WebApiSmartClinic.Migrations
                     b.Property<int?>("PlanoContaId")
                         .HasColumnType("integer");
 
+                    b.Property<int?>("TipoPagamentoId")
+                        .HasColumnType("integer");
+
                     b.Property<decimal>("Valor")
                         .HasColumnType("decimal(18,2)");
 
@@ -808,9 +753,13 @@ namespace WebApiSmartClinic.Migrations
 
                     b.HasIndex("CentroCustoId");
 
+                    b.HasIndex("FormaPagamentoId");
+
                     b.HasIndex("FornecedorId");
 
                     b.HasIndex("PlanoContaId");
+
+                    b.HasIndex("TipoPagamentoId");
 
                     b.ToTable("DespesasFixas", (string)null);
                 });
@@ -823,7 +772,44 @@ namespace WebApiSmartClinic.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
+                    b.Property<bool>("Ativo")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("CNPJEmpresaMatriz")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Celular")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<bool>("CelularComWhatsApp")
+                        .HasColumnType("boolean");
+
+                    b.Property<DateTime>("DataCriacao")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime?>("DataFim")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime?>("DataInicio")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime?>("DataInicioTeste")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime?>("DataNascimentoTitular")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<string>("DatabaseConnectionString")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Especialidade")
                         .IsRequired()
                         .HasColumnType("text");
 
@@ -831,9 +817,56 @@ namespace WebApiSmartClinic.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<bool>("PeriodoTeste")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("PlanoEscolhido")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int>("QtdeLicencaEmpresaPermitida")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("QtdeLicencaEmpresaUtilizada")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("QtdeLicencaFilialPermitida")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("QtdeLicencaFilialUtilizada")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("QtdeLicencaUsuarioPermitida")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("QtdeLicencaUsuarioUtilizada")
+                        .HasColumnType("integer");
+
+                    b.Property<bool>("ReceberNotificacoes")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("Sobrenome")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("StripeCustomerId")
+                        .HasColumnType("text");
+
+                    b.Property<string>("TelefoneFixo")
+                        .HasColumnType("text");
+
+                    b.Property<int>("TipoPagamentoId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("TitularCPF")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.HasKey("Id");
 
-                    b.ToTable("Empresa");
+                    b.HasIndex("TipoPagamentoId");
+
+                    b.ToTable("Empresas");
                 });
 
             modelBuilder.Entity("WebApiSmartClinic.Models.EvolucaoModel", b =>
@@ -1024,6 +1057,46 @@ namespace WebApiSmartClinic.Migrations
                     b.ToTable("FichaAvaliacao");
                 });
 
+            modelBuilder.Entity("WebApiSmartClinic.Models.FilialModel", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<bool>("Ativo")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("CNPJ")
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("DataCriacao")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Email")
+                        .HasColumnType("text");
+
+                    b.Property<int>("EmpresaId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Endereco")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Nome")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Telefone")
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("EmpresaId");
+
+                    b.ToTable("Filiais");
+                });
+
             modelBuilder.Entity("WebApiSmartClinic.Models.Financ_PagarModel", b =>
                 {
                     b.Property<int>("Id")
@@ -1046,6 +1119,9 @@ namespace WebApiSmartClinic.Migrations
 
                     b.Property<string>("Descricao")
                         .HasColumnType("text");
+
+                    b.Property<int?>("DespesaFixaId")
+                        .HasColumnType("integer");
 
                     b.Property<int?>("FornecedorId")
                         .HasColumnType("integer");
@@ -1092,6 +1168,8 @@ namespace WebApiSmartClinic.Migrations
 
                     b.HasIndex("CentroCustoId");
 
+                    b.HasIndex("DespesaFixaId");
+
                     b.HasIndex("FornecedorId");
 
                     b.HasIndex("PacienteId");
@@ -1119,9 +1197,6 @@ namespace WebApiSmartClinic.Migrations
 
                     b.Property<decimal?>("Desconto")
                         .HasColumnType("numeric");
-
-                    b.Property<int?>("DespesaFixaId")
-                        .HasColumnType("integer");
 
                     b.Property<int?>("FormaPagamentoId")
                         .HasColumnType("integer");
@@ -1151,8 +1226,6 @@ namespace WebApiSmartClinic.Migrations
                         .HasColumnType("integer");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("DespesaFixaId");
 
                     b.HasIndex("FormaPagamentoId");
 
@@ -1368,114 +1441,87 @@ namespace WebApiSmartClinic.Migrations
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Agencia")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("Bairro")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("Banco")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("CEP")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("CNPJ")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("CPF")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("Celular")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("ChavePIX")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("Cidade")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("Complemento")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("Conta")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<DateTime?>("DataNascimento")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Email")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("EstadoCivil")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("Fantasia")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("IE")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("IM")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("Logradouro")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("Nome")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("NrLogradouro")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("Observacao")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("Pais")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("Razao")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("Sexo")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("TelefoneFixo")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("Tipo")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("TipoPIX")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("UF")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.HasKey("Id");
@@ -1512,6 +1558,9 @@ namespace WebApiSmartClinic.Migrations
                     b.Property<int?>("UsuarioId")
                         .HasColumnType("integer");
 
+                    b.Property<string>("UsuarioId1")
+                        .HasColumnType("text");
+
                     b.Property<decimal>("Valor")
                         .HasColumnType("numeric");
 
@@ -1519,7 +1568,7 @@ namespace WebApiSmartClinic.Migrations
 
                     b.HasIndex("BancoId");
 
-                    b.HasIndex("UsuarioId");
+                    b.HasIndex("UsuarioId1");
 
                     b.ToTable("HistoricoTransacao");
                 });
@@ -1571,9 +1620,12 @@ namespace WebApiSmartClinic.Migrations
                     b.Property<int>("UsuarioId")
                         .HasColumnType("integer");
 
+                    b.Property<string>("UsuarioId1")
+                        .HasColumnType("text");
+
                     b.HasKey("Id");
 
-                    b.HasIndex("UsuarioId");
+                    b.HasIndex("UsuarioId1");
 
                     b.ToTable("LogUsuario");
                 });
@@ -1691,6 +1743,51 @@ namespace WebApiSmartClinic.Migrations
                     b.HasIndex("ProfissionalId");
 
                     b.ToTable("Paciente");
+                });
+
+            modelBuilder.Entity("WebApiSmartClinic.Models.PaymentModel", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<decimal>("Amount")
+                        .HasColumnType("numeric");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Currency")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int>("EmpresaId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("StripeInvoiceId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("StripePaymentIntentId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int?>("SubscriptionId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("EmpresaId");
+
+                    b.HasIndex("SubscriptionId");
+
+                    b.ToTable("Pagamentos");
                 });
 
             modelBuilder.Entity("WebApiSmartClinic.Models.PlanoContaModel", b =>
@@ -1935,7 +2032,7 @@ namespace WebApiSmartClinic.Migrations
                         new
                         {
                             Id = 2,
-                            Descricao = "psicólogo(a)",
+                            Descricao = "Psicólogo(a)",
                             IsSystemDefault = true
                         },
                         new
@@ -1948,6 +2045,12 @@ namespace WebApiSmartClinic.Migrations
                         {
                             Id = 4,
                             Descricao = "Dentista",
+                            IsSystemDefault = true
+                        },
+                        new
+                        {
+                            Id = 5,
+                            Descricao = "Médico",
                             IsSystemDefault = true
                         });
                 });
@@ -2034,6 +2137,10 @@ namespace WebApiSmartClinic.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("ConselhoId");
+
+                    b.HasIndex("ProfissaoId");
+
                     b.ToTable("Profissional");
                 });
 
@@ -2092,8 +2199,8 @@ namespace WebApiSmartClinic.Migrations
                     b.Property<string>("Observacao")
                         .HasColumnType("text");
 
-                    b.Property<string>("Status")
-                        .HasColumnType("text");
+                    b.Property<bool>("Status")
+                        .HasColumnType("boolean");
 
                     b.Property<string>("Tipo")
                         .HasColumnType("text");
@@ -2112,7 +2219,7 @@ namespace WebApiSmartClinic.Migrations
                             Capacidade = 10,
                             IsSystemDefault = true,
                             Nome = "Principal",
-                            Status = "Ativo",
+                            Status = true,
                             Tipo = "Geral",
                             local = "Principal"
                         });
@@ -2168,7 +2275,7 @@ namespace WebApiSmartClinic.Migrations
                             Cor = "#5D9CEC",
                             IsSystemDefault = true,
                             Legenda = "Em atendimento",
-                            Status = "em_atendimento"
+                            Status = "Em atendimento"
                         },
                         new
                         {
@@ -2176,7 +2283,7 @@ namespace WebApiSmartClinic.Migrations
                             Cor = "#2ECC71",
                             IsSystemDefault = true,
                             Legenda = "Concluído",
-                            Status = "concluido"
+                            Status = "Concluído"
                         },
                         new
                         {
@@ -2184,7 +2291,7 @@ namespace WebApiSmartClinic.Migrations
                             Cor = "#E74C3C",
                             IsSystemDefault = true,
                             Legenda = "Cancelado pelo paciente",
-                            Status = "cancelado_paciente"
+                            Status = "Cancelado pelo paciente"
                         },
                         new
                         {
@@ -2192,7 +2299,7 @@ namespace WebApiSmartClinic.Migrations
                             Cor = "#E57373",
                             IsSystemDefault = true,
                             Legenda = "Cancelado pela clínica",
-                            Status = "cancelado_clinica"
+                            Status = "Cancelado pela clínica"
                         },
                         new
                         {
@@ -2200,7 +2307,7 @@ namespace WebApiSmartClinic.Migrations
                             Cor = "#F9A825",
                             IsSystemDefault = true,
                             Legenda = "Remarcado",
-                            Status = "remarcado"
+                            Status = "Remarcado"
                         },
                         new
                         {
@@ -2208,7 +2315,7 @@ namespace WebApiSmartClinic.Migrations
                             Cor = "#E67E22",
                             IsSystemDefault = true,
                             Legenda = "Não compareceu",
-                            Status = "nao_compareceu"
+                            Status = "Não compareceu"
                         });
                 });
 
@@ -2232,6 +2339,52 @@ namespace WebApiSmartClinic.Migrations
                     b.HasIndex("CentroCustoId");
 
                     b.ToTable("SubCentroCusto");
+                });
+
+            modelBuilder.Entity("WebApiSmartClinic.Models.SubscriptionModel", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<decimal>("Amount")
+                        .HasColumnType("numeric");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Currency")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("CurrentPeriodEnd")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime>("CurrentPeriodStart")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("EmpresaId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("StripePriceId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("StripeSubscriptionId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("EmpresaId");
+
+                    b.ToTable("SubsCricao");
                 });
 
             modelBuilder.Entity("WebApiSmartClinic.Models.TipoPagamentoModel", b =>
@@ -2360,11 +2513,11 @@ namespace WebApiSmartClinic.Migrations
 
             modelBuilder.Entity("WebApiSmartClinic.Models.UsuarioModel", b =>
                 {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
+                    b.Property<string>("Id")
+                        .HasColumnType("text");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+                    b.Property<int>("AccessFailedCount")
+                        .HasColumnType("integer");
 
                     b.Property<bool>("Ativo")
                         .HasColumnType("boolean");
@@ -2373,34 +2526,74 @@ namespace WebApiSmartClinic.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<string>("ConcurrencyStamp")
+                        .HasColumnType("text");
+
                     b.Property<DateTime?>("DataCriacao")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Email")
-                        .IsRequired()
                         .HasColumnType("text");
+
+                    b.Property<bool>("EmailConfirmed")
+                        .HasColumnType("boolean");
 
                     b.Property<int>("EmpresaId")
                         .HasColumnType("integer");
 
+                    b.Property<int>("FilialId")
+                        .HasColumnType("integer");
+
+                    b.Property<bool>("LockoutEnabled")
+                        .HasColumnType("boolean");
+
+                    b.Property<DateTimeOffset?>("LockoutEnd")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<string>("Nome")
                         .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("NormalizedEmail")
+                        .HasColumnType("text");
+
+                    b.Property<string>("NormalizedUserName")
+                        .HasColumnType("text");
+
+                    b.Property<string>("PasswordHash")
                         .HasColumnType("text");
 
                     b.Property<int[]>("Permissao")
                         .IsRequired()
                         .HasColumnType("integer[]");
 
+                    b.Property<string>("PhoneNumber")
+                        .HasColumnType("text");
+
+                    b.Property<bool>("PhoneNumberConfirmed")
+                        .HasColumnType("boolean");
+
                     b.Property<int?>("ProfissionalId")
                         .HasColumnType("integer");
+
+                    b.Property<string>("SecurityStamp")
+                        .HasColumnType("text");
 
                     b.Property<string>("Senha")
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<bool>("TwoFactorEnabled")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("UserName")
+                        .HasColumnType("text");
+
                     b.HasKey("Id");
 
                     b.HasIndex("EmpresaId");
+
+                    b.HasIndex("FilialId");
 
                     b.HasIndex("ProfissionalId");
 
@@ -2456,6 +2649,17 @@ namespace WebApiSmartClinic.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("SalaHorarioModel", b =>
+                {
+                    b.HasOne("WebApiSmartClinic.Models.SalaModel", "Sala")
+                        .WithMany("HorariosFuncionamento")
+                        .HasForeignKey("SalaId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Sala");
                 });
 
             modelBuilder.Entity("WebApiSmartClinic.Dto.Paciente.RecorrenciaPacienteDto", b =>
@@ -2521,17 +2725,6 @@ namespace WebApiSmartClinic.Migrations
                     b.Navigation("Banco");
                 });
 
-            modelBuilder.Entity("WebApiSmartClinic.Models.CadastroClienteModel", b =>
-                {
-                    b.HasOne("WebApiSmartClinic.Models.TipoPagamentoModel", "TipoPagamento")
-                        .WithMany()
-                        .HasForeignKey("TipoPagamentoId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("TipoPagamento");
-                });
-
             modelBuilder.Entity("WebApiSmartClinic.Models.ComissaoModel", b =>
                 {
                     b.HasOne("WebApiSmartClinic.Models.ProcedimentoModel", "Procedimento")
@@ -2557,6 +2750,10 @@ namespace WebApiSmartClinic.Migrations
                         .WithMany()
                         .HasForeignKey("CentroCustoId");
 
+                    b.HasOne("WebApiSmartClinic.Models.FormaPagamentoModel", "FormaPagamento")
+                        .WithMany()
+                        .HasForeignKey("FormaPagamentoId");
+
                     b.HasOne("WebApiSmartClinic.Models.FornecedorModel", "Fornecedor")
                         .WithMany()
                         .HasForeignKey("FornecedorId");
@@ -2565,11 +2762,30 @@ namespace WebApiSmartClinic.Migrations
                         .WithMany()
                         .HasForeignKey("PlanoContaId");
 
+                    b.HasOne("WebApiSmartClinic.Models.TipoPagamentoModel", "TipoPagamento")
+                        .WithMany()
+                        .HasForeignKey("TipoPagamentoId");
+
                     b.Navigation("CentroCusto");
+
+                    b.Navigation("FormaPagamento");
 
                     b.Navigation("Fornecedor");
 
                     b.Navigation("PlanoConta");
+
+                    b.Navigation("TipoPagamento");
+                });
+
+            modelBuilder.Entity("WebApiSmartClinic.Models.EmpresaModel", b =>
+                {
+                    b.HasOne("WebApiSmartClinic.Models.TipoPagamentoModel", "TipoPagamento")
+                        .WithMany()
+                        .HasForeignKey("TipoPagamentoId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("TipoPagamento");
                 });
 
             modelBuilder.Entity("WebApiSmartClinic.Models.EvolucaoModel", b =>
@@ -2609,6 +2825,17 @@ namespace WebApiSmartClinic.Migrations
                     b.Navigation("Profissional");
                 });
 
+            modelBuilder.Entity("WebApiSmartClinic.Models.FilialModel", b =>
+                {
+                    b.HasOne("WebApiSmartClinic.Models.EmpresaModel", "Empresa")
+                        .WithMany("Filiais")
+                        .HasForeignKey("EmpresaId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Empresa");
+                });
+
             modelBuilder.Entity("WebApiSmartClinic.Models.Financ_PagarModel", b =>
                 {
                     b.HasOne("WebApiSmartClinic.Models.BancoModel", "Banco")
@@ -2618,6 +2845,11 @@ namespace WebApiSmartClinic.Migrations
                     b.HasOne("WebApiSmartClinic.Models.CentroCustoModel", "CentroCusto")
                         .WithMany()
                         .HasForeignKey("CentroCustoId");
+
+                    b.HasOne("WebApiSmartClinic.Models.DespesaFixaModel", "DespesaFixa")
+                        .WithMany("FinancPagar")
+                        .HasForeignKey("DespesaFixaId")
+                        .OnDelete(DeleteBehavior.Cascade);
 
                     b.HasOne("WebApiSmartClinic.Models.FornecedorModel", "Fornecedor")
                         .WithMany()
@@ -2639,6 +2871,8 @@ namespace WebApiSmartClinic.Migrations
 
                     b.Navigation("CentroCusto");
 
+                    b.Navigation("DespesaFixa");
+
                     b.Navigation("Fornecedor");
 
                     b.Navigation("Paciente");
@@ -2650,10 +2884,6 @@ namespace WebApiSmartClinic.Migrations
 
             modelBuilder.Entity("WebApiSmartClinic.Models.Financ_PagarSubModel", b =>
                 {
-                    b.HasOne("WebApiSmartClinic.Models.DespesaFixaModel", "DespesaFixa")
-                        .WithMany("FinancPagar")
-                        .HasForeignKey("DespesaFixaId");
-
                     b.HasOne("WebApiSmartClinic.Models.FormaPagamentoModel", "FormaPagamento")
                         .WithMany()
                         .HasForeignKey("FormaPagamentoId");
@@ -2665,8 +2895,6 @@ namespace WebApiSmartClinic.Migrations
                     b.HasOne("WebApiSmartClinic.Models.Financ_PagarModel", "FinancPagar")
                         .WithMany("subFinancPagar")
                         .HasForeignKey("financPagarId");
-
-                    b.Navigation("DespesaFixa");
 
                     b.Navigation("FinancPagar");
 
@@ -2741,7 +2969,7 @@ namespace WebApiSmartClinic.Migrations
 
                     b.HasOne("WebApiSmartClinic.Models.UsuarioModel", "Usuario")
                         .WithMany()
-                        .HasForeignKey("UsuarioId");
+                        .HasForeignKey("UsuarioId1");
 
                     b.Navigation("Banco");
 
@@ -2763,9 +2991,7 @@ namespace WebApiSmartClinic.Migrations
                 {
                     b.HasOne("WebApiSmartClinic.Models.UsuarioModel", "Usuario")
                         .WithMany()
-                        .HasForeignKey("UsuarioId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("UsuarioId1");
 
                     b.Navigation("Usuario");
                 });
@@ -2773,7 +2999,7 @@ namespace WebApiSmartClinic.Migrations
             modelBuilder.Entity("WebApiSmartClinic.Models.PacienteModel", b =>
                 {
                     b.HasOne("WebApiSmartClinic.Models.ConvenioModel", "Convenio")
-                        .WithMany("Pacientes")
+                        .WithMany()
                         .HasForeignKey("ConvenioId");
 
                     b.HasOne("WebApiSmartClinic.Models.PlanoModel", "Plano")
@@ -2789,6 +3015,23 @@ namespace WebApiSmartClinic.Migrations
                     b.Navigation("Plano");
 
                     b.Navigation("Profissional");
+                });
+
+            modelBuilder.Entity("WebApiSmartClinic.Models.PaymentModel", b =>
+                {
+                    b.HasOne("WebApiSmartClinic.Models.EmpresaModel", "Empresa")
+                        .WithMany()
+                        .HasForeignKey("EmpresaId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("WebApiSmartClinic.Models.SubscriptionModel", "Subscription")
+                        .WithMany()
+                        .HasForeignKey("SubscriptionId");
+
+                    b.Navigation("Empresa");
+
+                    b.Navigation("Subscription");
                 });
 
             modelBuilder.Entity("WebApiSmartClinic.Models.PlanoContaSubModel", b =>
@@ -2818,6 +3061,21 @@ namespace WebApiSmartClinic.Migrations
                         .HasForeignKey("CategoriaModelId");
                 });
 
+            modelBuilder.Entity("WebApiSmartClinic.Models.ProfissionalModel", b =>
+                {
+                    b.HasOne("WebApiSmartClinic.Models.ConselhoModel", "Conselho")
+                        .WithMany()
+                        .HasForeignKey("ConselhoId");
+
+                    b.HasOne("WebApiSmartClinic.Models.ProfissaoModel", "Profissao")
+                        .WithMany()
+                        .HasForeignKey("ProfissaoId");
+
+                    b.Navigation("Conselho");
+
+                    b.Navigation("Profissao");
+                });
+
             modelBuilder.Entity("WebApiSmartClinic.Models.SubCentroCustoModel", b =>
                 {
                     b.HasOne("WebApiSmartClinic.Models.CentroCustoModel", "CentroCusto")
@@ -2829,6 +3087,17 @@ namespace WebApiSmartClinic.Migrations
                     b.Navigation("CentroCusto");
                 });
 
+            modelBuilder.Entity("WebApiSmartClinic.Models.SubscriptionModel", b =>
+                {
+                    b.HasOne("WebApiSmartClinic.Models.EmpresaModel", "Empresa")
+                        .WithMany("Subscription")
+                        .HasForeignKey("EmpresaId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Empresa");
+                });
+
             modelBuilder.Entity("WebApiSmartClinic.Models.UsuarioModel", b =>
                 {
                     b.HasOne("WebApiSmartClinic.Models.EmpresaModel", "Empresa")
@@ -2837,11 +3106,19 @@ namespace WebApiSmartClinic.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("WebApiSmartClinic.Models.FilialModel", "Filial")
+                        .WithMany("Usuarios")
+                        .HasForeignKey("FilialId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("WebApiSmartClinic.Models.ProfissionalModel", "Profissional")
                         .WithMany()
                         .HasForeignKey("ProfissionalId");
 
                     b.Navigation("Empresa");
+
+                    b.Navigation("Filial");
 
                     b.Navigation("Profissional");
                 });
@@ -2861,11 +3138,6 @@ namespace WebApiSmartClinic.Migrations
                     b.Navigation("SubCentrosCusto");
                 });
 
-            modelBuilder.Entity("WebApiSmartClinic.Models.ConvenioModel", b =>
-                {
-                    b.Navigation("Pacientes");
-                });
-
             modelBuilder.Entity("WebApiSmartClinic.Models.DespesaFixaModel", b =>
                 {
                     b.Navigation("FinancPagar");
@@ -2873,6 +3145,10 @@ namespace WebApiSmartClinic.Migrations
 
             modelBuilder.Entity("WebApiSmartClinic.Models.EmpresaModel", b =>
                 {
+                    b.Navigation("Filiais");
+
+                    b.Navigation("Subscription");
+
                     b.Navigation("Usuarios");
                 });
 
@@ -2881,6 +3157,11 @@ namespace WebApiSmartClinic.Migrations
                     b.Navigation("Atividades");
 
                     b.Navigation("Exercicios");
+                });
+
+            modelBuilder.Entity("WebApiSmartClinic.Models.FilialModel", b =>
+                {
+                    b.Navigation("Usuarios");
                 });
 
             modelBuilder.Entity("WebApiSmartClinic.Models.Financ_PagarModel", b =>
@@ -2917,6 +3198,11 @@ namespace WebApiSmartClinic.Migrations
             modelBuilder.Entity("WebApiSmartClinic.Models.ProfissionalModel", b =>
                 {
                     b.Navigation("FichasAvaliacao");
+                });
+
+            modelBuilder.Entity("WebApiSmartClinic.Models.SalaModel", b =>
+                {
+                    b.Navigation("HorariosFuncionamento");
                 });
 #pragma warning restore 612, 618
         }

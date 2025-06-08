@@ -22,17 +22,28 @@ public class DespesaFixaCreateDto
     public int DiaVencimento { get; set; }
 
     [Required]
-    public DateTime DataInicio { get; set; }
+    private DateTime? _DataInicio;
+    public DateTime? DataInicio
+    {
+        get => _DataInicio?.ToLocalTime();
+        set => _DataInicio = value.HasValue
+            ? DateTime.SpecifyKind(value.Value.ToUniversalTime(), DateTimeKind.Utc)
+            : null;
+    }
 
-    public DateTime? DataFim { get; set; }
+    private DateTime? _DataFim;
+    public DateTime? DataFim
+    {
+        get => _DataFim?.ToLocalTime();
+        set => _DataFim = value.HasValue
+            ? DateTime.SpecifyKind(value.Value.ToUniversalTime(), DateTimeKind.Utc)
+            : null;
+    }
 
 
     public bool? Ativo { get; set; } = true;
 
-    [Required]
-    [StringLength(50)]
-    public string Categoria { get; set; }
-
+ 
     [Required]
     public int Frequencia { get; set; } = 1;
 
@@ -49,6 +60,14 @@ public class DespesaFixaCreateDto
     public int? CentroCustoId { get; set; }
 
     public CentroCustoCreateDto? CentroCusto { get; set; }
+    public int? TipoPagamentoId { get; set; }
+
+    public TipoPagamentoModel? TipoPagamento { get; set; }
+
+    public int? FormaPagamentoId { get; set; }
+
+    public FormaPagamentoModel? FormaPagamento { get; set; }
+
 }
 //public enum TipoFrequencia
 //{

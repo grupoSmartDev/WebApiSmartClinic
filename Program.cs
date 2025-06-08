@@ -209,16 +209,11 @@ services.AddCors(options =>
 {
     options.AddPolicy("AllowFrontend", policy =>
     {
-        policy
-            .WithOrigins(
-                "https://clinicsmart.app.br",
-                "https://smart-clinic-angular-it7o.vercel.app",
-                "https://smart-clinic-angular-tsxt.vercel.app"
-            )
-            .AllowAnyMethod()
-            .AllowAnyHeader()
-            .WithExposedHeaders("Authorization")
-            .AllowCredentials();
+        policy.WithOrigins("https://clinicsmart.app.br")
+              .AllowAnyMethod()
+              .AllowAnyHeader()
+              .AllowCredentials()
+              .WithExposedHeaders("Authorization");
     });
 });
 

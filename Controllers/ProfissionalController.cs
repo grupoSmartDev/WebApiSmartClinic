@@ -22,6 +22,7 @@ namespace WebApiSmartClinic.Controllers
             [FromQuery] string? cpfFiltro = null, [FromQuery] int? profissaoIdFiltro = null, [FromQuery] bool paginar = true)
         {
             var profissional = await _profissional.Listar(pageNumber, pageSize, idFiltro, nomeFiltro, cpfFiltro, profissaoIdFiltro, paginar);
+            
             return Ok(profissional);
         }
 
@@ -29,6 +30,7 @@ namespace WebApiSmartClinic.Controllers
         public async Task<ActionResult<ResponseModel<List<ProfissionalModel>>>> BuscarPorId(int idProfissional)
         {
             var profissional = await _profissional.BuscarPorId(idProfissional);
+            
             return Ok(profissional);
         }
 
@@ -43,7 +45,9 @@ namespace WebApiSmartClinic.Controllers
         [HttpPut("Editar")]
         public async Task<ActionResult<ResponseModel<List<ProfissionalModel>>>> Editar(ProfissionalEdicaoDto profissionalEdicaoDto, int pageNumber = 1, int pageSize = 10)
         {
-            var profissional = await _profissional.Editar(profissionalEdicaoDto, pageNumber, pageSize);
+            var userKey = HttpContext.Request.Headers["UserKey"].FirstOrDefault();
+            var profissional = await _profissional.Editar(profissionalEdicaoDto, pageNumber, pageSize, userKey);
+            
             return Ok(profissional);
         }
 
@@ -51,6 +55,7 @@ namespace WebApiSmartClinic.Controllers
         public async Task<ActionResult<ResponseModel<List<ProfissionalModel>>>> Delete(int idProfissional, int pageNumber = 1, int pageSize = 10)
         {
             var profissional = await _profissional.Delete(idProfissional, pageNumber, pageSize);
+            
             return Ok(profissional);
         }
     }

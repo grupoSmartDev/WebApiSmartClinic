@@ -10,6 +10,6 @@ namespace WebApiSmartClinic.Services.Profissional
         Task<ResponseModel<List<ProfissionalModel>>> Delete(int idProfissional, int pageNumber = 1, int pageSize = 10);
         Task<ResponseModel<ProfissionalModel>> BuscarPorId(int idProfissional);
         Task<ResponseModel<List<ProfissionalModel>>> Criar(ProfissionalCreateDto profissionalCreateDto, int pageNumber = 1, int pageSize = 10, string? userKey = null);
-        Task<ResponseModel<List<ProfissionalModel>>> Editar(ProfissionalEdicaoDto profissionalEdicaoDto, int pageNumber = 1, int pageSize = 10);
+        Task<ResponseModel<List<ProfissionalModel>>> Editar(ProfissionalEdicaoDto profissionalEdicaoDto, int pageNumber = 1, int pageSize = 10, string? userKey = null);
     }
 }

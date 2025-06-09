@@ -62,6 +62,8 @@ var key = Encoding.UTF8.GetBytes(appSettings.JwtSecretKey);
 // Middleware de conexão por tenant
 services.AddSingleton<IConnectionStringProvider, ConnectionStringProvider>();
 
+
+
 // DbContexts
 services.AddDbContext<DataConnectionContext>(options =>
     options.UseNpgsql(config.GetConnectionString("ConnectionsContext")));
@@ -183,15 +185,35 @@ services.AddScoped<AgendaService>();
 services.AddSingleton<IConnectionStringProvider, ConnectionStringProvider>();
 
 services.AddHttpClient();
+
+//services.AddCors(options =>
+//{
+//    options.AddPolicy("AllowFrontend", policy =>
+//    {
+//        policy.WithOrigins(
+//                "http://localhost:4200",
+//                "https://smart-clinic-angular-it7o.vercel.app",
+//                "https://smart-clinic-angular-tsxt.vercel.app",
+//                "https://clinicsmart.app.br",
+//                "https://api.clinicsmart.app.br",
+//                "https://viacep.com.br/ws/"
+//            )
+//            .AllowAnyMethod()
+//            .AllowAnyHeader()
+//            .WithExposedHeaders("Authorization")
+//            .AllowCredentials();
+//    });
+//});
+
 services.AddCors(options =>
 {
     options.AddPolicy("AllowFrontend", policy =>
     {
-        policy.WithOrigins("http://localhost:4200", "https://smart-clinic-angular-it7o.vercel.app", "https://smart-clinic-angular-tsxt.vercel.app", "https://viacep.com.br/ws/")
+        policy.WithOrigins("https://clinicsmart.app.br")
               .AllowAnyMethod()
               .AllowAnyHeader()
-              .WithExposedHeaders("Authorization")
-              .AllowCredentials();
+              .AllowCredentials()
+              .WithExposedHeaders("Authorization");
     });
 });
 
@@ -207,7 +229,7 @@ app.UseHttpsRedirection();
 app.UseCors("AllowFrontend");
 app.UseRouting();
 
-// 🧠 Middleware de tenant (deve vir antes do auth)
+//  Middleware de tenant (deve vir antes do auth)
 app.UseMiddleware<TenantMiddleware>();
 
 app.UseAuthentication();

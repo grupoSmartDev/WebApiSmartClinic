@@ -209,7 +209,7 @@ services.AddCors(options =>
 {
     options.AddPolicy("AllowFrontend", policy =>
     {
-        policy.WithOrigins("https://clinicsmart.app.br")
+        policy.WithOrigins("https://clinicsmart.app.br", "http://localhost:4200")
               .AllowAnyMethod()
               .AllowAnyHeader()
               .AllowCredentials()

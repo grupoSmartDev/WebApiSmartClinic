@@ -12,9 +12,9 @@ public class Financ_PagarModel
     private DateTime? _DataEmissao;
     public DateTime? DataEmissao
     {
-        get => _DataEmissao?.ToLocalTime();
+        get => _DataEmissao;
         set => _DataEmissao = value.HasValue
-            ? DateTime.SpecifyKind(value.Value.ToUniversalTime(), DateTimeKind.Utc)
+            ? DateTime.SpecifyKind(value.Value, DateTimeKind.Utc)
             : null;
     }
     public decimal? ValorOriginal { get; set; }
@@ -81,9 +81,9 @@ public class Financ_PagarSubModel
     private DateTime? _DataVencimento;
     public DateTime? DataVencimento
     {
-        get => _DataVencimento?.ToLocalTime();
+        get => _DataVencimento;
         set => _DataVencimento = value.HasValue
-            ? DateTime.SpecifyKind(value.Value.ToUniversalTime(), DateTimeKind.Utc)
+            ? DateTime.SpecifyKind(value.Value, DateTimeKind.Utc)
             : null;
     }
     public string? Observacao { get; set; }

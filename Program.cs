@@ -48,6 +48,7 @@ using WebApiSmartClinic.Services.CadastroCliente;
 using WebApiSmartClinic.Services.Auth;
 using WebApiSmartClinic.Services.DespesaFixa;
 using WebApiSmartClinic.Services.MailService;
+using WebApiSmartClinic.Services.StripeService;
 
 var builder = WebApplication.CreateBuilder(args);
 var services = builder.Services;
@@ -180,6 +181,7 @@ services.AddScoped<IDespesaFixaInterface, DespesaFixaService>();
 services.AddScoped<ICadastroClienteInterface, CadastroClienteService>();
 services.AddScoped<IConnectionStringProvider, ConnectionStringProvider>();
 services.AddScoped<IConnectionsRepository, ConnectionsRepository>();
+builder.Services.AddScoped<IStripeService, StripeService>();
 services.AddScoped<AgendaService>();
 
 services.AddSingleton<IConnectionStringProvider, ConnectionStringProvider>();

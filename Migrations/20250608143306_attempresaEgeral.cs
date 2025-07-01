@@ -11,22 +11,40 @@ namespace WebApiSmartClinic.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropForeignKey(
-                name: "FK_DespesasFixas_Financ_Pagar_FinancPagarId",
-                table: "DespesasFixas");
+            // Remove a constraint apenas se ela existir
+            migrationBuilder.Sql(@"
+        DO $$ 
+        BEGIN
+            IF EXISTS (SELECT 1 FROM information_schema.table_constraints 
+                       WHERE constraint_name = 'FK_Financ_Pagar_DespesasFixas_DespesaFixaId') THEN
+                ALTER TABLE ""Financ_Pagar"" DROP CONSTRAINT ""FK_Financ_Pagar_DespesasFixas_DespesaFixaId"";
+            END IF;
+        END $$;
+    ");
 
-            migrationBuilder.DropForeignKey(
-                name: "FK_Financ_Pagar_DespesasFixas_DespesaFixaId",
-                table: "Financ_Pagar");
+            // Remove a coluna apenas se ela existir
+            migrationBuilder.Sql(@"
+        DO $$ 
+        BEGIN
+            IF EXISTS (SELECT 1 FROM information_schema.columns 
+                       WHERE table_name = 'DespesasFixas' AND column_name = 'FinancPagarId') THEN
+                ALTER TABLE ""DespesasFixas"" DROP COLUMN ""FinancPagarId"";
+            END IF;
+        END $$;
+    ");
 
-            migrationBuilder.DropIndex(
-                name: "IX_DespesasFixas_FinancPagarId",
-                table: "DespesasFixas");
+            // Adiciona a coluna DespesaFixaId na tabela Financ_Pagar se ela não existir
+            migrationBuilder.Sql(@"
+        DO $$ 
+        BEGIN
+            IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
+                          WHERE table_name = 'Financ_Pagar' AND column_name = 'DespesaFixaId') THEN
+                ALTER TABLE ""Financ_Pagar"" ADD COLUMN ""DespesaFixaId"" integer;
+            END IF;
+        END $$;
+    ");
 
-            migrationBuilder.DropColumn(
-                name: "FinancPagarId",
-                table: "DespesasFixas");
-
+            // Adiciona a nova coluna DataAlteracao
             migrationBuilder.AddColumn<DateTime>(
                 name: "DataAlteracao",
                 table: "DespesasFixas",
@@ -34,6 +52,7 @@ namespace WebApiSmartClinic.Migrations
                 nullable: false,
                 defaultValue: new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified));
 
+            // Adiciona a foreign key
             migrationBuilder.AddForeignKey(
                 name: "FK_Financ_Pagar_DespesasFixas_DespesaFixaId",
                 table: "Financ_Pagar",
@@ -46,9 +65,7 @@ namespace WebApiSmartClinic.Migrations
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropForeignKey(
-                name: "FK_Financ_Pagar_DespesasFixas_DespesaFixaId",
-                table: "Financ_Pagar");
+         
 
             migrationBuilder.DropColumn(
                 name: "DataAlteracao",

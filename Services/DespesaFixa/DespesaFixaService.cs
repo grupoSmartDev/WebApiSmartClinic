@@ -434,6 +434,7 @@ public class DespesaFixaService : IDespesaFixaInterface
                 PlanoContaId = despesa.PlanoContaId,
                 CentroCustoId = despesa.CentroCustoId,
                 TipoPagamentoId = despesa.TipoPagamentoId,
+                BancoId = null,
                 DespesaFixaId = despesa.Id, // Link com a despesa fixa
                 subFinancPagar = new List<Financ_PagarSubModel>()
             };

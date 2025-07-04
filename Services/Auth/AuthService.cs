@@ -56,8 +56,6 @@ namespace WebApiSmartClinic.Services.Auth
         public async Task<object> LoginAsync(UserLoginRequest model, string? userKey)
         {
             // Validações
-            // (Normalmente, se o ModelState fosse inválido, retornaríamos no Controller;
-            // mas se preferir, pode tratar aqui também.)
             var conn = await _contextDataConnection.DataConnection
                 .Where(c => c.Key == userKey)
                 .Select(c => c.StringConnection)
@@ -72,7 +70,12 @@ namespace WebApiSmartClinic.Services.Auth
             
             using var scope = _scopeFactory.CreateScope();
             var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-            await dbContext.Database.MigrateAsync();
+            //await dbContext.Database.MigrateAsync();
+
+            var migrationPendente = await dbContext.Database.GetPendingMigrationsAsync();
+            
+            if (migrationPendente.Any())
+                await dbContext.Database.MigrateAsync();
 
             model.RememberMe = true;
 

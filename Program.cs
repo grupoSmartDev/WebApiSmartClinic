@@ -188,30 +188,11 @@ services.AddSingleton<IConnectionStringProvider, ConnectionStringProvider>();
 
 services.AddHttpClient();
 
-//services.AddCors(options =>
-//{
-//    options.AddPolicy("AllowFrontend", policy =>
-//    {
-//        policy.WithOrigins(
-//                "http://localhost:4200",
-//                "https://smart-clinic-angular-it7o.vercel.app",
-//                "https://smart-clinic-angular-tsxt.vercel.app",
-//                "https://clinicsmart.app.br",
-//                "https://api.clinicsmart.app.br",
-//                "https://viacep.com.br/ws/"
-//            )
-//            .AllowAnyMethod()
-//            .AllowAnyHeader()
-//            .WithExposedHeaders("Authorization")
-//            .AllowCredentials();
-//    });
-//});
-
 services.AddCors(options =>
 {
     options.AddPolicy("AllowFrontend", policy =>
     {
-        policy.WithOrigins("https://clinicsmart.app.br", "http://localhost:4200")
+        policy.WithOrigins("https://clinicsmart.app.br", "http://localhost:4200", "https://viacep.com.br/ws/")
               .AllowAnyMethod()
               .AllowAnyHeader()
               .AllowCredentials()

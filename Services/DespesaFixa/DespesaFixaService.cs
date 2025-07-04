@@ -9,10 +9,12 @@ namespace WebApiSmartClinic.Services.DespesaFixa;
 public class DespesaFixaService : IDespesaFixaInterface
 {
     private readonly AppDbContext _context;
+    
     public DespesaFixaService(AppDbContext context)
     {
         _context = context;
     }
+    
     public async Task<ResponseModel<DespesaFixaModel>> BuscarPorId(int idDespesa)
     {
         ResponseModel<DespesaFixaModel> resposta = new ResponseModel<DespesaFixaModel>();
@@ -159,8 +161,6 @@ public class DespesaFixaService : IDespesaFixaInterface
         }
     }
 
-
-
     public async Task<ResponseModel<List<DespesaFixaModel>>> Delete(int idDespesa)
     {
         ResponseModel<List<DespesaFixaModel>> resposta = new ResponseModel<List<DespesaFixaModel>>();
@@ -276,9 +276,7 @@ public class DespesaFixaService : IDespesaFixaInterface
         }
     }
 
-
-    public async Task<ResponseModel<List<DespesaFixaModel>>> Listar(int pageNumber = 1, int pageSize = 10, int? idFiltro = null, string? descricaoFiltro = null, string? vencimentoFiltro = null, string? centroCustoFiltro = null,
-        string? planoContaFiltro = null, bool paginar = true)
+    public async Task<ResponseModel<List<DespesaFixaModel>>> Listar(int pageNumber = 1, int pageSize = 10, int? idFiltro = null, string? descricaoFiltro = null, string? vencimentoFiltro = null, string? centroCustoFiltro = null, string? planoContaFiltro = null, bool paginar = true)
     {
         ResponseModel<List<DespesaFixaModel>> resposta = new ResponseModel<List<DespesaFixaModel>>();
         try
@@ -321,6 +319,7 @@ public class DespesaFixaService : IDespesaFixaInterface
         }
     }
 
+    // Método correto sendo chamado pelo front end
     public async Task<ResponseModel<List<DespesaFixaModel>>> Criar(DespesaFixaCreateDto despesaCreateDto)
     {
         ResponseModel<List<DespesaFixaModel>> resposta = new ResponseModel<List<DespesaFixaModel>>();
@@ -580,9 +579,7 @@ public class DespesaFixaService : IDespesaFixaInterface
     }
 
     // Validações específicas para edição
-    private async Task<(bool IsValid, string ErrorMessage)> ValidarDespesaFixaEdicao(
-        DespesaFixaEdicaoDto dto,
-        DespesaFixaModel despesaExistente)
+    private async Task<(bool IsValid, string ErrorMessage)> ValidarDespesaFixaEdicao(DespesaFixaEdicaoDto dto, DespesaFixaModel despesaExistente)
     {
         if (dto.DiaVencimento < 1 || dto.DiaVencimento > 31)
             return (false, "O dia de vencimento deve estar entre 1 e 31");

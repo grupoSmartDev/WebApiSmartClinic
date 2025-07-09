@@ -33,9 +33,9 @@ namespace WebApiSmartClinic.Controllers
         }
 
         [HttpGet("ListarSintetico")]
-        public async Task<ActionResult<ResponseModel<List<Financ_PagarModel>>>> ListarSintetico([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10, [FromQuery] int? idPaiFiltro = null, [FromQuery] int? parcelaNumeroFiltro = null, [FromQuery] DateTime? vencimentoInicio = null, [FromQuery] DateTime? vencimentoFim = null, [FromQuery] bool paginar = true)
+        public async Task<ActionResult<ResponseModel<List<Financ_PagarModel>>>> ListarSintetico([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10, [FromQuery] int? idPaiFiltro = null, [FromQuery] int? parcelaNumeroFiltro = null, [FromQuery] string? dataBaseFiltro = null, [FromQuery] DateTime? dataFiltroInicio = null, [FromQuery] DateTime? dataFiltroFim = null, [FromQuery] bool paginar = true)
         {
-            var financ_pagar = await _financ_pagar.ListarSintetico(pageNumber, pageSize, idPaiFiltro, parcelaNumeroFiltro, vencimentoInicio, vencimentoFim, paginar);
+            var financ_pagar = await _financ_pagar.ListarSintetico(pageNumber, pageSize, idPaiFiltro, parcelaNumeroFiltro, dataBaseFiltro, dataFiltroInicio, dataFiltroFim, paginar);
             return Ok(financ_pagar);
         }
 

@@ -5,6 +5,7 @@ using WebApiSmartClinic.Models;
 using WebApiSmartClinic.Services.Banco;
 using WebApiSmartClinic.Dto.Financ_Receber;
 using System.Linq;
+using WebApiSmartClinic.Helpers;
 
 namespace WebApiSmartClinic.Services.Financ_Pagar;
 
@@ -299,20 +300,44 @@ public class Financ_PagarService : IFinanc_PagarInterface
         }
     }
 
-    public async Task<ResponseModel<List<Financ_PagarSubModel>>> ListarSintetico(int pageNumber = 1, int pageSize = 10, int? idPaiFiltro = null, int? parcelaNumeroFiltro = null, DateTime? vencimentoInicio = null, DateTime? vencimentoFim = null, bool paginar = true)
+    public async Task<ResponseModel<List<Financ_PagarSubModel>>> ListarSintetico(int pageNumber = 1, int pageSize = 10, int? idPaiFiltro = null, int? parcelaNumeroFiltro = null, string? dataBaseFiltro = null, DateTime? dataFiltroInicio = null, DateTime? dataFiltroFim = null, bool paginar = true)
     {
         ResponseModel<List<Financ_PagarSubModel>> resposta = new ResponseModel<List<Financ_PagarSubModel>>();
 
         try
         {
-            var query = _context.Financ_PagarSub.AsQueryable();
+            var query = _context.Financ_PagarSub
+                .Include(x => x.FinancPagar)
+                .AsQueryable();
 
             query = query.Where(p =>
                 (!idPaiFiltro.HasValue || p.financPagarId == idPaiFiltro) &&
-                (!parcelaNumeroFiltro.HasValue || p.Parcela == parcelaNumeroFiltro) &&
-                (!vencimentoInicio.HasValue || p.DataVencimento >= vencimentoInicio) &&
-                (!vencimentoFim.HasValue || p.DataVencimento <= vencimentoFim)
+                (!parcelaNumeroFiltro.HasValue || p.Id == parcelaNumeroFiltro)
             );
+
+            if (dataBaseFiltro == "V")
+            {
+                query = query.Where(p =>
+                    (!dataFiltroInicio.HasValue || p.DataVencimento >= Funcoes.FormataDataTimeFiltros(dataFiltroInicio, "I")) &&
+                    (!dataFiltroFim.HasValue || p.DataVencimento <= Funcoes.FormataDataTimeFiltros(dataFiltroFim, "F"))
+                );
+            }
+
+            if (dataBaseFiltro == "E")
+            {
+                query = query.Where(p =>
+                    (!dataFiltroInicio.HasValue || p.FinancPagar!.DataEmissao >= Funcoes.FormataDataTimeFiltros(dataFiltroInicio, "I")) &&
+                    (!dataFiltroFim.HasValue || p.FinancPagar!.DataEmissao <= Funcoes.FormataDataTimeFiltros(dataFiltroFim, "F"))
+                );
+            }
+
+            if (dataBaseFiltro == "P")
+            {
+                query = query.Where(p =>
+                    (!dataFiltroInicio.HasValue || p.DataPagamento >= Funcoes.FormataDataTimeFiltros(dataFiltroInicio, "I")) &&
+                    (!dataFiltroFim.HasValue || p.DataPagamento <= Funcoes.FormataDataTimeFiltros(dataFiltroFim, "F"))
+                );
+            }
 
             query = query.OrderBy(p => p.financPagarId).ThenBy(p => p.Parcela);
 

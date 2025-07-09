@@ -326,14 +326,14 @@ public class Financ_ReceberService : IFinanc_ReceberInterface
     }
 
     public async Task<ResponseModel<List<Financ_ReceberSubModel>>> ListarSintetico(int pageNumber = 1,
-     int pageSize = 10,
-     int? idPaiFiltro = null,
-     int? parcelaNumeroFiltro = null,
-     string? dataBaseFiltro = "V",
-     DateTime? dataFiltroInicio = null,
-     DateTime? dataFiltroFim = null,
-     bool parcelasVencidasFiltro = false,
-     bool paginar = true)
+        int pageSize = 10,
+        int? idPaiFiltro = null,
+        int? parcelaNumeroFiltro = null,
+        string? dataBaseFiltro = "V",
+        DateTime? dataFiltroInicio = null,
+        DateTime? dataFiltroFim = null,
+        bool parcelasVencidasFiltro = false,
+        bool paginar = true)
     {
         ResponseModel<List<Financ_ReceberSubModel>> resposta = new ResponseModel<List<Financ_ReceberSubModel>>();
         try

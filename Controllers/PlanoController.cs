@@ -51,6 +51,13 @@ namespace WebApiSmartClinic.Controllers
             return Ok(plano);
         }
 
+        [HttpPut("InativarPlanoPaciente")]
+        public async Task<ActionResult<ResponseModel<List<PlanoModel>>>> InativarPlanoPaciente(PlanoEdicaoDto planoEdicaoDto, int pageNumber = 1, int pageSize = 10)
+        {
+            var plano = await _plano.InativarPlanoPaciente(planoEdicaoDto, pageNumber, pageSize);
+            return Ok(plano);
+        }
+
         [HttpDelete("Delete/{idPlano}")]
         public async Task<ActionResult<ResponseModel<List<PlanoModel>>>> Delete(int idPlano, int pageNumber = 1, int pageSize = 10)
         {

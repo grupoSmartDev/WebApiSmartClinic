@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
+using System.Linq.Expressions;
 using WebApiSmartClinic.Data;
 using WebApiSmartClinic.Dto.Agenda;
 using WebApiSmartClinic.Dto.Financ_Receber;
@@ -204,6 +205,56 @@ public class PlanoService : IPlanoInterface
         catch (Exception ex)
         {
             resposta.Mensagem = "Erro ao listar planos: " + ex.Message;
+            resposta.Status = false;
+            return resposta;
+        }
+    }
+
+    public async Task<ResponseModel<List<PlanoModel>>> InativarPlanoPaciente(PlanoEdicaoDto planoEditarDto,int pageNumber = 1, int pageSize = 10)
+    {
+        ResponseModel<List<PlanoModel>> resposta = new ResponseModel<List<PlanoModel>>();
+
+        try
+        {
+            var plano = await _context.Plano
+                .FirstOrDefaultAsync(p => p.Id == planoEditarDto.Id);
+
+            if (plano == null)
+            {
+                resposta.Mensagem = "Plano não encontrado";
+                resposta.Status = false;
+                return resposta;
+            }
+
+            // Verifica se já está inativo
+            if (!plano.Ativo)
+            {
+                resposta.Mensagem = "Plano já está inativo";
+                resposta.Status = false;
+                return resposta;
+            }
+
+            plano.Ativo = false;
+            plano.DataFim = DateTime.Now;
+
+            _context.Update(plano);
+            await _context.SaveChangesAsync();
+
+            
+            resposta.Status = true;
+
+
+            var query = _context.Plano.AsQueryable();
+
+            resposta = await PaginationHelper.PaginateAsync(query, pageNumber, pageSize);
+            resposta.Mensagem = "Plano desativado com sucesso!";
+
+            return resposta;
+  
+        }
+        catch (Exception ex)
+        {
+            resposta.Mensagem = $"Erro ao desativar plano: {ex.Message}";
             resposta.Status = false;
             return resposta;
         }

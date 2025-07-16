@@ -36,6 +36,12 @@ public class EvolucaoController : ControllerBase
         var evolucao = await _evolucao.Criar(evolucaoCreateDto);
         return Ok(evolucao);
     }
+    [HttpPost("CriarEvolucaoPaciente")]
+    public async Task<ActionResult<ResponseModel<EvolucaoModel>>> CriarEvolucaoPaciente(EvolucaoCreateDto evolucaoCreateDto)
+    {
+        var evolucao = await _evolucao.CriarEvolucaoPaciente(evolucaoCreateDto);
+        return Ok(evolucao);
+    }
 
     [HttpPut("Editar")]
     public async Task<ActionResult<ResponseModel<List<EvolucaoModel>>>> Editar(EvolucaoEdicaoDto evolucaoEdicaoDto)

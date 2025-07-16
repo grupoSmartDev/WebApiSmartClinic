@@ -341,7 +341,7 @@ public class Financ_PagarService : IFinanc_PagarInterface
 
             query = query.OrderBy(p => p.financPagarId).ThenBy(p => p.Parcela);
 
-            resposta.Dados = paginar ? (await PaginationHelper.PaginateAsync(query, pageNumber, pageSize)).Dados : await query.ToListAsync();
+            resposta = paginar ? await PaginationHelper.PaginateAsync(query, pageNumber, pageSize) : new ResponseModel<List<Financ_PagarSubModel>> { Dados = await query.ToListAsync() };
             resposta.Mensagem = "Todas as parcelas foram encontradas";
 
             return resposta;
@@ -385,7 +385,7 @@ public class Financ_PagarService : IFinanc_PagarInterface
 
             query = query.OrderBy(x => x.Id);
 
-            resposta.Dados = paginar ? (await PaginationHelper.PaginateAsync(query, pageNumber, pageSize)).Dados : await query.ToListAsync();
+            resposta = paginar ? await PaginationHelper.PaginateAsync(query, pageNumber, pageSize) : new ResponseModel<List<Financ_PagarModel>> { Dados = await query.ToListAsync() };
             resposta.Mensagem = "Todos os Financ_Pagar foram encontrados";
             return resposta;
         }

@@ -10,6 +10,7 @@ namespace WebApiSmartClinic.Services.Evolucao
         Task<ResponseModel<List<EvolucaoModel>>> Delete(int idEvolucao);
         Task<ResponseModel<EvolucaoModel>> BuscarPorId(int idEvolucao);
         Task<ResponseModel<List<EvolucaoModel>>> Criar(EvolucaoCreateDto evolucaoCreateDto);
+        Task<ResponseModel<EvolucaoModel>> CriarEvolucaoPaciente(EvolucaoCreateDto evolucaoCreateDto);
         Task<ResponseModel<List<EvolucaoModel>>> Editar(EvolucaoEdicaoDto evolucaoEdicaoDto);
     }
 }

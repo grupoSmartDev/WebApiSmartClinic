@@ -95,8 +95,80 @@ public class EvolucaoService : IEvolucaoInterface
             resposta.Dados = await _context.Evolucoes
                 .Include(e => e.Exercicios)
                 .Include(e => e.Atividades)
+                .Include(p => p.Paciente)
                 .ToListAsync();
 
+            resposta.Mensagem = "Evolução criada com sucesso";
+            return resposta;
+        }
+        catch (Exception ex)
+        {
+            resposta.Mensagem = ex.Message;
+            resposta.Status = false;
+            return resposta;
+        }
+    }
+
+    public async Task<ResponseModel<EvolucaoModel>> CriarEvolucaoPaciente(EvolucaoCreateDto evolucaoCreateDto)
+    {
+        ResponseModel<EvolucaoModel> resposta = new ResponseModel<EvolucaoModel>(); 
+        try
+        {
+            var evolucao = new EvolucaoModel
+            {
+                Observacao = evolucaoCreateDto.Observacao,
+                DataEvolucao = evolucaoCreateDto.DataEvolucao,
+                PacienteId = evolucaoCreateDto.PacienteId,
+                ProfissionalId = evolucaoCreateDto.ProfissionalId,
+                Exercicios = new List<ExercicioModel>(),
+                Atividades = new List<AtividadeModel>()
+            };
+
+            // ... código dos exercícios e atividades (mantém igual) ...
+            // Adicionar exercícios
+            if (evolucaoCreateDto.Exercicios != null)
+            {
+                foreach (var exercicioDto in evolucaoCreateDto.Exercicios)
+                {
+                    var exercicio = new ExercicioModel
+                    {
+                        Obs = exercicioDto.Obs,
+                        Peso = (int?)exercicioDto.Peso,
+                        Repeticoes = (int?)exercicioDto.Repeticoes,
+                        Series = (int?)exercicioDto.Series,
+                        Tempo = (int?)exercicioDto.Tempo,
+                        Descricao = exercicioDto.Descricao
+                    };
+                    evolucao.Exercicios.Add(exercicio);
+                }
+            }
+
+            // Adicionar atividades
+            if (evolucaoCreateDto.Atividades != null)
+            {
+                foreach (var atividadeDto in evolucaoCreateDto.Atividades)
+                {
+                    var atividade = new AtividadeModel
+                    {
+                        Tempo = atividadeDto.Tempo,
+                        Titulo = atividadeDto.Titulo,
+                        Descricao = atividadeDto.Descricao
+                    };
+                    evolucao.Atividades.Add(atividade);
+                }
+            }
+
+            _context.Add(evolucao);
+            await _context.SaveChangesAsync();
+
+            
+            var evolucaoCompleta = await _context.Evolucoes
+                .Include(e => e.Exercicios)
+                .Include(e => e.Atividades)
+                .Include(p => p.Paciente)
+                .FirstOrDefaultAsync(e => e.Id == evolucao.Id);
+
+            resposta.Dados = evolucaoCompleta; // Retorna só o objeto criado
             resposta.Mensagem = "Evolução criada com sucesso";
             return resposta;
         }

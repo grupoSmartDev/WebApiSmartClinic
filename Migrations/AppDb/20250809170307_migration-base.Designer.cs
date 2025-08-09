@@ -9,11 +9,11 @@ using WebApiSmartClinic.Data;
 
 #nullable disable
 
-namespace WebApiSmartClinic.Migrations
+namespace WebApiSmartClinic.Migrations.AppDb
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250608143306_attempresaEgeral")]
-    partial class attempresaEgeral
+    [Migration("20250809170307_migration-base")]
+    partial class migrationbase
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -1555,10 +1555,8 @@ namespace WebApiSmartClinic.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<int?>("UsuarioId")
-                        .HasColumnType("integer");
-
-                    b.Property<string>("UsuarioId1")
+                    b.Property<string>("UsuarioId")
+                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<decimal>("Valor")
@@ -1568,7 +1566,7 @@ namespace WebApiSmartClinic.Migrations
 
                     b.HasIndex("BancoId");
 
-                    b.HasIndex("UsuarioId1");
+                    b.HasIndex("UsuarioId");
 
                     b.ToTable("HistoricoTransacao");
                 });
@@ -1617,15 +1615,13 @@ namespace WebApiSmartClinic.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<int>("UsuarioId")
-                        .HasColumnType("integer");
-
-                    b.Property<string>("UsuarioId1")
+                    b.Property<string>("UsuarioId")
+                        .IsRequired()
                         .HasColumnType("text");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("UsuarioId1");
+                    b.HasIndex("UsuarioId");
 
                     b.ToTable("LogUsuario");
                 });
@@ -2969,7 +2965,9 @@ namespace WebApiSmartClinic.Migrations
 
                     b.HasOne("WebApiSmartClinic.Models.UsuarioModel", "Usuario")
                         .WithMany()
-                        .HasForeignKey("UsuarioId1");
+                        .HasForeignKey("UsuarioId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("Banco");
 
@@ -2991,7 +2989,9 @@ namespace WebApiSmartClinic.Migrations
                 {
                     b.HasOne("WebApiSmartClinic.Models.UsuarioModel", "Usuario")
                         .WithMany()
-                        .HasForeignKey("UsuarioId1");
+                        .HasForeignKey("UsuarioId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("Usuario");
                 });

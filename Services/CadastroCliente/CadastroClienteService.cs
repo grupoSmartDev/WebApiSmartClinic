@@ -65,49 +65,73 @@ public class CadastroClienteService : ICadastroClienteInterface
         var resposta = new ResponseModel<EmpresaModel>();
 
         var cpfKey = dto.TitularCPF;
-        var novoBanco = cpfKey;
-        var novaStringConexao = $"Host=62.72.51.219;Port=5432;Database={novoBanco};Username=postgres;Password=Elefante01!;";
-        //var novaStringConexao = $"Host=localhost;Port=5432;Database={novoBanco};Username=postgres;Password=Elefante01!;";
-        var masterConnection = $"Host=62.72.51.219;Port=5432;Database=connections;Username=postgres;Password=Elefante01!;";
-        //var masterConnection = "Host=localhost;Port=5432;Database=postgres;Username=postgres;Password=Elefante01!;";
+        var novoBanco = cpfKey; // cuidado: sanitize nome do DB
+        var novaStringConexao = $"Host=62.72.51.219;Port=5432;Database={novoBanco};Username=postgres;Password=Elefante01!;Include Error Detail=true;";
+        var masterConnection = $"Host=62.72.51.219;Port=5432;Database=connections;Username=postgres;Password=Elefante01!;Include Error Detail=true;";
 
         try
         {
-            // 1. Verifica se já existe
+            // 1) Verifica duplicidade na base de conexões
             bool existe = await _contextDataConnection.DataConnection.AnyAsync(c => c.Key == cpfKey);
             if (existe)
             {
                 resposta.Status = false;
                 resposta.Mensagem = "Já existe um cliente com esse CPF.";
+            
                 return resposta;
             }
 
-            // 2. Cria o banco de dados
-            await using (NpgsqlConnection conn = new NpgsqlConnection(masterConnection))
+            // 2) Cria o database do tenant
+            await using (var conn = new NpgsqlConnection(masterConnection))
             {
-                conn.Open();
+                await conn.OpenAsync();
                 using var cmd = conn.CreateCommand();
                 cmd.CommandText = $"CREATE DATABASE \"{novoBanco}\"";
                 await cmd.ExecuteNonQueryAsync();
             }
 
-            // 3. Salva a string no banco de conexões
+            // 3) Persiste a connection na base de conexões
             var novaConexao = new DataConnections { Key = cpfKey, StringConnection = novaStringConexao };
             await _contextDataConnection.DataConnection.AddAsync(novaConexao);
             await _contextDataConnection.SaveChangesAsync();
 
-            // 4. Define string no provider
+            // 4) Fixa a connection do tenant no provider (deve ser SCOPED/AsyncLocal)
             _connectionStringProvider.SetConnectionString(novaStringConexao);
 
-            // só agora cria o service scope
-            using var scope = _scopeFactory.CreateAsyncScope();
-            var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+            // 5) ÚNICO scope para tudo do tenant
+            await using var scope = _scopeFactory.CreateAsyncScope();
 
-            // agora o dbContext deve ler a nova connection string
-            await dbContext.Database.MigrateAsync();
+            var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();          // mesmo AppDbContext para tudo
+            var userManager = scope.ServiceProvider.GetRequiredService<UserManager<User>>();
+            var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+            var authService = scope.ServiceProvider.GetRequiredService<AuthService>();           // se você centralizou RegisterAsync nele
 
-            // 7. Cria cliente
-            var cliente = new EmpresaModel
+            // 6) Migrações do tenant
+            await db.Database.MigrateAsync();
+
+            // 7) Transação única do tenant (opcional, mas recomendado)
+            await using var tx = await db.Database.BeginTransactionAsync();
+
+            // 8) Garante roles
+            foreach (var role in new[] { "Admin", "User" })
+            {
+                if (!await roleManager.RoleExistsAsync(role))
+                {
+                    var rc = await roleManager.CreateAsync(new IdentityRole(role));
+                    if (!rc.Succeeded)
+                    {
+                        var err = string.Join("; ", rc.Errors.Select(e => e.Description));
+                        
+                        resposta.Status = false;
+                        resposta.Mensagem = $"Falha ao criar role {role}: {err}";
+
+                        return resposta;
+                    }
+                }
+            }
+
+            // 9) Cria empresa
+            var empresa = new EmpresaModel
             {
                 Nome = dto.Nome,
                 Sobrenome = dto.Sobrenome,
@@ -126,13 +150,39 @@ public class CadastroClienteService : ICadastroClienteInterface
                 PeriodoTeste = true,
                 DataInicioTeste = DateTime.UtcNow,
                 DataFim = DateTime.UtcNow.AddDays(7),
+                DatabaseConnectionString = novaStringConexao,
                 Ativo = true
             };
 
-            await dbContext.Empresas.AddAsync(cliente);
-            await dbContext.SaveChangesAsync();
+            await db.Empresas.AddAsync(empresa);
+            await db.SaveChangesAsync();
 
-            var userCreateRequest = new UserCreateRequest
+            // 10) Cria Admin do tenant
+            var adminReq = new UserCreateRequest
+            {
+                FirstName = "Admin",
+                LastName = "Teste",
+                Email = "gruposmartdesenvolvimentos@gmail.com",
+                Password = "Admin@123",
+                ConfirmPassword = "Admin@123",
+                AcceptTerms = true,
+            };
+
+            try
+            {
+                await authService.RegisterAsync(adminReq, cpfKey); // internamente usa userManager e AddToRole("Admin") no MESMO db
+            }
+            catch (Exception e)
+            {
+                resposta.Status = false;
+                resposta.Mensagem = e.Message;
+
+                return resposta;
+                throw;
+            }
+
+            // 11) Cria usuário do cliente
+            var userReq = new UserCreateRequest
             {
                 FirstName = dto.Nome,
                 LastName = dto.Sobrenome,
@@ -142,80 +192,241 @@ public class CadastroClienteService : ICadastroClienteInterface
                 AcceptTerms = true,
             };
 
-            if (!existe)
+            try
             {
-                var userCreatAdmin = new UserCreateRequest
-                {
-                    FirstName = "Admin",
-                    LastName = "Teste",
-                    Email = "gruposmartdesenvolvimentos@gmail.com",
-                    Password = "Admin@123",
-                    ConfirmPassword = "Admin@123",
-                    AcceptTerms = true,
-                };
-                using var authService2 = _scopeFactory.CreateAsyncScope();
-                var cu2 = authService2.ServiceProvider.GetRequiredService<AuthService>();
-
-                await cu2.RegisterAsync(userCreatAdmin, cpfKey);
-
-                var profissionalPadrao = new ProfissionalModel();
-                try
-                {
-                    profissionalPadrao.Email = dto.Email;
-                    profissionalPadrao.Nome = $"{dto.Nome} {dto.Sobrenome}";
-                    profissionalPadrao.Cpf = dto.TitularCPF;
-                    profissionalPadrao.Celular = dto.Celular;
-                    
-                    await _context.Profissional.AddAsync(profissionalPadrao);
-                    await _context.SaveChangesAsync();
-                }
-                catch (Exception)
-                {
-
-                    throw;
-                }
-
-             
+                await authService.RegisterAsync(userReq, cpfKey); 
             }
+            catch (Exception e)
+            {
+                resposta.Status = false;
+                resposta.Mensagem = e.Message;
 
-            using var authService = _scopeFactory.CreateAsyncScope();
-            var cu = authService.ServiceProvider.GetRequiredService<AuthService>();
+                return resposta;
+                throw;
+            }
             
-            await cu.RegisterAsync(userCreateRequest, cpfKey);
+            // 12) Cria Profissional usando o MESMO db
+            var prof = new ProfissionalModel
+            {
+                Email = dto.Email,
+                Nome = $"{dto.Nome} {dto.Sobrenome}",
+                Cpf = dto.TitularCPF,
+                Celular = dto.Celular
+            };
 
+            await db.Profissional.AddAsync(prof);
+            await db.SaveChangesAsync();
 
+            await tx.CommitAsync();
+
+            // 13) E-mail
+            //await _mailService.SendEmailAsync(new MailRequest
+            //{
+            //    ToEmail = userReq.Email,
+            //    Subject = "Conta criada com sucesso!",
+            //    Body = GetHtmlContent(userReq.FirstName)
+            //});
 
             resposta.Status = true;
-            resposta.Dados = cliente;
+            resposta.Dados = empresa;
             resposta.Mensagem = "Cliente e banco criados com sucesso.";
-
-            if(resposta.Status && !existe)
+            
+            if (resposta.Status && !existe)
             {
                 try
                 {
                     MailRequest mailRequest = new MailRequest();
-                    mailRequest.ToEmail = userCreateRequest.Email;
+                    mailRequest.ToEmail = userReq.Email;
                     mailRequest.Subject = "Conta criada com sucesso!";
-                    mailRequest.Body = GetHtmlContent(userCreateRequest.FirstName);
+                    mailRequest.Body = GetHtmlContent(userReq.FirstName);
 
 
                     await _mailService.SendEmailAsync(mailRequest);
                 }
                 catch (Exception)
                 {
-
-                    throw;
                 }
             }
-      
+
+            return resposta;
         }
         catch (Exception ex)
         {
+            resposta.Status = false;
             resposta.Mensagem = $"Erro: {ex.Message}";
+            
+            return resposta;
         }
-
-        return resposta;
     }
+
+
+    //public async Task<ResponseModel<EmpresaModel>> Criar(CadastroClienteCreateDto dto)
+    //{
+    //    var resposta = new ResponseModel<EmpresaModel>();
+
+    //    var cpfKey = dto.TitularCPF;
+    //    var novoBanco = cpfKey;
+    //    var novaStringConexao = $"Host=62.72.51.219;Port=5432;Database={novoBanco};Username=postgres;Password=Elefante01!;";
+    //    //var novaStringConexao = $"Host=localhost;Port=5432;Database={novoBanco};Username=postgres;Password=Elefante01!;";
+    //    var masterConnection = $"Host=62.72.51.219;Port=5432;Database=connections;Username=postgres;Password=Elefante01!;";
+    //    //var masterConnection = "Host=localhost;Port=5432;Database=postgres;Username=postgres;Password=Elefante01!;";
+
+    //    try
+    //    {
+    //        // 1. Verifica se já existe
+    //        bool existe = await _contextDataConnection.DataConnection.AnyAsync(c => c.Key == cpfKey);
+    //        if (existe)
+    //        {
+    //            resposta.Status = false;
+    //            resposta.Mensagem = "Já existe um cliente com esse CPF.";
+    //            return resposta;
+    //        }
+
+    //        // 2. Cria o banco de dados
+    //        await using (NpgsqlConnection conn = new NpgsqlConnection(masterConnection))
+    //        {
+    //            conn.Open();
+    //            using var cmd = conn.CreateCommand();
+    //            cmd.CommandText = $"CREATE DATABASE \"{novoBanco}\"";
+    //            await cmd.ExecuteNonQueryAsync();
+    //        }
+
+    //        // 3. Salva a string no banco de conexões
+    //        var novaConexao = new DataConnections { Key = cpfKey, StringConnection = novaStringConexao };
+    //        await _contextDataConnection.DataConnection.AddAsync(novaConexao);
+    //        await _contextDataConnection.SaveChangesAsync();
+
+    //        // 4. Define string no provider
+    //        _connectionStringProvider.SetConnectionString(novaStringConexao);
+
+    //        // só agora cria o service scope
+    //        using var scope = _scopeFactory.CreateAsyncScope();
+    //        var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+
+    //        // agora o dbContext deve ler a nova connection string
+    //        await dbContext.Database.MigrateAsync();
+
+    //        // 7. Cria cliente
+    //        var cliente = new EmpresaModel
+    //        {
+    //            Nome = dto.Nome,
+    //            Sobrenome = dto.Sobrenome,
+    //            Email = dto.Email,
+    //            Celular = dto.Celular,
+    //            TitularCPF = dto.TitularCPF,
+    //            CNPJEmpresaMatriz = dto.CNPJEmpresaMatriz,
+    //            Especialidade = dto.Especialidade,
+    //            PlanoEscolhido = dto.PlanoEscolhido,
+    //            TipoPagamentoId = (int)(dto.TipoPagamentoId == null || dto.TipoPagamentoId == 0 ? 1 : dto.TipoPagamentoId),
+    //            QtdeLicencaEmpresaPermitida = 1,
+    //            QtdeLicencaUsuarioPermitida = 3,
+    //            QtdeLicencaEmpresaUtilizada = 0,
+    //            QtdeLicencaUsuarioUtilizada = 0,
+    //            DataInicio = DateTime.UtcNow,
+    //            PeriodoTeste = true,
+    //            DataInicioTeste = DateTime.UtcNow,
+    //            DataFim = DateTime.UtcNow.AddDays(7),
+    //            DatabaseConnectionString = novaStringConexao,
+    //            Ativo = true
+    //        };
+
+    //        await dbContext.Empresas.AddAsync(cliente);
+
+    //        try
+    //        {
+    //            await dbContext.SaveChangesAsync();
+    //        }
+    //        catch (Exception e)
+    //        {
+    //            resposta.Status = true;
+    //            resposta.Mensagem = e.Message;
+
+    //            return resposta;
+    //            throw;
+    //        }
+
+    //        var userCreateRequest = new UserCreateRequest
+    //        {
+    //            FirstName = dto.Nome,
+    //            LastName = dto.Sobrenome,
+    //            Email = dto.Email,
+    //            Password = "Admin@123",
+    //            ConfirmPassword = "Admin@123",
+    //            AcceptTerms = true,
+    //        };
+
+    //        if (!existe)
+    //        {
+    //            var userCreatAdmin = new UserCreateRequest
+    //            {
+    //                FirstName = "Admin",
+    //                LastName = "Teste",
+    //                Email = "gruposmartdesenvolvimentos@gmail.com",
+    //                Password = "Admin@123",
+    //                ConfirmPassword = "Admin@123",
+    //                AcceptTerms = true,
+    //            };
+    //            using var authService2 = _scopeFactory.CreateAsyncScope();
+    //            var cu2 = authService2.ServiceProvider.GetRequiredService<AuthService>();
+
+    //            await cu2.RegisterAsync(userCreatAdmin, cpfKey);
+
+    //            var profissionalPadrao = new ProfissionalModel();
+    //            try
+    //            {
+    //                profissionalPadrao.Email = dto.Email;
+    //                profissionalPadrao.Nome = $"{dto.Nome} {dto.Sobrenome}";
+    //                profissionalPadrao.Cpf = dto.TitularCPF;
+    //                profissionalPadrao.Celular = dto.Celular;
+
+    //                await _context.Profissional.AddAsync(profissionalPadrao);
+    //                await _context.SaveChangesAsync();
+    //            }
+    //            catch (Exception)
+    //            {
+
+    //                throw;
+    //            }
+    //        }
+
+    //        using var authService = _scopeFactory.CreateAsyncScope();
+    //        var cu = authService.ServiceProvider.GetRequiredService<AuthService>();
+
+    //        await cu.RegisterAsync(userCreateRequest, cpfKey);
+
+
+
+    //        resposta.Status = true;
+    //        resposta.Dados = cliente;
+    //        resposta.Mensagem = "Cliente e banco criados com sucesso.";
+
+    //        if(resposta.Status && !existe)
+    //        {
+    //            try
+    //            {
+    //                MailRequest mailRequest = new MailRequest();
+    //                mailRequest.ToEmail = userCreateRequest.Email;
+    //                mailRequest.Subject = "Conta criada com sucesso!";
+    //                mailRequest.Body = GetHtmlContent(userCreateRequest.FirstName);
+
+
+    //                await _mailService.SendEmailAsync(mailRequest);
+    //            }
+    //            catch (Exception)
+    //            {
+
+    //                throw;
+    //            }
+    //        }
+
+    //    }
+    //    catch (Exception ex)
+    //    {
+    //        resposta.Mensagem = $"Erro: {ex.Message}";
+    //    }
+
+    //    return resposta;
+    //}
 
     public async Task<ResponseModel<EmpresaModel>> BuscarPorId(int idCadastroCliente)
     {

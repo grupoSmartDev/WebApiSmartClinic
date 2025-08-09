@@ -9,7 +9,7 @@ namespace WebApiSmartClinic.Models
         public int IdMovimentacao { get; set; }
         public string Descricao { get; set; }
         public string Rotina { get; set; }
-        public int UsuarioId { get; set; }
+        public string UsuarioId { get; set; }
 
         [JsonIgnore]
         public UsuarioModel? Usuario { get; set; }

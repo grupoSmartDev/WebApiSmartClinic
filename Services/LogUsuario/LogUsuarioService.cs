@@ -40,7 +40,7 @@ public class LogUsuarioService : ILogUsuarioInterface
         }
     }
 
-    public async Task<ResponseModel<List<LogUsuarioModel>>> Inserir(int id, string descricao, string rotina, int usuarioId)
+    public async Task<ResponseModel<List<LogUsuarioModel>>> Inserir(int id, string descricao, string rotina, string usuarioId)
     {
         ResponseModel<List<LogUsuarioModel>> resposta = new ResponseModel<List<LogUsuarioModel>>();
 

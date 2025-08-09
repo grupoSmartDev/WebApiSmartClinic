@@ -61,7 +61,7 @@ var appSettings = appSettingsSection.Get<AppSettings>();
 var key = Encoding.UTF8.GetBytes(appSettings.JwtSecretKey);
 
 // Middleware de conexão por tenant
-services.AddSingleton<IConnectionStringProvider, ConnectionStringProvider>();
+//services.AddSingleton<IConnectionStringProvider, ConnectionStringProvider>();
 
 
 
@@ -70,6 +70,7 @@ services.AddDbContext<DataConnectionContext>(options =>
     options.UseNpgsql(config.GetConnectionString("ConnectionsContext")));
 
 builder.Services.AddDbContext<AppDbContext>();
+
 
 // Identity
 services.AddIdentity<User, IdentityRole>(options =>
@@ -184,7 +185,7 @@ services.AddScoped<IConnectionsRepository, ConnectionsRepository>();
 builder.Services.AddScoped<IStripeService, StripeService>();
 services.AddScoped<AgendaService>();
 
-services.AddSingleton<IConnectionStringProvider, ConnectionStringProvider>();
+//services.AddSingleton<IConnectionStringProvider, ConnectionStringProvider>();
 
 services.AddHttpClient();
 

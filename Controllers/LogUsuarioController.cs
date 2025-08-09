@@ -31,7 +31,7 @@ namespace WebApiSmartClinic.Controllers
         }
 
         [HttpPost("Inserir")]
-        public async Task<ActionResult<ResponseModel<List<LogUsuarioModel>>>> Inserir(int id, string descricao, string rotina, int usuarioId)
+        public async Task<ActionResult<ResponseModel<List<LogUsuarioModel>>>> Inserir(int id, string descricao, string rotina, string usuarioId)
         {
             var logusuario = await _logusuario.Inserir(id, descricao, rotina, usuarioId);
             return Ok(logusuario);

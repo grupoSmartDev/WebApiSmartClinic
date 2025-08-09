@@ -522,7 +522,7 @@ public class Financ_ReceberService : IFinanc_ReceberInterface
                     Parcela = parcela.Parcela,
                     Valor = valorRestante,
                     DataVencimento = DateTime.Now.AddMonths(1),
-                    Observacao = "Gerada automaticamente por pagamento parcial."
+                    Observacao = " - Gerada automaticamente por pagamento parcial."
                 };
 
                 _context.Add(novaParcela);

@@ -61,7 +61,7 @@ var appSettings = appSettingsSection.Get<AppSettings>();
 var key = Encoding.UTF8.GetBytes(appSettings.JwtSecretKey);
 
 // Middleware de conexão por tenant
-//services.AddSingleton<IConnectionStringProvider, ConnectionStringProvider>();
+services.AddSingleton<IConnectionStringProvider, ConnectionStringProvider>();
 
 
 

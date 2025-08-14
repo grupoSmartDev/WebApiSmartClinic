@@ -11,5 +11,6 @@ namespace WebApiSmartClinic.Services.Profissao
         Task<ResponseModel<ProfissaoModel>> BuscarPorId(int idProfissao);
         Task<ResponseModel<List<ProfissaoModel>>> Criar(ProfissaoCreateDto profissaoCreateDto, int pageNumber = 1, int pageSize = 10);
         Task<ResponseModel<List<ProfissaoModel>>> Editar(ProfissaoEdicaoDto profissaoEdicaoDto, int pageNumber = 1, int pageSize = 10);
+        Task<ResponseModel<List<ProfissaoModel>>> Ativar(ProfissaoEdicaoDto profissaoEdicaoDto, int pageNumber = 1, int pageSize = 10);
     }
 }

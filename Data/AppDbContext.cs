@@ -99,11 +99,11 @@ public class AppDbContext : IdentityDbContext<User>
         );
 
         modelBuilder.Entity<ProfissaoModel>().HasData(
-            new ProfissaoModel { Id = 1, Descricao = "Administrador(a)", IsSystemDefault = true },
-            new ProfissaoModel { Id = 2, Descricao = "Psicólogo(a)", IsSystemDefault = true },
-            new ProfissaoModel { Id = 3, Descricao = "Fisioterapeuta", IsSystemDefault = true },
-            new ProfissaoModel { Id = 4, Descricao = "Dentista", IsSystemDefault = true },
-            new ProfissaoModel { Id = 5, Descricao = "Médico", IsSystemDefault = true }
+            new ProfissaoModel { Id = 1, Descricao = "Administrador(a)", IsSystemDefault = true, Ativo = true },
+            new ProfissaoModel { Id = 2, Descricao = "Psicólogo(a)", IsSystemDefault = true, Ativo = true },
+            new ProfissaoModel { Id = 3, Descricao = "Fisioterapeuta", IsSystemDefault = true, Ativo = true },
+            new ProfissaoModel { Id = 4, Descricao = "Dentista", IsSystemDefault = true, Ativo = true },
+            new ProfissaoModel { Id = 5, Descricao = "Médico", IsSystemDefault = true, Ativo = true }
         );
 
         modelBuilder.Entity<StatusModel>().HasData(

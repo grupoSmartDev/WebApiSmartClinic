@@ -11,5 +11,6 @@ namespace WebApiSmartClinic.Services.Profissional
         Task<ResponseModel<ProfissionalModel>> BuscarPorId(int idProfissional);
         Task<ResponseModel<List<ProfissionalModel>>> Criar(ProfissionalCreateDto profissionalCreateDto, int pageNumber = 1, int pageSize = 10, string? userKey = null);
         Task<ResponseModel<List<ProfissionalModel>>> Editar(ProfissionalEdicaoDto profissionalEdicaoDto, int pageNumber = 1, int pageSize = 10, string? userKey = null);
+        Task<ResponseModel<List<ProfissionalModel>>> AtivarProfissional(ProfissionalEdicaoDto profissionalEdicaoDto, int pageNumber = 1, int pageSize = 10, string? userKey = null);
     }
 }

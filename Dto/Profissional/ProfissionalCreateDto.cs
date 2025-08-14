@@ -36,5 +36,6 @@ namespace WebApiSmartClinic.Dto.Profissional
 
         // Opcional: Data de cadastro para rastrear a criação do registro
         public DateTime? DataCadastro { get; set; } = DateTime.Now;
+        public bool Ativo { get; set; } = true; // Por padrão ativo
     }
 }

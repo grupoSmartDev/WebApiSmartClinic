@@ -165,18 +165,57 @@ public class ProfissionalService : IProfissionalInterface
                 return resposta;
             }
 
-            _context.Remove(profissional);
+            profissional.Ativo = false;
+
+            _context.Update(profissional);
             await _context.SaveChangesAsync();
             var query = _context.Profissional.AsQueryable();
 
             resposta = await PaginationHelper.PaginateAsync(query, pageNumber, pageSize);
-            resposta.Mensagem = "Profissional Excluido com sucesso";
+            resposta.Mensagem = "Profissional Inativado com sucesso";
             return resposta;
 
         }
         catch (Exception ex)
         {
 
+            resposta.Mensagem = ex.Message;
+            resposta.Status = false;
+            return resposta;
+        }
+    }
+
+    public async Task<ResponseModel<List<ProfissionalModel>>> AtivarProfissional(ProfissionalEdicaoDto dto, int pageNumber = 1, int pageSize = 10, string? userKey = null )
+    {
+        ResponseModel<List<ProfissionalModel>> resposta = new ResponseModel<List<ProfissionalModel>>();
+
+        try
+        {
+            var profissional = _context.Profissional.FirstOrDefault(x => x.Id == dto.Id);
+            if (profissional == null)
+            {
+                resposta.Mensagem = "Profissional não encontrado";
+                return resposta;
+            }
+
+            if (profissional.Ativo == true) {
+                resposta.Mensagem = "Profissional já esta atívo";
+                return resposta;
+            }
+
+            profissional.Ativo = true;
+
+            _context.Update(profissional);
+            await _context.SaveChangesAsync();
+            var query = _context.Profissional.AsQueryable();
+
+            resposta = await PaginationHelper.PaginateAsync(query, pageNumber, pageSize);
+            resposta.Mensagem = "Profissional Ativo com sucesso";
+            return resposta;
+
+        }
+        catch (Exception ex)
+        {
             resposta.Mensagem = ex.Message;
             resposta.Status = false;
             return resposta;

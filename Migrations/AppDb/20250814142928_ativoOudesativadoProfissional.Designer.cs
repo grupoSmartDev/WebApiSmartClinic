@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using WebApiSmartClinic.Data;
@@ -11,9 +12,11 @@ using WebApiSmartClinic.Data;
 namespace WebApiSmartClinic.Migrations.AppDb
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250814142928_ativoOudesativadoProfissional")]
+    partial class ativoOudesativadoProfissional
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -2004,9 +2007,6 @@ namespace WebApiSmartClinic.Migrations.AppDb
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<bool>("Ativo")
-                        .HasColumnType("boolean");
-
                     b.Property<string>("Descricao")
                         .IsRequired()
                         .HasColumnType("text");
@@ -2022,35 +2022,30 @@ namespace WebApiSmartClinic.Migrations.AppDb
                         new
                         {
                             Id = 1,
-                            Ativo = true,
                             Descricao = "Administrador(a)",
                             IsSystemDefault = true
                         },
                         new
                         {
                             Id = 2,
-                            Ativo = true,
                             Descricao = "Psicólogo(a)",
                             IsSystemDefault = true
                         },
                         new
                         {
                             Id = 3,
-                            Ativo = true,
                             Descricao = "Fisioterapeuta",
                             IsSystemDefault = true
                         },
                         new
                         {
                             Id = 4,
-                            Ativo = true,
                             Descricao = "Dentista",
                             IsSystemDefault = true
                         },
                         new
                         {
                             Id = 5,
-                            Ativo = true,
                             Descricao = "Médico",
                             IsSystemDefault = true
                         });

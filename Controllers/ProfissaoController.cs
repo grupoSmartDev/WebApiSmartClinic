@@ -42,6 +42,13 @@ namespace WebApiSmartClinic.Controllers
         {
             var profissao = await _profissao.Editar(profissaoEdicaoDto, pageNumber, pageSize);
             return Ok(profissao);
+        } 
+        
+        [HttpPut("Ativar")]
+        public async Task<ActionResult<ResponseModel<List<ProfissaoModel>>>> Ativar(ProfissaoEdicaoDto profissaoEdicaoDto, int pageNumber = 1, int pageSize = 10)
+        {
+            var profissao = await _profissao.Ativar(profissaoEdicaoDto, pageNumber, pageSize);
+            return Ok(profissao);
         }
 
         [HttpDelete("Delete/{idProfissao}")]

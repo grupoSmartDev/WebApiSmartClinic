@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using WebApiSmartClinic.Data;
 using WebApiSmartClinic.Dto.Profissao;
+using WebApiSmartClinic.Dto.Profissional;
 using WebApiSmartClinic.Models;
 
 namespace WebApiSmartClinic.Services.Profissao;
@@ -81,19 +82,21 @@ public class ProfissaoService : IProfissaoInterface
             var profissao = await _context.Profissao.FirstOrDefaultAsync(x => x.Id == idProfissao);
             if (profissao == null)
             {
-                resposta.Mensagem = "Nenhum Profissao encontrado";
+                resposta.Mensagem = "Nenhuma Profissão encontrada.";
                 return resposta;
             }
 
             var profissional = await _context.Profissional.FirstOrDefaultAsync(x => x.ProfissaoId == idProfissao);
             if (profissional == null)
             {
-                _context.Remove(profissao);
+                profissao.Ativo = false;
+
+                _context.Update(profissao);
                 await _context.SaveChangesAsync();
                 resposta.Status = true;
-                resposta.Mensagem = "Profissão excluída com sucesso.";
+                resposta.Mensagem = "Profissão inativa com sucesso.";
             }
-            else resposta.Mensagem = "Profissionla vinculado.";
+            else resposta.Mensagem = "Profissional vinculado, remova a profissão do profissional antes de inativar.";
 
             
             var query = _context.Profissao.AsQueryable();
@@ -147,6 +150,44 @@ public class ProfissaoService : IProfissaoInterface
             resposta.Mensagem = ex.Message;
             resposta.Status = false;
             
+            return resposta;
+        }
+    }
+
+    public async Task<ResponseModel<List<ProfissaoModel>>> Ativar(ProfissaoEdicaoDto dto, int pageNumber = 1, int pageSize = 10)
+    {
+        ResponseModel<List<ProfissaoModel>> resposta = new ResponseModel<List<ProfissaoModel>>();
+
+        try
+        {
+            var profissao = _context.Profissao.FirstOrDefault(x => x.Id == dto.Id);
+            if (profissao == null)
+            {
+                resposta.Mensagem = "Profissão não encontrado";
+                return resposta;
+            }
+
+            if (profissao.Ativo == true)
+            {
+                resposta.Mensagem = "Profissão já esta atívo";
+                return resposta;
+            }
+
+            profissao.Ativo = true;
+
+            _context.Update(profissao);
+            await _context.SaveChangesAsync();
+            var query = _context.Profissao.AsQueryable();
+
+            resposta = await PaginationHelper.PaginateAsync(query, pageNumber, pageSize);
+            resposta.Mensagem = "Profissão Ativo com sucesso";
+            return resposta;
+
+        }
+        catch (Exception ex)
+        {
+            resposta.Mensagem = ex.Message;
+            resposta.Status = false;
             return resposta;
         }
     }

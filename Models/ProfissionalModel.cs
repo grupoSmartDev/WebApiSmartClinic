@@ -40,4 +40,5 @@ public class ProfissionalModel
         get => _DataCadastro;
         set => _DataCadastro = value.HasValue ? DateTime.SpecifyKind(value.Value, DateTimeKind.Utc) : DateTime.UtcNow;
     }
+    public bool Ativo { get; set; } = true; // Por padrão ativo
 }

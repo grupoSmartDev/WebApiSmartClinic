@@ -338,11 +338,10 @@ public class CadastroClienteService : ICadastroClienteInterface
             }
             catch (Exception e)
             {
-                resposta.Status = true;
+                resposta.Status = false;
                 resposta.Mensagem = e.Message;
 
                 return resposta;
-                throw;
             }
 
             var userCreateRequest = new UserCreateRequest
@@ -372,7 +371,6 @@ public class CadastroClienteService : ICadastroClienteInterface
                 await cu2.RegisterAsync(userCreatAdmin, cpfKey);
 
                 var profissionalPadrao = new ProfissionalModel();
-                try
                 {
                     profissionalPadrao.Email = dto.Email;
                     profissionalPadrao.Nome = $"{dto.Nome} {dto.Sobrenome}";
@@ -382,19 +380,17 @@ public class CadastroClienteService : ICadastroClienteInterface
                     await _context.Profissional.AddAsync(profissionalPadrao);
                     await _context.SaveChangesAsync();
                 }
-                catch (Exception)
-                {
-
-                    throw;
-                }
             }
 
-            using var authService = _scopeFactory.CreateAsyncScope();
-            var cu = authService.ServiceProvider.GetRequiredService<AuthService>();
+            await using (var authScope = _scopeFactory.CreateAsyncScope())
+            {
+                var cu = authScope.ServiceProvider.GetRequiredService<AuthService>();
+                await cu.RegisterAsync(userCreateRequest, cpfKey);
+            }
+            //using var authService = _scopeFactory.CreateAsyncScope();
+            //var cu = authService.ServiceProvider.GetRequiredService<AuthService>();
 
-            await cu.RegisterAsync(userCreateRequest, cpfKey);
-
-
+            //await cu.RegisterAsync(userCreateRequest, cpfKey);
 
             resposta.Status = true;
             resposta.Dados = cliente;
@@ -412,10 +408,8 @@ public class CadastroClienteService : ICadastroClienteInterface
 
                     await _mailService.SendEmailAsync(mailRequest);
                 }
-                catch (Exception)
+                catch (Exception) 
                 {
-
-                    throw;
                 }
             }
 

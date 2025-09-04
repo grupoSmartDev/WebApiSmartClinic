@@ -94,29 +94,52 @@ public class SalaService : ISalaInterface
     public async Task<ResponseModel<List<SalaModel>>> Delete(int idSala, int pageNumber = 1, int pageSize = 10)
     {
         ResponseModel<List<SalaModel>> resposta = new ResponseModel<List<SalaModel>>();
-
         try
         {
-            var sala = await _context.Sala.FirstOrDefaultAsync(x => x.Id == idSala);
+            var sala = await _context.Sala
+                .Include(s => s.Agendamentos) // Assumindo relacionamento com agendamentos
+                .FirstOrDefaultAsync(x => x.Id == idSala);
+
             if (sala == null)
             {
-                resposta.Mensagem = "Nenhum Sala encontrado";
+                resposta.Mensagem = "Nenhuma Sala encontrada";
+                resposta.Status = false;
                 return resposta;
             }
 
-            _context.Remove(sala);
+            // Verifica se é registro padrão
+            if (sala.IsSystemDefault)
+            {
+                resposta.Mensagem = "Não é possível inativar a sala pois é padrão do sistema.";
+                resposta.Status = false;
+                return resposta;
+            }
+
+            // Verificar se há agendamentos ativos/futuros vinculados à sala
+            if (sala.Agendamentos.Count > 0)
+            {
+                resposta.Mensagem = "Não é possível inativar a sala pois existem agendamentos ativos ou futuros vinculados a ela";
+                resposta.Status = false;
+                return resposta;
+            }
+
+            // Soft delete - marcar como inativo
+            sala.Status = false;
+            sala.DataAlteracao = DateTime.UtcNow;
+            // sala.UsuarioAlteracao = "usuarioLogado"; // Se tiver controle de usuário
+
+            _context.Update(sala);
             await _context.SaveChangesAsync();
 
-            var query = _context.Sala.AsQueryable();
-
+            // Buscar apenas salas ativas para a paginação
+            var query = _context.Sala.Where(s => s.Status == true).AsQueryable();
             resposta = await PaginationHelper.PaginateAsync(query, pageNumber, pageSize);
-            resposta.Mensagem = "Sala Excluido com sucesso";
-            return resposta;
+            resposta.Mensagem = "Esse processo não irá excluir o registro e sim inativá-lo. Sala inativada com sucesso";
 
+            return resposta;
         }
         catch (Exception ex)
         {
-
             resposta.Mensagem = ex.Message;
             resposta.Status = false;
             return resposta;

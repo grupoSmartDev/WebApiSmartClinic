@@ -35,8 +35,23 @@ public class FornecedorModel
         get => _DataNascimento;
         set => _DataNascimento = value.HasValue ? DateTime.SpecifyKind(value.Value, DateTimeKind.Utc) : null;
     }
+    private DateTime? _DataAlteracao;
+    public DateTime? DataAlteracao
+    {
+        get => _DataAlteracao;
+        set => _DataAlteracao = value.HasValue ? DateTime.SpecifyKind(value.Value, DateTimeKind.Utc) : null;
+    }
     public string? Nome { get; set; }
     public string? Observacao { get; set; }
+    public bool Ativo { get; set; } = true;
+    public string? CRF { get; set; } // Para farmácias
+    public string? ANVISA { get; set; } // Registro ANVISA para medicamentos/equipamentos
+    public string? CategoriaFornecedor { get; set; } // Medicamentos, Equipamentos, Materiais, Serviços
+    public string? EspecialidadeFornecimento { get; set; }
+    public string? Representante { get; set; }
+    public string? TelefoneRepresentante { get; set; }
+    public string? EmailRepresentante { get; set; }
 
-    //public ICollection<Financ_Pagar> Financ_Pagar { get; set; }
+    public virtual ICollection<Financ_PagarModel>? Financ_Pagar { get; set; } = new List<Financ_PagarModel>();
+
 }

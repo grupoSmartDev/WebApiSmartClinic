@@ -53,6 +53,7 @@ namespace WebApiSmartClinic.Models
         public int? PacienteId { get; set; }
         [JsonIgnore]
         public PacienteModel? Paciente { get; set; }
+        public virtual ICollection<PacientePlanoHistoricoModel> HistoricoPacientes { get; set; } = new List<PacientePlanoHistoricoModel>(); // Histórico de uso
 
         public int? FinanceiroId { get; set; }
         [JsonIgnore]

@@ -63,6 +63,9 @@ public class AppDbContext : IdentityDbContext<User>
     public DbSet<FilialModel> Filiais { get; set; }
     public DbSet<SubscriptionModel> SubsCricao{ get; set; }
     public DbSet<PaymentModel> Pagamentos{ get; set; }
+    public DbSet<ComissaoCalculadaModel> Comissoes{ get; set; }
+    public DbSet<PacientePlanoHistoricoModel> PacientePlanoHistoricos { get; set; }
+
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
@@ -235,7 +238,12 @@ public class AppDbContext : IdentityDbContext<User>
             .WithMany()
             .HasForeignKey(s => s.TipoPagamentoId);
 
-  
+        modelBuilder.Entity<Financ_PagarModel>()
+          .HasOne(f => f.Fornecedor)
+          .WithMany(fp => fp.Financ_Pagar)
+          .HasForeignKey(s => s.FornecedorId);
+
+
         // Relacionamento: PlanoConta -> SubPlanoConta
         modelBuilder.Entity<PlanoContaModel>()
             .HasMany(f => f.SubPlanos)
@@ -357,5 +365,70 @@ public class AppDbContext : IdentityDbContext<User>
         .WithMany(d => d.FinancPagar)
         .HasForeignKey(f => f.DespesaFixaId)
         .OnDelete(DeleteBehavior.Cascade);
+
+        // Configuração do relacionamento Sala -> Agenda (1:N)
+        modelBuilder.Entity<AgendaModel>()
+            .HasOne(a => a.Sala)
+            .WithMany(s => s.Agendamentos)
+            .HasForeignKey(a => a.SalaId)
+            .OnDelete(DeleteBehavior.Restrict); // Impede delete em cascata
+
+        modelBuilder.Entity<AgendaModel>()
+      .HasOne(a => a.Paciente)
+      .WithMany(p => p.Agendamentos)
+      .HasForeignKey(a => a.PacienteId)
+      .OnDelete(DeleteBehavior.Restrict);
+
+        // Relacionamento Agenda -> Profissional
+        modelBuilder.Entity<AgendaModel>()
+            .HasOne(a => a.Profissional)
+            .WithMany(p => p.Agendamentos)
+            .HasForeignKey(a => a.ProfissionalId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        modelBuilder.Entity<ComissaoCalculadaModel>()
+        .HasOne(c => c.Profissional)
+        .WithMany(p => p.ComissoesCalculadas)
+        .HasForeignKey(c => c.ProfissionalId)
+        .OnDelete(DeleteBehavior.Restrict);
+
+        modelBuilder.Entity<ComissaoCalculadaModel>()
+         .HasOne(c => c.Agendamento)
+         .WithOne(a => a.ComissaoCalculada)
+         .HasForeignKey<ComissaoCalculadaModel>(c => c.AgendamentoId)
+         .OnDelete(DeleteBehavior.Restrict);
+
+        modelBuilder.Entity<PacientePlanoHistoricoModel>()
+        .HasOne(h => h.Paciente)
+        .WithMany(p => p.HistoricoPlanos)
+        .HasForeignKey(h => h.PacienteId)
+        .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<PacientePlanoHistoricoModel>()
+         .HasOne(h => h.Plano)
+         .WithMany(p => p.HistoricoPacientes)
+         .HasForeignKey(h => h.PlanoId)
+         .OnDelete(DeleteBehavior.Restrict);
+
+        // Configurações de precisão para decimais
+        modelBuilder.Entity<ComissaoCalculadaModel>()
+            .Property(c => c.ValorComissao)
+            .HasPrecision(18, 2);
+
+        modelBuilder.Entity<ComissaoCalculadaModel>()
+            .Property(c => c.ValorBase)
+            .HasPrecision(18, 2);
+
+        modelBuilder.Entity<ComissaoCalculadaModel>()
+            .Property(c => c.PercentualOuValor)
+            .HasPrecision(18, 2);
+
+        modelBuilder.Entity<ProfissionalModel>()
+            .Property(p => p.ValorComissao)
+            .HasPrecision(18, 2);
+
+        modelBuilder.Entity<PacientePlanoHistoricoModel>()
+            .Property(h => h.ValorPago)
+            .HasPrecision(18, 2);
     }
 }

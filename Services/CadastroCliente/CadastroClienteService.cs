@@ -11,6 +11,8 @@ using WebApiSmartClinic.Dto.Profissional;
 using WebApiSmartClinic.Dto.User;
 using WebApiSmartClinic.Helpers;
 using WebApiSmartClinic.Models;
+using WebApiSmartClinic.Models.Asaas;
+using WebApiSmartClinic.Services.Asaas;
 using WebApiSmartClinic.Services.Auth;
 using WebApiSmartClinic.Services.ConnectionsService;
 using WebApiSmartClinic.Services.MailService;
@@ -30,6 +32,7 @@ public class CadastroClienteService : ICadastroClienteInterface
     private readonly IServiceScopeFactory _scopeFactory;
     private readonly IServiceProvider _serviceProvider;
     private readonly EmailService _mailService;
+     private readonly IAsaasService _asaasService;
 
     public CadastroClienteService(
         SignInManager<User> signInManager,
@@ -40,7 +43,7 @@ public class CadastroClienteService : ICadastroClienteInterface
         IConnectionStringProvider connectionStringProvider, 
         DataConnectionContext contextDataConnection, 
         IServiceScopeFactory scopeFactory,
-        IServiceProvider serviceProvider, IEmailService emailService)
+        IServiceProvider serviceProvider, IEmailService emailService, IAsaasService asaasService)
     {
         _signInManager = signInManager;
         _userManager = userManager;
@@ -52,6 +55,7 @@ public class CadastroClienteService : ICadastroClienteInterface
         _scopeFactory = scopeFactory;
         _serviceProvider = serviceProvider;
         _mailService = (EmailService?)emailService;
+        _asaasService = asaasService;
     }
 
     public async Task CriarUsuario(UserCreateRequest userCreateRequest, string? userKey = null)
@@ -60,206 +64,7 @@ public class CadastroClienteService : ICadastroClienteInterface
         await authService.RegisterAsync(userCreateRequest, userKey);
     }
 
-    //public async Task<ResponseModel<EmpresaModel>> Criar(CadastroClienteCreateDto dto)
-    //{
-    //    var resposta = new ResponseModel<EmpresaModel>();
-
-    //    var cpfKey = dto.TitularCPF;
-    //    var novoBanco = cpfKey; // cuidado: sanitize nome do DB
-    //    var novaStringConexao = $"Host=62.72.51.219;Port=5432;Database={novoBanco};Username=postgres;Password=Elefante01!;Include Error Detail=true;";
-    //    var masterConnection = $"Host=62.72.51.219;Port=5432;Database=connections;Username=postgres;Password=Elefante01!;Include Error Detail=true;";
-
-    //    try
-    //    {
-    //        // 1) Verifica duplicidade na base de conexões
-    //        bool existe = await _contextDataConnection.DataConnection.AnyAsync(c => c.Key == cpfKey);
-    //        if (existe)
-    //        {
-    //            resposta.Status = false;
-    //            resposta.Mensagem = "Já existe um cliente com esse CPF.";
-
-    //            return resposta;
-    //        }
-
-    //        // 2) Cria o database do tenant
-    //        await using (var conn = new NpgsqlConnection(masterConnection))
-    //        {
-    //            await conn.OpenAsync();
-    //            using var cmd = conn.CreateCommand();
-    //            cmd.CommandText = $"CREATE DATABASE \"{novoBanco}\"";
-    //            await cmd.ExecuteNonQueryAsync();
-    //        }
-
-    //        // 3) Persiste a connection na base de conexões
-    //        var novaConexao = new DataConnections { Key = cpfKey, StringConnection = novaStringConexao };
-    //        await _contextDataConnection.DataConnection.AddAsync(novaConexao);
-    //        await _contextDataConnection.SaveChangesAsync();
-
-    //        // 4) Fixa a connection do tenant no provider (deve ser SCOPED/AsyncLocal)
-    //        _connectionStringProvider.SetConnectionString(novaStringConexao);
-
-    //        // 5) ÚNICO scope para tudo do tenant
-    //        await using var scope = _scopeFactory.CreateAsyncScope();
-
-    //        var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();          // mesmo AppDbContext para tudo
-    //        var userManager = scope.ServiceProvider.GetRequiredService<UserManager<User>>();
-    //        var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
-    //        var authService = scope.ServiceProvider.GetRequiredService<AuthService>();           // se você centralizou RegisterAsync nele
-
-    //        // 6) Migrações do tenant
-    //        await db.Database.MigrateAsync();
-
-    //        // 7) Transação única do tenant (opcional, mas recomendado)
-    //        await using var tx = await db.Database.BeginTransactionAsync();
-
-    //        // 8) Garante roles
-    //        foreach (var role in new[] { "Admin", "User" })
-    //        {
-    //            if (!await roleManager.RoleExistsAsync(role))
-    //            {
-    //                var rc = await roleManager.CreateAsync(new IdentityRole(role));
-    //                if (!rc.Succeeded)
-    //                {
-    //                    var err = string.Join("; ", rc.Errors.Select(e => e.Description));
-
-    //                    resposta.Status = false;
-    //                    resposta.Mensagem = $"Falha ao criar role {role}: {err}";
-
-    //                    return resposta;
-    //                }
-    //            }
-    //        }
-
-    //        // 9) Cria empresa
-    //        var empresa = new EmpresaModel
-    //        {
-    //            Nome = dto.Nome,
-    //            Sobrenome = dto.Sobrenome,
-    //            Email = dto.Email,
-    //            Celular = dto.Celular,
-    //            TitularCPF = dto.TitularCPF,
-    //            CNPJEmpresaMatriz = dto.CNPJEmpresaMatriz,
-    //            Especialidade = dto.Especialidade,
-    //            PlanoEscolhido = dto.PlanoEscolhido,
-    //            TipoPagamentoId = (int)(dto.TipoPagamentoId == null || dto.TipoPagamentoId == 0 ? 1 : dto.TipoPagamentoId),
-    //            QtdeLicencaEmpresaPermitida = 1,
-    //            QtdeLicencaUsuarioPermitida = 3,
-    //            QtdeLicencaEmpresaUtilizada = 0,
-    //            QtdeLicencaUsuarioUtilizada = 0,
-    //            DataInicio = DateTime.UtcNow,
-    //            PeriodoTeste = true,
-    //            DataInicioTeste = DateTime.UtcNow,
-    //            DataFim = DateTime.UtcNow.AddDays(7),
-    //            DatabaseConnectionString = novaStringConexao,
-    //            Ativo = true
-    //        };
-
-    //        await db.Empresas.AddAsync(empresa);
-    //        await db.SaveChangesAsync();
-
-    //        // 10) Cria Admin do tenant
-    //        var adminReq = new UserCreateRequest
-    //        {
-    //            FirstName = "Admin",
-    //            LastName = "Teste",
-    //            Email = "gruposmartdesenvolvimentos@gmail.com",
-    //            Password = "Admin@123",
-    //            ConfirmPassword = "Admin@123",
-    //            AcceptTerms = true,
-    //        };
-
-    //        try
-    //        {
-    //            await authService.RegisterAsync(adminReq, cpfKey); // internamente usa userManager e AddToRole("Admin") no MESMO db
-    //        }
-    //        catch (Exception e)
-    //        {
-    //            resposta.Status = false;
-    //            resposta.Mensagem = e.Message;
-
-    //            return resposta;
-    //            throw;
-    //        }
-
-    //        // 11) Cria usuário do cliente
-    //        var userReq = new UserCreateRequest
-    //        {
-    //            FirstName = dto.Nome,
-    //            LastName = dto.Sobrenome,
-    //            Email = dto.Email,
-    //            Password = "Admin@123",
-    //            ConfirmPassword = "Admin@123",
-    //            AcceptTerms = true,
-    //        };
-
-    //        try
-    //        {
-    //            await authService.RegisterAsync(userReq, cpfKey); 
-    //        }
-    //        catch (Exception e)
-    //        {
-    //            resposta.Status = false;
-    //            resposta.Mensagem = e.Message;
-
-    //            return resposta;
-    //            throw;
-    //        }
-
-    //        // 12) Cria Profissional usando o MESMO db
-    //        var prof = new ProfissionalModel
-    //        {
-    //            Email = dto.Email,
-    //            Nome = $"{dto.Nome} {dto.Sobrenome}",
-    //            Cpf = dto.TitularCPF,
-    //            Celular = dto.Celular
-    //        };
-
-    //        await db.Profissional.AddAsync(prof);
-    //        await db.SaveChangesAsync();
-
-    //        await tx.CommitAsync();
-
-    //        // 13) E-mail
-    //        //await _mailService.SendEmailAsync(new MailRequest
-    //        //{
-    //        //    ToEmail = userReq.Email,
-    //        //    Subject = "Conta criada com sucesso!",
-    //        //    Body = GetHtmlContent(userReq.FirstName)
-    //        //});
-
-    //        resposta.Status = true;
-    //        resposta.Dados = empresa;
-    //        resposta.Mensagem = "Cliente e banco criados com sucesso.";
-
-    //        if (resposta.Status && !existe)
-    //        {
-    //            try
-    //            {
-    //                MailRequest mailRequest = new MailRequest();
-    //                mailRequest.ToEmail = userReq.Email;
-    //                mailRequest.Subject = "Conta criada com sucesso!";
-    //                mailRequest.Body = GetHtmlContent(userReq.FirstName);
-
-
-    //                await _mailService.SendEmailAsync(mailRequest);
-    //            }
-    //            catch (Exception)
-    //            {
-    //            }
-    //        }
-
-    //        return resposta;
-    //    }
-    //    catch (Exception ex)
-    //    {
-    //        resposta.Status = false;
-    //        resposta.Mensagem = $"Erro: {ex.Message}";
-
-    //        return resposta;
-    //    }
-    //}
-
-
+  
     public async Task<ResponseModel<EmpresaModel>> Criar(CadastroClienteCreateDto dto)
     {
         var resposta = new ResponseModel<EmpresaModel>();
@@ -306,6 +111,54 @@ public class CadastroClienteService : ICadastroClienteInterface
             // agora o dbContext deve ler a nova connection string
             await dbContext.Database.MigrateAsync();
 
+
+            // =================== NOVA LÓGICA ASAAS ===================
+            string asaasCustomerId = null;
+            string asaasSubscriptionId = null;
+
+            // 5. SE NÃO FOR TRIAL, CRIAR NO ASAAS
+            if (!dto.PeriodoTeste && dto.PrecoSelecionado > 0)
+            {
+                try
+                {
+                    // Criar customer no Asaas
+                    var customerRequest = new AsaasCustomerRequest
+                    {
+                        name = $"{dto.Nome} {dto.Sobrenome}",
+                        email = dto.Email,
+                        phone = LimparTelefone(dto.Celular),
+                        mobilePhone = LimparTelefone(dto.Celular),
+                        cpfCnpj = dto.TitularCPF,
+                        observations = $"ClinicSmart - {dto.PlanoEscolhido} - {dto.PeriodoCobranca}"
+                    };
+
+                    var customer = await _asaasService.CreateCustomerAsync(customerRequest);
+                    asaasCustomerId = customer.id;
+
+                    // Criar subscription no Asaas
+                    var subscriptionRequest = new AsaasSubscriptionRequest
+                    {
+                        customer = customer.id,
+                        billingType = MapearTipoPagamento(dto.TipoPagamentoId ?? 1),
+                        value = dto.PrecoSelecionado,
+                        nextDueDate = DateTime.Now.AddDays(1).ToString("yyyy-MM-dd"),
+                        cycle = dto.PeriodoCobranca == "monthly" ? "MONTHLY" : "SEMIANNUALLY",
+                        description = $"ClinicSmart - {dto.PlanoEscolhido}",
+                        externalReference = $"clinicsmart_cpf_{cpfKey}"
+                    };
+
+                    var subscription = await _asaasService.CreateSubscriptionAsync(subscriptionRequest);
+                    asaasSubscriptionId = subscription.id;
+
+                    Console.WriteLine($"🎉 Asaas integrado com sucesso! Customer: {asaasCustomerId}, Subscription: {asaasSubscriptionId}");
+                }
+                catch (Exception asaasEx)
+                {
+                    Console.WriteLine($"❌ Erro na integração Asaas: {asaasEx.Message}");
+                    // Continua o cadastro mesmo se o Asaas falhar
+                }
+            }
+
             // 7. Cria cliente
             var cliente = new EmpresaModel
             {
@@ -327,7 +180,16 @@ public class CadastroClienteService : ICadastroClienteInterface
                 DataInicioTeste = DateTime.UtcNow,
                 DataFim = DateTime.UtcNow.AddDays(7),
                 DatabaseConnectionString = novaStringConexao,
-                Ativo = true
+                Ativo = true,
+                // NOVOS CAMPOS ASAAS
+                AsaasCustomerId = asaasCustomerId,
+                AsaasSubscriptionId = asaasSubscriptionId,
+                PeriodoCobranca = dto.PeriodoCobranca,
+                PrecoSelecionado = dto.PrecoSelecionado,
+                DataNascimentoTitular = dto.DataNascimentoTitular,
+                TelefoneFixo = dto.TelefoneFixo,
+                CelularComWhatsApp = dto.CelularComWhatsApp,
+                ReceberNotificacoes = dto.ReceberNotificacoes
             };
 
             await dbContext.Empresas.AddAsync(cliente);
@@ -573,4 +435,37 @@ public class CadastroClienteService : ICadastroClienteInterface
 
         return htmlContent;
     }
+
+    // NOVOS MÉTODOS AUXILIARES
+    private string MapearTipoPagamento(int tipoPagamentoId)
+    {
+        return tipoPagamentoId switch
+        {
+            1 => "CREDIT_CARD",
+            2 => "BOLETO",
+            3 => "PIX",
+            _ => "BOLETO"
+        };
     }
+
+    private string LimparTelefone(string telefone)
+    {
+        return telefone?.Replace("(", "").Replace(")", "").Replace(" ", "").Replace("-", "");
+    }
+
+    private string LimparCPF(string cpf)
+    {
+        return cpf?.Replace(".", "").Replace("-", "");
+    }
+
+    private int ObterLicencasPermitidas(string plano)
+    {
+        return plano?.ToLower() switch
+        {
+            "basic" => 1,
+            "plus" => 5,
+            "premium" => 15,
+            _ => 1
+        };
+    }
+}

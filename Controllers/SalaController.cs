@@ -44,8 +44,9 @@ public class SalaController : ControllerBase
         return Ok(sala);
     }
 
+    // ✅ Ainda melhor - sem [FromRoute] ele já entende automaticamente
     [HttpDelete("Delete/{id}")]
-    public async Task<ActionResult<ResponseModel<List<SalaModel>>>> Delete([FromBody] int id, int pageNumber = 1, int pageSize = 10)
+    public async Task<ActionResult<ResponseModel<List<SalaModel>>>> Delete(int id, int pageNumber = 1, int pageSize = 10)
     {
         var sala = await _context.Delete(id, pageNumber, pageSize);
         return Ok(sala);

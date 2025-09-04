@@ -11,15 +11,7 @@ namespace WebApiSmartClinic.Models
 
         public string Titulo { get; set; }
 
-        //private DateTime? _date;
-
-        //[DataType(DataType.Date)]
-        //public DateTime? Data
-        //{
-        //    get => _date;
-        //    set => _date = value.HasValue ? DateTime.SpecifyKind(value.Value, DateTimeKind.Utc) : null;
-        //}
-
+     
         private DateTime? _Data;
         public DateTime? Data
         {
@@ -51,6 +43,7 @@ namespace WebApiSmartClinic.Models
         public int? FinancReceberId { get; set; }
         public Financ_ReceberModel? FinancReceber { get; set; }
         public int? SalaId { get; set; }
+        public virtual SalaModel? Sala { get; set; }
         public int? PacoteId { get; set; }
         public PacienteModel? Pacote {get; set;}
         public bool LembreteSms { get; set; } = false;
@@ -62,5 +55,22 @@ namespace WebApiSmartClinic.Models
         public bool Avulso { get; set; } = false;
         public bool StatusFinal { get; set; } = false;
         public List<DayOfWeek>? DiasRecorrencia { get; set; }
+
+        public virtual ComissaoCalculadaModel? ComissaoCalculada { get; set; }
+
+        public bool Ativo { get; set; } = true;
+        private DateTime? _DataAlteracao;
+        public DateTime? DataAlteracao
+        {
+            get => _DataAlteracao;
+            set => _DataAlteracao = value.HasValue ? DateTime.SpecifyKind(value.Value, DateTimeKind.Utc) : null;
+        }
+
+        private DateTime _DataCriacao;
+        public DateTime DataCriacao
+        {
+            get => _DataCriacao;
+            set => _DataCriacao = DateTime.SpecifyKind(value, DateTimeKind.Utc);
+        } 
     }
 }

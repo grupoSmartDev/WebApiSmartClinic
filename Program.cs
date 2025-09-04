@@ -49,6 +49,8 @@ using WebApiSmartClinic.Services.Auth;
 using WebApiSmartClinic.Services.DespesaFixa;
 using WebApiSmartClinic.Services.MailService;
 using WebApiSmartClinic.Services.StripeService;
+using WebApiSmartClinic.Services.Asaas;
+using WebApiSmartClinic.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 var services = builder.Services;
@@ -166,7 +168,7 @@ services.AddScoped<ICategoriaInterface, CategoriaService>();
 services.AddScoped<IFinanc_PagarInterface, Financ_PagarService>();
 services.AddScoped<IFinanc_ReceberInterface, Financ_ReceberService>();
 services.AddScoped<IHistoricoTransacaoInterface, HistoricoTransacaoService>();
-services.AddScoped<IComissaoInterface, ComissaoService>();
+//services.AddScoped<IComissaoInterface, ComissaoService>();
 services.AddScoped<IPlanoInterface, PlanoService>();
 services.AddScoped<IAgendaInterface, AgendaService>();
 services.AddScoped<IProfissionalInterface, ProfissionalService>();
@@ -182,8 +184,13 @@ services.AddScoped<IDespesaFixaInterface, DespesaFixaService>();
 services.AddScoped<ICadastroClienteInterface, CadastroClienteService>();
 services.AddScoped<IConnectionStringProvider, ConnectionStringProvider>();
 services.AddScoped<IConnectionsRepository, ConnectionsRepository>();
+services.AddScoped<IComissaoService, WebApiSmartClinic.Services.ComissaoService>();
 builder.Services.AddScoped<IStripeService, StripeService>();
 services.AddScoped<AgendaService>();
+
+
+builder.Services.AddHttpClient<IAsaasService, AsaasService>();
+builder.Services.AddScoped<IAsaasService, AsaasService>();
 
 //services.AddSingleton<IConnectionStringProvider, ConnectionStringProvider>();
 

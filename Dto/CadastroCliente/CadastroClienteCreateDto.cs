@@ -63,5 +63,11 @@ namespace WebApiSmartClinic.Dto.CadastroCliente
 
         [JsonIgnore]
         public TipoPagamentoModel? TipoPagamento { get; set; }
+
+        public string PeriodoCobranca { get; set; } // "monthly" ou "semiannual"
+        public decimal PrecoSelecionado { get; set; }
+
     }
+
+
 }

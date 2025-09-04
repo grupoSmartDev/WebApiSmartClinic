@@ -12,6 +12,13 @@ public class SalaModel
     public bool Status { get; set; } = true;
     public string? HorarioFincionamento { get; set; }
     public string? Observacao { get; set; }
+    private DateTime? _DataAlteracao;
+    public DateTime? DataAlteracao
+    {
+        get => _DataAlteracao;
+        set => _DataAlteracao = value.HasValue ? DateTime.SpecifyKind(value.Value, DateTimeKind.Utc) : null;
+    }
     public bool IsSystemDefault { get; internal set; }
     public virtual ICollection<SalaHorarioModel> HorariosFuncionamento { get; set; } = new List<SalaHorarioModel>();
+    public virtual ICollection<AgendaModel> Agendamentos { get; set; } = new List<AgendaModel>();
 }

@@ -31,5 +31,14 @@ namespace WebApiSmartClinic.Dto.Fornecedor
         public string? Email { get; set; }
         public string? Nome { get; set; }
         public string? Observacao { get; set; }
+        public string? CRF { get; set; }
+        public string? ANVISA { get; set; }
+        public string? CategoriaFornecedor { get; set; }
+        public string? EspecialidadeFornecimento { get; set; }
+
+        // Representante
+        public string? Representante { get; set; }
+        public string? TelefoneRepresentante { get; set; }
+        public string? EmailRepresentante { get; set; }
     }
 }

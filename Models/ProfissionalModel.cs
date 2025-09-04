@@ -41,4 +41,11 @@ public class ProfissionalModel
         set => _DataCadastro = value.HasValue ? DateTime.SpecifyKind(value.Value, DateTimeKind.Utc) : DateTime.UtcNow;
     }
     public bool Ativo { get; set; } = true; // Por padrão ativo
+
+    public virtual ICollection<AgendaModel> Agendamentos { get; set; } = new List<AgendaModel>();
+    public virtual ICollection<ComissaoCalculadaModel> ComissoesCalculadas { get; set; } = new List<ComissaoCalculadaModel>();
+
+    public string? TipoComissao { get; set; } //no tipo de comissao é P para porcentagem e VF para valor fixo. 
+    public decimal ValorComissao { get; set; } 
 }
+

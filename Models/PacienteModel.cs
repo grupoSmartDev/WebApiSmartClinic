@@ -83,10 +83,19 @@ namespace WebApiSmartClinic.Models
             Evolucoes = new List<EvolucaoModel>();
            // Plano = new PlanoModel();
         }
+        public bool Ativo { get; set; } = true;
+        private DateTime? _DataAlteracao;
+        public DateTime? DataAlteracao
+        {
+            get => _DataAlteracao;
+            set => _DataAlteracao = value.HasValue ? DateTime.SpecifyKind(value.Value, DateTimeKind.Utc) : null;
+        }
 
         public int? FichaAvaliacaoId { get; set; }
         public FichaAvaliacaoModel? FichaAvaliacao { get; set; }
         public List<RecorrenciaPacienteDto>? Recorrencias { get; set; } = new List<RecorrenciaPacienteDto>();
         public DateTime? DataFimRecorrencia { get; set; }
+        public virtual ICollection<AgendaModel> Agendamentos { get; set; } = new List<AgendaModel>();
+        public virtual ICollection<PacientePlanoHistoricoModel> HistoricoPlanos { get; set; } = new List<PacientePlanoHistoricoModel>();
     }
 }

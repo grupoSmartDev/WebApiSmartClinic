@@ -97,31 +97,44 @@ public class PlanoService : IPlanoInterface
     public async Task<ResponseModel<List<PlanoModel>>> Delete(int idPlano, int pageNumber = 1, int pageSize = 10)
     {
         ResponseModel<List<PlanoModel>> resposta = new ResponseModel<List<PlanoModel>>();
-
         try
         {
-            var plano = await _context.Plano.FirstOrDefaultAsync(x => x.Id == idPlano);
+            var plano = await _context.Plano
+                .Include(p => p.Paciente) // Assumindo que existe navegação para pacientes
+                .FirstOrDefaultAsync(x => x.Id == idPlano);
+
             if (plano == null)
             {
                 resposta.Mensagem = "Nenhum Plano encontrado";
+                resposta.Status = false;
                 return resposta;
             }
 
-            _context.Remove(plano);
+            // Verificar se há pacientes ativos vinculados ao plano
+            if (plano.Paciente != null && plano.Paciente.Plano.Ativo) // Assumindo que paciente tem propriedade Ativo
+            {
+                resposta.Mensagem = "Não é possível inativar o plano pois existem pacientes ativos vinculados a ele";
+                resposta.Status = false;
+                return resposta;
+            }
+
+            // Soft delete - marcar como inativo
+            plano.Ativo = false;
+      
+            _context.Update(plano);
             await _context.SaveChangesAsync();
 
-            var query = _context.Plano.AsQueryable();
-
+            // Buscar apenas planos ativos para a paginação
+            var query = _context.Plano.Where(p => p.Ativo == true).AsQueryable();
             resposta = await PaginationHelper.PaginateAsync(query, pageNumber, pageSize);
-            resposta.Mensagem = "Plano Excluido com sucesso";
-            
+            resposta.Mensagem = "Esse processo não irá excluir o registro e sim inativá-lo. Plano inativado com sucesso";
+
             return resposta;
         }
         catch (Exception ex)
         {
             resposta.Mensagem = ex.Message;
             resposta.Status = false;
-            
             return resposta;
         }
     }

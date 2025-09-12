@@ -35,7 +35,7 @@ public class ComissaoService : IComissaoService
                 .Where(a => 
                            a.Data >= dataInicio &&
                            a.Data <= dataFim &&
-                           a.Status.Status == "Realizado" && // Apenas agendamentos realizados
+                           a.StatusId == 4 && // Apenas agendamentos realizados
                            !_context.Comissoes.Any(c => c.AgendamentoId == a.Id && c.Ativo)); // Não calculados ainda
 
             if (profissionalId.HasValue)
@@ -90,6 +90,13 @@ public class ComissaoService : IComissaoService
                     NomePlano = agendamento.Paciente.Plano?.Descricao,
                     DataCalculo = DateTime.UtcNow
                 };
+
+                var dataAgTratada = DateTime.SpecifyKind(comissao.DataAgendamento, DateTimeKind.Utc);
+                var dataCalcTratada = DateTime.SpecifyKind(comissao.DataCalculo, DateTimeKind.Utc);
+
+                comissao.DataAgendamento = dataAgTratada;
+                comissao.DataCalculo = dataCalcTratada;
+
 
                 // Calcular valor da comissão
                 if (agendamento.Profissional.TipoComissao == "P")

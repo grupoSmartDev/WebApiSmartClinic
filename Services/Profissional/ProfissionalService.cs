@@ -80,6 +80,8 @@ public class ProfissionalService : IProfissionalInterface
             profissional.BancoCpfTitular = profissionalCreateDto.BancoCpfTitular;
             profissional.EhUsuario = profissionalCreateDto.EhUsuario;
             profissional.DataCadastro = profissionalCreateDto.DataCadastro;
+            profissional.TipoComissao = profissionalCreateDto.TipoComissao;
+            profissional.ValorComissao = profissionalCreateDto.ValorComissao;
 
             if (profissionalCreateDto.EhUsuario == true)
             { 
@@ -258,6 +260,8 @@ public class ProfissionalService : IProfissionalInterface
             profissional.BancoCpfTitular = profissionalEdicaoDto.BancoCpfTitular;
             profissional.EhUsuario = profissionalEdicaoDto.EhUsuario;
             profissional.DataCadastro = profissionalEdicaoDto.DataCadastro;
+            profissional.TipoComissao = profissionalEdicaoDto.TipoComissao;
+            profissional.ValorComissao = profissionalEdicaoDto.ValorComissao;
 
             if (profissional.EhUsuario == true)
             {

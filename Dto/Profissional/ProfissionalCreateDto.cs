@@ -36,6 +36,8 @@ namespace WebApiSmartClinic.Dto.Profissional
 
         // Opcional: Data de cadastro para rastrear a criação do registro
         public DateTime? DataCadastro { get; set; } = DateTime.Now;
-        public bool Ativo { get; set; } = true; // Por padrão ativo
+        public bool Ativo { get; set; } = true; // Por padrão ativo;
+        public string? TipoComissao { get; set; } //no tipo de comissao é P para porcentagem e VF para valor fixo. 
+        public decimal ValorComissao { get; set; }
     }
 }

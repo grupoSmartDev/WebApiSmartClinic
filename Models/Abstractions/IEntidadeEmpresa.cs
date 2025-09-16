@@ -6,4 +6,5 @@
 public interface IEntidadeEmpresa
 {
     int EmpresaId { get; set; }
+    bool Ativo { get; set; }
 }

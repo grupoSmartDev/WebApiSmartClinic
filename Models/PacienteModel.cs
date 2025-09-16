@@ -6,7 +6,7 @@ using WebApiSmartClinic.Services.EmpresaPermissao;
 
 namespace WebApiSmartClinic.Models
 {
-    public class PacienteModel : IEntidadeEmpresa, IEntidadeAuditavel
+    public class PacienteModel : IEntidadeEmpresa, IEntidadeAuditavel, IEntidadeDoProfissional
     {
         public int Id { get; set; }
         public int EmpresaId { get; set; }

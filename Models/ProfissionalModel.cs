@@ -6,6 +6,12 @@ namespace WebApiSmartClinic.Models;
 public class ProfissionalModel : IEntidadeEmpresa, IEntidadeAuditavel
 {
     public int Id { get; set; }
+    /// <summary>Usuário (Identity) vinculado a este profissional.
+    /// Opcional: secretárias/Suport e outros podem não ter usuário vinculado.</summary>
+    public string? UsuarioId { get; set; }
+
+    /// <summary>Navegação opcional para o usuário do Identity.</summary>
+    public User? Usuario { get; set; }
     public int EmpresaId { get; set; }
     public string? UsuarioCriacaoId { get; set; }
     private DateTime _DataCriacao = DateTime.UtcNow;

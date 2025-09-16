@@ -3,7 +3,7 @@ using WebApiSmartClinic.Models.Abstractions;
 
 namespace WebApiSmartClinic.Models
 {
-    public class ComissaoModel : IEntidadeEmpresa, IEntidadeAuditavel
+    public class ComissaoModel : IEntidadeEmpresa, IEntidadeAuditavel, IEntidadeDoProfissional
     {
         public int Id { get; set; }
         public int EmpresaId { get; set; }
@@ -22,7 +22,7 @@ namespace WebApiSmartClinic.Models
             set => _DataAlteracao = value.HasValue ? DateTime.SpecifyKind(value.Value.ToUniversalTime(), DateTimeKind.Utc) : null;
         }
         public bool Ativo { get; set; }
-        public int ProfissionalId { get; set; }
+        public int? ProfissionalId { get; set; }
         public ProfissionalModel Profissional { get; set; }  // Relação com o profissional
 
         public int ProcedimentoId { get; set; }

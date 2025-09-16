@@ -6,6 +6,8 @@ using WebApiSmartClinic.Helpers;
 using Microsoft.Extensions.Options;
 using WebApiSmartClinic.Dto.User;
 using WebApiSmartClinic.Models.Abstractions;
+using System.Linq.Expressions;
+using Microsoft.EntityFrameworkCore.Metadata;
 
 namespace WebApiSmartClinic.Data;
 
@@ -21,10 +23,14 @@ public class AppDbContext : IdentityDbContext<User>
         _connectionStringProvider = connectionStringProvider;
     }
 
-    // Contexto por requisição (preenchido pelo middleware)
+    public bool VerTodasEmpresas { get; set; }            // Admin = true
     public int? EmpresaSelecionada { get; set; }
-    public bool VerTodasEmpresas { get; set; }
-    public string? UsuarioAtualId { get; set; }
+    public bool EhAdmin { get; set; }
+    public bool EhSupport { get; set; }
+    public bool EhUser { get; set; }                      // Perfil User?
+    public int? ProfissionalAtualId { get; set; }         // Profissional vinculado ao User
+    public string? UsuarioAtualId { get; set; }           // Auditoria
+
 
     //public DbSet<AutorModel> Autores { get; set; }
     //public DbSet<LivroModel> Livros { get; set; }
@@ -72,7 +78,35 @@ public class AppDbContext : IdentityDbContext<User>
     public DbSet<PaymentModel> Pagamentos{ get; set; }
     public DbSet<ComissaoCalculadaModel> Comissoes{ get; set; }
     public DbSet<PacientePlanoHistoricoModel> PacientePlanoHistoricos { get; set; }
+    // Tipos a ignorar no filtro global (Identity, agregadores globais, etc.)
+    private static readonly HashSet<string> _tiposIgnorados = new(StringComparer.Ordinal)
+    {
+        // Identity
+        "Microsoft.AspNetCore.Identity.IdentityUser",
+        "Microsoft.AspNetCore.Identity.IdentityRole",
+        "Microsoft.AspNetCore.Identity.IdentityUserRole`2",
+        "Microsoft.AspNetCore.Identity.IdentityUserClaim`1",
+        "Microsoft.AspNetCore.Identity.IdentityUserLogin`1",
+        "Microsoft.AspNetCore.Identity.IdentityRoleClaim`1",
+        "Microsoft.AspNetCore.Identity.IdentityUserToken`1",
 
+        // Entidades que NÃO devem sofrer filtro multi-empresa
+        "WebApiSmartClinic.Models.EmpresaModel",
+        "WebApiSmartClinic.Models.UsuarioEmpresaModel",
+        // Adicione aqui catálogos “globais do tenant”, se existirem (ex.: TipoPagamentoModel global)
+    };
+
+    private static bool DeveIgnorar(IMutableEntityType et)
+    {
+        var t = et.ClrType;
+        if (_tiposIgnorados.Contains(t.FullName!)) return true;
+
+        var nomeTabela = et.GetTableName();
+        if (!string.IsNullOrEmpty(nomeTabela) && nomeTabela.StartsWith("AspNet", StringComparison.OrdinalIgnoreCase))
+            return true;
+
+        return false;
+    }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
@@ -438,57 +472,126 @@ public class AppDbContext : IdentityDbContext<User>
             .Property(h => h.ValorPago)
             .HasPrecision(18, 2);
 
-        // Aplica filtro global para TODA entidade com EmpresaId
+        modelBuilder.Entity<ProfissionalModel>(e =>
+        {
+            e.HasIndex(p => p.UsuarioId).IsUnique();
+
+            // FK para AspNetUsers (User). OnDelete: Restrict para não apagar profissional ao remover usuário
+            e.HasOne(p => p.Usuario)
+             .WithMany() 
+             .HasForeignKey(p => p.UsuarioId)
+             .OnDelete(DeleteBehavior.Restrict);
+
+            e.Property(p => p.UsuarioId).HasMaxLength(450);
+        });
+
+        // Helper local: EF.Property<T>(e, "Nome")
+        static MethodCallExpression EfProp<T>(ParameterExpression e, string nome) =>
+            Expression.Call(typeof(EF), nameof(EF.Property), new[] { typeof(T) }, e, Expression.Constant(nome));
+
         foreach (var et in modelBuilder.Model.GetEntityTypes())
         {
-            if (typeof(IEntidadeEmpresa).IsAssignableFrom(et.ClrType))
-            {
-                var metodo = typeof(AppDbContext)
-                    .GetMethod(nameof(AplicarFiltroEmpresa), System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)!
-                    .MakeGenericMethod(et.ClrType);
+            if (DeveIgnorar(et)) continue;
 
-                metodo.Invoke(this, new object[] { modelBuilder });
+            var clr = et.ClrType;
+
+            // Só aplicamos em tipos multi-empresa
+            if (!typeof(IEntidadeEmpresa).IsAssignableFrom(clr))
+                continue;
+
+            // Param do lambda: (e) =>
+            var e = Expression.Parameter(clr, "e");
+            var thisDb = Expression.Constant(this);
+
+            // (VerTodasEmpresas || (EmpresaSelecionada != null && e.EmpresaId == EmpresaSelecionada.Value))
+            var verTodas = Expression.Property(thisDb, nameof(VerTodasEmpresas));
+            var empSel = Expression.Property(thisDb, nameof(EmpresaSelecionada));
+            var empSelNotNull = Expression.NotEqual(empSel, Expression.Constant(null, typeof(int?)));
+            var empresaIdEqSel = Expression.Equal(EfProp<int>(e, nameof(IEntidadeEmpresa.EmpresaId)),
+                                                  Expression.Property(empSel, "Value"));
+            var condEmpresa = Expression.OrElse(verTodas, Expression.AndAlso(empSelNotNull, empresaIdEqSel));
+
+            // && e.Ativo == true
+            var condAtivo = Expression.Equal(EfProp<bool>(e, nameof(IEntidadeEmpresa.Ativo)), Expression.Constant(true));
+
+            // Base: empresa + ativo
+            Expression condicao = Expression.AndAlso(condEmpresa, condAtivo);
+
+            // Se a entidade também é “do profissional”, aplica corte extra quando EhUser == true:
+            // && ( !EhUser || (ProfissionalAtualId != null && e.ProfissionalId == ProfissionalAtualId.Value) )
+            if (typeof(IEntidadeDoProfissional).IsAssignableFrom(clr))
+            {
+                var ehUser = Expression.Property(thisDb, nameof(EhUser));
+                var profSel = Expression.Property(thisDb, nameof(ProfissionalAtualId));
+                var profNotNull = Expression.NotEqual(profSel, Expression.Constant(null, typeof(int?)));
+                var profEq = Expression.Equal(EfProp<int>(e, nameof(IEntidadeDoProfissional.ProfissionalId)),
+                                                     Expression.Property(profSel, "Value"));
+                var condProf = Expression.OrElse(Expression.Not(ehUser), Expression.AndAlso(profNotNull, profEq));
+
+                condicao = Expression.AndAlso(condicao, condProf);
             }
+
+            // Lambda final: e => <condicao>
+            var lambda = Expression.Lambda(condicao, e);
+
+            // Aplica o filtro na entidade
+            modelBuilder.Entity(clr).HasQueryFilter(lambda);
         }
+
+
+        // Aplica filtro global para TODA entidade com EmpresaId
+        //foreach (var et in modelBuilder.Model.GetEntityTypes())
+        //{
+        //    if (typeof(IEntidadeEmpresa).IsAssignableFrom(et.ClrType))
+        //    {
+        //        var metodo = typeof(AppDbContext)
+        //            .GetMethod(nameof(AplicarFiltroEmpresa), System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)!
+        //            .MakeGenericMethod(et.ClrType);
+
+        //        metodo.Invoke(this, new object[] { modelBuilder });
+        //    }
+        //}
+
+
     }
 
-    public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
-    {
-        var agora = DateTime.UtcNow;
+    //public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+    //{
+    //    var agora = DateTime.UtcNow;
 
-        foreach (var entry in ChangeTracker.Entries<IEntidadeAuditavel>())
-        {
-            if (entry.State == EntityState.Added)
-            {
-                entry.Entity.DataCriacao = agora;
-                entry.Entity.UsuarioCriacaoId = UsuarioAtualId;
-                entry.Entity.Ativo = true;
-            }
-            else if (entry.State == EntityState.Modified)
-            {
-                entry.Entity.DataAlteracao = agora;
-                entry.Entity.UsuarioAlteracaoId = UsuarioAtualId;
-            }
-        }
+    //    foreach (var entry in ChangeTracker.Entries<IEntidadeAuditavel>())
+    //    {
+    //        if (entry.State == EntityState.Added)
+    //        {
+    //            entry.Entity.DataCriacao = agora;
+    //            entry.Entity.UsuarioCriacaoId = UsuarioAtualId;
+    //            entry.Entity.Ativo = true;
+    //        }
+    //        else if (entry.State == EntityState.Modified)
+    //        {
+    //            entry.Entity.DataAlteracao = agora;
+    //            entry.Entity.UsuarioAlteracaoId = UsuarioAtualId;
+    //        }
+    //    }
 
-        foreach (var entry in ChangeTracker.Entries<IEntidadeEmpresa>())
-        {
-            if (entry.State == EntityState.Added)
-            {
-                // Quem não pode ver todas grava na empresa selecionada
-                if (!VerTodasEmpresas && EmpresaSelecionada is not null)
-                    entry.Entity.EmpresaId = EmpresaSelecionada.Value;
-            }
+    //    foreach (var entry in ChangeTracker.Entries<IEntidadeEmpresa>())
+    //    {
+    //        if (entry.State == EntityState.Added)
+    //        {
+    //            // Quem não pode ver todas grava na empresa selecionada
+    //            if (!VerTodasEmpresas && EmpresaSelecionada is not null)
+    //                entry.Entity.EmpresaId = EmpresaSelecionada.Value;
+    //        }
 
-            // Protege contra troca indevida de EmpresaId em updates
-            if (entry.State == EntityState.Modified)
-            {
-                entry.Property(x => x.EmpresaId).IsModified = false;
-            }
-        }
+    //        // Protege contra troca indevida de EmpresaId em updates
+    //        if (entry.State == EntityState.Modified)
+    //        {
+    //            entry.Property(x => x.EmpresaId).IsModified = false;
+    //        }
+    //    }
 
-        return await base.SaveChangesAsync(cancellationToken);
-    }
+    //    return await base.SaveChangesAsync(cancellationToken);
+    //}
 
     private void AplicarFiltroEmpresa<T>(ModelBuilder modelBuilder) where T : class, IEntidadeEmpresa
     {

@@ -2,7 +2,7 @@
 
 namespace WebApiSmartClinic.Models;
 
-public class ComissaoCalculadaModel : IEntidadeEmpresa, IEntidadeAuditavel
+public class ComissaoCalculadaModel : IEntidadeEmpresa, IEntidadeAuditavel, IEntidadeDoProfissional
 {
     public int Id { get; set; }
     public int EmpresaId { get; set; }
@@ -22,7 +22,7 @@ public class ComissaoCalculadaModel : IEntidadeEmpresa, IEntidadeAuditavel
     }
     public bool Ativo { get; set; }
     // Foreign Key para Profissional
-    public int ProfissionalId { get; set; }
+    public int? ProfissionalId { get; set; }
     public virtual ProfissionalModel Profissional { get; set; }
 
     // Foreign Key para Agendamento (sessão realizada)

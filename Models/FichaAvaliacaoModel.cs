@@ -5,7 +5,7 @@ using WebApiSmartClinic.Models.Abstractions;
 namespace WebApiSmartClinic.Models;
 
 
-public class FichaAvaliacaoModel : IEntidadeEmpresa, IEntidadeAuditavel
+public class FichaAvaliacaoModel : IEntidadeEmpresa, IEntidadeAuditavel, IEntidadeDoProfissional
 {
     public int Id { get; set; }
     public int EmpresaId { get; set; }

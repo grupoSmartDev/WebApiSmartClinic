@@ -28,7 +28,7 @@ public class EmpresaPermissaoService : IEmpresaPermissaoInterface
 
         var roles = await _userManager.GetRolesAsync(user);
         // Admin e Support podem enxergar TODAS as empresas do tenant
-        return roles.Contains(Perfis.Admin) || roles.Contains(Perfis.Support);
+        return roles.Contains(Perfis.Admin);
     }
 
     public async Task<bool> UsuarioTemAcessoEmpresaAsync(string? usuarioId, int empresaId)

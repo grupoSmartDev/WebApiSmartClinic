@@ -6,7 +6,7 @@ using WebApiSmartClinic.Models.Abstractions;
 
 namespace WebApiSmartClinic.Models
 {
-    public class AgendaModel : IEntidadeEmpresa, IEntidadeAuditavel
+    public class AgendaModel : IEntidadeEmpresa, IEntidadeAuditavel, IEntidadeDoProfissional
     {
         public int Id { get; set; }
         public string Titulo { get; set; }

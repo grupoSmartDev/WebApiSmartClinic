@@ -41,7 +41,7 @@ public class DespesaFixaCreateDto
     }
 
 
-    public bool? Ativo { get; set; } = true;
+    public bool Ativo { get; set; } = true;
 
  
     [Required]

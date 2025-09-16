@@ -1,9 +1,27 @@
 
+using WebApiSmartClinic.Models.Abstractions;
+
 namespace WebApiSmartClinic.Models;
 
-public class ProfissionalModel
+public class ProfissionalModel : IEntidadeEmpresa, IEntidadeAuditavel
 {
     public int Id { get; set; }
+    public int EmpresaId { get; set; }
+    public string? UsuarioCriacaoId { get; set; }
+    private DateTime _DataCriacao = DateTime.UtcNow;
+    public DateTime DataCriacao
+    {
+        get => _DataCriacao.ToLocalTime();
+        set => _DataCriacao = DateTime.SpecifyKind(value.ToUniversalTime(), DateTimeKind.Utc);
+    }
+    public string? UsuarioAlteracaoId { get; set; }
+    private DateTime? _DataAlteracao;
+    public DateTime? DataAlteracao
+    {
+        get => _DataAlteracao?.ToLocalTime();
+        set => _DataAlteracao = value.HasValue ? DateTime.SpecifyKind(value.Value.ToUniversalTime(), DateTimeKind.Utc) : null;
+    }
+    public bool Ativo { get; set; }
     public string Email { get; set; }
     public string Nome { get; set; }
     public string? Sobrenome { get; set; }
@@ -40,7 +58,7 @@ public class ProfissionalModel
         get => _DataCadastro;
         set => _DataCadastro = value.HasValue ? DateTime.SpecifyKind(value.Value, DateTimeKind.Utc) : DateTime.UtcNow;
     }
-    public bool Ativo { get; set; } = true; // Por padrão ativo
+    // public bool Ativo { get; set; } = true; // Por padrão ativo
 
     public virtual ICollection<AgendaModel> Agendamentos { get; set; } = new List<AgendaModel>();
     public virtual ICollection<ComissaoCalculadaModel> ComissoesCalculadas { get; set; } = new List<ComissaoCalculadaModel>();

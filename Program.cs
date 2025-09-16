@@ -1,6 +1,5 @@
 using Microsoft.EntityFrameworkCore;
 using WebApiSmartClinic.Data;
-using WebApiSmartClinic.Services.Autor;
 using WebApiSmartClinic.Services.CentroCusto;
 using WebApiSmartClinic.Services.Convenio;
 using WebApiSmartClinic.Services.FormaPagamento;
@@ -51,6 +50,8 @@ using WebApiSmartClinic.Services.MailService;
 using WebApiSmartClinic.Services.StripeService;
 using WebApiSmartClinic.Services.Asaas;
 using WebApiSmartClinic.Services;
+using WebApiSmartClinic.Services.EmpresaPermissao;
+using Microsoft.AspNetCore.Diagnostics;
 
 var builder = WebApplication.CreateBuilder(args);
 var services = builder.Services;
@@ -61,18 +62,15 @@ var appSettingsSection = config.GetSection("AppSettings");
 services.Configure<AppSettings>(appSettingsSection);
 var appSettings = appSettingsSection.Get<AppSettings>();
 var key = Encoding.UTF8.GetBytes(appSettings.JwtSecretKey);
-
+services.AddProblemDetails();
 // Middleware de conexão por tenant
 services.AddSingleton<IConnectionStringProvider, ConnectionStringProvider>();
-
-
 
 // DbContexts
 services.AddDbContext<DataConnectionContext>(options =>
     options.UseNpgsql(config.GetConnectionString("ConnectionsContext")));
 
 builder.Services.AddDbContext<AppDbContext>();
-
 
 // Identity
 services.AddIdentity<User, IdentityRole>(options =>
@@ -129,6 +127,7 @@ services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new OpenApiInfo { Title = "WebApiSmartClinic", Version = "v1" });
     c.EnableAnnotations();
+    
     c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
         Name = "Authorization",
@@ -138,9 +137,22 @@ services.AddSwaggerGen(c =>
         In = ParameterLocation.Header,
         Description = "Digite 'Bearer' [espaço] e então seu token JWT."
     });
+
     c.AddSecurityRequirement(new OpenApiSecurityRequirement {
-        { new OpenApiSecurityScheme { Reference = new OpenApiReference { Type = ReferenceType.SecurityScheme, Id = "Bearer" } }, new string[] {} }
+        { 
+            new OpenApiSecurityScheme 
+            {
+                Reference = new OpenApiReference 
+                {
+                    Type = ReferenceType.SecurityScheme, 
+                    Id = "Bearer" 
+                } 
+            },
+            new string[] {} 
+        }
     });
+
+    c.OperationFilter<EmpresaHeaderOperationFilter>();
 });
 
 // Outros serviços (ex: CadastroClienteService, AuthService etc)
@@ -150,7 +162,6 @@ services.AddScoped<ICadastroClienteInterface, CadastroClienteService>();
 services.AddScoped<IConnectionsService, ConnectionsService>();
 
 // Vincular interface com os servicos
-services.AddScoped<IAutorInterface, AutorService>();
 services.AddScoped<ISalaInterface, SalaService>();
 services.AddScoped<ITipoPagamentoInterface, TipoPagamentoService>();
 services.AddScoped<IFornecedorInterface, FornecedorService>();
@@ -187,6 +198,7 @@ services.AddScoped<IConnectionsRepository, ConnectionsRepository>();
 services.AddScoped<IComissaoService, WebApiSmartClinic.Services.ComissaoService>();
 builder.Services.AddScoped<IStripeService, StripeService>();
 services.AddScoped<AgendaService>();
+services.AddScoped<IEmpresaPermissaoInterface, EmpresaPermissaoService>();
 
 
 builder.Services.AddHttpClient<IAsaasService, AsaasService>();
@@ -209,7 +221,18 @@ services.AddCors(options =>
 });
 
 var app = builder.Build();
-
+app.UseExceptionHandler("/error");
+app.UseExceptionHandler(exceptionApp =>
+{
+    exceptionApp.Run(async ctx =>
+    {
+        var ex = ctx.Features.Get<IExceptionHandlerFeature>()?.Error;
+        var problem = Results.Problem(
+            detail: ex?.Message,
+            statusCode: StatusCodes.Status500InternalServerError);
+        await problem.ExecuteAsync(ctx);
+    });
+});
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -220,245 +243,16 @@ app.UseHttpsRedirection();
 app.UseCors("AllowFrontend");
 app.UseRouting();
 
-//  Middleware de tenant (deve vir antes do auth)
-app.UseMiddleware<TenantMiddleware>();
 
 app.UseAuthentication();
+//  Middleware de tenant (deve vir antes do auth)
+app.UseMiddleware<TenantMiddleware>();
 app.UseAuthorization();
 
-app.UseMiddleware<ErrorHandlerMiddleware>();
+//app.UseMiddleware<ErrorHandlerMiddleware>();
 app.UseMiddleware<ConnectionStringMiddleware>();
+app.UseMiddleware<EmpresaContextoMiddleware>();
 
 app.MapControllers();
 
 app.Run();
-
-//var builder = WebApplication.CreateBuilder(args);
-
-//// add services to DI container
-//{
-//    var services = builder.Services;
-//    var env = builder.Environment;
-
-//    // Adiciona o contexto do Entity Framework Core
-//    builder.Services.AddDbContext<DataConnectionContext>(options =>
-//        options.UseNpgsql(builder.Configuration.GetConnectionString("ConnectionsContext")));
-
-//    builder.Services.AddDbContext<AppDbContext>((serviceProvider, options) =>
-//    {
-//        var connectionStringProvider = serviceProvider.GetRequiredService<IConnectionStringProvider>();
-//        var connectionString = connectionStringProvider.GetConnectionString() ?? builder.Configuration.GetConnectionString("DefaultContext");
-//        options.UseNpgsql(connectionString);
-//    });
-
-//    services.AddIdentity<User, IdentityRole>(options => options.SignIn.RequireConfirmedAccount = true)
-//    .AddEntityFrameworkStores<AppDbContext>()
-//    .AddEntityFrameworkStores<DataConnectionContext>()
-//    .AddDefaultTokenProviders();
-
-//    services.AddCors();
-//    services.AddControllers().AddJsonOptions(x =>
-//    {
-//        // serialize enums as strings in api responses (e.g. Role)
-//        x.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
-
-//        // ignore omitted parameters on models to enable optional params (e.g. User update)
-//        x.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
-
-//        x.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
-//        x.JsonSerializerOptions.WriteIndented = true;
-
-//    });
-
-//    services.AddAuthorization(options =>
-//    {
-//        options.FallbackPolicy = new AuthorizationPolicyBuilder()
-//            .RequireAssertion(context =>
-//            {
-//                // Recupera o endpoint atual (só funciona em .NET 5+ com endpoint routing)
-//                var endpoint = context.Resource as Microsoft.AspNetCore.Http.Endpoint;
-
-//                // Verifica se existe algum atributo [AllowAnonymous]
-//                var allowAnonymous = endpoint?.Metadata?.GetMetadata<IAllowAnonymous>() != null;
-
-//                // Se tiver [AllowAnonymous], libera
-//                if (allowAnonymous) return true;
-
-//                // Senão, exige que esteja autenticado
-//                return context.User.Identity?.IsAuthenticated == true;
-//            })
-//            .Build();
-//    });
-
-//    services.Configure<ConnectionStringConfig>(builder.Configuration);
-//    services.Configure<RequestLocalizationOptions>(options =>
-//    {
-//        var supportedCultures = new[]
-//        {
-//        new CultureInfo("pt-BR"),
-//    };
-
-//        options.DefaultRequestCulture = new RequestCulture("pt-BR");
-//        options.SupportedCultures = supportedCultures;
-//        options.SupportedUICultures = supportedCultures;
-//    });
-
-//    // Configure JWT Authentication
-//    // Configuração JWT
-//    var appSettingsSection = builder.Configuration.GetSection("AppSettings");
-//    builder.Services.Configure<AppSettings>(appSettingsSection);
-//    var appSettings = appSettingsSection.Get<AppSettings>();
-
-//    var key = Encoding.UTF8.GetBytes(appSettings.JwtSecretKey);
-//    builder.Services.AddAuthentication(x =>
-//    {
-//        x.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-//        x.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-//    })
-//    .AddJwtBearer(x =>
-//    {
-//        x.RequireHttpsMetadata = false;
-//        x.SaveToken = true;
-//        x.TokenValidationParameters = new TokenValidationParameters
-//        {
-//            ValidateIssuerSigningKey = true,
-//            IssuerSigningKey = new SymmetricSecurityKey(key),
-//            ValidateIssuer = true,
-//            ValidateAudience = true,
-//            ValidIssuer = appSettings.JwtIssuer,
-//            ValidAudience = appSettings.JwtAudience,
-//            ValidateLifetime = true,
-//            ClockSkew = TimeSpan.Zero
-//        };
-//    });
-
-//    // Vincular interface com os servicos
-//    builder.Services.AddScoped<IAutorInterface, AutorService>();
-//    builder.Services.AddScoped<ISalaInterface, SalaService>();
-//    builder.Services.AddScoped<ITipoPagamentoInterface, TipoPagamentoService>();
-//    builder.Services.AddScoped<IFornecedorInterface, FornecedorService>();
-//    builder.Services.AddScoped<IFormaPagamentoInterface, FormaPagamentoService>();
-//    builder.Services.AddScoped<ICentroCustoInterface, CentroCustoService>();
-//    builder.Services.AddScoped<ISubCentroCustoInterface, SubCentroCustoService>();
-//    builder.Services.AddScoped<IStatusInterface, StatusService>();
-//    builder.Services.AddScoped<IPacienteInterface, PacienteService>();
-//    builder.Services.AddScoped<IConvenioInterface, ConvenioService>();
-//    builder.Services.AddScoped<IBancoInterface, BancoService>();
-//    builder.Services.AddScoped<IConselhoInterface, ConselhoService>();
-//    builder.Services.AddScoped<IProcedimentoInterface, ProcedimentoService>();
-//    builder.Services.AddScoped<IBoletoInterface, BoletoService>();
-//    builder.Services.AddScoped<ICategoriaInterface, CategoriaService>();
-//    builder.Services.AddScoped<IFinanc_PagarInterface, Financ_PagarService>();
-//    builder.Services.AddScoped<IFinanc_ReceberInterface, Financ_ReceberService>();
-//    builder.Services.AddScoped<IHistoricoTransacaoInterface, HistoricoTransacaoService>();
-//    builder.Services.AddScoped<IComissaoInterface, ComissaoService>();
-//    builder.Services.AddScoped<IPlanoInterface, PlanoService>();
-//    builder.Services.AddScoped<IAgendaInterface, AgendaService>();
-//    builder.Services.AddScoped<IProfissionalInterface, ProfissionalService>();
-//    builder.Services.AddScoped<ILogUsuarioInterface, LogUsuarioService>();
-//    builder.Services.AddScoped<IExercicioInterface, ExercicioService>();
-//    builder.Services.AddScoped<IAtividadeInterface, AtividadeService>();
-//    builder.Services.AddScoped<IEvolucaoInterface, EvolucaoService>();
-//    builder.Services.AddScoped<IProfissaoInterface, ProfissaoService>();
-//    builder.Services.AddScoped<IFichaAvaliacaoInterface, FichaAvaliacaoService>();
-//    builder.Services.AddScoped<IPlanoContaInterface, PlanoContaService>();
-//    builder.Services.AddScoped<IDespesaFixaInterface, DespesaFixaService>();
-//    builder.Services.AddScoped<ICadastroClienteInterface, CadastroClienteService>();
-
-//    //builder.Services.AddScoped<IConnectionStringProvider, ConnectionStringProvider>();
-//    builder.Services.AddSingleton<IConnectionStringProvider, ConnectionStringProvider>();
-
-//    builder.Services.AddScoped<AgendaService>();
-//    builder.Services.AddScoped<AuthService>();
-//    builder.Services.AddScoped<IAuthInterface, AuthService>();
-
-
-//    builder.Services.AddScoped<IConnectionsRepository, ConnectionsRepository>();
-//    // Registrar IConnectionsRepository e ConnectionsRepository
-//    builder.Services.AddScoped<IConnectionsRepository, ConnectionsRepository>();
-
-//    // Registrar IConnectionsService e ConnectionsService
-//    builder.Services.AddScoped<IConnectionsService, ConnectionsService>();
-//}
-
-//builder.Services.AddCors(options =>
-//{
-//    options.AddPolicy("AllowFrontend", policy =>
-//    {
-//        policy.WithOrigins("http://localhost:4200", "https://smart-clinic-angular-it7o.vercel.app", "https://smart-clinic-angular-tsxt.vercel.app", "https://viacep.com.br/ws/")
-//              .AllowAnyMethod()
-//              .AllowAnyHeader()
-//              .WithExposedHeaders("Authorization")
-//              .AllowCredentials();
-//    });
-//});
-
-//// Na configuração do app
-//// IMPORTANTE: Colocar ANTES 
-
-//// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-//builder.Services.AddEndpointsApiExplorer();
-//builder.Services.AddSwaggerGen(c =>
-//{
-//    c.SwaggerDoc("v1", new OpenApiInfo { Title = "WebApiSmartClinic", Version = "v1" });
-//    c.EnableAnnotations(); // Habilita as anotações do Swagger
-
-//    c.OperationFilter<AddRequiredHeaderParameter>();
-//    // JWT Bearer Authentication configuration
-//    c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
-//    {
-//        Name = "Authorization",
-//        Type = SecuritySchemeType.ApiKey,
-//        Scheme = "bearer",
-//        BearerFormat = "JWT",
-//        In = ParameterLocation.Header,
-//        Description = "Digite 'Bearer' [espaço] e então seu token JWT."
-//    });
-
-//    c.AddSecurityRequirement(new OpenApiSecurityRequirement
-//    {
-//        {
-//            new OpenApiSecurityScheme
-//            {
-//                Reference = new OpenApiReference
-//                {
-//                    Type = ReferenceType.SecurityScheme,
-//                    Id = "Bearer"
-//                }
-//            },
-//            Array.Empty<string>()
-//        }
-//    });
-
-//    //c.OperationFilter<AllowAnonymousOperationFilter>();
-//});
-
-
-//builder.Services.AddHttpClient();
-
-//var app = builder.Build();
-
-//if (app.Environment.IsDevelopment())
-//{
-//    app.UseSwagger();
-//    app.UseSwaggerUI();
-//}
-
-//app.UseHttpsRedirection();
-
-//// CORS antes da autenticação
-//app.UseCors("AllowFrontend");
-
-//app.UseRouting();
-
-//// Autenticação antes da autorização
-//app.UseAuthentication();
-//app.UseAuthorization();
-
-//// Seus middlewares personalizados depois
-//app.UseMiddleware<ErrorHandlerMiddleware>();
-//app.UseMiddleware<ConnectionStringMiddleware>();
-
-//app.MapControllers();
-
-//app.Run();

@@ -1,21 +1,9 @@
 
-using WebApiSmartClinic.Models.Abstractions;
-
 namespace WebApiSmartClinic.Models;
 
-public class FornecedorModel : IEntidadeEmpresa, IEntidadeAuditavel
+public class FornecedorModel
 {
     public int Id { get; set; }
-    public int EmpresaId { get; set; }
-    public string? UsuarioCriacaoId { get; set; }
-    private DateTime _DataCriacao = DateTime.UtcNow;
-    public DateTime DataCriacao
-    {
-        get => _DataCriacao.ToLocalTime();
-        set => _DataCriacao = DateTime.SpecifyKind(value.ToUniversalTime(), DateTimeKind.Utc);
-    }
-    public string? UsuarioAlteracaoId { get; set; }
-    //public bool Ativo { get; set; }
     public string? Razao { get; set; }
     public string? Fantasia { get; set; }
     public string? Tipo { get; set; }

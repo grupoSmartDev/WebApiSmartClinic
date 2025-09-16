@@ -5,7 +5,6 @@ using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using WebApiSmartClinic.Helpers;
 using Microsoft.Extensions.Options;
 using WebApiSmartClinic.Dto.User;
-using WebApiSmartClinic.Models.Abstractions;
 
 namespace WebApiSmartClinic.Data;
 
@@ -20,14 +19,8 @@ public class AppDbContext : IdentityDbContext<User>
         _connectionStringConfig = connectionStringConfig.Value;
         _connectionStringProvider = connectionStringProvider;
     }
-
-    // Contexto por requisição (preenchido pelo middleware)
-    public int? EmpresaSelecionada { get; set; }
-    public bool VerTodasEmpresas { get; set; }
-    public string? UsuarioAtualId { get; set; }
-
-    //public DbSet<AutorModel> Autores { get; set; }
-    //public DbSet<LivroModel> Livros { get; set; }
+    public DbSet<AutorModel> Autores { get; set; }
+    public DbSet<LivroModel> Livros { get; set; }
     public DbSet<StatusModel> Status { get; set; }
     public DbSet<TipoPagamentoModel> TipoPagamento { get; set; }
     public DbSet<FormaPagamentoModel> FormaPagamento { get; set; }
@@ -59,14 +52,14 @@ public class AppDbContext : IdentityDbContext<User>
     public DbSet<EvolucaoModel> Evolucoes { get; set; }
     public DbSet<ProfissaoModel> Profissao { get; set; }
     public DbSet<FichaAvaliacaoModel> FichaAvaliacao { get; set; }
-    // public DbSet<EmpresaModel> Empresa { get; set; }
+   // public DbSet<EmpresaModel> Empresa { get; set; }
     public DbSet<PlanoContaModel> PlanoConta { get; set; }
     public DbSet<PlanoContaSubModel> PlanoContaSub { get; set; }
     public DbSet<User> Users { get; set; }
     public DbSet<RecorrenciaPacienteModel> RecorrenciaPaciente { get; set; }
     public DbSet<EmpresaModel> Empresas { get; set; }
     public DbSet<DespesaFixaModel> Despesas { get; set; }
-    public DbSet<UsuarioEmpresaModel> UsuarioEmpresas { get; set; }
+
     public DbSet<FilialModel> Filiais { get; set; }
     public DbSet<SubscriptionModel> SubsCricao{ get; set; }
     public DbSet<PaymentModel> Pagamentos{ get; set; }
@@ -287,7 +280,7 @@ public class AppDbContext : IdentityDbContext<User>
         {
             entity.ToTable("Financ_PagarSub");
 
-            // Relacionamento com o cabeçalho continua
+          // Relacionamento com o cabeçalho continua
             entity.HasOne(s => s.FinancPagar)
                 .WithMany(f => f.subFinancPagar)
                 .HasForeignKey(s => s.financPagarId);
@@ -368,10 +361,10 @@ public class AppDbContext : IdentityDbContext<User>
         });
 
         modelBuilder.Entity<Financ_PagarModel>()
-            .HasOne(f => f.DespesaFixa)
-            .WithMany(d => d.FinancPagar)
-            .HasForeignKey(f => f.DespesaFixaId)
-            .OnDelete(DeleteBehavior.Cascade);
+        .HasOne(f => f.DespesaFixa)
+        .WithMany(d => d.FinancPagar)
+        .HasForeignKey(f => f.DespesaFixaId)
+        .OnDelete(DeleteBehavior.Cascade);
 
         // Configuração do relacionamento Sala -> Agenda (1:N)
         modelBuilder.Entity<AgendaModel>()
@@ -381,10 +374,10 @@ public class AppDbContext : IdentityDbContext<User>
             .OnDelete(DeleteBehavior.Restrict); // Impede delete em cascata
 
         modelBuilder.Entity<AgendaModel>()
-          .HasOne(a => a.Paciente)
-          .WithMany(p => p.Agendamentos)
-          .HasForeignKey(a => a.PacienteId)
-          .OnDelete(DeleteBehavior.Restrict);
+      .HasOne(a => a.Paciente)
+      .WithMany(p => p.Agendamentos)
+      .HasForeignKey(a => a.PacienteId)
+      .OnDelete(DeleteBehavior.Restrict);
 
         // Relacionamento Agenda -> Profissional
         modelBuilder.Entity<AgendaModel>()
@@ -437,62 +430,5 @@ public class AppDbContext : IdentityDbContext<User>
         modelBuilder.Entity<PacientePlanoHistoricoModel>()
             .Property(h => h.ValorPago)
             .HasPrecision(18, 2);
-
-        // Aplica filtro global para TODA entidade com EmpresaId
-        foreach (var et in modelBuilder.Model.GetEntityTypes())
-        {
-            if (typeof(IEntidadeEmpresa).IsAssignableFrom(et.ClrType))
-            {
-                var metodo = typeof(AppDbContext)
-                    .GetMethod(nameof(AplicarFiltroEmpresa), System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)!
-                    .MakeGenericMethod(et.ClrType);
-
-                metodo.Invoke(this, new object[] { modelBuilder });
-            }
-        }
-    }
-
-    public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
-    {
-        var agora = DateTime.UtcNow;
-
-        foreach (var entry in ChangeTracker.Entries<IEntidadeAuditavel>())
-        {
-            if (entry.State == EntityState.Added)
-            {
-                entry.Entity.DataCriacao = agora;
-                entry.Entity.UsuarioCriacaoId = UsuarioAtualId;
-                entry.Entity.Ativo = true;
-            }
-            else if (entry.State == EntityState.Modified)
-            {
-                entry.Entity.DataAlteracao = agora;
-                entry.Entity.UsuarioAlteracaoId = UsuarioAtualId;
-            }
-        }
-
-        foreach (var entry in ChangeTracker.Entries<IEntidadeEmpresa>())
-        {
-            if (entry.State == EntityState.Added)
-            {
-                // Quem não pode ver todas grava na empresa selecionada
-                if (!VerTodasEmpresas && EmpresaSelecionada is not null)
-                    entry.Entity.EmpresaId = EmpresaSelecionada.Value;
-            }
-
-            // Protege contra troca indevida de EmpresaId em updates
-            if (entry.State == EntityState.Modified)
-            {
-                entry.Property(x => x.EmpresaId).IsModified = false;
-            }
-        }
-
-        return await base.SaveChangesAsync(cancellationToken);
-    }
-
-    private void AplicarFiltroEmpresa<T>(ModelBuilder modelBuilder) where T : class, IEntidadeEmpresa
-    {
-        modelBuilder.Entity<T>().HasQueryFilter(e =>
-            VerTodasEmpresas || (EmpresaSelecionada != null && e.EmpresaId == EmpresaSelecionada));
     }
 }

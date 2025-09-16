@@ -1,11 +1,28 @@
 
 using System.Text.Json.Serialization;
+using WebApiSmartClinic.Models.Abstractions;
 
 namespace WebApiSmartClinic.Models
 {
-    public class Financ_ReceberModel
+    public class Financ_ReceberModel : IEntidadeEmpresa, IEntidadeAuditavel
     {
         public int Id { get; set; }
+        public int EmpresaId { get; set; }
+        public string? UsuarioCriacaoId { get; set; }
+        private DateTime _DataCriacao = DateTime.UtcNow;
+        public DateTime DataCriacao
+        {
+            get => _DataCriacao.ToLocalTime();
+            set => _DataCriacao = DateTime.SpecifyKind(value.ToUniversalTime(), DateTimeKind.Utc);
+        }
+        public string? UsuarioAlteracaoId { get; set; }
+        private DateTime? _DataAlteracao;
+        public DateTime? DataAlteracao
+        {
+            get => _DataAlteracao?.ToLocalTime();
+            set => _DataAlteracao = value.HasValue ? DateTime.SpecifyKind(value.Value.ToUniversalTime(), DateTimeKind.Utc) : null;
+        }
+        public bool Ativo { get; set; }
         public int? IdOrigem { get; set; } = 0;
         public int? NrDocto { get; set; }
         private DateTime? _DataEmissao;
@@ -45,7 +62,6 @@ namespace WebApiSmartClinic.Models
         public TipoPagamentoModel? TipoPagamento { get; set; }
 
         public ICollection<Financ_ReceberSubModel>? subFinancReceber { get; set; } = new List<Financ_ReceberSubModel>();
-
     }
 
     public class Financ_ReceberSubModel

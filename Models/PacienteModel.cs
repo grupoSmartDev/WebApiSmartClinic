@@ -1,12 +1,30 @@
 using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
 using WebApiSmartClinic.Dto.Paciente;
+using WebApiSmartClinic.Models.Abstractions;
+using WebApiSmartClinic.Services.EmpresaPermissao;
 
 namespace WebApiSmartClinic.Models
 {
-    public class PacienteModel
+    public class PacienteModel : IEntidadeEmpresa, IEntidadeAuditavel
     {
         public int Id { get; set; }
+        public int EmpresaId { get; set; }
+        public string? UsuarioCriacaoId { get; set; }
+        private DateTime _DataCriacao = DateTime.UtcNow;
+        public DateTime DataCriacao
+        {
+            get => _DataCriacao.ToLocalTime();
+            set => _DataCriacao = DateTime.SpecifyKind(value.ToUniversalTime(), DateTimeKind.Utc);
+        }
+        public string? UsuarioAlteracaoId { get; set; }
+        private DateTime? _DataAlteracao;
+        public DateTime? DataAlteracao
+        {
+            get => _DataAlteracao?.ToLocalTime();
+            set => _DataAlteracao = value.HasValue ? DateTime.SpecifyKind(value.Value.ToUniversalTime(), DateTimeKind.Utc) : null;
+        }
+        public bool Ativo { get; set; }
         public string? Bairro { get; set; }
         public string? BreveDiagnostico { get; set; }
         public string? Celular { get; set; }
@@ -83,13 +101,13 @@ namespace WebApiSmartClinic.Models
             Evolucoes = new List<EvolucaoModel>();
            // Plano = new PlanoModel();
         }
-        public bool Ativo { get; set; } = true;
-        private DateTime? _DataAlteracao;
-        public DateTime? DataAlteracao
-        {
-            get => _DataAlteracao;
-            set => _DataAlteracao = value.HasValue ? DateTime.SpecifyKind(value.Value, DateTimeKind.Utc) : null;
-        }
+        //public bool Ativo { get; set; } = true;
+        //private DateTime? _DataAlteracao;
+        //public DateTime? DataAlteracao
+        //{
+        //    get => _DataAlteracao;
+        //    set => _DataAlteracao = value.HasValue ? DateTime.SpecifyKind(value.Value, DateTimeKind.Utc) : null;
+        //}
 
         public int? FichaAvaliacaoId { get; set; }
         public FichaAvaliacaoModel? FichaAvaliacao { get; set; }

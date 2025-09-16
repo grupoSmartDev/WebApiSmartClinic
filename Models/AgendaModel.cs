@@ -2,24 +2,32 @@
 using System.ComponentModel.DataAnnotations;
 using System.Drawing;
 using System.Globalization;
+using WebApiSmartClinic.Models.Abstractions;
 
 namespace WebApiSmartClinic.Models
 {
-    public class AgendaModel
+    public class AgendaModel : IEntidadeEmpresa, IEntidadeAuditavel
     {
         public int Id { get; set; }
-
         public string Titulo { get; set; }
+        public int EmpresaId { get; set; }
+        public string? UsuarioCriacaoId { get; set; }
+        private DateTime _DataCriacao = DateTime.UtcNow;
+        public DateTime DataCriacao
+        {
+            get => _DataCriacao.ToLocalTime();
+            set => _DataCriacao = DateTime.SpecifyKind(value.ToUniversalTime(), DateTimeKind.Utc);
+        }
+        public string? UsuarioAlteracaoId { get; set; }
+        private DateTime? _DataAlteracao;
+        public DateTime? DataAlteracao
+        {
+            get => _DataAlteracao?.ToLocalTime();
+            set => _DataAlteracao = value.HasValue ? DateTime.SpecifyKind(value.Value.ToUniversalTime(), DateTimeKind.Utc) : null;
+        }
+        public bool Ativo { get; set; }
 
 
-        //private DateTime? _Data;
-        //public DateTime? Data
-        //{
-        //    get => _Data?.ToLocalTime();
-        //    set => _Data = value.HasValue
-        //        ? DateTime.SpecifyKind(value.Value.ToUniversalTime(), DateTimeKind.Utc)
-        //        : null;
-        //}
         private DateTime? _Data;
         public DateTime? Data
         {
@@ -66,19 +74,19 @@ namespace WebApiSmartClinic.Models
 
         public virtual ComissaoCalculadaModel? ComissaoCalculada { get; set; }
 
-        public bool Ativo { get; set; } = true;
-        private DateTime? _DataAlteracao;
-        public DateTime? DataAlteracao
-        {
-            get => _DataAlteracao;
-            set => _DataAlteracao = value.HasValue ? DateTime.SpecifyKind(value.Value, DateTimeKind.Utc) : null;
-        }
+        //public bool Ativo { get; set; } = true;
+        //private DateTime? _DataAlteracao;
+        //public DateTime? DataAlteracao
+        //{
+        //    get => _DataAlteracao;
+        //    set => _DataAlteracao = value.HasValue ? DateTime.SpecifyKind(value.Value, DateTimeKind.Utc) : null;
+        //}
 
-        private DateTime _DataCriacao;
-        public DateTime DataCriacao
-        {
-            get => _DataCriacao;
-            set => _DataCriacao = DateTime.SpecifyKind(value, DateTimeKind.Utc);
-        } 
+        //private DateTime _DataCriacao;
+        //public DateTime DataCriacao
+        //{
+        //    get => _DataCriacao;
+        //    set => _DataCriacao = DateTime.SpecifyKind(value, DateTimeKind.Utc);
+        //} 
     }
 }

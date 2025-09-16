@@ -4,6 +4,11 @@ using WebApiSmartClinic.Models;
 
 namespace WebApiSmartClinic.Services.Paciente
 {
+    // Marca “entidades que pertencem a uma empresa”.
+    public interface IEntidadeEmpresa
+    {
+        int EmpresaId { get; set; }
+    }
     public interface IPacienteInterface
     {
         Task<ResponseModel<List<PacienteModel>>> Listar(int pageNumber = 1, int pageSize = 10, int? idFiltro = null, string? nomeFiltro = null, string? cpfFiltro = null, string? celularFiltro = null, bool paginar = true);

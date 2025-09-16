@@ -99,6 +99,8 @@ public class Financ_ReceberService : IFinanc_ReceberInterface
                 }
             }
 
+
+
             await _context.SaveChangesAsync();
             var query = _context.Financ_Receber
                 .Include(x => x.subFinancReceber)
@@ -252,9 +254,6 @@ public class Financ_ReceberService : IFinanc_ReceberInterface
                     (!vencimentoFim.HasValue || p.DataVencimento <= vencimentoFim)
                 ));
             }
-
-            //if (_context.VerTodasEmpresas && filtro.EmpresaId.HasValue)
-            //    query = query.Where(x => x.EmpresaId == filtro.EmpresaId.Value);
 
             query = query.OrderBy(x => x.Id);
 

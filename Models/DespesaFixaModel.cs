@@ -1,31 +1,14 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
 using WebApiSmartClinic.Dto.Financ_Pagar;
-using WebApiSmartClinic.Models.Abstractions;
 
 namespace WebApiSmartClinic.Models;
 
-public class DespesaFixaModel : IEntidadeEmpresa, IEntidadeAuditavel
+public class DespesaFixaModel
 {
 
     [Key]
     public int Id { get; set; }
-    public int EmpresaId { get; set; }
-    public string? UsuarioCriacaoId { get; set; }
-    private DateTime _DataCriacao = DateTime.UtcNow;
-    public DateTime DataCriacao
-    {
-        get => _DataCriacao.ToLocalTime();
-        set => _DataCriacao = DateTime.SpecifyKind(value.ToUniversalTime(), DateTimeKind.Utc);
-    }
-    public string? UsuarioAlteracaoId { get; set; }
-    private DateTime? _DataAlteracao;
-    public DateTime? DataAlteracao
-    {
-        get => _DataAlteracao?.ToLocalTime();
-        set => _DataAlteracao = value.HasValue ? DateTime.SpecifyKind(value.Value.ToUniversalTime(), DateTimeKind.Utc) : null;
-    }
-    public bool Ativo { get; set; }
 
     [Required]
     [StringLength(150)]
@@ -59,7 +42,7 @@ public class DespesaFixaModel : IEntidadeEmpresa, IEntidadeAuditavel
     }
 
 
-    //public bool? Ativo { get; set; } = true;
+    public bool? Ativo { get; set; } = true;
 
     [Required]
     public int Frequencia { get; set; } = 1;
@@ -84,6 +67,6 @@ public class DespesaFixaModel : IEntidadeEmpresa, IEntidadeAuditavel
     public int? FormaPagamentoId { get; set; }
 
     public FormaPagamentoModel? FormaPagamento { get; set; }
-    //public DateTime DataAlteracao { get; internal set; }
+    public DateTime DataAlteracao { get; internal set; }
 }
 

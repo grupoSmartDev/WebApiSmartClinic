@@ -78,9 +78,9 @@ public class EmpresaModel
     public ICollection<SubscriptionModel> Subscription { get; set; } = new List<SubscriptionModel>();
     public string DatabaseConnectionString { get; internal set; }
 
-    public string? AsaasCustomerId { get; set; } // ID do customer no Asaas
-    public string? AsaasSubscriptionId { get; set; } // ID da subscription no Asaas
-    public string? PeriodoCobranca { get; set; } // "monthly" ou "semiannual"
+    public string AsaasCustomerId { get; set; } // ID do customer no Asaas
+    public string AsaasSubscriptionId { get; set; } // ID da subscription no Asaas
+    public string PeriodoCobranca { get; set; } // "monthly" ou "semiannual"
     public decimal PrecoSelecionado { get; set; }
 
 }

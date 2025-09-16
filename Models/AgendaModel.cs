@@ -31,9 +31,9 @@ namespace WebApiSmartClinic.Models
         private DateTime? _Data;
         public DateTime? Data
         {
-            get => _Data?.ToLocalTime();
+            get => _Data;
             set => _Data = value.HasValue
-                ? DateTime.SpecifyKind(value.Value.ToUniversalTime(), DateTimeKind.Utc)
+                ? DateTime.SpecifyKind(value.Value, DateTimeKind.Unspecified)
                 : null;
         }
 

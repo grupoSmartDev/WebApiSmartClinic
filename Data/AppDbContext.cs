@@ -74,9 +74,9 @@ public class AppDbContext : IdentityDbContext<User>
     public DbSet<DespesaFixaModel> Despesas { get; set; }
     public DbSet<UsuarioEmpresaModel> UsuarioEmpresas { get; set; }
     public DbSet<FilialModel> Filiais { get; set; }
-    public DbSet<SubscriptionModel> SubsCricao{ get; set; }
-    public DbSet<PaymentModel> Pagamentos{ get; set; }
-    public DbSet<ComissaoCalculadaModel> Comissoes{ get; set; }
+    public DbSet<SubscriptionModel> SubsCricao { get; set; }
+    public DbSet<PaymentModel> Pagamentos { get; set; }
+    public DbSet<ComissaoCalculadaModel> Comissoes { get; set; }
     public DbSet<PacientePlanoHistoricoModel> PacientePlanoHistoricos { get; set; }
     // Tipos a ignorar no filtro global (Identity, agregadores globais, etc.)
     private static readonly HashSet<string> _tiposIgnorados = new(StringComparer.Ordinal)
@@ -478,7 +478,7 @@ public class AppDbContext : IdentityDbContext<User>
 
             // FK para AspNetUsers (User). OnDelete: Restrict para não apagar profissional ao remover usuário
             e.HasOne(p => p.Usuario)
-             .WithMany() 
+             .WithMany()
              .HasForeignKey(p => p.UsuarioId)
              .OnDelete(DeleteBehavior.Restrict);
 
@@ -517,19 +517,37 @@ public class AppDbContext : IdentityDbContext<User>
             // Base: empresa + ativo
             Expression condicao = Expression.AndAlso(condEmpresa, condAtivo);
 
-            // Se a entidade também é “do profissional”, aplica corte extra quando EhUser == true:
-            // && ( !EhUser || (ProfissionalAtualId != null && e.ProfissionalId == ProfissionalAtualId.Value) )
             if (typeof(IEntidadeDoProfissional).IsAssignableFrom(clr))
             {
                 var ehUser = Expression.Property(thisDb, nameof(EhUser));
-                var profSel = Expression.Property(thisDb, nameof(ProfissionalAtualId));
+                var profSel = Expression.Property(thisDb, nameof(ProfissionalAtualId)); // int?
                 var profNotNull = Expression.NotEqual(profSel, Expression.Constant(null, typeof(int?)));
-                var profEq = Expression.Equal(EfProp<int>(e, nameof(IEntidadeDoProfissional.ProfissionalId)),
-                                                     Expression.Property(profSel, "Value"));
+
+                // ATENÇÃO: usar int? aqui
+                var profProp = EfProp<int?>(e, nameof(IEntidadeDoProfissional.ProfissionalId));
+
+                // Comparar nullable com nullable (null == X => false, do jeito que queremos)
+                var profEq = Expression.Equal(profProp, profSel);
+
+                // (!EhUser) || (ProfissionalAtualId != null && e.ProfissionalId == ProfissionalAtualId)
                 var condProf = Expression.OrElse(Expression.Not(ehUser), Expression.AndAlso(profNotNull, profEq));
 
                 condicao = Expression.AndAlso(condicao, condProf);
             }
+
+            // Se a entidade também é “do profissional”, aplica corte extra quando EhUser == true:
+            // && ( !EhUser || (ProfissionalAtualId != null && e.ProfissionalId == ProfissionalAtualId.Value) )
+            //if (typeof(IEntidadeDoProfissional).IsAssignableFrom(clr))
+            //{
+            //    var ehUser = Expression.Property(thisDb, nameof(EhUser));
+            //    var profSel = Expression.Property(thisDb, nameof(ProfissionalAtualId));
+            //    var profNotNull = Expression.NotEqual(profSel, Expression.Constant(null, typeof(int?)));
+            //    var profEq = Expression.Equal(EfProp<int>(e, nameof(IEntidadeDoProfissional.ProfissionalId)),
+            //                                         Expression.Property(profSel, "Value"));
+            //    var condProf = Expression.OrElse(Expression.Not(ehUser), Expression.AndAlso(profNotNull, profEq));
+
+            //    condicao = Expression.AndAlso(condicao, condProf);
+            //}
 
             // Lambda final: e => <condicao>
             var lambda = Expression.Lambda(condicao, e);
@@ -537,6 +555,88 @@ public class AppDbContext : IdentityDbContext<User>
             // Aplica o filtro na entidade
             modelBuilder.Entity(clr).HasQueryFilter(lambda);
         }
+    }
+
+
+    public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+    {
+        var agora = DateTime.UtcNow;
+
+        foreach (var entry in ChangeTracker.Entries())
+        {
+            // Auditoria + Soft Delete
+            if (entry.Entity is IEntidadeAuditavel aud)
+            {
+                if (entry.State == EntityState.Added)
+                {
+                    aud.DataCriacao = agora;
+                    aud.UsuarioCriacaoId = UsuarioAtualId;
+
+                    // Em criação, mantenha registros visíveis por padrão
+                    if (entry.Entity is IEntidadeEmpresa emp && !emp.Ativo)
+                        emp.Ativo = true;
+                }
+                else if (entry.State == EntityState.Modified)
+                {
+                    aud.DataAlteracao = agora;
+                    aud.UsuarioAlteracaoId = UsuarioAtualId;
+                }
+                else if (entry.State == EntityState.Deleted)
+                {
+                    // Soft delete: marca inativo e converte para Modified
+                    entry.State = EntityState.Modified;
+                    aud.DataAlteracao = agora;
+                    aud.UsuarioAlteracaoId = UsuarioAtualId;
+
+                    if (entry.Entity is IEntidadeEmpresa emp)
+                        emp.Ativo = false;
+                }
+            }
+
+            // Regras multi-empresa
+            if (entry.Entity is IEntidadeEmpresa eemp)
+            {
+                if (entry.State == EntityState.Added)
+                {
+                    // Support/User: força EmpresaSelecionada
+                    if (!VerTodasEmpresas)
+                    {
+                        if (EmpresaSelecionada is null)
+                            throw new InvalidOperationException("Empresa selecionada não definida para criação.");
+                        eemp.EmpresaId = EmpresaSelecionada.Value;
+                    }
+                    // Admin: pode aceitar EmpresaId recebido (ou você pode validar aqui também)
+                }
+                else if (entry.State == EntityState.Modified)
+                {
+                    // Nunca permitir troca de empresa por update
+                    entry.Property(nameof(IEntidadeEmpresa.EmpresaId)).IsModified = false;
+                }
+            }
+
+            // Amarração por Profissional para perfil User
+            if (EhUser && entry.Entity is IEntidadeDoProfissional dono)
+            {
+                if (ProfissionalAtualId is null)
+                    throw new InvalidOperationException("Profissional do usuário não definido.");
+
+                if (entry.State == EntityState.Added)
+                {
+                    // Se vier vazio, amarra ao próprio
+                    if (!dono.ProfissionalId.HasValue || dono.ProfissionalId.Value == 0)
+                        dono.ProfissionalId = ProfissionalAtualId;
+                }
+                else if (entry.State == EntityState.Modified)
+                {
+                    // Não deixa trocar o dono
+                    entry.Property(nameof(IEntidadeDoProfissional.ProfissionalId)).IsModified = false;
+                }
+            }
+        }
+
+        return await base.SaveChangesAsync(cancellationToken);
+    }
+
 
 
         // Aplica filtro global para TODA entidade com EmpresaId
@@ -551,9 +651,6 @@ public class AppDbContext : IdentityDbContext<User>
         //        metodo.Invoke(this, new object[] { modelBuilder });
         //    }
         //}
-
-
-    }
 
     //public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     //{

@@ -27,7 +27,7 @@ namespace WebApiSmartClinic.Models
         }
         public bool Ativo { get; set; }
 
-
+     
         private DateTime? _Data;
         public DateTime? Data
         {

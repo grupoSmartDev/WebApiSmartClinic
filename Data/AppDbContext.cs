@@ -198,6 +198,10 @@ public class AppDbContext : IdentityDbContext<User>
             new PlanoContaModel { Id = 4, EmpresaId = 1, Nome = "Geral - Despesa", Tipo = "D", Codigo = "4", IsSystemDefault = true }
         );
 
+        modelBuilder.Entity<CategoriaModel>().HasData(
+          new CategoriaModel { Id = 1, Nome = "Geral", IsSystemDefault = true, Ativo = true }
+      );
+
         modelBuilder.Entity<PlanoModel>()
           .HasOne(p => p.Paciente)
           .WithOne(p => p.Plano)

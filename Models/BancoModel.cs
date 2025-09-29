@@ -33,11 +33,11 @@ namespace WebApiSmartClinic.Models
         //public bool Ativo { get; set; } = true; // Indica se a conta bancária está ativa ou desativada
 
         // Dados para homologação e emissão de boletos
-        public string CodigoConvenio { get; set; } // Código do Convênio fornecido pelo banco
-        public string Carteira { get; set; } // Carteira de Cobrança
-        public string VariacaoCarteira { get; set; } // Variação da Carteira (se aplicável)
-        public string CodigoBeneficiario { get; set; } // Código fornecido pelo banco para o beneficiário
-        public string NumeroContrato { get; set; } // Número do contrato com o banco para emissão de boletos
-        public string CodigoTransmissao { get; set; } // Código de transmissão para arquivos de remessa
+        public string? CodigoConvenio { get; set; } // Código do Convênio fornecido pelo banco
+        public string? Carteira { get; set; } // Carteira de Cobrança
+        public string? VariacaoCarteira { get; set; } // Variação da Carteira (se aplicável)
+        public string? CodigoBeneficiario { get; set; } // Código fornecido pelo banco para o beneficiário
+        public string? NumeroContrato { get; set; } // Número do contrato com o banco para emissão de boletos
+        public string? CodigoTransmissao { get; set; } // Código de transmissão para arquivos de remessa
     }
 }

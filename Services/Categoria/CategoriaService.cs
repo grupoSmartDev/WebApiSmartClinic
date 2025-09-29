@@ -70,29 +70,34 @@ public class CategoriaService : ICategoriaInterface
     public async Task<ResponseModel<List<CategoriaModel>>> Delete(int idCategoria, int pageNumber = 1, int pageSize = 10)
     {
         ResponseModel<List<CategoriaModel>> resposta = new ResponseModel<List<CategoriaModel>>();
-
         try
         {
             var categoria = await _context.Categoria.FirstOrDefaultAsync(x => x.Id == idCategoria);
             if (categoria == null)
             {
-                resposta.Mensagem = "Nenhum Categoria encontrado";
+                resposta.Mensagem = "Nenhuma Categoria encontrada";
                 return resposta;
             }
 
-            _context.Remove(categoria);
+            if (categoria.IsSystemDefault)
+            {
+                resposta.Mensagem = "Não é possível excluir uma categoria padrão do sistema";
+                resposta.Status = false;
+                return resposta;
+            }
+
+            // Soft Delete - apenas marca como inativo
+            categoria.Ativo = false;
+            _context.Update(categoria);
             await _context.SaveChangesAsync();
 
-            var query = _context.Categoria.AsQueryable();
-
+            var query = _context.Categoria.Where(x => x.Ativo).AsQueryable();
             resposta = await PaginationHelper.PaginateAsync(query, pageNumber, pageSize);
-            resposta.Mensagem = "Categoria Excluido com sucesso";
+            resposta.Mensagem = "Categoria excluída com sucesso";
             return resposta;
-
         }
         catch (Exception ex)
         {
-
             resposta.Mensagem = ex.Message;
             resposta.Status = false;
             return resposta;

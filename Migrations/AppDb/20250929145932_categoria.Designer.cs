@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using WebApiSmartClinic.Data;
@@ -11,9 +12,11 @@ using WebApiSmartClinic.Data;
 namespace WebApiSmartClinic.Migrations.AppDb
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250929145932_categoria")]
+    partial class categoria
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -403,6 +406,7 @@ namespace WebApiSmartClinic.Migrations.AppDb
                         .HasColumnType("boolean");
 
                     b.Property<string>("Carteira")
+                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("Codigo")
@@ -410,12 +414,15 @@ namespace WebApiSmartClinic.Migrations.AppDb
                         .HasColumnType("text");
 
                     b.Property<string>("CodigoBeneficiario")
+                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("CodigoConvenio")
+                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("CodigoTransmissao")
+                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("DocumentoTitular")
@@ -435,6 +442,7 @@ namespace WebApiSmartClinic.Migrations.AppDb
                         .HasColumnType("text");
 
                     b.Property<string>("NumeroContrato")
+                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<decimal>("SaldoInicial")
@@ -445,6 +453,7 @@ namespace WebApiSmartClinic.Migrations.AppDb
                         .HasColumnType("text");
 
                     b.Property<string>("VariacaoCarteira")
+                        .IsRequired()
                         .HasColumnType("text");
 
                     b.HasKey("Id");

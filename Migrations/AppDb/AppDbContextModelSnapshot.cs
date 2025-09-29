@@ -185,16 +185,7 @@ namespace WebApiSmartClinic.Migrations.AppDb
                     b.Property<bool>("Ativo")
                         .HasColumnType("boolean");
 
-                    b.Property<DateTime?>("DataAlteracao")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<DateTime>("DataCriacao")
-                        .HasColumnType("timestamp with time zone");
-
                     b.Property<int>("DiaSemana")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("EmpresaId")
                         .HasColumnType("integer");
 
                     b.Property<TimeSpan>("HoraFim")
@@ -205,12 +196,6 @@ namespace WebApiSmartClinic.Migrations.AppDb
 
                     b.Property<int>("SalaId")
                         .HasColumnType("integer");
-
-                    b.Property<string>("UsuarioAlteracaoId")
-                        .HasColumnType("text");
-
-                    b.Property<string>("UsuarioCriacaoId")
-                        .HasColumnType("text");
 
                     b.HasKey("Id");
 
@@ -284,9 +269,6 @@ namespace WebApiSmartClinic.Migrations.AppDb
                     b.Property<int[]>("DiasRecorrencia")
                         .HasColumnType("integer[]");
 
-                    b.Property<int>("EmpresaId")
-                        .HasColumnType("integer");
-
                     b.Property<int?>("FinancReceberId")
                         .HasColumnType("integer");
 
@@ -336,12 +318,6 @@ namespace WebApiSmartClinic.Migrations.AppDb
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<string>("UsuarioAlteracaoId")
-                        .HasColumnType("text");
-
-                    b.Property<string>("UsuarioCriacaoId")
-                        .HasColumnType("text");
-
                     b.Property<decimal?>("Valor")
                         .HasColumnType("numeric");
 
@@ -370,21 +346,9 @@ namespace WebApiSmartClinic.Migrations.AppDb
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<bool>("Ativo")
-                        .HasColumnType("boolean");
-
-                    b.Property<DateTime?>("DataAlteracao")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<DateTime>("DataCriacao")
-                        .HasColumnType("timestamp with time zone");
-
                     b.Property<string>("Descricao")
                         .IsRequired()
                         .HasColumnType("text");
-
-                    b.Property<int>("EmpresaId")
-                        .HasColumnType("integer");
 
                     b.Property<int?>("EvolucaoId")
                         .HasColumnType("integer");
@@ -395,17 +359,32 @@ namespace WebApiSmartClinic.Migrations.AppDb
                     b.Property<string>("Titulo")
                         .HasColumnType("text");
 
-                    b.Property<string>("UsuarioAlteracaoId")
-                        .HasColumnType("text");
-
-                    b.Property<string>("UsuarioCriacaoId")
-                        .HasColumnType("text");
-
                     b.HasKey("Id");
 
                     b.HasIndex("EvolucaoId");
 
                     b.ToTable("Atividade", (string)null);
+                });
+
+            modelBuilder.Entity("WebApiSmartClinic.Models.AutorModel", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Nome")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Sobrenome")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Autores", (string)null);
                 });
 
             modelBuilder.Entity("WebApiSmartClinic.Models.BancoModel", b =>
@@ -443,18 +422,9 @@ namespace WebApiSmartClinic.Migrations.AppDb
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<DateTime?>("DataAlteracao")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<DateTime>("DataCriacao")
-                        .HasColumnType("timestamp with time zone");
-
                     b.Property<string>("DocumentoTitular")
                         .IsRequired()
                         .HasColumnType("text");
-
-                    b.Property<int>("EmpresaId")
-                        .HasColumnType("integer");
 
                     b.Property<string>("NomeBanco")
                         .IsRequired()
@@ -479,12 +449,6 @@ namespace WebApiSmartClinic.Migrations.AppDb
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<string>("UsuarioAlteracaoId")
-                        .HasColumnType("text");
-
-                    b.Property<string>("UsuarioCriacaoId")
-                        .HasColumnType("text");
-
                     b.Property<string>("VariacaoCarteira")
                         .IsRequired()
                         .HasColumnType("text");
@@ -502,21 +466,12 @@ namespace WebApiSmartClinic.Migrations.AppDb
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<bool>("Ativo")
-                        .HasColumnType("boolean");
-
                     b.Property<int>("BancoId")
                         .HasColumnType("integer");
 
                     b.Property<string>("CodigoDeBarras")
                         .IsRequired()
                         .HasColumnType("text");
-
-                    b.Property<DateTime?>("DataAlteracao")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<DateTime>("DataCriacao")
-                        .HasColumnType("timestamp with time zone");
 
                     b.Property<DateTime?>("DataPagamento")
                         .HasColumnType("timestamp with time zone");
@@ -527,9 +482,6 @@ namespace WebApiSmartClinic.Migrations.AppDb
                     b.Property<string>("DocumentoSacado")
                         .IsRequired()
                         .HasColumnType("text");
-
-                    b.Property<int>("EmpresaId")
-                        .HasColumnType("integer");
 
                     b.Property<decimal>("Juros")
                         .HasColumnType("numeric");
@@ -556,12 +508,6 @@ namespace WebApiSmartClinic.Migrations.AppDb
                     b.Property<bool>("Pago")
                         .HasColumnType("boolean");
 
-                    b.Property<string>("UsuarioAlteracaoId")
-                        .HasColumnType("text");
-
-                    b.Property<string>("UsuarioCriacaoId")
-                        .HasColumnType("text");
-
                     b.Property<decimal>("Valor")
                         .HasColumnType("numeric");
 
@@ -580,26 +526,8 @@ namespace WebApiSmartClinic.Migrations.AppDb
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<bool>("Ativo")
-                        .HasColumnType("boolean");
-
-                    b.Property<DateTime?>("DataAlteracao")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<DateTime>("DataCriacao")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<int>("EmpresaId")
-                        .HasColumnType("integer");
-
                     b.Property<string>("Nome")
                         .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("UsuarioAlteracaoId")
-                        .HasColumnType("text");
-
-                    b.Property<string>("UsuarioCriacaoId")
                         .HasColumnType("text");
 
                     b.HasKey("Id");
@@ -615,33 +543,15 @@ namespace WebApiSmartClinic.Migrations.AppDb
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<bool>("Ativo")
-                        .HasColumnType("boolean");
-
-                    b.Property<DateTime?>("DataAlteracao")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<DateTime>("DataCriacao")
-                        .HasColumnType("timestamp with time zone");
-
                     b.Property<string>("Descricao")
                         .IsRequired()
                         .HasColumnType("text");
-
-                    b.Property<int>("EmpresaId")
-                        .HasColumnType("integer");
 
                     b.Property<bool>("IsSystemDefault")
                         .HasColumnType("boolean");
 
                     b.Property<string>("Tipo")
                         .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("UsuarioAlteracaoId")
-                        .HasColumnType("text");
-
-                    b.Property<string>("UsuarioCriacaoId")
                         .HasColumnType("text");
 
                     b.HasKey("Id");
@@ -652,20 +562,14 @@ namespace WebApiSmartClinic.Migrations.AppDb
                         new
                         {
                             Id = 1,
-                            Ativo = false,
-                            DataCriacao = new DateTime(2025, 9, 13, 18, 0, 9, 605, DateTimeKind.Utc).AddTicks(2061),
                             Descricao = "Geral - Receita",
-                            EmpresaId = 0,
                             IsSystemDefault = true,
                             Tipo = "R"
                         },
                         new
                         {
                             Id = 2,
-                            Ativo = false,
-                            DataCriacao = new DateTime(2025, 9, 13, 18, 0, 9, 605, DateTimeKind.Utc).AddTicks(2070),
                             Descricao = "Geral - Despesa",
-                            EmpresaId = 0,
                             IsSystemDefault = true,
                             Tipo = "D"
                         });
@@ -688,20 +592,11 @@ namespace WebApiSmartClinic.Migrations.AppDb
                     b.Property<DateTime>("DataAgendamento")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<DateTime?>("DataAlteracao")
-                        .HasColumnType("timestamp with time zone");
-
                     b.Property<DateTime>("DataCalculo")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<DateTime>("DataCriacao")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<DateTime?>("DataPagamento")
                         .HasColumnType("timestamp with time zone");
-
-                    b.Property<int>("EmpresaId")
-                        .HasColumnType("integer");
 
                     b.Property<string>("NomePaciente")
                         .HasColumnType("text");
@@ -723,12 +618,6 @@ namespace WebApiSmartClinic.Migrations.AppDb
                         .HasColumnType("integer");
 
                     b.Property<string>("TipoComissaoUtilizado")
-                        .HasColumnType("text");
-
-                    b.Property<string>("UsuarioAlteracaoId")
-                        .HasColumnType("text");
-
-                    b.Property<string>("UsuarioCriacaoId")
                         .HasColumnType("text");
 
                     b.Property<string>("UsuarioPagamento")
@@ -760,23 +649,11 @@ namespace WebApiSmartClinic.Migrations.AppDb
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<bool>("Ativo")
-                        .HasColumnType("boolean");
-
-                    b.Property<DateTime?>("DataAlteracao")
-                        .HasColumnType("timestamp with time zone");
-
                     b.Property<DateTime?>("DataAtendimento")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<DateTime>("DataCriacao")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<DateTime?>("DataPagamento")
                         .HasColumnType("timestamp with time zone");
-
-                    b.Property<int>("EmpresaId")
-                        .HasColumnType("integer");
 
                     b.Property<bool>("Pago")
                         .HasColumnType("boolean");
@@ -789,12 +666,6 @@ namespace WebApiSmartClinic.Migrations.AppDb
 
                     b.Property<int>("ProfissionalId")
                         .HasColumnType("integer");
-
-                    b.Property<string>("UsuarioAlteracaoId")
-                        .HasColumnType("text");
-
-                    b.Property<string>("UsuarioCriacaoId")
-                        .HasColumnType("text");
 
                     b.Property<decimal>("ValorComissao")
                         .HasColumnType("numeric");
@@ -819,18 +690,6 @@ namespace WebApiSmartClinic.Migrations.AppDb
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<bool>("Ativo")
-                        .HasColumnType("boolean");
-
-                    b.Property<DateTime?>("DataAlteracao")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<DateTime>("DataCriacao")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<int>("EmpresaId")
-                        .HasColumnType("integer");
-
                     b.Property<bool>("IsSystemDefault")
                         .HasColumnType("boolean");
 
@@ -842,12 +701,6 @@ namespace WebApiSmartClinic.Migrations.AppDb
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<string>("UsuarioAlteracaoId")
-                        .HasColumnType("text");
-
-                    b.Property<string>("UsuarioCriacaoId")
-                        .HasColumnType("text");
-
                     b.HasKey("Id");
 
                     b.ToTable("Conselho", (string)null);
@@ -856,9 +709,6 @@ namespace WebApiSmartClinic.Migrations.AppDb
                         new
                         {
                             Id = 1,
-                            Ativo = false,
-                            DataCriacao = new DateTime(2025, 9, 13, 18, 0, 9, 605, DateTimeKind.Utc).AddTicks(1494),
-                            EmpresaId = 0,
                             IsSystemDefault = true,
                             Nome = "Conselho Regional de Fisioterapia e Terapia Ocupacional",
                             Sigla = "CREFITO"
@@ -866,9 +716,6 @@ namespace WebApiSmartClinic.Migrations.AppDb
                         new
                         {
                             Id = 2,
-                            Ativo = false,
-                            DataCriacao = new DateTime(2025, 9, 13, 18, 0, 9, 605, DateTimeKind.Utc).AddTicks(1498),
-                            EmpresaId = 0,
                             IsSystemDefault = true,
                             Nome = "Conselho Federal de Psicologia",
                             Sigla = "CFP"
@@ -886,18 +733,9 @@ namespace WebApiSmartClinic.Migrations.AppDb
                     b.Property<bool>("Ativo")
                         .HasColumnType("boolean");
 
-                    b.Property<DateTime?>("DataAlteracao")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<DateTime>("DataCriacao")
-                        .HasColumnType("timestamp with time zone");
-
                     b.Property<string>("Email")
                         .IsRequired()
                         .HasColumnType("text");
-
-                    b.Property<int>("EmpresaId")
-                        .HasColumnType("integer");
 
                     b.Property<bool>("IsSystemDefault")
                         .HasColumnType("boolean");
@@ -918,12 +756,6 @@ namespace WebApiSmartClinic.Migrations.AppDb
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<string>("UsuarioAlteracaoId")
-                        .HasColumnType("text");
-
-                    b.Property<string>("UsuarioCriacaoId")
-                        .HasColumnType("text");
-
                     b.HasKey("Id");
 
                     b.ToTable("Convenio", (string)null);
@@ -933,9 +765,7 @@ namespace WebApiSmartClinic.Migrations.AppDb
                         {
                             Id = 1,
                             Ativo = true,
-                            DataCriacao = new DateTime(2025, 9, 13, 18, 0, 9, 605, DateTimeKind.Utc).AddTicks(2024),
                             Email = "email@email.com",
-                            EmpresaId = 0,
                             IsSystemDefault = true,
                             Nome = "Unimed",
                             PeriodoCarencia = "0",
@@ -952,16 +782,13 @@ namespace WebApiSmartClinic.Migrations.AppDb
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<bool>("Ativo")
+                    b.Property<bool?>("Ativo")
                         .HasColumnType("boolean");
 
                     b.Property<int?>("CentroCustoId")
                         .HasColumnType("integer");
 
-                    b.Property<DateTime?>("DataAlteracao")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<DateTime>("DataCriacao")
+                    b.Property<DateTime>("DataAlteracao")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<DateTime?>("DataFim")
@@ -978,9 +805,6 @@ namespace WebApiSmartClinic.Migrations.AppDb
                     b.Property<int>("DiaVencimento")
                         .HasColumnType("integer");
 
-                    b.Property<int>("EmpresaId")
-                        .HasColumnType("integer");
-
                     b.Property<int?>("FormaPagamentoId")
                         .HasColumnType("integer");
 
@@ -995,12 +819,6 @@ namespace WebApiSmartClinic.Migrations.AppDb
 
                     b.Property<int?>("TipoPagamentoId")
                         .HasColumnType("integer");
-
-                    b.Property<string>("UsuarioAlteracaoId")
-                        .HasColumnType("text");
-
-                    b.Property<string>("UsuarioCriacaoId")
-                        .HasColumnType("text");
 
                     b.Property<decimal>("Valor")
                         .HasColumnType("decimal(18,2)");
@@ -1029,9 +847,11 @@ namespace WebApiSmartClinic.Migrations.AppDb
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<string>("AsaasCustomerId")
+                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("AsaasSubscriptionId")
+                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<bool>("Ativo")
@@ -1080,6 +900,7 @@ namespace WebApiSmartClinic.Migrations.AppDb
                         .HasColumnType("text");
 
                     b.Property<string>("PeriodoCobranca")
+                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<bool>("PeriodoTeste")
@@ -1145,20 +966,8 @@ namespace WebApiSmartClinic.Migrations.AppDb
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<bool>("Ativo")
-                        .HasColumnType("boolean");
-
-                    b.Property<DateTime?>("DataAlteracao")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<DateTime>("DataCriacao")
-                        .HasColumnType("timestamp with time zone");
-
                     b.Property<DateTime?>("DataEvolucao")
                         .HasColumnType("timestamp with time zone");
-
-                    b.Property<int>("EmpresaId")
-                        .HasColumnType("integer");
 
                     b.Property<string>("Observacao")
                         .IsRequired()
@@ -1169,12 +978,6 @@ namespace WebApiSmartClinic.Migrations.AppDb
 
                     b.Property<int?>("ProfissionalId")
                         .HasColumnType("integer");
-
-                    b.Property<string>("UsuarioAlteracaoId")
-                        .HasColumnType("text");
-
-                    b.Property<string>("UsuarioCriacaoId")
-                        .HasColumnType("text");
 
                     b.HasKey("Id");
 
@@ -1191,21 +994,9 @@ namespace WebApiSmartClinic.Migrations.AppDb
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<bool>("Ativo")
-                        .HasColumnType("boolean");
-
-                    b.Property<DateTime?>("DataAlteracao")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<DateTime>("DataCriacao")
-                        .HasColumnType("timestamp with time zone");
-
                     b.Property<string>("Descricao")
                         .IsRequired()
                         .HasColumnType("text");
-
-                    b.Property<int>("EmpresaId")
-                        .HasColumnType("integer");
 
                     b.Property<int?>("EvolucaoId")
                         .HasColumnType("integer");
@@ -1224,12 +1015,6 @@ namespace WebApiSmartClinic.Migrations.AppDb
 
                     b.Property<int?>("Tempo")
                         .HasColumnType("integer");
-
-                    b.Property<string>("UsuarioAlteracaoId")
-                        .HasColumnType("text");
-
-                    b.Property<string>("UsuarioCriacaoId")
-                        .HasColumnType("text");
 
                     b.HasKey("Id");
 
@@ -1264,9 +1049,6 @@ namespace WebApiSmartClinic.Migrations.AppDb
                     b.Property<string>("AssinaturaProfissional")
                         .HasColumnType("text");
 
-                    b.Property<bool>("Ativo")
-                        .HasColumnType("boolean");
-
                     b.Property<string>("AvaliacaoPostural")
                         .HasColumnType("text");
 
@@ -1276,13 +1058,7 @@ namespace WebApiSmartClinic.Migrations.AppDb
                     b.Property<bool>("CirurgiasPrevias")
                         .HasColumnType("boolean");
 
-                    b.Property<DateTime?>("DataAlteracao")
-                        .HasColumnType("timestamp with time zone");
-
                     b.Property<DateTime?>("DataAvaliacao")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<DateTime>("DataCriacao")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("DetalheCirurgias")
@@ -1296,9 +1072,6 @@ namespace WebApiSmartClinic.Migrations.AppDb
 
                     b.Property<string>("DoencasPreExistentes")
                         .HasColumnType("text");
-
-                    b.Property<int>("EmpresaId")
-                        .HasColumnType("integer");
 
                     b.Property<string>("Especialidade")
                         .HasColumnType("text");
@@ -1363,12 +1136,6 @@ namespace WebApiSmartClinic.Migrations.AppDb
                     b.Property<string>("TratamentosRealizados")
                         .HasColumnType("text");
 
-                    b.Property<string>("UsuarioAlteracaoId")
-                        .HasColumnType("text");
-
-                    b.Property<string>("UsuarioCriacaoId")
-                        .HasColumnType("text");
-
                     b.HasKey("Id");
 
                     b.HasIndex("PacienteId")
@@ -1393,9 +1160,6 @@ namespace WebApiSmartClinic.Migrations.AppDb
                     b.Property<string>("CNPJ")
                         .HasColumnType("text");
 
-                    b.Property<DateTime?>("DataAlteracao")
-                        .HasColumnType("timestamp with time zone");
-
                     b.Property<DateTime>("DataCriacao")
                         .HasColumnType("timestamp with time zone");
 
@@ -1415,12 +1179,6 @@ namespace WebApiSmartClinic.Migrations.AppDb
                     b.Property<string>("Telefone")
                         .HasColumnType("text");
 
-                    b.Property<string>("UsuarioAlteracaoId")
-                        .HasColumnType("text");
-
-                    b.Property<string>("UsuarioCriacaoId")
-                        .HasColumnType("text");
-
                     b.HasKey("Id");
 
                     b.HasIndex("EmpresaId");
@@ -1436,9 +1194,6 @@ namespace WebApiSmartClinic.Migrations.AppDb
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<bool>("Ativo")
-                        .HasColumnType("boolean");
-
                     b.Property<int?>("BancoId")
                         .HasColumnType("integer");
 
@@ -1448,12 +1203,6 @@ namespace WebApiSmartClinic.Migrations.AppDb
                     b.Property<string>("Classificacao")
                         .HasColumnType("text");
 
-                    b.Property<DateTime?>("DataAlteracao")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<DateTime>("DataCriacao")
-                        .HasColumnType("timestamp with time zone");
-
                     b.Property<DateTime?>("DataEmissao")
                         .HasColumnType("timestamp with time zone");
 
@@ -1461,9 +1210,6 @@ namespace WebApiSmartClinic.Migrations.AppDb
                         .HasColumnType("text");
 
                     b.Property<int?>("DespesaFixaId")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("EmpresaId")
                         .HasColumnType("integer");
 
                     b.Property<int?>("FornecedorId")
@@ -1495,12 +1241,6 @@ namespace WebApiSmartClinic.Migrations.AppDb
 
                     b.Property<int?>("TipoPagamentoId")
                         .HasColumnType("integer");
-
-                    b.Property<string>("UsuarioAlteracaoId")
-                        .HasColumnType("text");
-
-                    b.Property<string>("UsuarioCriacaoId")
-                        .HasColumnType("text");
 
                     b.Property<decimal?>("Valor")
                         .HasColumnType("numeric");
@@ -1593,9 +1333,6 @@ namespace WebApiSmartClinic.Migrations.AppDb
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<bool>("Ativo")
-                        .HasColumnType("boolean");
-
                     b.Property<int?>("BancoId")
                         .HasColumnType("integer");
 
@@ -1605,20 +1342,11 @@ namespace WebApiSmartClinic.Migrations.AppDb
                     b.Property<string>("Classificacao")
                         .HasColumnType("text");
 
-                    b.Property<DateTime?>("DataAlteracao")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<DateTime>("DataCriacao")
-                        .HasColumnType("timestamp with time zone");
-
                     b.Property<DateTime?>("DataEmissao")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Descricao")
                         .HasColumnType("text");
-
-                    b.Property<int>("EmpresaId")
-                        .HasColumnType("integer");
 
                     b.Property<int?>("FornecedorId")
                         .HasColumnType("integer");
@@ -1646,12 +1374,6 @@ namespace WebApiSmartClinic.Migrations.AppDb
 
                     b.Property<int>("TipoPagamentoId")
                         .HasColumnType("integer");
-
-                    b.Property<string>("UsuarioAlteracaoId")
-                        .HasColumnType("text");
-
-                    b.Property<string>("UsuarioCriacaoId")
-                        .HasColumnType("text");
 
                     b.Property<decimal?>("Valor")
                         .HasColumnType("numeric");
@@ -1740,33 +1462,15 @@ namespace WebApiSmartClinic.Migrations.AppDb
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<bool>("Ativo")
-                        .HasColumnType("boolean");
-
-                    b.Property<DateTime?>("DataAlteracao")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<DateTime>("DataCriacao")
-                        .HasColumnType("timestamp with time zone");
-
                     b.Property<string>("Descricao")
                         .IsRequired()
                         .HasColumnType("text");
-
-                    b.Property<int>("EmpresaId")
-                        .HasColumnType("integer");
 
                     b.Property<bool>("IsSystemDefault")
                         .HasColumnType("boolean");
 
                     b.Property<int>("Parcelas")
                         .HasColumnType("integer");
-
-                    b.Property<string>("UsuarioAlteracaoId")
-                        .HasColumnType("text");
-
-                    b.Property<string>("UsuarioCriacaoId")
-                        .HasColumnType("text");
 
                     b.HasKey("Id");
 
@@ -1776,60 +1480,42 @@ namespace WebApiSmartClinic.Migrations.AppDb
                         new
                         {
                             Id = 1,
-                            Ativo = false,
-                            DataCriacao = new DateTime(2025, 9, 13, 18, 0, 9, 605, DateTimeKind.Utc).AddTicks(1870),
                             Descricao = "Dinheiro",
-                            EmpresaId = 0,
                             IsSystemDefault = true,
                             Parcelas = 1
                         },
                         new
                         {
                             Id = 2,
-                            Ativo = false,
-                            DataCriacao = new DateTime(2025, 9, 13, 18, 0, 9, 605, DateTimeKind.Utc).AddTicks(1872),
                             Descricao = "Cartão de Crédito",
-                            EmpresaId = 0,
                             IsSystemDefault = true,
                             Parcelas = 1
                         },
                         new
                         {
                             Id = 3,
-                            Ativo = false,
-                            DataCriacao = new DateTime(2025, 9, 13, 18, 0, 9, 605, DateTimeKind.Utc).AddTicks(1873),
                             Descricao = "Cartão de Débito",
-                            EmpresaId = 0,
                             IsSystemDefault = true,
                             Parcelas = 1
                         },
                         new
                         {
                             Id = 4,
-                            Ativo = false,
-                            DataCriacao = new DateTime(2025, 9, 13, 18, 0, 9, 605, DateTimeKind.Utc).AddTicks(1874),
                             Descricao = "Boleto",
-                            EmpresaId = 0,
                             IsSystemDefault = true,
                             Parcelas = 1
                         },
                         new
                         {
                             Id = 5,
-                            Ativo = false,
-                            DataCriacao = new DateTime(2025, 9, 13, 18, 0, 9, 605, DateTimeKind.Utc).AddTicks(1875),
                             Descricao = "Pix",
-                            EmpresaId = 0,
                             IsSystemDefault = true,
                             Parcelas = 1
                         },
                         new
                         {
                             Id = 6,
-                            Ativo = false,
-                            DataCriacao = new DateTime(2025, 9, 13, 18, 0, 9, 605, DateTimeKind.Utc).AddTicks(1876),
                             Descricao = "Depósito",
-                            EmpresaId = 0,
                             IsSystemDefault = true,
                             Parcelas = 1
                         });
@@ -1891,9 +1577,6 @@ namespace WebApiSmartClinic.Migrations.AppDb
                     b.Property<DateTime?>("DataAlteracao")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<DateTime>("DataCriacao")
-                        .HasColumnType("timestamp with time zone");
-
                     b.Property<DateTime?>("DataNascimento")
                         .HasColumnType("timestamp with time zone");
 
@@ -1902,9 +1585,6 @@ namespace WebApiSmartClinic.Migrations.AppDb
 
                     b.Property<string>("EmailRepresentante")
                         .HasColumnType("text");
-
-                    b.Property<int>("EmpresaId")
-                        .HasColumnType("integer");
 
                     b.Property<string>("EspecialidadeFornecimento")
                         .HasColumnType("text");
@@ -1960,12 +1640,6 @@ namespace WebApiSmartClinic.Migrations.AppDb
                     b.Property<string>("UF")
                         .HasColumnType("text");
 
-                    b.Property<string>("UsuarioAlteracaoId")
-                        .HasColumnType("text");
-
-                    b.Property<string>("UsuarioCriacaoId")
-                        .HasColumnType("text");
-
                     b.HasKey("Id");
 
                     b.ToTable("Fornecedor", (string)null);
@@ -1979,17 +1653,8 @@ namespace WebApiSmartClinic.Migrations.AppDb
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<bool>("Ativo")
-                        .HasColumnType("boolean");
-
                     b.Property<int>("BancoId")
                         .HasColumnType("integer");
-
-                    b.Property<DateTime?>("DataAlteracao")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<DateTime>("DataCriacao")
-                        .HasColumnType("timestamp with time zone");
 
                     b.Property<DateTime?>("DataTransacao")
                         .HasColumnType("timestamp with time zone");
@@ -1998,21 +1663,12 @@ namespace WebApiSmartClinic.Migrations.AppDb
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<int>("EmpresaId")
-                        .HasColumnType("integer");
-
                     b.Property<string>("Referencia")
                         .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("TipoTransacao")
                         .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("UsuarioAlteracaoId")
-                        .HasColumnType("text");
-
-                    b.Property<string>("UsuarioCriacaoId")
                         .HasColumnType("text");
 
                     b.Property<string>("UsuarioId")
@@ -2031,6 +1687,28 @@ namespace WebApiSmartClinic.Migrations.AppDb
                     b.ToTable("HistoricoTransacao", (string)null);
                 });
 
+            modelBuilder.Entity("WebApiSmartClinic.Models.LivroModel", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("AutorId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Titulo")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AutorId");
+
+                    b.ToTable("Livros", (string)null);
+                });
+
             modelBuilder.Entity("WebApiSmartClinic.Models.LogUsuarioModel", b =>
                 {
                     b.Property<int>("Id")
@@ -2039,15 +1717,6 @@ namespace WebApiSmartClinic.Migrations.AppDb
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<bool>("Ativo")
-                        .HasColumnType("boolean");
-
-                    b.Property<DateTime?>("DataAlteracao")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<DateTime>("DataCriacao")
-                        .HasColumnType("timestamp with time zone");
-
                     b.Property<DateTime?>("DataMovimentacao")
                         .HasColumnType("timestamp with time zone");
 
@@ -2055,20 +1724,11 @@ namespace WebApiSmartClinic.Migrations.AppDb
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<int>("EmpresaId")
-                        .HasColumnType("integer");
-
                     b.Property<int>("IdMovimentacao")
                         .HasColumnType("integer");
 
                     b.Property<string>("Rotina")
                         .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("UsuarioAlteracaoId")
-                        .HasColumnType("text");
-
-                    b.Property<string>("UsuarioCriacaoId")
                         .HasColumnType("text");
 
                     b.Property<string>("UsuarioId")
@@ -2127,9 +1787,6 @@ namespace WebApiSmartClinic.Migrations.AppDb
                     b.Property<DateTime?>("DataCadastro")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<DateTime>("DataCriacao")
-                        .HasColumnType("timestamp with time zone");
-
                     b.Property<DateTime?>("DataFimRecorrencia")
                         .HasColumnType("timestamp with time zone");
 
@@ -2141,9 +1798,6 @@ namespace WebApiSmartClinic.Migrations.AppDb
 
                     b.Property<string>("Email")
                         .HasColumnType("text");
-
-                    b.Property<int>("EmpresaId")
-                        .HasColumnType("integer");
 
                     b.Property<string>("EstadoCivil")
                         .HasColumnType("text");
@@ -2197,12 +1851,6 @@ namespace WebApiSmartClinic.Migrations.AppDb
                     b.Property<string>("Uf")
                         .HasColumnType("text");
 
-                    b.Property<string>("UsuarioAlteracaoId")
-                        .HasColumnType("text");
-
-                    b.Property<string>("UsuarioCriacaoId")
-                        .HasColumnType("text");
-
                     b.HasKey("Id");
 
                     b.HasIndex("ConvenioId");
@@ -2232,9 +1880,6 @@ namespace WebApiSmartClinic.Migrations.AppDb
                     b.Property<int>("AulasUtilizadas")
                         .HasColumnType("integer");
 
-                    b.Property<DateTime?>("DataAlteracao")
-                        .HasColumnType("timestamp with time zone");
-
                     b.Property<DateTime>("DataCriacao")
                         .HasColumnType("timestamp with time zone");
 
@@ -2243,9 +1888,6 @@ namespace WebApiSmartClinic.Migrations.AppDb
 
                     b.Property<DateTime>("DataInicio")
                         .HasColumnType("timestamp with time zone");
-
-                    b.Property<int>("EmpresaId")
-                        .HasColumnType("integer");
 
                     b.Property<string>("MotivoFinalizacao")
                         .HasColumnType("text");
@@ -2261,12 +1903,6 @@ namespace WebApiSmartClinic.Migrations.AppDb
 
                     b.Property<int>("Status")
                         .HasColumnType("integer");
-
-                    b.Property<string>("UsuarioAlteracaoId")
-                        .HasColumnType("text");
-
-                    b.Property<string>("UsuarioCriacaoId")
-                        .HasColumnType("text");
 
                     b.Property<decimal>("ValorPago")
                         .HasPrecision(18, 2)
@@ -2334,21 +1970,9 @@ namespace WebApiSmartClinic.Migrations.AppDb
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<bool>("Ativo")
-                        .HasColumnType("boolean");
-
                     b.Property<string>("Codigo")
                         .IsRequired()
                         .HasColumnType("text");
-
-                    b.Property<DateTime?>("DataAlteracao")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<DateTime>("DataCriacao")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<int>("EmpresaId")
-                        .HasColumnType("integer");
 
                     b.Property<bool?>("Inativo")
                         .HasColumnType("boolean");
@@ -2367,12 +1991,6 @@ namespace WebApiSmartClinic.Migrations.AppDb
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<string>("UsuarioAlteracaoId")
-                        .HasColumnType("text");
-
-                    b.Property<string>("UsuarioCriacaoId")
-                        .HasColumnType("text");
-
                     b.HasKey("Id");
 
                     b.ToTable("PlanoConta", (string)null);
@@ -2381,10 +1999,7 @@ namespace WebApiSmartClinic.Migrations.AppDb
                         new
                         {
                             Id = 1,
-                            Ativo = false,
                             Codigo = "1",
-                            DataCriacao = new DateTime(2025, 9, 13, 18, 0, 9, 605, DateTimeKind.Utc).AddTicks(2117),
-                            EmpresaId = 0,
                             Inativo = false,
                             IsSystemDefault = true,
                             Nome = "Geral - Ativo",
@@ -2393,10 +2008,7 @@ namespace WebApiSmartClinic.Migrations.AppDb
                         new
                         {
                             Id = 2,
-                            Ativo = false,
                             Codigo = "2",
-                            DataCriacao = new DateTime(2025, 9, 13, 18, 0, 9, 605, DateTimeKind.Utc).AddTicks(2122),
-                            EmpresaId = 0,
                             Inativo = false,
                             IsSystemDefault = true,
                             Nome = "Geral - Passívo",
@@ -2405,10 +2017,7 @@ namespace WebApiSmartClinic.Migrations.AppDb
                         new
                         {
                             Id = 3,
-                            Ativo = false,
                             Codigo = "3",
-                            DataCriacao = new DateTime(2025, 9, 13, 18, 0, 9, 605, DateTimeKind.Utc).AddTicks(2123),
-                            EmpresaId = 0,
                             Inativo = false,
                             IsSystemDefault = true,
                             Nome = "Geral - Receita",
@@ -2417,10 +2026,7 @@ namespace WebApiSmartClinic.Migrations.AppDb
                         new
                         {
                             Id = 4,
-                            Ativo = false,
                             Codigo = "4",
-                            DataCriacao = new DateTime(2025, 9, 13, 18, 0, 9, 605, DateTimeKind.Utc).AddTicks(2124),
-                            EmpresaId = 0,
                             Inativo = false,
                             IsSystemDefault = true,
                             Nome = "Geral - Despesa",
@@ -2436,21 +2042,9 @@ namespace WebApiSmartClinic.Migrations.AppDb
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<bool>("Ativo")
-                        .HasColumnType("boolean");
-
                     b.Property<string>("Codigo")
                         .IsRequired()
                         .HasColumnType("text");
-
-                    b.Property<DateTime?>("DataAlteracao")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<DateTime>("DataCriacao")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<int>("EmpresaId")
-                        .HasColumnType("integer");
 
                     b.Property<string>("Nome")
                         .IsRequired()
@@ -2461,12 +2055,6 @@ namespace WebApiSmartClinic.Migrations.AppDb
 
                     b.Property<string>("Tipo")
                         .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("UsuarioAlteracaoId")
-                        .HasColumnType("text");
-
-                    b.Property<string>("UsuarioCriacaoId")
                         .HasColumnType("text");
 
                     b.HasKey("Id");
@@ -2490,12 +2078,6 @@ namespace WebApiSmartClinic.Migrations.AppDb
                     b.Property<int?>("CentroCustoId")
                         .HasColumnType("integer");
 
-                    b.Property<DateTime?>("DataAlteracao")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<DateTime>("DataCriacao")
-                        .HasColumnType("timestamp with time zone");
-
                     b.Property<DateTime?>("DataFim")
                         .HasColumnType("timestamp with time zone");
 
@@ -2508,9 +2090,6 @@ namespace WebApiSmartClinic.Migrations.AppDb
                         .HasColumnType("character varying(255)");
 
                     b.Property<int>("DiasSemana")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("EmpresaId")
                         .HasColumnType("integer");
 
                     b.Property<int?>("FinanceiroId")
@@ -2526,12 +2105,6 @@ namespace WebApiSmartClinic.Migrations.AppDb
                         .IsRequired()
                         .HasMaxLength(1)
                         .HasColumnType("character varying(1)");
-
-                    b.Property<string>("UsuarioAlteracaoId")
-                        .HasColumnType("text");
-
-                    b.Property<string>("UsuarioCriacaoId")
-                        .HasColumnType("text");
 
                     b.Property<decimal?>("ValorAnual")
                         .HasColumnType("numeric");
@@ -2575,21 +2148,12 @@ namespace WebApiSmartClinic.Migrations.AppDb
                     b.Property<int?>("CategoriaModelId")
                         .HasColumnType("integer");
 
-                    b.Property<DateTime?>("DataAlteracao")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<DateTime>("DataCriacao")
-                        .HasColumnType("timestamp with time zone");
-
                     b.Property<string>("Descricao")
                         .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("Duracao")
                         .HasColumnType("text");
-
-                    b.Property<int>("EmpresaId")
-                        .HasColumnType("integer");
 
                     b.Property<string>("MateriaisNecessarios")
                         .HasColumnType("text");
@@ -2603,12 +2167,6 @@ namespace WebApiSmartClinic.Migrations.AppDb
 
                     b.Property<decimal>("Preco")
                         .HasColumnType("numeric");
-
-                    b.Property<string>("UsuarioAlteracaoId")
-                        .HasColumnType("text");
-
-                    b.Property<string>("UsuarioCriacaoId")
-                        .HasColumnType("text");
 
                     b.HasKey("Id");
 
@@ -2628,27 +2186,12 @@ namespace WebApiSmartClinic.Migrations.AppDb
                     b.Property<bool>("Ativo")
                         .HasColumnType("boolean");
 
-                    b.Property<DateTime?>("DataAlteracao")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<DateTime>("DataCriacao")
-                        .HasColumnType("timestamp with time zone");
-
                     b.Property<string>("Descricao")
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<int>("EmpresaId")
-                        .HasColumnType("integer");
-
                     b.Property<bool>("IsSystemDefault")
                         .HasColumnType("boolean");
-
-                    b.Property<string>("UsuarioAlteracaoId")
-                        .HasColumnType("text");
-
-                    b.Property<string>("UsuarioCriacaoId")
-                        .HasColumnType("text");
 
                     b.HasKey("Id");
 
@@ -2659,45 +2202,35 @@ namespace WebApiSmartClinic.Migrations.AppDb
                         {
                             Id = 1,
                             Ativo = true,
-                            DataCriacao = new DateTime(2025, 9, 13, 18, 0, 9, 605, DateTimeKind.Utc).AddTicks(1694),
                             Descricao = "Administrador(a)",
-                            EmpresaId = 0,
                             IsSystemDefault = true
                         },
                         new
                         {
                             Id = 2,
                             Ativo = true,
-                            DataCriacao = new DateTime(2025, 9, 13, 18, 0, 9, 605, DateTimeKind.Utc).AddTicks(1696),
                             Descricao = "Psicólogo(a)",
-                            EmpresaId = 0,
                             IsSystemDefault = true
                         },
                         new
                         {
                             Id = 3,
                             Ativo = true,
-                            DataCriacao = new DateTime(2025, 9, 13, 18, 0, 9, 605, DateTimeKind.Utc).AddTicks(1697),
                             Descricao = "Fisioterapeuta",
-                            EmpresaId = 0,
                             IsSystemDefault = true
                         },
                         new
                         {
                             Id = 4,
                             Ativo = true,
-                            DataCriacao = new DateTime(2025, 9, 13, 18, 0, 9, 605, DateTimeKind.Utc).AddTicks(1698),
                             Descricao = "Dentista",
-                            EmpresaId = 0,
                             IsSystemDefault = true
                         },
                         new
                         {
                             Id = 5,
                             Ativo = true,
-                            DataCriacao = new DateTime(2025, 9, 13, 18, 0, 9, 605, DateTimeKind.Utc).AddTicks(1699),
                             Descricao = "Médico",
-                            EmpresaId = 0,
                             IsSystemDefault = true
                         });
                 });
@@ -2747,13 +2280,7 @@ namespace WebApiSmartClinic.Migrations.AppDb
                     b.Property<string>("Cpf")
                         .HasColumnType("text");
 
-                    b.Property<DateTime?>("DataAlteracao")
-                        .HasColumnType("timestamp with time zone");
-
                     b.Property<DateTime?>("DataCadastro")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<DateTime>("DataCriacao")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<bool?>("EhUsuario")
@@ -2762,9 +2289,6 @@ namespace WebApiSmartClinic.Migrations.AppDb
                     b.Property<string>("Email")
                         .IsRequired()
                         .HasColumnType("text");
-
-                    b.Property<int>("EmpresaId")
-                        .HasColumnType("integer");
 
                     b.Property<string>("Nome")
                         .IsRequired()
@@ -2795,12 +2319,6 @@ namespace WebApiSmartClinic.Migrations.AppDb
                         .HasColumnType("text");
 
                     b.Property<string>("UfConselho")
-                        .HasColumnType("text");
-
-                    b.Property<string>("UsuarioAlteracaoId")
-                        .HasColumnType("text");
-
-                    b.Property<string>("UsuarioCriacaoId")
                         .HasColumnType("text");
 
                     b.Property<decimal>("ValorComissao")
@@ -2855,20 +2373,11 @@ namespace WebApiSmartClinic.Migrations.AppDb
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<bool>("Ativo")
-                        .HasColumnType("boolean");
-
                     b.Property<int>("Capacidade")
                         .HasColumnType("integer");
 
                     b.Property<DateTime?>("DataAlteracao")
                         .HasColumnType("timestamp with time zone");
-
-                    b.Property<DateTime>("DataCriacao")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<int>("EmpresaId")
-                        .HasColumnType("integer");
 
                     b.Property<string>("HorarioFincionamento")
                         .HasColumnType("text");
@@ -2889,12 +2398,6 @@ namespace WebApiSmartClinic.Migrations.AppDb
                     b.Property<string>("Tipo")
                         .HasColumnType("text");
 
-                    b.Property<string>("UsuarioAlteracaoId")
-                        .HasColumnType("text");
-
-                    b.Property<string>("UsuarioCriacaoId")
-                        .HasColumnType("text");
-
                     b.Property<string>("local")
                         .HasColumnType("text");
 
@@ -2906,10 +2409,7 @@ namespace WebApiSmartClinic.Migrations.AppDb
                         new
                         {
                             Id = 1,
-                            Ativo = false,
                             Capacidade = 10,
-                            DataCriacao = new DateTime(2025, 9, 13, 18, 0, 9, 605, DateTimeKind.Utc).AddTicks(1976),
-                            EmpresaId = 0,
                             IsSystemDefault = true,
                             Nome = "Principal",
                             Status = true,
@@ -2926,21 +2426,9 @@ namespace WebApiSmartClinic.Migrations.AppDb
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<bool>("Ativo")
-                        .HasColumnType("boolean");
-
                     b.Property<string>("Cor")
                         .IsRequired()
                         .HasColumnType("text");
-
-                    b.Property<DateTime?>("DataAlteracao")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<DateTime>("DataCriacao")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<int>("EmpresaId")
-                        .HasColumnType("integer");
 
                     b.Property<bool>("IsSystemDefault")
                         .HasColumnType("boolean");
@@ -2953,12 +2441,6 @@ namespace WebApiSmartClinic.Migrations.AppDb
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<string>("UsuarioAlteracaoId")
-                        .HasColumnType("text");
-
-                    b.Property<string>("UsuarioCriacaoId")
-                        .HasColumnType("text");
-
                     b.HasKey("Id");
 
                     b.ToTable("Status", (string)null);
@@ -2967,10 +2449,7 @@ namespace WebApiSmartClinic.Migrations.AppDb
                         new
                         {
                             Id = 1,
-                            Ativo = false,
                             Cor = "#4B89DC",
-                            DataCriacao = new DateTime(2025, 9, 13, 18, 0, 9, 605, DateTimeKind.Utc).AddTicks(1747),
-                            EmpresaId = 0,
                             IsSystemDefault = true,
                             Legenda = "Agendamento realizado com sucesso!",
                             Status = "Agendado"
@@ -2978,10 +2457,7 @@ namespace WebApiSmartClinic.Migrations.AppDb
                         new
                         {
                             Id = 2,
-                            Ativo = false,
                             Cor = "#3498DB",
-                            DataCriacao = new DateTime(2025, 9, 13, 18, 0, 9, 605, DateTimeKind.Utc).AddTicks(1749),
-                            EmpresaId = 0,
                             IsSystemDefault = true,
                             Legenda = "Confirmado",
                             Status = "Confirmado"
@@ -2989,10 +2465,7 @@ namespace WebApiSmartClinic.Migrations.AppDb
                         new
                         {
                             Id = 3,
-                            Ativo = false,
                             Cor = "#5D9CEC",
-                            DataCriacao = new DateTime(2025, 9, 13, 18, 0, 9, 605, DateTimeKind.Utc).AddTicks(1750),
-                            EmpresaId = 0,
                             IsSystemDefault = true,
                             Legenda = "Em atendimento",
                             Status = "Em atendimento"
@@ -3000,10 +2473,7 @@ namespace WebApiSmartClinic.Migrations.AppDb
                         new
                         {
                             Id = 4,
-                            Ativo = false,
                             Cor = "#2ECC71",
-                            DataCriacao = new DateTime(2025, 9, 13, 18, 0, 9, 605, DateTimeKind.Utc).AddTicks(1751),
-                            EmpresaId = 0,
                             IsSystemDefault = true,
                             Legenda = "Concluído",
                             Status = "Concluído"
@@ -3011,10 +2481,7 @@ namespace WebApiSmartClinic.Migrations.AppDb
                         new
                         {
                             Id = 5,
-                            Ativo = false,
                             Cor = "#E74C3C",
-                            DataCriacao = new DateTime(2025, 9, 13, 18, 0, 9, 605, DateTimeKind.Utc).AddTicks(1753),
-                            EmpresaId = 0,
                             IsSystemDefault = true,
                             Legenda = "Cancelado pelo paciente",
                             Status = "Cancelado pelo paciente"
@@ -3022,10 +2489,7 @@ namespace WebApiSmartClinic.Migrations.AppDb
                         new
                         {
                             Id = 6,
-                            Ativo = false,
                             Cor = "#E57373",
-                            DataCriacao = new DateTime(2025, 9, 13, 18, 0, 9, 605, DateTimeKind.Utc).AddTicks(1755),
-                            EmpresaId = 0,
                             IsSystemDefault = true,
                             Legenda = "Cancelado pela clínica",
                             Status = "Cancelado pela clínica"
@@ -3033,10 +2497,7 @@ namespace WebApiSmartClinic.Migrations.AppDb
                         new
                         {
                             Id = 7,
-                            Ativo = false,
                             Cor = "#F9A825",
-                            DataCriacao = new DateTime(2025, 9, 13, 18, 0, 9, 605, DateTimeKind.Utc).AddTicks(1756),
-                            EmpresaId = 0,
                             IsSystemDefault = true,
                             Legenda = "Remarcado",
                             Status = "Remarcado"
@@ -3044,10 +2505,7 @@ namespace WebApiSmartClinic.Migrations.AppDb
                         new
                         {
                             Id = 8,
-                            Ativo = false,
                             Cor = "#E67E22",
-                            DataCriacao = new DateTime(2025, 9, 13, 18, 0, 9, 605, DateTimeKind.Utc).AddTicks(1757),
-                            EmpresaId = 0,
                             IsSystemDefault = true,
                             Legenda = "Não compareceu",
                             Status = "Não compareceu"
@@ -3062,29 +2520,11 @@ namespace WebApiSmartClinic.Migrations.AppDb
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<bool>("Ativo")
-                        .HasColumnType("boolean");
-
                     b.Property<int>("CentroCustoId")
-                        .HasColumnType("integer");
-
-                    b.Property<DateTime?>("DataAlteracao")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<DateTime>("DataCriacao")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<int>("EmpresaId")
                         .HasColumnType("integer");
 
                     b.Property<string>("Nome")
                         .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("UsuarioAlteracaoId")
-                        .HasColumnType("text");
-
-                    b.Property<string>("UsuarioCriacaoId")
                         .HasColumnType("text");
 
                     b.HasKey("Id");
@@ -3148,29 +2588,11 @@ namespace WebApiSmartClinic.Migrations.AppDb
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<bool>("Ativo")
-                        .HasColumnType("boolean");
-
-                    b.Property<DateTime?>("DataAlteracao")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<DateTime>("DataCriacao")
-                        .HasColumnType("timestamp with time zone");
-
                     b.Property<string>("Descricao")
                         .HasColumnType("text");
 
-                    b.Property<int>("EmpresaId")
-                        .HasColumnType("integer");
-
                     b.Property<bool>("IsSystemDefault")
                         .HasColumnType("boolean");
-
-                    b.Property<string>("UsuarioAlteracaoId")
-                        .HasColumnType("text");
-
-                    b.Property<string>("UsuarioCriacaoId")
-                        .HasColumnType("text");
 
                     b.HasKey("Id");
 
@@ -3180,37 +2602,25 @@ namespace WebApiSmartClinic.Migrations.AppDb
                         new
                         {
                             Id = 1,
-                            Ativo = false,
-                            DataCriacao = new DateTime(2025, 9, 13, 18, 0, 9, 605, DateTimeKind.Utc).AddTicks(1930),
                             Descricao = "À Vista",
-                            EmpresaId = 0,
                             IsSystemDefault = true
                         },
                         new
                         {
                             Id = 2,
-                            Ativo = false,
-                            DataCriacao = new DateTime(2025, 9, 13, 18, 0, 9, 605, DateTimeKind.Utc).AddTicks(1932),
                             Descricao = "Parcelado",
-                            EmpresaId = 0,
                             IsSystemDefault = true
                         },
                         new
                         {
                             Id = 3,
-                            Ativo = false,
-                            DataCriacao = new DateTime(2025, 9, 13, 18, 0, 9, 605, DateTimeKind.Utc).AddTicks(1933),
                             Descricao = "Convênio",
-                            EmpresaId = 0,
                             IsSystemDefault = true
                         },
                         new
                         {
                             Id = 4,
-                            Ativo = false,
-                            DataCriacao = new DateTime(2025, 9, 13, 18, 0, 9, 605, DateTimeKind.Utc).AddTicks(1934),
                             Descricao = "Recorrente",
-                            EmpresaId = 0,
                             IsSystemDefault = true
                         });
                 });
@@ -3292,42 +2702,6 @@ namespace WebApiSmartClinic.Migrations.AppDb
                         .HasDatabaseName("UserNameIndex");
 
                     b.ToTable("AspNetUsers", (string)null);
-                });
-
-            modelBuilder.Entity("WebApiSmartClinic.Models.UsuarioEmpresaModel", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("EmpresaId")
-                        .HasColumnType("integer");
-
-                    b.Property<bool>("EmpresaPadrao")
-                        .HasColumnType("boolean");
-
-                    b.Property<bool>("PodeEscrever")
-                        .HasColumnType("boolean");
-
-                    b.Property<bool>("PodeExcluir")
-                        .HasColumnType("boolean");
-
-                    b.Property<bool>("PodeLer")
-                        .HasColumnType("boolean");
-
-                    b.Property<string>("UsuarioId")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("EmpresaId");
-
-                    b.HasIndex("UsuarioId");
-
-                    b.ToTable("UsuarioEmpresas", (string)null);
                 });
 
             modelBuilder.Entity("WebApiSmartClinic.Models.UsuarioModel", b =>
@@ -3825,6 +3199,17 @@ namespace WebApiSmartClinic.Migrations.AppDb
                     b.Navigation("Usuario");
                 });
 
+            modelBuilder.Entity("WebApiSmartClinic.Models.LivroModel", b =>
+                {
+                    b.HasOne("WebApiSmartClinic.Models.AutorModel", "Autor")
+                        .WithMany("Livros")
+                        .HasForeignKey("AutorId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Autor");
+                });
+
             modelBuilder.Entity("WebApiSmartClinic.Models.LogUsuarioModel", b =>
                 {
                     b.HasOne("WebApiSmartClinic.Models.UsuarioModel", "Usuario")
@@ -3957,25 +3342,6 @@ namespace WebApiSmartClinic.Migrations.AppDb
                     b.Navigation("Empresa");
                 });
 
-            modelBuilder.Entity("WebApiSmartClinic.Models.UsuarioEmpresaModel", b =>
-                {
-                    b.HasOne("WebApiSmartClinic.Models.EmpresaModel", "Empresa")
-                        .WithMany()
-                        .HasForeignKey("EmpresaId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("WebApiSmartClinic.Models.User", "Usuario")
-                        .WithMany()
-                        .HasForeignKey("UsuarioId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Empresa");
-
-                    b.Navigation("Usuario");
-                });
-
             modelBuilder.Entity("WebApiSmartClinic.Models.UsuarioModel", b =>
                 {
                     b.HasOne("WebApiSmartClinic.Models.EmpresaModel", "Empresa")
@@ -4004,6 +3370,11 @@ namespace WebApiSmartClinic.Migrations.AppDb
             modelBuilder.Entity("WebApiSmartClinic.Models.AgendaModel", b =>
                 {
                     b.Navigation("ComissaoCalculada");
+                });
+
+            modelBuilder.Entity("WebApiSmartClinic.Models.AutorModel", b =>
+                {
+                    b.Navigation("Livros");
                 });
 
             modelBuilder.Entity("WebApiSmartClinic.Models.CategoriaModel", b =>

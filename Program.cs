@@ -64,7 +64,7 @@ var appSettings = appSettingsSection.Get<AppSettings>();
 var key = Encoding.UTF8.GetBytes(appSettings.JwtSecretKey);
 services.AddProblemDetails();
 // Middleware de conexão por tenant
-services.AddSingleton<IConnectionStringProvider, ConnectionStringProvider>();
+//services.AddSingleton<IConnectionStringProvider, ConnectionStringProvider>();
 
 // DbContexts
 services.AddDbContext<DataConnectionContext>(options =>
@@ -158,7 +158,7 @@ services.AddSwaggerGen(c =>
 // Outros serviços (ex: CadastroClienteService, AuthService etc)
 services.AddScoped<IAuthInterface, AuthService>();
 services.AddScoped<AuthService>();
-services.AddScoped<ICadastroClienteInterface, CadastroClienteService>();
+//services.AddScoped<ICadastroClienteInterface, CadastroClienteService>();
 services.AddScoped<IConnectionsService, ConnectionsService>();
 
 // Vincular interface com os servicos
@@ -221,10 +221,11 @@ services.AddCors(options =>
 });
 
 var app = builder.Build();
-app.UseExceptionHandler("/error");
-app.UseExceptionHandler(exceptionApp =>
+
+// 1) Exceptions (uma vez só) – resposta JSON sem reexecutar pipeline
+app.UseExceptionHandler(errorApp =>
 {
-    exceptionApp.Run(async ctx =>
+    errorApp.Run(async ctx =>
     {
         var ex = ctx.Features.Get<IExceptionHandlerFeature>()?.Error;
         var problem = Results.Problem(
@@ -233,6 +234,7 @@ app.UseExceptionHandler(exceptionApp =>
         await problem.ExecuteAsync(ctx);
     });
 });
+
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -240,19 +242,74 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
 app.UseCors("AllowFrontend");
+
 app.UseRouting();
 
+// 2) Conexão do tenant PARA rotas anônimas (Auth/login|register) e qualquer outra
+//    que precise da connection ANTES de autenticarmos.
 
-app.UseAuthentication();
-//  Middleware de tenant (deve vir antes do auth)
-app.UseMiddleware<TenantMiddleware>();
+// 3) Autenticação (preenche HttpContext.User – não reexecuta pipeline)
+
+app.UseAuthentication(); // 0
+app.UseMiddleware<ConnectionStringMiddleware>(); // 1
+app.UseMiddleware<TenantMiddleware>(); // 2
+
+app.UseMiddleware<EmpresaContextoMiddleware>(); // 3
+
+// 4) TenantMiddleware – para requests AUTENTICADOS pegar a connection via claim UserKey
+//    (e opcionalmente validar acesso).
+
+// 5) Contexto de empresa/visibilidade – apenas para API e idempotente
+//app.UseWhen(ctx => ctx.Request.Path.StartsWithSegments("/api"), branch =>
+//{
+//});
+
 app.UseAuthorization();
-
-//app.UseMiddleware<ErrorHandlerMiddleware>();
-app.UseMiddleware<ConnectionStringMiddleware>();
-app.UseMiddleware<EmpresaContextoMiddleware>();
 
 app.MapControllers();
 
 app.Run();
+
+
+//var app = builder.Build();
+//app.UseExceptionHandler("/error");
+//app.UseExceptionHandler(exceptionApp =>
+//{
+//    exceptionApp.Run(async ctx =>
+//    {
+//        var ex = ctx.Features.Get<IExceptionHandlerFeature>()?.Error;
+//        var problem = Results.Problem(
+//            detail: ex?.Message,
+//            statusCode: StatusCodes.Status500InternalServerError);
+//        await problem.ExecuteAsync(ctx);
+//    });
+//});
+//if (app.Environment.IsDevelopment())
+//{
+//    app.UseSwagger();
+//    app.UseSwaggerUI();
+//}
+
+//app.UseHttpsRedirection();
+//app.UseCors("AllowFrontend");
+//app.UseRouting();
+
+
+//app.UseAuthentication();
+////  Middleware de tenant (deve vir antes do auth)
+//app.UseMiddleware<TenantMiddleware>();
+//app.UseWhen(ctx => ctx.Request.Path.StartsWithSegments("/api"), branch =>
+//{
+//    branch.UseMiddleware<EmpresaContextoMiddleware>();
+//});
+
+//app.UseAuthorization();
+
+//app.UseMiddleware<ConnectionStringMiddleware>();
+
+
+//app.MapControllers();
+
+//app.Run();

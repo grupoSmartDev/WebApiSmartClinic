@@ -138,64 +138,64 @@ public class AppDbContext : IdentityDbContext<User>
         );
 
         modelBuilder.Entity<ConselhoModel>().HasData(
-            new ConselhoModel { Id = 1, Nome = "Conselho Regional de Fisioterapia e Terapia Ocupacional", Sigla = "CREFITO", IsSystemDefault = true },
-            new ConselhoModel { Id = 2, Nome = "Conselho Federal de Psicologia", Sigla = "CFP", IsSystemDefault = true }
+            new ConselhoModel { Id = 1, EmpresaId = 1, Nome = "Conselho Regional de Fisioterapia e Terapia Ocupacional", Sigla = "CREFITO", IsSystemDefault = true },
+            new ConselhoModel { Id = 2, EmpresaId = 1, Nome = "Conselho Federal de Psicologia", Sigla = "CFP", IsSystemDefault = true }
         );
 
         modelBuilder.Entity<ProfissaoModel>().HasData(
-            new ProfissaoModel { Id = 1, Descricao = "Administrador(a)", IsSystemDefault = true, Ativo = true },
-            new ProfissaoModel { Id = 2, Descricao = "Psicólogo(a)", IsSystemDefault = true, Ativo = true },
-            new ProfissaoModel { Id = 3, Descricao = "Fisioterapeuta", IsSystemDefault = true, Ativo = true },
-            new ProfissaoModel { Id = 4, Descricao = "Dentista", IsSystemDefault = true, Ativo = true },
-            new ProfissaoModel { Id = 5, Descricao = "Médico", IsSystemDefault = true, Ativo = true }
+            new ProfissaoModel { Id = 1, EmpresaId = 1, Descricao = "Administrador(a)", IsSystemDefault = true, Ativo = true },
+            new ProfissaoModel { Id = 2, EmpresaId = 1, Descricao = "Psicólogo(a)", IsSystemDefault = true, Ativo = true },
+            new ProfissaoModel { Id = 3, EmpresaId = 1, Descricao = "Fisioterapeuta", IsSystemDefault = true, Ativo = true },
+            new ProfissaoModel { Id = 4, EmpresaId = 1, Descricao = "Dentista", IsSystemDefault = true, Ativo = true },
+            new ProfissaoModel { Id = 5, EmpresaId = 1, Descricao = "Médico", IsSystemDefault = true, Ativo = true }
         );
 
         modelBuilder.Entity<StatusModel>().HasData(
-            new StatusModel { Id = 1, Cor = "#4B89DC", Legenda = "Agendamento realizado com sucesso!", Status = "Agendado", IsSystemDefault = true },
-            new StatusModel { Id = 2, Cor = "#3498DB", Legenda = "Confirmado", Status = "Confirmado", IsSystemDefault = true },
-            new StatusModel { Id = 3, Cor = "#5D9CEC", Legenda = "Em atendimento", Status = "Em atendimento", IsSystemDefault = true },
-            new StatusModel { Id = 4, Cor = "#2ECC71", Legenda = "Concluído", Status = "Concluído", IsSystemDefault = true },
-            new StatusModel { Id = 5, Cor = "#E74C3C", Legenda = "Cancelado pelo paciente", Status = "Cancelado pelo paciente", IsSystemDefault = true },
-            new StatusModel { Id = 6, Cor = "#E57373", Legenda = "Cancelado pela clínica", Status = "Cancelado pela clínica", IsSystemDefault = true },
-            new StatusModel { Id = 7, Cor = "#F9A825", Legenda = "Remarcado", Status = "Remarcado", IsSystemDefault = true },
-            new StatusModel { Id = 8, Cor = "#E67E22", Legenda = "Não compareceu", Status = "Não compareceu", IsSystemDefault = true }
+            new StatusModel { Id = 1, Cor = "#4B89DC", Ativo = true, EmpresaId = 1, Legenda = "Agendamento realizado com sucesso!", Status = "Agendado", IsSystemDefault = true },
+            new StatusModel { Id = 2, Cor = "#3498DB", Ativo = true, EmpresaId = 1, Legenda = "Confirmado", Status = "Confirmado", IsSystemDefault = true },
+            new StatusModel { Id = 3, Cor = "#5D9CEC", Ativo = true, EmpresaId = 1, Legenda = "Em atendimento", Status = "Em atendimento", IsSystemDefault = true },
+            new StatusModel { Id = 4, Cor = "#2ECC71", Ativo = true, EmpresaId = 1, Legenda = "Concluído", Status = "Concluído", IsSystemDefault = true },
+            new StatusModel { Id = 5, Cor = "#E74C3C", Ativo = true, EmpresaId = 1, Legenda = "Cancelado pelo paciente", Status = "Cancelado pelo paciente", IsSystemDefault = true },
+            new StatusModel { Id = 6, Cor = "#E57373", Ativo = true, EmpresaId = 1, Legenda = "Cancelado pela clínica", Status = "Cancelado pela clínica", IsSystemDefault = true },
+            new StatusModel { Id = 7, Cor = "#F9A825", Ativo = true, EmpresaId = 1, Legenda = "Remarcado", Status = "Remarcado", IsSystemDefault = true },
+            new StatusModel { Id = 8, Cor = "#E67E22", Ativo = true, EmpresaId = 1, Legenda = "Não compareceu", Status = "Não compareceu", IsSystemDefault = true }
         );
 
         modelBuilder.Entity<FormaPagamentoModel>().HasData(
-            new FormaPagamentoModel { Id = 1, Descricao = "Dinheiro", Parcelas = 1, IsSystemDefault = true },
-            new FormaPagamentoModel { Id = 2, Descricao = "Cartão de Crédito", Parcelas = 1, IsSystemDefault = true },
-            new FormaPagamentoModel { Id = 3, Descricao = "Cartão de Débito", Parcelas = 1, IsSystemDefault = true },
-            new FormaPagamentoModel { Id = 4, Descricao = "Boleto", Parcelas = 1, IsSystemDefault = true },
-            new FormaPagamentoModel { Id = 5, Descricao = "Pix", Parcelas = 1, IsSystemDefault = true },
-            new FormaPagamentoModel { Id = 6, Descricao = "Depósito", Parcelas = 1, IsSystemDefault = true }
+            new FormaPagamentoModel { Id = 1, EmpresaId = 1, Descricao = "Dinheiro", Parcelas = 1, IsSystemDefault = true },
+            new FormaPagamentoModel { Id = 2, EmpresaId = 1, Descricao = "Cartão de Crédito", Parcelas = 1, IsSystemDefault = true },
+            new FormaPagamentoModel { Id = 3, EmpresaId = 1, Descricao = "Cartão de Débito", Parcelas = 1, IsSystemDefault = true },
+            new FormaPagamentoModel { Id = 4, EmpresaId = 1, Descricao = "Boleto", Parcelas = 1, IsSystemDefault = true },
+            new FormaPagamentoModel { Id = 5, EmpresaId = 1, Descricao = "Pix", Parcelas = 1, IsSystemDefault = true },
+            new FormaPagamentoModel { Id = 6, EmpresaId = 1, Descricao = "Depósito", Parcelas = 1, IsSystemDefault = true }
         );
 
         modelBuilder.Entity<TipoPagamentoModel>().HasData(
-            new TipoPagamentoModel { Id = 1, Descricao = "À Vista", IsSystemDefault = true },
-            new TipoPagamentoModel { Id = 2, Descricao = "Parcelado", IsSystemDefault = true },
-            new TipoPagamentoModel { Id = 3, Descricao = "Convênio", IsSystemDefault = true },
-            new TipoPagamentoModel { Id = 4, Descricao = "Recorrente", IsSystemDefault = true }
+            new TipoPagamentoModel { Id = 1, EmpresaId = 1, Descricao = "À Vista", IsSystemDefault = true },
+            new TipoPagamentoModel { Id = 2, EmpresaId = 1, Descricao = "Parcelado", IsSystemDefault = true },
+            new TipoPagamentoModel { Id = 3, EmpresaId = 1, Descricao = "Convênio", IsSystemDefault = true },
+            new TipoPagamentoModel { Id = 4, EmpresaId = 1, Descricao = "Recorrente", IsSystemDefault = true }
         );
 
         modelBuilder.Entity<SalaModel>().HasData(
-            new SalaModel { Id = 1, Nome = "Principal", Capacidade = 10, Tipo = "Geral", local = "Principal", Status = true, IsSystemDefault = true }
+            new SalaModel { Id = 1, EmpresaId = 1, Nome = "Principal", Capacidade = 10, Tipo = "Geral", local = "Principal", Status = true, IsSystemDefault = true }
         );
 
         modelBuilder.Entity<ConvenioModel>().HasData(
-            new ConvenioModel { Id = 1, Nome = "Unimed", PeriodoCarencia = "0", Ativo = true, RegistroAvs = "ABC", Telefone = "343434-3434", Email = "email@email.com", IsSystemDefault = true }
+            new ConvenioModel { Id = 1, Nome = "Unimed", EmpresaId = 1, PeriodoCarencia = "0", Ativo = true, RegistroAvs = "ABC", Telefone = "343434-3434", Email = "email@email.com", IsSystemDefault = true }
         );
 
 
         modelBuilder.Entity<CentroCustoModel>().HasData(
-            new CentroCustoModel { Id = 1, Descricao = "Geral - Receita", Tipo = "R", IsSystemDefault = true },
-            new CentroCustoModel { Id = 2, Descricao = "Geral - Despesa", Tipo = "D", IsSystemDefault = true }
+            new CentroCustoModel { Id = 1, EmpresaId = 1, Descricao = "Geral - Receita", Tipo = "R", IsSystemDefault = true },
+            new CentroCustoModel { Id = 2, EmpresaId = 1, Descricao = "Geral - Despesa", Tipo = "D", IsSystemDefault = true }
         );
 
         modelBuilder.Entity<PlanoContaModel>().HasData(
-            new PlanoContaModel { Id = 1, Nome = "Geral - Ativo", Tipo = "A", Codigo = "1", IsSystemDefault = true },
-            new PlanoContaModel { Id = 2, Nome = "Geral - Passívo", Tipo = "P", Codigo = "2", IsSystemDefault = true },
-            new PlanoContaModel { Id = 3, Nome = "Geral - Receita", Tipo = "R", Codigo = "3", IsSystemDefault = true },
-            new PlanoContaModel { Id = 4, Nome = "Geral - Despesa", Tipo = "D", Codigo = "4", IsSystemDefault = true }
+            new PlanoContaModel { Id = 1, EmpresaId = 1, Nome = "Geral - Ativo", Tipo = "A", Codigo = "1", IsSystemDefault = true },
+            new PlanoContaModel { Id = 2, EmpresaId = 1, Nome = "Geral - Passívo", Tipo = "P", Codigo = "2", IsSystemDefault = true },
+            new PlanoContaModel { Id = 3, EmpresaId = 1, Nome = "Geral - Receita", Tipo = "R", Codigo = "3", IsSystemDefault = true },
+            new PlanoContaModel { Id = 4, EmpresaId = 1, Nome = "Geral - Despesa", Tipo = "D", Codigo = "4", IsSystemDefault = true }
         );
 
         modelBuilder.Entity<PlanoModel>()
@@ -495,61 +495,49 @@ public class AppDbContext : IdentityDbContext<User>
 
             var clr = et.ClrType;
 
-            // Só aplicamos em tipos multi-empresa
+            // Aplica somente em tipos multi-empresa
             if (!typeof(IEntidadeEmpresa).IsAssignableFrom(clr))
                 continue;
 
-            // Param do lambda: (e) =>
+            // Parâmetros: (e) =>
             var e = Expression.Parameter(clr, "e");
             var thisDb = Expression.Constant(this);
 
-            // (VerTodasEmpresas || (EmpresaSelecionada != null && e.EmpresaId == EmpresaSelecionada.Value))
+            // ---- Empresa (Admin vê todas; senão, precisa EmpresaSelecionada.HasValue && EmpresaId == EmpresaSelecionada.Value)
             var verTodas = Expression.Property(thisDb, nameof(VerTodasEmpresas));
-            var empSel = Expression.Property(thisDb, nameof(EmpresaSelecionada));
-            var empSelNotNull = Expression.NotEqual(empSel, Expression.Constant(null, typeof(int?)));
-            var empresaIdEqSel = Expression.Equal(EfProp<int>(e, nameof(IEntidadeEmpresa.EmpresaId)),
-                                                  Expression.Property(empSel, "Value"));
-            var condEmpresa = Expression.OrElse(verTodas, Expression.AndAlso(empSelNotNull, empresaIdEqSel));
+            var empSel = Expression.Property(thisDb, nameof(EmpresaSelecionada));       // int?
+            var empHas = Expression.Property(empSel, "HasValue");                       // EmpresaSelecionada.HasValue
+            var empEq = Expression.Equal(
+                                EfProp<int>(e, nameof(IEntidadeEmpresa.EmpresaId)),
+                                Expression.Property(empSel, "Value"));                       // e.EmpresaId == EmpresaSelecionada.Value
+            var condEmpresa = Expression.OrElse(verTodas, Expression.AndAlso(empHas, empEq));
 
-            // && e.Ativo == true
-            var condAtivo = Expression.Equal(EfProp<bool>(e, nameof(IEntidadeEmpresa.Ativo)), Expression.Constant(true));
+            // ---- Ativo = true
+            var condAtivo = Expression.Equal(
+                                EfProp<bool>(e, nameof(IEntidadeEmpresa.Ativo)),
+                                Expression.Constant(true));
 
-            // Base: empresa + ativo
+            // Base: Empresa + Ativo
             Expression condicao = Expression.AndAlso(condEmpresa, condAtivo);
 
+            // ---- Profissional (apenas quando a entidade implementa IEntidadeDoProfissional)
             if (typeof(IEntidadeDoProfissional).IsAssignableFrom(clr))
             {
                 var ehUser = Expression.Property(thisDb, nameof(EhUser));
-                var profSel = Expression.Property(thisDb, nameof(ProfissionalAtualId)); // int?
-                var profNotNull = Expression.NotEqual(profSel, Expression.Constant(null, typeof(int?)));
+                var profSel = Expression.Property(thisDb, nameof(ProfissionalAtualId));    // int?
+                var profHas = Expression.Property(profSel, "HasValue");                    // ProfissionalAtualId.HasValue
 
-                // ATENÇÃO: usar int? aqui
-                var profProp = EfProp<int?>(e, nameof(IEntidadeDoProfissional.ProfissionalId));
+                // IMPORTANTE: usar int? aqui para casar com o tipo do banco/Model
+                var profProp = EfProp<int?>(e, nameof(IEntidadeDoProfissional.ProfissionalId)); // e.ProfissionalId (nullable)
+                var profEq = Expression.Equal(profProp, profSel);                          // e.ProfissionalId == ProfissionalAtualId
 
-                // Comparar nullable com nullable (null == X => false, do jeito que queremos)
-                var profEq = Expression.Equal(profProp, profSel);
-
-                // (!EhUser) || (ProfissionalAtualId != null && e.ProfissionalId == ProfissionalAtualId)
-                var condProf = Expression.OrElse(Expression.Not(ehUser), Expression.AndAlso(profNotNull, profEq));
+                // (!EhUser) || (ProfissionalAtualId.HasValue && e.ProfissionalId == ProfissionalAtualId)
+                var condProf = Expression.OrElse(Expression.Not(ehUser), Expression.AndAlso(profHas, profEq));
 
                 condicao = Expression.AndAlso(condicao, condProf);
             }
 
-            // Se a entidade também é “do profissional”, aplica corte extra quando EhUser == true:
-            // && ( !EhUser || (ProfissionalAtualId != null && e.ProfissionalId == ProfissionalAtualId.Value) )
-            //if (typeof(IEntidadeDoProfissional).IsAssignableFrom(clr))
-            //{
-            //    var ehUser = Expression.Property(thisDb, nameof(EhUser));
-            //    var profSel = Expression.Property(thisDb, nameof(ProfissionalAtualId));
-            //    var profNotNull = Expression.NotEqual(profSel, Expression.Constant(null, typeof(int?)));
-            //    var profEq = Expression.Equal(EfProp<int>(e, nameof(IEntidadeDoProfissional.ProfissionalId)),
-            //                                         Expression.Property(profSel, "Value"));
-            //    var condProf = Expression.OrElse(Expression.Not(ehUser), Expression.AndAlso(profNotNull, profEq));
-
-            //    condicao = Expression.AndAlso(condicao, condProf);
-            //}
-
-            // Lambda final: e => <condicao>
+            // Lambda final: e => condicao
             var lambda = Expression.Lambda(condicao, e);
 
             // Aplica o filtro na entidade

@@ -155,14 +155,13 @@ public class StatusService : IStatusInterface
             // Filtro por status
             if (!string.IsNullOrEmpty(status))
             {
-                query = query.Where(x => x.Status.Contains(status));
+                query = query.Where(x => x.Status != null && x.Status.Contains(status));
             }
-
-            // Filtro por cor
             if (!string.IsNullOrEmpty(cor))
             {
-                query = query.Where(x => x.Cor.Contains(cor));
+                query = query.Where(x => x.Cor != null && x.Cor.Contains(cor));
             }
+
 
             query = query.OrderBy(x => x.Id);
 

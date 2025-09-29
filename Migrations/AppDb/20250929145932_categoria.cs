@@ -8,36 +8,61 @@ namespace WebApiSmartClinic.Migrations.AppDb
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            // Adiciona apenas IsSystemDefault (se Ativo já existe)
-            migrationBuilder.AddColumn<bool>(
-                name: "IsSystemDefault",
-                table: "Categoria",
-                type: "boolean",
-                nullable: false,
-                defaultValue: false);
-
-            // Atualiza registros existentes para Ativo = true (se necessário)
-            migrationBuilder.Sql("UPDATE \"Categoria\" SET \"Ativo\" = true WHERE \"Ativo\" = false;");
-
-            // Insere categoria padrão se não existir
+            // Remove as colunas se existirem (limpeza)
             migrationBuilder.Sql(@"
-                INSERT INTO ""Categoria"" (""Id"", ""Ativo"", ""IsSystemDefault"", ""Nome"")
-                SELECT 1, true, true, 'Geral'
-                WHERE NOT EXISTS (SELECT 1 FROM ""Categoria"" WHERE ""Id"" = 1);
+                ALTER TABLE ""Categoria"" DROP COLUMN IF EXISTS ""Ativo"";
+            ");
+
+            migrationBuilder.Sql(@"
+                ALTER TABLE ""Categoria"" DROP COLUMN IF EXISTS ""IsSystemDefault"";
+            ");
+
+            // Adiciona a coluna Ativo
+            migrationBuilder.Sql(@"
+                ALTER TABLE ""Categoria"" ADD COLUMN ""Ativo"" boolean NOT NULL DEFAULT true;
+            ");
+
+            // Adiciona a coluna IsSystemDefault
+            migrationBuilder.Sql(@"
+                ALTER TABLE ""Categoria"" ADD COLUMN ""IsSystemDefault"" boolean NOT NULL DEFAULT false;
+            ");
+
+            // Atualiza a categoria "Geral" para ser IsSystemDefault se já existir
+            migrationBuilder.Sql(@"
+                UPDATE ""Categoria"" 
+                SET ""IsSystemDefault"" = true, ""Ativo"" = true
+                WHERE ""Nome"" = 'Geral';
+            ");
+
+            // Insere a categoria "Geral" apenas se não existir nenhuma com esse nome
+            migrationBuilder.Sql(@"
+                INSERT INTO ""Categoria"" (""Nome"", ""Ativo"", ""IsSystemDefault"")
+                SELECT 'Geral', true, true
+                WHERE NOT EXISTS (
+                    SELECT 1 FROM ""Categoria"" 
+                    WHERE ""Nome"" = 'Geral'
+                );
             ");
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DeleteData(
-                table: "Categoria",
-                keyColumn: "Id",
-                keyValue: 1);
+            // Remove a marcação IsSystemDefault da categoria Geral
+            migrationBuilder.Sql(@"
+                UPDATE ""Categoria"" 
+                SET ""IsSystemDefault"" = false
+                WHERE ""Nome"" = 'Geral';
+            ");
 
-            migrationBuilder.DropColumn(
-                name: "IsSystemDefault",
-                table: "Categoria");
+            // Remove as colunas
+            migrationBuilder.Sql(@"
+                ALTER TABLE ""Categoria"" DROP COLUMN IF EXISTS ""IsSystemDefault"";
+            ");
+
+            migrationBuilder.Sql(@"
+                ALTER TABLE ""Categoria"" DROP COLUMN IF EXISTS ""Ativo"";
+            ");
         }
     }
 }

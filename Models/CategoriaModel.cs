@@ -22,10 +22,10 @@ namespace WebApiSmartClinic.Models
             get => _DataAlteracao?.ToLocalTime();
             set => _DataAlteracao = value.HasValue ? DateTime.SpecifyKind(value.Value.ToUniversalTime(), DateTimeKind.Utc) : null;
         }
-        public bool Ativo { get; set; }
         public string Nome { get; set; } // Nome da Categoria (ex: Estética, Fisioterapia, Pilates)
         public bool IsSystemDefault { get; set; } = true;
         public bool Ativo { get; set; } = true;
+
         [JsonIgnore]
         public virtual ICollection<ProcedimentoModel>? Procedimentos { get; set; } // Relacionamento com Procedimentos
     }

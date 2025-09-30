@@ -275,7 +275,8 @@ public class CadastroClienteService : ICadastroClienteInterface
                     Nome = $"{dto.Nome} {dto.Sobrenome}",
                     Cpf = dto.TitularCPF,
                     Celular = dto.Celular,
-                    EmpresaId = empresa.Id
+                    EmpresaId = empresa.Id,
+                    UsuarioId = userCliente.Id
                 };
 
                 await db.Profissional.AddAsync(profissionalPadrao);

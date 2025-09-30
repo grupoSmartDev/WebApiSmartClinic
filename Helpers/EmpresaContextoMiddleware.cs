@@ -51,8 +51,8 @@ public class EmpresaContextoMiddleware
         // 2) Escopo de empresa ANTES de consultar Profissional
         db.VerTodasEmpresas = ehAdmin;
 
-        if (!db.VerTodasEmpresas)
-        {
+        //if (!db.VerTodasEmpresas)
+        //{
             // Header opcional
             if (ctx.Request.Headers.TryGetValue("X-Empresa-Id", out var h) && int.TryParse(h, out var empresaHeader))
             {
@@ -63,11 +63,15 @@ public class EmpresaContextoMiddleware
             // Padrão (se ainda não definido)
             if (db.EmpresaSelecionada is null && !string.IsNullOrEmpty(usuarioId))
                 db.EmpresaSelecionada = await permissao.ObterEmpresaPadraoAsync(usuarioId);
-        }
-        else
-        {
-            db.EmpresaSelecionada = 0;
-        }
+        //}
+        //else
+        //{
+        //    if (ctx.Request.Headers.TryGetValue("X-Empresa-Id", out var h) && int.TryParse(h, out var empresaHeader))
+        //    {
+        //        if (!string.IsNullOrEmpty(usuarioId))
+        //            db.EmpresaSelecionada = empresaHeader;
+        //    }
+        //}
 
         // 3) Agora sim, se for User, buscar o Profissional
         int? profissionalAtualId = null;
@@ -112,7 +116,7 @@ public class EmpresaContextoMiddleware
         db.EhSupport = ehSupport;
         db.EhUser = ehUser;
         db.ProfissionalAtualId = profissionalAtualId;
-
+        //db.EmpresaSelecionada = 1;
         await _next(ctx);
     }
 

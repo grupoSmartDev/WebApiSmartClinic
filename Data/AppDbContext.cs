@@ -92,6 +92,16 @@ public class AppDbContext : IdentityDbContext<User>
 
         // Entidades que NÃO devem sofrer filtro multi-empresa
         "WebApiSmartClinic.Models.EmpresaModel",
+        "WebApiSmartClinic.Models.ConselhoModel",
+        "WebApiSmartClinic.Models.ProfissaoModel",
+        "WebApiSmartClinic.Models.StatusModel",
+        "WebApiSmartClinic.Models.FormaPagamentoModel",
+        "WebApiSmartClinic.Models.TipoPagamentoModel",
+        "WebApiSmartClinic.Models.SalaModel",
+        "WebApiSmartClinic.Models.ConvenioModel",
+        "WebApiSmartClinic.Models.CentroCustoModel",
+        "WebApiSmartClinic.Models.PlanoContaModel",
+        "WebApiSmartClinic.Models.CategoriaModel",
         "WebApiSmartClinic.Models.UsuarioEmpresaModel",
         // Adicione aqui catálogos “globais do tenant”, se existirem (ex.: TipoPagamentoModel global)
     };
@@ -591,13 +601,13 @@ public class AppDbContext : IdentityDbContext<User>
                 if (entry.State == EntityState.Added)
                 {
                     // Support/User: força EmpresaSelecionada
-                    if (!VerTodasEmpresas)
-                    {
-                        if (EmpresaSelecionada is null)
-                            throw new InvalidOperationException("Empresa selecionada não definida para criação.");
-                        eemp.EmpresaId = EmpresaSelecionada.Value;
-                    }
-                    // Admin: pode aceitar EmpresaId recebido (ou você pode validar aqui também)
+                    //if (!VerTodasEmpresas)
+                    //{
+                    //}
+                    if (EmpresaSelecionada is null)
+                        throw new InvalidOperationException("Empresa selecionada não definida para criação.");
+                    
+                    eemp.EmpresaId = EmpresaSelecionada.Value;
                 }
                 else if (entry.State == EntityState.Modified)
                 {
@@ -631,18 +641,18 @@ public class AppDbContext : IdentityDbContext<User>
 
 
 
-        // Aplica filtro global para TODA entidade com EmpresaId
-        //foreach (var et in modelBuilder.Model.GetEntityTypes())
-        //{
-        //    if (typeof(IEntidadeEmpresa).IsAssignableFrom(et.ClrType))
-        //    {
-        //        var metodo = typeof(AppDbContext)
-        //            .GetMethod(nameof(AplicarFiltroEmpresa), System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)!
-        //            .MakeGenericMethod(et.ClrType);
+    // Aplica filtro global para TODA entidade com EmpresaId
+    //foreach (var et in modelBuilder.Model.GetEntityTypes())
+    //{
+    //    if (typeof(IEntidadeEmpresa).IsAssignableFrom(et.ClrType))
+    //    {
+    //        var metodo = typeof(AppDbContext)
+    //            .GetMethod(nameof(AplicarFiltroEmpresa), System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)!
+    //            .MakeGenericMethod(et.ClrType);
 
-        //        metodo.Invoke(this, new object[] { modelBuilder });
-        //    }
-        //}
+    //        metodo.Invoke(this, new object[] { modelBuilder });
+    //    }
+    //}
 
     //public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     //{

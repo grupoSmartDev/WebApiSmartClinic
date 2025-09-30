@@ -244,7 +244,7 @@ namespace WebApiSmartClinic.Migrations.AppDb
                         FROM information_schema.columns
                         WHERE table_name='Profissional' AND column_name='UsuarioId'
                     ) THEN
-                        ALTER TABLE ""Profissional"" ADD COLUMN ""UsuarioId"" text COLLATE pg_catalog.""default"" NOT NULL;
+                        ALTER TABLE ""Profissional"" ADD COLUMN ""UsuarioId"" text COLLATE pg_catalog.""default"";
                     END IF;
                 END $$;
             ");
@@ -1561,17 +1561,29 @@ namespace WebApiSmartClinic.Migrations.AppDb
                 principalTable: "Profissional",
                 principalColumn: "Id");
 
-            migrationBuilder.DropForeignKey(
-                name: "FK_Profissional_AspNetUsers_UsuarioId",
-                table: "Profissional");
+            migrationBuilder.Sql(@"
+                DO $$
+                BEGIN
+                    IF NOT EXISTS (
+                        SELECT 1 
+                        FROM pg_constraint 
+                        WHERE conname = 'FK_Profissional_AspNetUsers_UsuarioId'
+                    ) THEN
+                        ALTER TABLE ""Profissional""
+                        ADD CONSTRAINT ""FK_Profissional_AspNetUsers_UsuarioId""
+                        FOREIGN KEY (""UsuarioId"") REFERENCES ""AspNetUsers""(""Id"") ON DELETE RESTRICT;
+                    END IF;
+                END $$;
+            ");
 
-            migrationBuilder.AddForeignKey(
-                name: "FK_Profissional_AspNetUsers_UsuarioId",
-                table: "Profissional",
-                column: "UsuarioId",
-                principalTable: "AspNetUsers",
-                principalColumn: "Id",
-                onDelete: ReferentialAction.Restrict);
+
+            //migrationBuilder.AddForeignKey(
+            //    name: "FK_Profissional_AspNetUsers_UsuarioId",
+            //    table: "Profissional",
+            //    column: "UsuarioId",
+            //    principalTable: "AspNetUsers",
+            //    principalColumn: "Id",
+            //    onDelete: ReferentialAction.Restrict);
         }
 
         /// <inheritdoc />

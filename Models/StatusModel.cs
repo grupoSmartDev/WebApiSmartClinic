@@ -20,7 +20,7 @@ public class StatusModel : IEntidadeEmpresa, IEntidadeAuditavel
         get => _DataAlteracao?.ToLocalTime();
         set => _DataAlteracao = value.HasValue ? DateTime.SpecifyKind(value.Value.ToUniversalTime(), DateTimeKind.Utc) : null;
     }
-    public bool Ativo { get; set; }
+    public bool Ativo { get; set; } = true;
     public string Status { get; set; }
     public string Legenda { get; set; }
     public string Cor { get; set; }

@@ -20,7 +20,7 @@ public class FilialModel
         get => _DataAlteracao?.ToLocalTime();
         set => _DataAlteracao = value.HasValue ? DateTime.SpecifyKind(value.Value.ToUniversalTime(), DateTimeKind.Utc) : null;
     }
-    public bool Ativo { get; set; }
+    public bool Ativo { get; set; } = true;    
     public string Nome { get; set; }
     public string? CNPJ { get; set; } // Pode ser null se for só uma unidade
     public string? Endereco { get; set; }

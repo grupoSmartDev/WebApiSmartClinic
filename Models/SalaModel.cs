@@ -21,7 +21,7 @@ public class SalaModel : IEntidadeEmpresa, IEntidadeAuditavel
         get => _DataAlteracao?.ToLocalTime();
         set => _DataAlteracao = value.HasValue ? DateTime.SpecifyKind(value.Value.ToUniversalTime(), DateTimeKind.Utc) : null;
     }
-    public bool Ativo { get; set; }
+    public bool Ativo { get; set; } = true;   
     public string Nome { get; set; }
     public int Capacidade { get; set; }
     public string? Tipo { get; set; }

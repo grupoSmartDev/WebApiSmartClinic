@@ -19,7 +19,7 @@ namespace WebApiSmartClinic.Migrations.AppDb
                     FROM information_schema.columns
                     WHERE table_name='Agenda' AND column_name='Ativo'
                 ) THEN
-                    ALTER TABLE ""Agenda"" ADD COLUMN ""Ativo"" boolean NOT NULL DEFAULT FALSE;
+                    ALTER TABLE ""Agenda"" ADD COLUMN ""Ativo"" boolean NOT NULL DEFAULT TRUE;
                 END IF;
             END $$;
         ");

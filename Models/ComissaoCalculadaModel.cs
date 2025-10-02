@@ -20,8 +20,7 @@ public class ComissaoCalculadaModel : IEntidadeEmpresa, IEntidadeAuditavel, IEnt
         get => _DataAlteracao?.ToLocalTime();
         set => _DataAlteracao = value.HasValue ? DateTime.SpecifyKind(value.Value.ToUniversalTime(), DateTimeKind.Utc) : null;
     }
-    public bool Ativo { get; set; }
-    // Foreign Key para Profissional
+    public bool Ativo { get; set; } = true;    // Foreign Key para Profissional
     public int? ProfissionalId { get; set; }
     public virtual ProfissionalModel Profissional { get; set; }
 

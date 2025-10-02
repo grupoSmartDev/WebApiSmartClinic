@@ -21,7 +21,7 @@ namespace WebApiSmartClinic.Models
             get => _DataAlteracao?.ToLocalTime();
             set => _DataAlteracao = value.HasValue ? DateTime.SpecifyKind(value.Value.ToUniversalTime(), DateTimeKind.Utc) : null;
         }
-        public bool Ativo { get; set; }
+        public bool Ativo { get; set; } = true;        
         public int Parcelas { get; set; }
         public string Descricao { get; set; }
         public bool IsSystemDefault { get; internal set; }

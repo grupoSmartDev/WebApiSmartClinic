@@ -24,7 +24,7 @@ namespace WebApiSmartClinic.Models
             get => _DataAlteracao?.ToLocalTime();
             set => _DataAlteracao = value.HasValue ? DateTime.SpecifyKind(value.Value.ToUniversalTime(), DateTimeKind.Utc) : null;
         }
-        public bool Ativo { get; set; }
+        public bool Ativo { get; set; } = true;
 
         [Required(ErrorMessage = "A descrição é obrigatória.")]
         [StringLength(255, ErrorMessage = "A descrição deve ter no máximo 255 caracteres.")]

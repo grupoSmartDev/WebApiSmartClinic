@@ -21,7 +21,7 @@ namespace WebApiSmartClinic.Models
             get => _DataAlteracao?.ToLocalTime();
             set => _DataAlteracao = value.HasValue ? DateTime.SpecifyKind(value.Value.ToUniversalTime(), DateTimeKind.Utc) : null;
         }
-        public bool Ativo { get; set; }
+        public bool Ativo { get; set; } = true;        
         public string NossoNumero { get; set; } // Número único do boleto
         public string NumeroDocumento { get; set; } // Número do documento
         public decimal Valor { get; set; } // Valor do boleto

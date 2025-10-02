@@ -23,7 +23,7 @@ public class FichaAvaliacaoModel : IEntidadeEmpresa, IEntidadeAuditavel, IEntida
         get => _DataAlteracao?.ToLocalTime();
         set => _DataAlteracao = value.HasValue ? DateTime.SpecifyKind(value.Value.ToUniversalTime(), DateTimeKind.Utc) : null;
     }
-    public bool Ativo { get; set; }
+    public bool Ativo { get; set; } = true;    
     public int? PacienteId { get; set; }
     public PacienteModel? Paciente { get; set; }
     private DateTime? _DataAvaliacao;

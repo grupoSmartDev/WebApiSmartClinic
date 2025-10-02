@@ -21,7 +21,7 @@ namespace WebApiSmartClinic.Models
             get => _DataAlteracao?.ToLocalTime();
             set => _DataAlteracao = value.HasValue ? DateTime.SpecifyKind(value.Value.ToUniversalTime(), DateTimeKind.Utc) : null;
         }
-        public bool Ativo { get; set; }
+        public bool Ativo { get; set; } = true;        
         public string NomeBanco { get; set; } // Nome do Banco
         public string Codigo { get; set; } // Código do Banco (geralmente usado em transações)
         public string Agencia { get; set; } // Agência Bancária

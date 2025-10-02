@@ -22,7 +22,7 @@ public class ExercicioModel : IEntidadeEmpresa, IEntidadeAuditavel
         get => _DataAlteracao?.ToLocalTime();
         set => _DataAlteracao = value.HasValue ? DateTime.SpecifyKind(value.Value.ToUniversalTime(), DateTimeKind.Utc) : null;
     }
-    public bool Ativo { get; set; }
+    public bool Ativo { get; set; } = true;    
     public string Descricao { get; set; }
     public string? Obs { get; set; }
     public int? Peso { get; set; }

@@ -22,7 +22,7 @@ namespace WebApiSmartClinic.Models
             get => _DataAlteracao?.ToLocalTime();
             set => _DataAlteracao = value.HasValue ? DateTime.SpecifyKind(value.Value.ToUniversalTime(), DateTimeKind.Utc) : null;
         }
-        public bool Ativo { get; set; }
+        public bool Ativo { get; set; } = true;        
         public int BancoId { get; set; }  // Relacionamento com a conta bancária associada
         public BancoModel Banco { get; set; }  // Propriedade de navegação para a conta bancária
         private DateTime? _DataTransacao;

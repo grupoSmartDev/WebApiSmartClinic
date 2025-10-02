@@ -19,7 +19,7 @@ public class SalaHorarioModel : IEntidadeEmpresa, IEntidadeAuditavel
         get => _DataAlteracao?.ToLocalTime();
         set => _DataAlteracao = value.HasValue ? DateTime.SpecifyKind(value.Value.ToUniversalTime(), DateTimeKind.Utc) : null;
     }
-    public bool Ativo { get; set; }
+    public bool Ativo { get; set; } = true;    
     public int SalaId { get; set; }
     public DayOfWeek DiaSemana { get; set; }
     public TimeSpan HoraInicio { get; set; }

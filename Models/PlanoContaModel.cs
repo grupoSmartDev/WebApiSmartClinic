@@ -21,7 +21,7 @@ namespace WebApiSmartClinic.Models
             get => _DataAlteracao?.ToLocalTime();
             set => _DataAlteracao = value.HasValue ? DateTime.SpecifyKind(value.Value.ToUniversalTime(), DateTimeKind.Utc) : null;
         }
-        public bool Ativo { get; set; }
+        public bool Ativo { get; set; } = true;        
         public string Codigo { get; set; } // Código único para identificação do plano (e.g., 1.01.02)
         public string Nome { get; set; } // Nome do plano de contas
         public string Tipo { get; set; } // Receita, Despesa, etc.
@@ -49,8 +49,7 @@ namespace WebApiSmartClinic.Models
             get => _DataAlteracao?.ToLocalTime();
             set => _DataAlteracao = value.HasValue ? DateTime.SpecifyKind(value.Value.ToUniversalTime(), DateTimeKind.Utc) : null;
         }
-        public bool Ativo { get; set; }
-        public int PlanoContaId { get; set; } // Relacionamento com o plano pai
+        public bool Ativo { get; set; } = true;        public int PlanoContaId { get; set; } // Relacionamento com o plano pai
         public PlanoContaModel PlanoConta { get; set; } // Referência ao plano pai
         public string Codigo { get; set; } // Código único da subconta
         public string Nome { get; set; } // Nome da subconta

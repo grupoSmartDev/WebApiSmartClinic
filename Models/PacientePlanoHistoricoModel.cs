@@ -20,8 +20,7 @@ public class PacientePlanoHistoricoModel : IEntidadeEmpresa, IEntidadeAuditavel
         get => _DataAlteracao?.ToLocalTime();
         set => _DataAlteracao = value.HasValue ? DateTime.SpecifyKind(value.Value.ToUniversalTime(), DateTimeKind.Utc) : null;
     }
-    public bool Ativo { get; set; }
-    // Foreign Keys
+    public bool Ativo { get; set; } = true;    // Foreign Keys
     public int PacienteId { get; set; }
     public int PlanoId { get; set; }
 

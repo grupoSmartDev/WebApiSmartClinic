@@ -27,7 +27,7 @@ public class ProfissionalModel : IEntidadeEmpresa, IEntidadeAuditavel
         get => _DataAlteracao?.ToLocalTime();
         set => _DataAlteracao = value.HasValue ? DateTime.SpecifyKind(value.Value.ToUniversalTime(), DateTimeKind.Utc) : null;
     }
-    public bool Ativo { get; set; }
+    public bool Ativo { get; set; } = true;    
     public string Email { get; set; }
     public string Nome { get; set; }
     public string? Sobrenome { get; set; }

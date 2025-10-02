@@ -23,8 +23,7 @@ public class SubCentroCustoModel : IEntidadeEmpresa, IEntidadeAuditavel
         get => _DataAlteracao?.ToLocalTime();
         set => _DataAlteracao = value.HasValue ? DateTime.SpecifyKind(value.Value.ToUniversalTime(), DateTimeKind.Utc) : null;
     }
-    public bool Ativo { get; set; }
-
+    public bool Ativo { get; set; } = true;
     // Relacionamento com o Centro de Custo Pai
     public int CentroCustoId { get; set; }
 

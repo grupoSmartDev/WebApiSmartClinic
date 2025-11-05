@@ -1,7 +1,7 @@
 
 namespace WebApiSmartClinic.Dto.Banco
 {
-    public class BancoCreateDto
+    public sealed class BancoCreateDto
     {
         public string NomeBanco { get; set; } 
         public string Codigo { get; set; }

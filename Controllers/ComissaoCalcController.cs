@@ -6,7 +6,7 @@ namespace WebApiSmartClinic.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public class ComissaoCalcController : Controller
+public sealed class ComissaoCalcController : Controller
 {
     private readonly IComissaoService _comissaoService;
 

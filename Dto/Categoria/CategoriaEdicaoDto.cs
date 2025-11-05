@@ -4,7 +4,7 @@ using WebApiSmartClinic.Models;
 
 namespace WebApiSmartClinic.Dto.Categoria
 {
-    public class CategoriaEdicaoDto : CategoriaModel
+    public sealed class CategoriaEdicaoDto : CategoriaModel
     {
         
     }

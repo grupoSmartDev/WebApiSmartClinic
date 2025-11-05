@@ -1,5 +1,4 @@
 ﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using WebApiSmartClinic.Helpers;
 using WebApiSmartClinic.Services.MailService;
@@ -8,7 +7,7 @@ namespace WebApiSmartClinic.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
-public class MailController : ControllerBase
+public sealed class MailController : ControllerBase
 {
     
     private readonly IEmailService emailService;

@@ -4,7 +4,7 @@ using WebApiSmartClinic.Models;
 
 namespace WebApiSmartClinic.Dto.Procedimento
 {
-    public class ProcedimentoEdicaoDto : ProcedimentoModel
+    public sealed class ProcedimentoEdicaoDto : ProcedimentoModel
     {
         
     }

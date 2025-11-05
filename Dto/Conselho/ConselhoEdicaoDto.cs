@@ -3,7 +3,7 @@ using WebApiSmartClinic.Models;
 
 namespace WebApiSmartClinic.Dto.Conselho
 {
-    public class ConselhoEdicaoDto : ConselhoModel
+    public sealed class ConselhoEdicaoDto : ConselhoModel
     {
        
     }

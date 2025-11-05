@@ -3,7 +3,7 @@ using WebApiSmartClinic.Models;
 
 namespace WebApiSmartClinic.Dto.HistoricoTransacao
 {
-    public class HistoricoTransacaoEdicaoDto : HistoricoTransacaoModel
+    public sealed class HistoricoTransacaoEdicaoDto : HistoricoTransacaoModel
     {
         
     }

@@ -3,7 +3,7 @@ using WebApiSmartClinic.Models;
 
 namespace WebApiSmartClinic.Dto.PlanoConta
 {
-    public class PlanoContaEdicaoDto
+    public sealed class PlanoContaEdicaoDto
     {
         public int? Id { get; set; }
         public string Codigo { get; set; } // Código único para identificação do plano (e.g., 1.01.02)
@@ -13,7 +13,7 @@ namespace WebApiSmartClinic.Dto.PlanoConta
         public string? Observacao { get; set; } // Observações sobre o plano
         public ICollection<PlanoContaSubEdicaoDto>? SubPlanos { get; set; } = new List<PlanoContaSubEdicaoDto>(); // Subcontas associadas
     }
-    public class PlanoContaSubEdicaoDto
+    public sealed class PlanoContaSubEdicaoDto
     {
         public int? Id { get; set; }
         public int PlanoContaId { get; set; } // Relacionamento com o plano pai

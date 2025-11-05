@@ -1,5 +1,3 @@
-
-using System.Text.Json.Serialization;
 using WebApiSmartClinic.Models.Abstractions;
 
 namespace WebApiSmartClinic.Models;

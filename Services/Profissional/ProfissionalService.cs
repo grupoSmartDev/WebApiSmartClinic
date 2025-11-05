@@ -42,11 +42,8 @@ public class ProfissionalService : IProfissionalInterface
 
             var consultaProfissional = _context.Profissional.Where(x => x.Cpf == profissionalCreateDto.Cpf).ToArray();
 
-            if(!consultaProfissional.IsNullOrEmpty())
+            if(!consultaProfissional.Any())
             {
-               
-
-    
                 var queryPesquisa = _context.Profissional.AsQueryable();
 
                 resposta = await PaginationHelper.PaginateAsync(queryPesquisa, pageNumber, pageSize);

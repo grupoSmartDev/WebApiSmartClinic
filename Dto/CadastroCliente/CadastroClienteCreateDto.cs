@@ -4,7 +4,7 @@ using WebApiSmartClinic.Models;
 
 namespace WebApiSmartClinic.Dto.CadastroCliente
 {
-    public class CadastroClienteCreateDto
+    public sealed class CadastroClienteCreateDto
     {
         private DateTime? _DataInicio;
         public DateTime? DataInicio

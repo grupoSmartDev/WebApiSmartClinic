@@ -3,7 +3,7 @@ using WebApiSmartClinic.Models;
 
 namespace WebApiSmartClinic.Dto.Exercicio;
 
-public class ExercicioCreateDto
+public sealed class ExercicioCreateDto
 {
     public string Descricao { get; set; }
     public string? Obs { get; set; }

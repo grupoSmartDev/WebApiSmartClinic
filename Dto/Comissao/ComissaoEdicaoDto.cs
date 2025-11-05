@@ -3,7 +3,7 @@ using WebApiSmartClinic.Models;
 
 namespace WebApiSmartClinic.Dto.Comissao
 {
-    public class ComissaoEdicaoDto : ComissaoModel
+    public sealed class ComissaoEdicaoDto : ComissaoModel
     {
        
     }

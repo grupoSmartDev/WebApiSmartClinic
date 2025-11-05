@@ -4,7 +4,7 @@ using WebApiSmartClinic.Models;
 
 namespace WebApiSmartClinic.Dto.Atividade
 {
-    public class AtividadeCreateDto
+    public sealed class AtividadeCreateDto
     {
         public string? Titulo { get; set; }
         public string Descricao { get; set; }

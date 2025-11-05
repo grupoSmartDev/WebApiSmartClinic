@@ -4,7 +4,7 @@ namespace WebApiSmartClinic.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public class HelpersController : Controller
+public sealed class HelpersController : Controller
 {
     private readonly HttpClient _httpClient;
 

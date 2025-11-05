@@ -5,7 +5,7 @@ using WebApiSmartClinic.Models;
 
 namespace WebApiSmartClinic.Dto.Plano;
 
-public class PlanoEdicaoDto : PlanoModel
+public sealed class PlanoEdicaoDto : PlanoModel
 {
     
 }

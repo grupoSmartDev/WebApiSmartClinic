@@ -6,7 +6,7 @@ using WebApiSmartClinic.Models;
 
 namespace WebApiSmartClinic.Dto.Evolucao;
 
-public class EvolucaoCreateDto
+public sealed class EvolucaoCreateDto
 {
     public string Observacao { get; set; }
     public DateTime DataEvolucao { get; set; }

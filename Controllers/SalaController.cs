@@ -1,5 +1,4 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using WebApiSmartClinic.Dto.Sala;
 using WebApiSmartClinic.Models;
 using WebApiSmartClinic.Services.Sala;
@@ -8,7 +7,7 @@ namespace WebApiSmartClinic.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
-public class SalaController : ControllerBase
+public sealed class SalaController : ControllerBase
 {
     private readonly ISalaInterface _context;
     public SalaController(ISalaInterface sala)

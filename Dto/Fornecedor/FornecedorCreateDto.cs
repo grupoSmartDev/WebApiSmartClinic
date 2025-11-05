@@ -1,7 +1,7 @@
 
 namespace WebApiSmartClinic.Dto.Fornecedor
 {
-    public class FornecedorCreateDto
+    public sealed class FornecedorCreateDto
     {
         public string? Razao { get; set; }
         public string? Fantasia { get; set; }

@@ -1,6 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 
-public class SalaHorarioCreateDto
+public sealed class SalaHorarioCreateDto
 {
     public int SalaId { get; set; }
     public DayOfWeek DiaSemana { get; set; }

@@ -2,7 +2,7 @@
 
 namespace WebApiSmartClinic.Dto.Status;
 
-public class StatusEdicaoDto : StatusModel
+public sealed class StatusEdicaoDto : StatusModel
 {
     
 }

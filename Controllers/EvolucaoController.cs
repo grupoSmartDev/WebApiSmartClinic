@@ -1,4 +1,3 @@
-
 using Microsoft.AspNetCore.Mvc;
 using WebApiSmartClinic.Dto.Evolucao;
 using WebApiSmartClinic.Models;
@@ -8,7 +7,7 @@ namespace WebApiSmartClinic.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
-public class EvolucaoController : ControllerBase
+public sealed class EvolucaoController : ControllerBase
 {
     private readonly IEvolucaoInterface _evolucao;
     public EvolucaoController(IEvolucaoInterface evolucao)

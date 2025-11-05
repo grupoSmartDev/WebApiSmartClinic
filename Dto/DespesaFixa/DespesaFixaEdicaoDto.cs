@@ -2,6 +2,6 @@
 
 namespace WebApiSmartClinic.Dto.DespesaFixa;
 
-public class DespesaFixaEdicaoDto : DespesaFixaModel
+public sealed class DespesaFixaEdicaoDto : DespesaFixaModel
 {
 }

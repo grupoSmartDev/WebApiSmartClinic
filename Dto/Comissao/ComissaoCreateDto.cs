@@ -3,7 +3,7 @@ using WebApiSmartClinic.Models;
 
 namespace WebApiSmartClinic.Dto.Comissao
 {
-    public class ComissaoCreateDto
+    public sealed class ComissaoCreateDto
     {
         public int ProfissionalId { get; set; }
         public ProfissionalModel Profissional { get; set; }  // Relação com o profissional

@@ -4,7 +4,7 @@ using WebApiSmartClinic.Models;
 
 namespace WebApiSmartClinic.Dto.Convenio
 {
-    public class ConvenioCreateDto
+    public sealed class ConvenioCreateDto
     {
         public string Nome { get; set; }
         public string RegistroAvs { get; set; }

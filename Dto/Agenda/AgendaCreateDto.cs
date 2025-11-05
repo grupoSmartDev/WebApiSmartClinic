@@ -1,47 +1,44 @@
-
-using System.ComponentModel.DataAnnotations;
 using WebApiSmartClinic.Dto.Financ_Receber;
 using WebApiSmartClinic.Models;
 
-namespace WebApiSmartClinic.Dto.Agenda
-{
-    public class AgendaCreateDto
-    {
-        public string Titulo { get; set; }
-        public DateTime? Data { get; set; }
-        public string HoraInicio { get; set; }
-        public string HoraFim { get; set; }
-        public int? PacienteId { get; set; }
-        public PacienteModel? Paciente { get; set; }
-        public int? ProfissionalId { get; set; }
-        public ProfissionalModel? Profissional { get; set; }
-        public bool Convenio { get; set; } = false;
-        public decimal? Valor { get; set; }
-        public string? FormaPagamento { get; set; }
-        public bool Pago { get; set; }
-        public int? FinancReceberId { get; set; }
-        public Financ_ReceberCreateDto? FinancReceber { get; set; }
-        public int? SalaId { get; set; }
-        public int? PacoteId { get; set; }
-        public PlanoModel? Pacote { get; set; }
-        public bool LembreteSms { get; set; } = false;
-        public bool LembreteWhatsapp { get; set; } = false;
-        public bool LembreteEmail { get; set; } = false;
-        public int? StatusId { get; set; }
-        public StatusModel? Status { get; set; }
-        public bool IntegracaoGmail { get; set; } = false;
-        public bool StatusFinal { get; set; } = false;
-        public bool Avulso { get; set; } = false;
-        public DateTime? DataFimRecorrencia { get; set; }
-        public List<DiaRecorrenciaDto>? DiasRecorrencia { get; set; }
-    }
+namespace WebApiSmartClinic.Dto.Agenda;
 
-    public class DiaRecorrenciaDto
-    {
-        public DayOfWeek DiaSemana { get; set; }
-        public string HoraInicio { get; set; }
-        public string HoraFim { get; set; }
-        public int? ProfissionalId { get; set; }
-        public int? SalaId { get; set; }
-    }
+public sealed class AgendaCreateDto
+{
+    public string Titulo { get; set; }
+    public DateTime? Data { get; set; }
+    public string HoraInicio { get; set; }
+    public string HoraFim { get; set; }
+    public int? PacienteId { get; set; }
+    public PacienteModel? Paciente { get; set; }
+    public int? ProfissionalId { get; set; }
+    public ProfissionalModel? Profissional { get; set; }
+    public bool Convenio { get; set; } = false;
+    public decimal? Valor { get; set; }
+    public string? FormaPagamento { get; set; }
+    public bool Pago { get; set; }
+    public int? FinancReceberId { get; set; }
+    public Financ_ReceberCreateDto? FinancReceber { get; set; }
+    public int? SalaId { get; set; }
+    public int? PacoteId { get; set; }
+    public PlanoModel? Pacote { get; set; }
+    public bool LembreteSms { get; set; } = false;
+    public bool LembreteWhatsapp { get; set; } = false;
+    public bool LembreteEmail { get; set; } = false;
+    public int? StatusId { get; set; }
+    public StatusModel? Status { get; set; }
+    public bool IntegracaoGmail { get; set; } = false;
+    public bool StatusFinal { get; set; } = false;
+    public bool Avulso { get; set; } = false;
+    public DateTime? DataFimRecorrencia { get; set; }
+    public List<DiaRecorrenciaDto>? DiasRecorrencia { get; set; }
+}
+
+public class DiaRecorrenciaDto
+{
+    public DayOfWeek DiaSemana { get; set; }
+    public string HoraInicio { get; set; }
+    public string HoraFim { get; set; }
+    public int? ProfissionalId { get; set; }
+    public int? SalaId { get; set; }
 }

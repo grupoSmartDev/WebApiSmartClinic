@@ -4,7 +4,7 @@ using WebApiSmartClinic.Models;
 
 namespace WebApiSmartClinic.Dto.Exercicio
 {
-    public class ExercicioEdicaoDto : ExercicioModel
+    public sealed class ExercicioEdicaoDto : ExercicioModel
     {
         
     }

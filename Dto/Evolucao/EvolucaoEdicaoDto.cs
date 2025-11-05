@@ -6,7 +6,7 @@ using WebApiSmartClinic.Models;
 
 namespace WebApiSmartClinic.Dto.Evolucao;
 
-public class EvolucaoEdicaoDto : EvolucaoModel
+public sealed class EvolucaoEdicaoDto : EvolucaoModel
 {
     
 }

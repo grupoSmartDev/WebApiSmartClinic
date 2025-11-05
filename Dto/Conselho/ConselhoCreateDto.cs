@@ -1,7 +1,7 @@
 
 namespace WebApiSmartClinic.Dto.Conselho
 {
-    public class ConselhoCreateDto
+    public sealed class ConselhoCreateDto
     {
         public string Nome { get; set; }
         public string Sigla { get; set; }

@@ -3,7 +3,7 @@ using WebApiSmartClinic.Models;
 
 namespace WebApiSmartClinic.Dto.Boleto
 {
-    public class BoletoEdicaoDto : BoletoModel
+    public sealed class BoletoEdicaoDto : BoletoModel
     {
         
     }

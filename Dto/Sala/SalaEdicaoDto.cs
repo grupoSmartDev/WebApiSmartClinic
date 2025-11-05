@@ -3,7 +3,7 @@ using WebApiSmartClinic.Models;
 
 namespace WebApiSmartClinic.Dto.Sala;
 
-public class SalaEdicaoDto : SalaModel
+public sealed class SalaEdicaoDto : SalaModel
 {
     
 }

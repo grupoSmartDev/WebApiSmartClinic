@@ -6,7 +6,7 @@ using WebApiSmartClinic.Models;
 
 namespace WebApiSmartClinic.Dto.Financ_Pagar;
 
-public class Financ_PagarCreateDto
+public sealed class Financ_PagarCreateDto
 {
     public int? IdOrigem { get; set; }
     public int? NrDocto { get; set; }
@@ -44,7 +44,7 @@ public class Financ_PagarCreateDto
 
 }
 
-public class Financ_PagarSubCreateDto
+public sealed class Financ_PagarSubCreateDto
 {
     
     public int? financPagarId { get; set; }

@@ -1,6 +1,3 @@
-
-using static System.Runtime.InteropServices.JavaScript.JSType;
-using System.Runtime.Intrinsics.X86;
 using System.Text.Json.Serialization;
 
 namespace WebApiSmartClinic.Models;
@@ -76,11 +73,16 @@ public class EmpresaModel
     public ICollection<FilialModel>? Filiais { get; set; } = new List<FilialModel>();
     [JsonIgnore]
     public ICollection<SubscriptionModel> Subscription { get; set; } = new List<SubscriptionModel>();
-    public string DatabaseConnectionString { get; internal set; }
-
+    public string DatabaseConnectionString { get; set; }
     public string? AsaasCustomerId { get; set; } // ID do customer no Asaas
     public string? AsaasSubscriptionId { get; set; } // ID da subscription no Asaas
     public string? PeriodoCobranca { get; set; } // "monthly" ou "semiannual"
     public decimal PrecoSelecionado { get; set; }
-
+    public string? InscricaoEstadual { get; set; }
+    public string? InscricaoMunicipal { get; set; }
+    public string? Endereco { get; set; }
+    public string? Cep { get; set; }
+    public string? Cidade { get; set; }
+    public string? Estado { get; set; }
+    public string? SiteOuRedeSocial { get; set; }
 }

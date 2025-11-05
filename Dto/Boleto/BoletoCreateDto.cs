@@ -1,9 +1,8 @@
-
 using WebApiSmartClinic.Models;
 
 namespace WebApiSmartClinic.Dto.Boleto
 {
-    public class BoletoCreateDto
+    public sealed class BoletoCreateDto
     {
         public string NossoNumero { get; set; } // Número único do boleto
         public string NumeroDocumento { get; set; } // Número do documento

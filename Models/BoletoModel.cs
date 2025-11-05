@@ -1,59 +1,57 @@
-
 using WebApiSmartClinic.Models.Abstractions;
 
-namespace WebApiSmartClinic.Models
+namespace WebApiSmartClinic.Models;
+
+public class BoletoModel : IEntidadeEmpresa, IEntidadeAuditavel
 {
-    public class BoletoModel : IEntidadeEmpresa, IEntidadeAuditavel
+    public int Id { get; set; }
+    public int EmpresaId { get; set; }
+    public string? UsuarioCriacaoId { get; set; }
+    private DateTime _DataCriacao = DateTime.UtcNow;
+    public DateTime DataCriacao
     {
-        public int Id { get; set; }
-        public int EmpresaId { get; set; }
-        public string? UsuarioCriacaoId { get; set; }
-        private DateTime _DataCriacao = DateTime.UtcNow;
-        public DateTime DataCriacao
-        {
-            get => _DataCriacao.ToLocalTime();
-            set => _DataCriacao = DateTime.SpecifyKind(value.ToUniversalTime(), DateTimeKind.Utc);
-        }
-        public string? UsuarioAlteracaoId { get; set; }
-        private DateTime? _DataAlteracao;
-        public DateTime? DataAlteracao
-        {
-            get => _DataAlteracao?.ToLocalTime();
-            set => _DataAlteracao = value.HasValue ? DateTime.SpecifyKind(value.Value.ToUniversalTime(), DateTimeKind.Utc) : null;
-        }
-        public bool Ativo { get; set; } = true;        
-        public string NossoNumero { get; set; } // Número único do boleto
-        public string NumeroDocumento { get; set; } // Número do documento
-        public decimal Valor { get; set; } // Valor do boleto
-        private DateTime? _DataVencimento;
-        public DateTime? DataVencimento 
-        {
-            get => _DataVencimento;
-            set => _DataVencimento = value.HasValue ? DateTime.SpecifyKind(value.Value, DateTimeKind.Utc) : null;
-        } // Data de vencimento do boleto
-        public decimal Juros { get; set; } // Valor de juros (se aplicável)
-        public decimal Multa { get; set; } // Valor de multa (se aplicável)
-
-        // Dados do Sacado (quem vai pagar o boleto)
-        public string NomeSacado { get; set; }
-        public string DocumentoSacado { get; set; } // CPF ou CNPJ
-
-        // Relacionamento com o banco emissor do boleto
-        public int BancoId { get; set; }
-        public BancoModel? Banco { get; set; }
-
-        // Informações de status do boleto
-        public bool Pago { get; set; }
-
-        private DateTime? _dataPagamento;
-        public DateTime? DataPagamento 
-        {
-            get => _dataPagamento;
-            set => _dataPagamento = value.HasValue ? DateTime.SpecifyKind(value.Value, DateTimeKind.Utc) : null;
-        }
-
-        // Propriedades adicionais para homologação
-        public string CodigoDeBarras { get; set; } // Código de barras gerado pelo banco
-        public string LinhaDigitavel { get; set; } // Linha digitável gerada pelo banco
+        get => _DataCriacao.ToLocalTime();
+        set => _DataCriacao = DateTime.SpecifyKind(value.ToUniversalTime(), DateTimeKind.Utc);
     }
+    public string? UsuarioAlteracaoId { get; set; }
+    private DateTime? _DataAlteracao;
+    public DateTime? DataAlteracao
+    {
+        get => _DataAlteracao?.ToLocalTime();
+        set => _DataAlteracao = value.HasValue ? DateTime.SpecifyKind(value.Value.ToUniversalTime(), DateTimeKind.Utc) : null;
+    }
+    public bool Ativo { get; set; } = true;        
+    public string NossoNumero { get; set; } // Número único do boleto
+    public string NumeroDocumento { get; set; } // Número do documento
+    public decimal Valor { get; set; } // Valor do boleto
+    private DateTime? _DataVencimento;
+    public DateTime? DataVencimento 
+    {
+        get => _DataVencimento;
+        set => _DataVencimento = value.HasValue ? DateTime.SpecifyKind(value.Value, DateTimeKind.Utc) : null;
+    } // Data de vencimento do boleto
+    public decimal Juros { get; set; } // Valor de juros (se aplicável)
+    public decimal Multa { get; set; } // Valor de multa (se aplicável)
+
+    // Dados do Sacado (quem vai pagar o boleto)
+    public string NomeSacado { get; set; }
+    public string DocumentoSacado { get; set; } // CPF ou CNPJ
+
+    // Relacionamento com o banco emissor do boleto
+    public int BancoId { get; set; }
+    public BancoModel? Banco { get; set; }
+
+    // Informações de status do boleto
+    public bool Pago { get; set; }
+
+    private DateTime? _dataPagamento;
+    public DateTime? DataPagamento 
+    {
+        get => _dataPagamento;
+        set => _dataPagamento = value.HasValue ? DateTime.SpecifyKind(value.Value, DateTimeKind.Utc) : null;
+    }
+
+    // Propriedades adicionais para homologação
+    public string CodigoDeBarras { get; set; } // Código de barras gerado pelo banco
+    public string LinhaDigitavel { get; set; } // Linha digitável gerada pelo banco
 }

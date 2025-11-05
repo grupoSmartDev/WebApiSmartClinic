@@ -3,7 +3,7 @@ using WebApiSmartClinic.Models;
 
 namespace WebApiSmartClinic.Dto.CentroCusto
 {
-    public class CentroCustoEdicaoDto : CentroCustoModel
+    public sealed class CentroCustoEdicaoDto : CentroCustoModel
     {
         public int Id { get; set; }
         public string Tipo { get; set; }

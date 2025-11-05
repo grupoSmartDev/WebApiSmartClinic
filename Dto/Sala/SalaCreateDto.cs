@@ -3,7 +3,7 @@ using WebApiSmartClinic.Dto.SalaHorario;
 
 namespace WebApiSmartClinic.Dto.Sala;
 
-public class SalaCreateDto
+public sealed class SalaCreateDto
 {
     public string Nome { get; set; }
     public int Capacidade { get; set; }

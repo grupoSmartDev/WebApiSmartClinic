@@ -3,7 +3,7 @@ using WebApiSmartClinic.Models;
 
 namespace WebApiSmartClinic.Dto.FichaAvaliacao
 {
-    public class FichaAvaliacaoCreateDto
+    public sealed class FichaAvaliacaoCreateDto
     {
         public int? PacienteId { get; set; }
         public PacienteModel? Paciente { get; set; }

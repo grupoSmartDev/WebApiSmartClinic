@@ -7,7 +7,7 @@ using WebApiSmartClinic.Models;
 
 namespace WebApiSmartClinic.Dto.Plano;
 
-public class PlanoCreateDto
+public sealed class PlanoCreateDto
 {
 
     [Required(ErrorMessage = "A descrição é obrigatória.")]

@@ -6,7 +6,7 @@ using WebApiSmartClinic.Models;
 
 namespace WebApiSmartClinic.Dto.Paciente
 {
-    public class PacienteEdicaoDto : PacienteModel
+    public sealed class PacienteEdicaoDto : PacienteModel
     {
         
     }

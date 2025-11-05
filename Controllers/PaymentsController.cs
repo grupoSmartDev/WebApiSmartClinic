@@ -1,13 +1,12 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using static WebApiSmartClinic.Models.stripe.StripeModels;
+﻿using Microsoft.AspNetCore.Mvc;
 using WebApiSmartClinic.Services.StripeService;
+using static WebApiSmartClinic.Models.stripe.StripeModels;
 
 namespace WebApiSmartClinic.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public class PaymentController : ControllerBase
+public sealed class PaymentController : ControllerBase
 {
     private readonly IStripeService _stripeService;
     private readonly IConfiguration _configuration;

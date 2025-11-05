@@ -2,7 +2,7 @@
 
 namespace WebApiSmartClinic.Dto.SalaHorario
 {
-    public class SalaHorarioEdicaoDto : SalaHorarioModel
+    public sealed class SalaHorarioEdicaoDto : SalaHorarioModel
     {
     }
 }

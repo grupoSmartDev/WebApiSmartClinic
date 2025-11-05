@@ -3,7 +3,7 @@ using WebApiSmartClinic.Models;
 
 namespace WebApiSmartClinic.Dto.Profissional
 {
-    public class ProfissionalCreateDto
+    public sealed class ProfissionalCreateDto
     {
         public string Email { get; set; }
         public string Nome { get; set; }

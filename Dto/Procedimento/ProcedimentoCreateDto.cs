@@ -4,7 +4,7 @@ using WebApiSmartClinic.Models;
 
 namespace WebApiSmartClinic.Dto.Procedimento
 {
-    public class ProcedimentoCreateDto
+    public sealed class ProcedimentoCreateDto
     {
         public string Nome { get; set; } // Nome do Procedimento
         public string Descricao { get; set; } // Descrição detalhada do Procedimento

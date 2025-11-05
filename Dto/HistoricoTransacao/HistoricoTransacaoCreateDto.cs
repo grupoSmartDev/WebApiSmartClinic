@@ -4,7 +4,7 @@ using WebApiSmartClinic.Models;
 
 namespace WebApiSmartClinic.Dto.HistoricoTransacao
 {
-    public class HistoricoTransacaoCreateDto
+    public sealed class HistoricoTransacaoCreateDto
     {
         public int BancoId { get; set; }  // Relacionamento com a conta bancária associada
         public BancoModel Banco { get; set; }  // Propriedade de navegação para a conta bancária

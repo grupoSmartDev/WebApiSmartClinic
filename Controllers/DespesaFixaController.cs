@@ -1,7 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using WebApiSmartClinic.Dto.DespesaFixa;
-using WebApiSmartClinic.Dto.Evolucao;
 using WebApiSmartClinic.Models;
 using WebApiSmartClinic.Services.DespesaFixa;
 
@@ -9,7 +7,7 @@ namespace WebApiSmartClinic.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
-public class DespesaFixaController : ControllerBase
+public sealed class DespesaFixaController : ControllerBase
 {
     private readonly IDespesaFixaInterface _despesaFixa;
 

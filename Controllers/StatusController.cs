@@ -1,5 +1,4 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using WebApiSmartClinic.Dto.Status;
 using WebApiSmartClinic.Models;
 using WebApiSmartClinic.Services.Status;
@@ -8,7 +7,7 @@ namespace WebApiSmartClinic.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
-public class StatusController : ControllerBase
+public sealed class StatusController : ControllerBase
 {
     private readonly IStatusInterface _status;
     public StatusController(IStatusInterface status)

@@ -4,7 +4,7 @@ using WebApiSmartClinic.Services.Empresa;
 
 namespace WebApiSmartClinic.Controllers;
 
-public class EmpresaController : Controller
+public sealed class EmpresaController : Controller
 {
 
     private readonly EmpresaService _companyService;
@@ -28,7 +28,7 @@ public class EmpresaController : Controller
     }
 }
 
-public class EmpresaCreateDto
+public sealed class EmpresaCreateDto
 {
     public string Nome { get; set; }
 }

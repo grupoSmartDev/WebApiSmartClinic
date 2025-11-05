@@ -8,7 +8,7 @@ using WebApiSmartClinic.Dto.Financ_Pagar;
 
 namespace WebApiSmartClinic.Dto.DespesaFixa;
 
-public class DespesaFixaCreateDto
+public sealed class DespesaFixaCreateDto
 {
     [Required]
     [StringLength(150)]

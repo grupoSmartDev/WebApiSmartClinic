@@ -4,7 +4,7 @@ using WebApiSmartClinic.Models;
 
 namespace WebApiSmartClinic.Dto.Agenda
 {
-    public class AgendaEdicaoDto : AgendaModel
+    public sealed class AgendaEdicaoDto : AgendaModel
     {
 
     }

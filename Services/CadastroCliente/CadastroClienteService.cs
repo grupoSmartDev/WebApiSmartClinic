@@ -1,4 +1,4 @@
-
+﻿
 using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -69,23 +69,15 @@ public class CadastroClienteService : ICadastroClienteInterface
     {
         var resposta = new ResponseModel<EmpresaModel>();
 
-        // 0) Chaves e conexões
-        var cpfKey = dto.TitularCPF;                  // chave do tenant (UserKey)
-        var novoBanco = SanitizarNomeBanco(cpfKey);   // nome do DB: use apenas [a-zA-Z0-9_]
-        var templateDb = "ClinicSmart";      // <<< configure aqui ou via appsettings
-        var novoOwner = "postgres";                  // <<< se quiser definir o OWNER
-
-        // conexões (troque para configs)
+        var cpfKey = dto.TitularCPF;
+        var novoBanco = SanitizarNomeBanco(cpfKey);
+        var templateDb = "ClinicSmart";
+        var novoOwner = "postgres";
         var novaStringConexao = $"Host=62.72.51.219;Port=5432;Database={novoBanco};Username=postgres;Password=Elefante01!;";
-        //var novaStringConexao = $"Host=localhost;Port=5432;Database={novoBanco};Username=postgres;Password=Elefante01!;";
-
-        // Base "master" onde você pode executar CREATE DATABASE e matar conexões do template
         var masterConnection = $"Host=62.72.51.219;Port=5432;Database=connections;Username=postgres;Password=Elefante01!;";
-        //var masterConnection = "Host=localhost;Port=5432;Database=postgres;Username=postgres;Password=Elefante01!;";
 
         try
         {
-            // 1) Evita duplicidade da key do tenant
             bool existe = await _contextDataConnection.DataConnection.AnyAsync(c => c.Key == cpfKey);
             if (existe)
             {
@@ -94,7 +86,6 @@ public class CadastroClienteService : ICadastroClienteInterface
                 return resposta;
             }
 
-            // 2) Cria o DB clonando do TEMPLATE (rápido!)
             try
             {
                 await CriarBancoPorTemplateAsync(masterConnection, novoBanco, templateDb, novoOwner);
@@ -106,15 +97,12 @@ public class CadastroClienteService : ICadastroClienteInterface
                 return resposta;
             }
 
-            // 3) Registra a connection string na base 'connections'
             var novaConexao = new DataConnections { Key = cpfKey, StringConnection = novaStringConexao };
             await _contextDataConnection.DataConnection.AddAsync(novaConexao);
             await _contextDataConnection.SaveChangesAsync();
 
-            // 4) Define a connection do tenant atual para o restante da operação
             _connectionStringProvider.SetConnectionString(novaStringConexao);
 
-            // 5) Único escopo para trabalhar no DB recém criado (NÃO precisamos de MigrateAsync)
             await using var scope = _scopeFactory.CreateAsyncScope();
             var sp = scope.ServiceProvider;
             var db = sp.GetRequiredService<AppDbContext>();
@@ -122,9 +110,6 @@ public class CadastroClienteService : ICadastroClienteInterface
             var roleMgr = sp.GetRequiredService<RoleManager<IdentityRole>>();
             var authSvc = sp.GetRequiredService<AuthService>();
 
-            // 6) (NÃO precisa mais) — db.Database.MigrateAsync();
-
-            // =================== NOVA LÓGICA ASAAS (mantida) ===================
             string? asaasCustomerId = null;
             string? asaasSubscriptionId = null;
 
@@ -157,12 +142,11 @@ public class CadastroClienteService : ICadastroClienteInterface
                     var subscription = await _asaasService.CreateSubscriptionAsync(subscriptionRequest);
                     asaasSubscriptionId = subscription.id;
                 }
-                catch (Exception) { /* segue sem travar cadastro */ }
+                catch (Exception) { }
             }
 
             try
             {
-                // 7.1) Cria a Empresa (matriz)
                 var empresa = new EmpresaModel
                 {
                     Nome = dto.Nome,
@@ -172,10 +156,10 @@ public class CadastroClienteService : ICadastroClienteInterface
                     TitularCPF = dto.TitularCPF,
                     CNPJEmpresaMatriz = dto.CNPJEmpresaMatriz,
                     Especialidade = dto.Especialidade,
-                    PlanoEscolhido = dto.PlanoEscolhido,
+                    PlanoEscolhido = PlanoEscolhidoLp(dto.PrecoSelecionado),
                     TipoPagamentoId = (int)(dto.TipoPagamentoId == null || dto.TipoPagamentoId == 0 ? 1 : dto.TipoPagamentoId),
-                    QtdeLicencaEmpresaPermitida = 1,
-                    QtdeLicencaUsuarioPermitida = 3,
+                    QtdeLicencaEmpresaPermitida = ObterLicencasPermitidas(PlanoEscolhidoLp(dto.PrecoSelecionado)),
+                    QtdeLicencaUsuarioPermitida = ObterLicencasPermitidas(PlanoEscolhidoLp(dto.PrecoSelecionado)),
                     QtdeLicencaEmpresaUtilizada = 0,
                     QtdeLicencaUsuarioUtilizada = 0,
                     DataInicio = DateTime.UtcNow,
@@ -195,9 +179,8 @@ public class CadastroClienteService : ICadastroClienteInterface
                 };
 
                 await db.Empresas.AddAsync(empresa);
-                await db.SaveChangesAsync(); // garante empresa.Id
+                await db.SaveChangesAsync(); 
 
-                // 7.2) Garante papéis
                 async Task GarantirPerfisAsync()
                 {
                     foreach (var p in new[] { Perfis.Admin, Perfis.Support, Perfis.User })
@@ -206,7 +189,6 @@ public class CadastroClienteService : ICadastroClienteInterface
                 }
                 await GarantirPerfisAsync();
 
-                // 7.3) Cria usuários padrão
                 var userAdminReq = new UserCreateRequest
                 {
                     FirstName = "Admin",
@@ -238,7 +220,6 @@ public class CadastroClienteService : ICadastroClienteInterface
                 if (userCliente != null && !(await userMgr.IsInRoleAsync(userCliente, Perfis.Admin)))
                     await userMgr.AddToRoleAsync(userCliente, Perfis.Admin);
 
-                // 7.4) Vincula usuários à Empresa (EmpresaPadrao = true)
                 if (userAdmin != null)
                     db.UsuarioEmpresas.Add(new UsuarioEmpresaModel
                     {
@@ -263,12 +244,10 @@ public class CadastroClienteService : ICadastroClienteInterface
 
                 await db.SaveChangesAsync();
 
-                // 7.5) MODO CONTEXTO: setar flags para criar registros multi-empresa fora do middleware
-                db.VerTodasEmpresas = true;                 // ignora exigência de EmpresaSelecionada
-                db.EmpresaSelecionada = empresa.Id;         // opcional, por consistência
+                db.VerTodasEmpresas = true;
+                db.EmpresaSelecionada = empresa.Id;
                 db.UsuarioAtualId = userAdmin?.Id ?? "system";
 
-                // 7.6) Cria Profissional padrão
                 var profissionalPadrao = new ProfissionalModel
                 {
                     Email = dto.Email,
@@ -288,12 +267,11 @@ public class CadastroClienteService : ICadastroClienteInterface
             }
             catch (Exception exCriacao)
             {
-                // se falhar depois de criar o banco/clonar template, limpar DB e mapping
                 try
                 {
                     await DroparBancoSeFalharAsync(masterConnection, novoBanco);
                 }
-                catch { /* best effort */ }
+                catch { }
 
                 await RemoverDataConnectionSeFalharAsync(cpfKey);
 
@@ -302,7 +280,6 @@ public class CadastroClienteService : ICadastroClienteInterface
                 return resposta;
             }
 
-            // 8) E-mail de boas-vindas (best-effort)
             try
             {
                 await _mailService.SendEmailAsync(new MailRequest
@@ -312,7 +289,7 @@ public class CadastroClienteService : ICadastroClienteInterface
                     Body = GetHtmlContent(dto.Nome)
                 });
             }
-            catch { /* não interrompe o fluxo */ }
+            catch { }
         }
         catch (Exception ex)
         {
@@ -325,7 +302,6 @@ public class CadastroClienteService : ICadastroClienteInterface
 
     private static string SanitizarNomeBanco(string nome)
     {
-        // permite somente letras, números e underscore (evita injeção em identificadores)
         if (string.IsNullOrWhiteSpace(nome) || !Regex.IsMatch(nome, "^[A-Za-z0-9_]+$"))
             throw new InvalidOperationException("Nome de banco inválido. Use apenas letras, números e underscore.");
         return nome;
@@ -336,7 +312,6 @@ public class CadastroClienteService : ICadastroClienteInterface
         await using var conn = new NpgsqlConnection(masterConnection);
         await conn.OpenAsync();
 
-        // garante que o TEMPLATE não tem conexões abertas
         await using (var kill = conn.CreateCommand())
         {
             kill.CommandText = @"SELECT pg_terminate_backend(pid)
@@ -346,10 +321,8 @@ public class CadastroClienteService : ICadastroClienteInterface
             await kill.ExecuteNonQueryAsync();
         }
 
-        // cria o banco novo a partir do TEMPLATE
         await using (var cmd = conn.CreateCommand())
         {
-            // IMPORTANTE: nomes já estão sanitizados (sem aspas perigosas)
             cmd.CommandText = $@"CREATE DATABASE ""{novoBanco}"" WITH TEMPLATE ""{templateDb}"" OWNER ""{owner}"";";
             await cmd.ExecuteNonQueryAsync();
         }
@@ -360,7 +333,6 @@ public class CadastroClienteService : ICadastroClienteInterface
         await using var conn = new NpgsqlConnection(masterConnection);
         await conn.OpenAsync();
 
-        // derruba conexões no banco alvo
         await using (var kill = conn.CreateCommand())
         {
             kill.CommandText = @"SELECT pg_terminate_backend(pid)
@@ -370,7 +342,6 @@ public class CadastroClienteService : ICadastroClienteInterface
             await kill.ExecuteNonQueryAsync();
         }
 
-        // drop database
         await using (var drop = conn.CreateCommand())
         {
             drop.CommandText = $@"DROP DATABASE IF EXISTS ""{nomeBanco}"";";
@@ -483,7 +454,6 @@ public class CadastroClienteService : ICadastroClienteInterface
         return htmlContent;
     }
 
-    // NOVOS MÉTODOS AUXILIARES
     private string MapearTipoPagamento(int tipoPagamentoId)
     {
         return tipoPagamentoId switch
@@ -500,11 +470,6 @@ public class CadastroClienteService : ICadastroClienteInterface
         return telefone?.Replace("(", "").Replace(")", "").Replace(" ", "").Replace("-", "");
     }
 
-    private string LimparCPF(string cpf)
-    {
-        return cpf?.Replace(".", "").Replace("-", "");
-    }
-
     private int ObterLicencasPermitidas(string plano)
     {
         return plano?.ToLower() switch
@@ -513,6 +478,20 @@ public class CadastroClienteService : ICadastroClienteInterface
             "plus" => 5,
             "premium" => 15,
             _ => 1
+        };
+    }
+
+    public string PlanoEscolhidoLp(decimal precoSelecionado)
+    {
+        return precoSelecionado switch
+        {
+            89.0M => "Basic",
+            149.0M => "Basic",
+            189.0M => "Plus",
+            249.0M => "Plus",
+            269.0M => "Premium",
+            329.0M => "Premium",
+            _ => "Basic"
         };
     }
 }

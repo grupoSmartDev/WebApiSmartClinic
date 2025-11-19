@@ -556,6 +556,60 @@ namespace WebApiSmartClinic.Services.Auth
                 .FirstOrDefault() ?? string.Empty;
         }
 
+        private async Task<object> GenerateJwtAsync(string email, string userKey)
+        {
+            var user = await _userManager.FindByEmailAsync(email);
+            var roles = await _userManager.GetRolesAsync(user);
+
+            // 👇 NOVO: Busca o plano do usuário
+            var plano = await ObterPlanoUsuarioAsync(user.Id);
+            Console.WriteLine($"🔍 Plano detectado para {email}: {plano}");
+
+            var claims = new List<Claim>
+    {
+        new Claim(JwtRegisteredClaimNames.Sub, user.Id),
+        new Claim(JwtRegisteredClaimNames.Email, user.Email),
+        new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+        new Claim("UserKey", userKey),
+        new Claim("Plano", plano) // 👈 ADICIONA O PLANO AQUI
+    };
+
+            // Adiciona roles
+            claims.AddRange(roles.Select(role => new Claim(ClaimTypes.Role, role)));
+
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_appSettings.JwtSecretKey));
+            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+
+            var token = new JwtSecurityToken(
+                issuer: _appSettings.JwtIssuer,
+                audience: _appSettings.JwtAudience,
+                claims: claims,
+                expires: DateTime.UtcNow.AddHours(_appSettings.JwtExpiresHours),
+                signingCredentials: creds
+            );
+
+            Console.WriteLine($"Token gerado com claims: {string.Join(", ", token.Claims.Select(c => $"{c.Type}: {c.Value}"))}");
+
+            return new
+            {
+                success = true,
+                data = new
+                {
+                    key = userKey,
+                    accessToken = new JwtSecurityTokenHandler().WriteToken(token),
+                    expiresIn = _appSettings.JwtExpiresHours * 3600,
+                    plano = plano, // 👈 RETORNA O PLANO TAMBÉM
+                    userToken = new
+                    {
+                        id = user.Id,
+                        email = user.Email,
+                        claims = claims.Select(c => new { type = c.Type, value = c.Value }).ToList(),
+                        role = roles.FirstOrDefault() ?? string.Empty
+                    }
+                }
+            };
+        }
+
         private string ConvertBlobToBase64(byte[]? blob)
         {
             if (blob == null || blob.Length == 0)

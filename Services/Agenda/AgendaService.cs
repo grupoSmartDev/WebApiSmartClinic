@@ -424,6 +424,7 @@ public class AgendaService : IAgendaInterface
         }
         catch (Exception ex)
         {
+
             resposta.Mensagem = "Erro ao buscar Agenda";
             resposta.Status = false;
             return resposta;

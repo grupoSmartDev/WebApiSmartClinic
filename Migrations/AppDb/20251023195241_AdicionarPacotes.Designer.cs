@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using WebApiSmartClinic.Data;
@@ -11,9 +12,11 @@ using WebApiSmartClinic.Data;
 namespace WebApiSmartClinic.Migrations.AppDb
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251023195241_AdicionarPacotes")]
+    partial class AdicionarPacotes
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1059,12 +1062,6 @@ namespace WebApiSmartClinic.Migrations.AppDb
                     b.Property<bool>("CelularComWhatsApp")
                         .HasColumnType("boolean");
 
-                    b.Property<string>("Cep")
-                        .HasColumnType("text");
-
-                    b.Property<string>("Cidade")
-                        .HasColumnType("text");
-
                     b.Property<DateTime>("DataCriacao")
                         .HasColumnType("timestamp with time zone");
 
@@ -1088,20 +1085,8 @@ namespace WebApiSmartClinic.Migrations.AppDb
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<string>("Endereco")
-                        .HasColumnType("text");
-
                     b.Property<string>("Especialidade")
                         .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("Estado")
-                        .HasColumnType("text");
-
-                    b.Property<string>("InscricaoEstadual")
-                        .HasColumnType("text");
-
-                    b.Property<string>("InscricaoMunicipal")
                         .HasColumnType("text");
 
                     b.Property<string>("Nome")
@@ -1141,9 +1126,6 @@ namespace WebApiSmartClinic.Migrations.AppDb
 
                     b.Property<bool>("ReceberNotificacoes")
                         .HasColumnType("boolean");
-
-                    b.Property<string>("SiteOuRedeSocial")
-                        .HasColumnType("text");
 
                     b.Property<string>("Sobrenome")
                         .IsRequired()

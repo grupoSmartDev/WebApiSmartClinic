@@ -78,6 +78,10 @@ public class AppDbContext : IdentityDbContext<User>
     public DbSet<PaymentModel> Pagamentos { get; set; }
     public DbSet<ComissaoCalculadaModel> Comissoes { get; set; }
     public DbSet<PacientePlanoHistoricoModel> PacientePlanoHistoricos { get; set; }
+
+    public DbSet<PacoteModel> Pacotes { get; set; }
+    public DbSet<PacotePacienteModel> PacotesPacientes { get; set; }
+    public DbSet<PacoteUsoModel> PacotesUsos { get; set; }
     // Tipos a ignorar no filtro global (Identity, agregadores globais, etc.)
     private static readonly HashSet<string> _tiposIgnorados = new(StringComparer.Ordinal)
     {

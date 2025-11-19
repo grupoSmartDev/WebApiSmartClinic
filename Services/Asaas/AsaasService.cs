@@ -9,6 +9,7 @@ public interface IAsaasService
     Task<AsaasCustomerResponse> CreateCustomerAsync(AsaasCustomerRequest request);
     Task<AsaasSubscriptionResponse> CreateSubscriptionAsync(AsaasSubscriptionRequest request);
     Task<AsaasCustomerResponse> GetCustomerByEmailAsync(string email);
+    Task<AsaasPaymentResponse> CreatePaymentAsync(AsaasPaymentRequest request); //pagamento para cartao de credito
 }
 
 public class AsaasService : IAsaasService
@@ -31,11 +32,10 @@ public class AsaasService : IAsaasService
     {
         try
         {
-            // FORÇAR CONSOLE OUTPUT
-            Console.WriteLine("🚀 INICIANDO CRIAÇÃO DE CUSTOMER");
+            Console.WriteLine("\n🚀 CRIANDO CUSTOMER NO ASAAS");
             Console.WriteLine($"📧 Email: {request.email}");
-            Console.WriteLine($"🔑 API Key (primeiros 20 chars): {_apiKey?.Substring(0, Math.Min(20, _apiKey?.Length ?? 0))}");
-            Console.WriteLine($"🌐 Base URL: {_baseUrl}");
+            Console.WriteLine($"👤 Nome: {request.name}");
+            Console.WriteLine($"📄 CPF: {request.cpfCnpj}");
 
             var json = JsonSerializer.Serialize(request, new JsonSerializerOptions
             {
@@ -43,35 +43,13 @@ public class AsaasService : IAsaasService
                 WriteIndented = true
             });
 
-            Console.WriteLine($"📄 JSON ENVIADO:\n{json}");
+            Console.WriteLine($"📤 Request:\n{json}");
 
             var content = new StringContent(json, Encoding.UTF8, "application/json");
-
-            using var requestMessage = new HttpRequestMessage(HttpMethod.Post, $"{_baseUrl}/customers")
-            {
-                Content = content
-            };
-
-            requestMessage.Headers.Add("access_token", _apiKey);
-            requestMessage.Headers.Add("User-Agent", "ClinicSmart/1.0");
-
-            Console.WriteLine("📋 HEADERS ENVIADOS:");
-            foreach (var header in requestMessage.Headers)
-            {
-                Console.WriteLine($"  {header.Key}: {string.Join(",", header.Value)}");
-            }
-
-            Console.WriteLine("🌐 ENVIANDO REQUISIÇÃO...");
-            var response = await _httpClient.SendAsync(requestMessage);
+            var response = await _httpClient.PostAsync($"{_baseUrl}/customers", content);
             var responseContent = await response.Content.ReadAsStringAsync();
 
-            Console.WriteLine($"📊 RESPONSE STATUS: {response.StatusCode}");
-            Console.WriteLine($"📄 RESPONSE CONTENT:\n{responseContent}");
-            Console.WriteLine($"📋 RESPONSE HEADERS:");
-            foreach (var header in response.Headers)
-            {
-                Console.WriteLine($"  {header.Key}: {string.Join(",", header.Value)}");
-            }
+            Console.WriteLine($"📥 Response ({response.StatusCode}):\n{responseContent}");
 
             if (response.IsSuccessStatusCode)
             {
@@ -80,37 +58,24 @@ public class AsaasService : IAsaasService
                     PropertyNamingPolicy = JsonNamingPolicy.CamelCase
                 });
 
-                Console.WriteLine($"✅ CUSTOMER CRIADO COM SUCESSO: {customer.id}");
+                Console.WriteLine($"✅ Customer criado: {customer.id}");
                 return customer;
             }
             else
             {
-                Console.WriteLine($"❌ ERRO NO ASAAS - STATUS: {response.StatusCode}");
-                Console.WriteLine($"❌ CONTEÚDO DO ERRO: {responseContent}");
-
-                // Tentar fazer parse do erro
-                try
+                var error = JsonSerializer.Deserialize<AsaasErrorResponse>(responseContent, new JsonSerializerOptions
                 {
-                    var error = JsonSerializer.Deserialize<AsaasErrorResponse>(responseContent, new JsonSerializerOptions
-                    {
-                        PropertyNamingPolicy = JsonNamingPolicy.CamelCase
-                    });
+                    PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+                });
 
-                    var errorMsg = error.errors?.FirstOrDefault()?.description ?? "Erro desconhecido";
-                    Console.WriteLine($"❌ ERRO PARSEADO: {errorMsg}");
-                    throw new Exception($"Erro Asaas: {errorMsg}");
-                }
-                catch (JsonException jsonEx)
-                {
-                    Console.WriteLine($"❌ ERRO AO FAZER PARSE DO JSON: {jsonEx.Message}");
-                    throw new Exception($"Erro Asaas - Status: {response.StatusCode}, Response: {responseContent}");
-                }
+                var errorMsg = error?.errors?.FirstOrDefault()?.description ?? "Erro desconhecido";
+                Console.WriteLine($"❌ Erro: {errorMsg}");
+                throw new Exception($"Erro Asaas: {errorMsg}");
             }
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"💥 EXCEÇÃO GERAL: {ex.Message}");
-            Console.WriteLine($"💥 STACK TRACE: {ex.StackTrace}");
+            Console.WriteLine($"💥 Exceção: {ex.Message}");
             throw new Exception($"Erro ao criar customer no Asaas: {ex.Message}");
         }
     }
@@ -119,24 +84,51 @@ public class AsaasService : IAsaasService
     {
         try
         {
-            var json = JsonSerializer.Serialize(request);
-            var content = new StringContent(json, Encoding.UTF8, "application/json");
+            Console.WriteLine("\n💳 CRIANDO SUBSCRIPTION NO ASAAS");
+            Console.WriteLine($"👤 Customer: {request.customer}");
+            Console.WriteLine($"💰 Valor: R$ {request.value:F2}");
+            Console.WriteLine($"🔄 Ciclo: {request.cycle}");
+            Console.WriteLine($"💳 Tipo: {request.billingType}");
 
+            var json = JsonSerializer.Serialize(request, new JsonSerializerOptions
+            {
+                PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+                WriteIndented = true
+            });
+
+            Console.WriteLine($"📤 Request:\n{json}");
+
+            var content = new StringContent(json, Encoding.UTF8, "application/json");
             var response = await _httpClient.PostAsync($"{_baseUrl}/subscriptions", content);
             var responseContent = await response.Content.ReadAsStringAsync();
 
+            Console.WriteLine($"📥 Response ({response.StatusCode}):\n{responseContent}");
+
             if (response.IsSuccessStatusCode)
             {
-                return JsonSerializer.Deserialize<AsaasSubscriptionResponse>(responseContent);
+                var subscription = JsonSerializer.Deserialize<AsaasSubscriptionResponse>(responseContent, new JsonSerializerOptions
+                {
+                    PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+                });
+
+                Console.WriteLine($"✅ Subscription criada: {subscription.id}");
+                return subscription;
             }
             else
             {
-                var error = JsonSerializer.Deserialize<AsaasErrorResponse>(responseContent);
-                throw new Exception($"Erro Asaas: {error.errors?.FirstOrDefault()?.description}");
+                var error = JsonSerializer.Deserialize<AsaasErrorResponse>(responseContent, new JsonSerializerOptions
+                {
+                    PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+                });
+
+                var errorMsg = error?.errors?.FirstOrDefault()?.description ?? "Erro desconhecido";
+                Console.WriteLine($"❌ Erro: {errorMsg}");
+                throw new Exception($"Erro Asaas: {errorMsg}");
             }
         }
         catch (Exception ex)
         {
+            Console.WriteLine($"💥 Exceção: {ex.Message}");
             throw new Exception($"Erro ao criar subscription no Asaas: {ex.Message}");
         }
     }
@@ -145,21 +137,92 @@ public class AsaasService : IAsaasService
     {
         try
         {
-            var response = await _httpClient.GetAsync($"{_baseUrl}/customers?email={email}");
+            Console.WriteLine($"🔍 Buscando customer: {email}");
+
+            var response = await _httpClient.GetAsync($"{_baseUrl}/customers?email={Uri.EscapeDataString(email)}");
             var responseContent = await response.Content.ReadAsStringAsync();
+
+            Console.WriteLine($"📥 Response ({response.StatusCode})");
 
             if (response.IsSuccessStatusCode)
             {
                 var result = JsonSerializer.Deserialize<dynamic>(responseContent);
-                // Implementar lógica para extrair customer do resultado
-                return null; // Por enquanto
+                return null; // Implementar quando necessário
             }
 
             return null;
         }
-        catch
+        catch (Exception ex)
         {
+            Console.WriteLine($"💥 Erro: {ex.Message}");
             return null;
+        }
+    }
+
+    public async Task<AsaasPaymentResponse> CreatePaymentAsync(AsaasPaymentRequest request)
+    {
+        try
+        {
+            Console.WriteLine("\n💳 CRIANDO PAGAMENTO COM CARTÃO NO ASAAS");
+            Console.WriteLine($"👤 Customer: {request.customer}");
+            Console.WriteLine($"💰 Valor: R$ {request.value:F2}");
+            Console.WriteLine($"📅 Vencimento: {request.dueDate:dd/MM/yyyy}");
+            Console.WriteLine($"💳 Parcelas: {request.installmentCount ?? 1}x");
+            Console.WriteLine($"🔐 Cartão Final: ****{request.creditCard?.number?.Substring(request.creditCard.number.Length - 4)}");
+
+            var json = JsonSerializer.Serialize(request, new JsonSerializerOptions
+            {
+                PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+                WriteIndented = true,
+                DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull
+            });
+
+            Console.WriteLine($"📤 Request:\n{json}");
+
+            var content = new StringContent(json, Encoding.UTF8, "application/json");
+            var response = await _httpClient.PostAsync($"{_baseUrl}/payments", content);
+            var responseContent = await response.Content.ReadAsStringAsync();
+
+            Console.WriteLine($"📥 Response ({response.StatusCode}):\n{responseContent}");
+
+            if (response.IsSuccessStatusCode)
+            {
+                var payment = JsonSerializer.Deserialize<AsaasPaymentResponse>(responseContent, new JsonSerializerOptions
+                {
+                    PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+                });
+
+                Console.WriteLine($"✅ Pagamento criado: {payment.id}");
+                Console.WriteLine($"📊 Status: {payment.status}");
+                Console.WriteLine($"🔗 URL da Fatura: {payment.invoiceUrl}");
+                return payment;
+            }
+            else
+            {
+                var error = JsonSerializer.Deserialize<AsaasErrorResponse>(responseContent, new JsonSerializerOptions
+                {
+                    PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+                });
+
+                var errorMsg = error?.errors?.FirstOrDefault()?.description ?? "Erro desconhecido";
+                Console.WriteLine($"❌ Erro: {errorMsg}");
+
+                // Log de todos os erros
+                if (error?.errors != null)
+                {
+                    foreach (var err in error.errors)
+                    {
+                        Console.WriteLine($"   ⚠️ {err.code}: {err.description}");
+                    }
+                }
+
+                throw new Exception($"Erro Asaas: {errorMsg}");
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"💥 Exceção: {ex.Message}");
+            throw new Exception($"Erro ao criar pagamento no Asaas: {ex.Message}");
         }
     }
 }

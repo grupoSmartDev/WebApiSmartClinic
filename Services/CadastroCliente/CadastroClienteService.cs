@@ -70,51 +70,60 @@ public class CadastroClienteService : ICadastroClienteInterface
         var resposta = new ResponseModel<EmpresaModel>();
 
         // 0) Chaves e conexões
-        var cpfKey = dto.TitularCPF;                  // chave do tenant (UserKey)
-        var novoBanco = SanitizarNomeBanco(cpfKey);   // nome do DB: use apenas [a-zA-Z0-9_]
-        var templateDb = "ClinicSmart";      // <<< configure aqui ou via appsettings
-        var novoOwner = "postgres";                  // <<< se quiser definir o OWNER
+        var cpfKey = dto.TitularCPF;
+        var novoBanco = SanitizarNomeBanco(cpfKey);
+        var templateDb = "ClinicSmart";
+        var novoOwner = "postgres";
 
-        // conexões (troque para configs)
         var novaStringConexao = $"Host=62.72.51.219;Port=5432;Database={novoBanco};Username=postgres;Password=Elefante01!;";
-        //var novaStringConexao = $"Host=localhost;Port=5432;Database={novoBanco};Username=postgres;Password=Elefante01!;";
-
-        // Base "master" onde você pode executar CREATE DATABASE e matar conexões do template
         var masterConnection = $"Host=62.72.51.219;Port=5432;Database=connections;Username=postgres;Password=Elefante01!;";
-        //var masterConnection = "Host=localhost;Port=5432;Database=postgres;Username=postgres;Password=Elefante01!;";
 
         try
         {
+            Console.WriteLine("\n🎯 ===== INICIANDO CADASTRO =====");
+            Console.WriteLine($"👤 Cliente: {dto.Nome} {dto.Sobrenome}");
+            Console.WriteLine($"📧 Email: {dto.Email}");
+            Console.WriteLine($"📄 CPF: {dto.TitularCPF}");
+            Console.WriteLine($"💼 Plano: {dto.PlanoEscolhido}");
+            Console.WriteLine($"💰 Valor: R$ {dto.PrecoSelecionado:F2}");
+            Console.WriteLine($"🧪 Teste: {dto.PeriodoTeste}");
+
             // 1) Evita duplicidade da key do tenant
             bool existe = await _contextDataConnection.DataConnection.AnyAsync(c => c.Key == cpfKey);
             if (existe)
             {
+                Console.WriteLine($"❌ CPF já cadastrado");
                 resposta.Status = false;
                 resposta.Mensagem = "Já existe um cliente com esse CPF.";
                 return resposta;
             }
 
-            // 2) Cria o DB clonando do TEMPLATE (rápido!)
+            // 2) Cria o DB clonando do TEMPLATE
+            Console.WriteLine($"📦 Criando banco: {novoBanco}");
             try
             {
                 await CriarBancoPorTemplateAsync(masterConnection, novoBanco, templateDb, novoOwner);
+                Console.WriteLine($"✅ Banco criado!");
             }
             catch (Exception exTpl)
             {
+                Console.WriteLine($"❌ Erro ao criar banco: {exTpl.Message}");
                 resposta.Status = false;
                 resposta.Mensagem = $"Falha ao clonar banco pelo template: {exTpl.Message}";
                 return resposta;
             }
 
-            // 3) Registra a connection string na base 'connections'
+            // 3) Registra a connection string
+            Console.WriteLine($"🔗 Registrando connection...");
             var novaConexao = new DataConnections { Key = cpfKey, StringConnection = novaStringConexao };
             await _contextDataConnection.DataConnection.AddAsync(novaConexao);
             await _contextDataConnection.SaveChangesAsync();
+            Console.WriteLine($"✅ Connection registrada!");
 
-            // 4) Define a connection do tenant atual para o restante da operação
+            // 4) Define a connection do tenant atual
             _connectionStringProvider.SetConnectionString(novaStringConexao);
 
-            // 5) Único escopo para trabalhar no DB recém criado (NÃO precisamos de MigrateAsync)
+            // 5) Escopo para trabalhar no DB recém criado
             await using var scope = _scopeFactory.CreateAsyncScope();
             var sp = scope.ServiceProvider;
             var db = sp.GetRequiredService<AppDbContext>();
@@ -122,46 +131,176 @@ public class CadastroClienteService : ICadastroClienteInterface
             var roleMgr = sp.GetRequiredService<RoleManager<IdentityRole>>();
             var authSvc = sp.GetRequiredService<AuthService>();
 
-            // 6) (NÃO precisa mais) — db.Database.MigrateAsync();
-
-            // =================== NOVA LÓGICA ASAAS (mantida) ===================
+            // =================== LÓGICA ASAAS ===================
             string? asaasCustomerId = null;
             string? asaasSubscriptionId = null;
+            string? asaasPaymentId = null;
 
-            if (!dto.PeriodoTeste && dto.PrecoSelecionado > 0)
-            {
-                try
-                {
-                    var customerRequest = new AsaasCustomerRequest
-                    {
-                        name = $"{dto.Nome} {dto.Sobrenome}",
-                        email = dto.Email,
-                        phone = LimparTelefone(dto.Celular),
-                        mobilePhone = LimparTelefone(dto.Celular),
-                        cpfCnpj = dto.TitularCPF,
-                        observations = $"ClinicSmart - {dto.PlanoEscolhido} - {dto.PeriodoCobranca}"
-                    };
-                    var customer = await _asaasService.CreateCustomerAsync(customerRequest);
-                    asaasCustomerId = customer.id;
-
-                    var subscriptionRequest = new AsaasSubscriptionRequest
-                    {
-                        customer = customer.id,
-                        billingType = MapearTipoPagamento(dto.TipoPagamentoId ?? 1),
-                        value = dto.PrecoSelecionado,
-                        nextDueDate = DateTime.Now.AddDays(1).ToString("yyyy-MM-dd"),
-                        cycle = dto.PeriodoCobranca == "monthly" ? "MONTHLY" : "SEMIANNUALLY",
-                        description = $"ClinicSmart - {dto.PlanoEscolhido}",
-                        externalReference = $"clinicsmart_cpf_{cpfKey}"
-                    };
-                    var subscription = await _asaasService.CreateSubscriptionAsync(subscriptionRequest);
-                    asaasSubscriptionId = subscription.id;
-                }
-                catch (Exception) { /* segue sem travar cadastro */ }
-            }
+            Console.WriteLine("\n💳 Integrando com Asaas...");
 
             try
             {
+                // Criar Customer
+                var customerRequest = new AsaasCustomerRequest
+                {
+                    name = $"{dto.Nome} {dto.Sobrenome}",
+                    email = dto.Email,
+                    phone = LimparTelefone(dto.Celular),
+                    mobilePhone = LimparTelefone(dto.Celular),
+                    cpfCnpj = dto.TitularCPF,
+                    observations = $"ClinicSmart - {dto.PlanoEscolhido} - {dto.PeriodoCobranca}"
+                };
+                var customer = await _asaasService.CreateCustomerAsync(customerRequest);
+                asaasCustomerId = customer.id;
+
+                // Se NÃO for período de teste E tiver valor
+               if (!dto.PeriodoTeste && dto.PrecoSelecionado > 0)
+                {
+                    // RECORRÊNCIA (Assinatura mensal/semestral)
+                    if (dto.PeriodoCobranca == "monthly")
+                    {
+                        Console.WriteLine("🔄 Criando assinatura recorrente...");
+
+                        var subscriptionRequest = new AsaasSubscriptionRequest
+                        {
+                            customer = customer.id,
+                            billingType = MapearTipoPagamento(dto.TipoPagamentoId ?? 1),
+                            value = dto.PrecoSelecionado,
+                            nextDueDate = DateTime.Now.AddDays(1).ToString("yyyy-MM-dd"),
+                            cycle = dto.PeriodoCobranca == "monthly" ? "MONTHLY" : "SEMIANNUALLY",
+                            description = $"ClinicSmart - {dto.PlanoEscolhido}",
+                            externalReference = $"clinicsmart_cpf_{cpfKey}",
+                            totalValue = dto.PrecoSelecionado,
+                            installmentCount = "6"
+                        };
+                        var subscription = await _asaasService.CreateSubscriptionAsync(subscriptionRequest);
+                        asaasSubscriptionId = subscription.id;
+
+                        Console.WriteLine($"✅ Assinatura criada: {asaasSubscriptionId}");
+                    }
+                    // PAGAMENTO ÚNICO COM CARTÃO
+                    else if (dto.DadosCartao != null)
+                    {
+
+                        Console.WriteLine("💳 Processando pagamento com cartão...");
+
+                        var paymentRequest = new AsaasPaymentRequest
+                        {
+                            customer = customer.id,
+                            billingType = "CREDIT_CARD",
+                            value = dto.PrecoSelecionado,
+                            dueDate = DateTime.Now.AddDays(1),
+                            description = $"ClinicSmart - {dto.PlanoEscolhido}",
+                            installmentCount = dto.QtdeParcelas ?? 1, // Se tiver parcelas
+                            installmentValue = dto.QtdeParcelas > 1
+                                ? Math.Round(dto.PrecoSelecionado / dto.QtdeParcelas.Value, 2)
+                                : null,
+                            remoteIp = "127.0.0.1", // Capture do HttpContext se estiver numa controller
+                            creditCard = new AsaasCreditCardRequest
+                            {
+                                holderName = dto.DadosCartao.HolderName,
+                                number = dto.DadosCartao.Number.Replace(" ", "").Replace("-", ""),
+                                expiryMonth = dto.DadosCartao.ExpiryMonth,
+                                expiryYear = dto.DadosCartao.ExpiryYear,
+                                ccv = dto.DadosCartao.Ccv
+                            },
+                            creditCardHolderInfo = new AsaasCreditCardHolderInfoRequest
+                            {
+                                name = $"{dto.Nome} {dto.Sobrenome}",
+                                email = dto.Email,
+                                cpfCnpj = dto.TitularCPF.Replace(".", "").Replace("-", ""),
+                                postalCode = dto.DadosCartao.PostalCode?.Replace("-", ""),
+                                addressNumber = dto.DadosCartao.AddressNumber,
+                                addressComplement = dto.DadosCartao.AddressComplement,
+                                phone = LimparTelefone(dto.TelefoneFixo),
+                                mobilePhone = LimparTelefone(dto.Celular)
+                            }
+                        };
+
+                        var payment = await _asaasService.CreatePaymentAsync(paymentRequest);
+                        asaasPaymentId = payment.id;
+
+                        Console.WriteLine($"✅ Pagamento criado: {asaasPaymentId}");
+                        Console.WriteLine($"📊 Status: {payment.status}");
+
+                        // Se o pagamento foi aprovado na hora
+                        if (payment.status == "CONFIRMED")
+                        {
+                            Console.WriteLine("🎉 Pagamento aprovado instantaneamente!");
+                        }
+                    }
+                    else if (dto.TipoPagamentoId == 2)
+                    {
+                        Console.WriteLine("🧾 Gerando boleto bancário...");
+
+                        var paymentRequest = new AsaasPaymentRequest
+                        {
+                            customer = customer.id,
+                            billingType = "BOLETO",
+                            value = dto.PrecoSelecionado,
+                            dueDate = DateTime.Now.AddDays(3), // 3 dias para pagar
+                            description = $"ClinicSmart - {dto.PlanoEscolhido} - {dto.PeriodoCobranca}",
+                            externalReference = $"clinicsmart_cpf_{cpfKey}",
+                            creditCard = null,
+                            creditCardHolderInfo = null
+                        };
+
+                        var payment = await _asaasService.CreatePaymentAsync(paymentRequest);
+                        asaasPaymentId = payment.id;
+
+                        Console.WriteLine($"✅ Boleto gerado: {asaasPaymentId}");
+                        Console.WriteLine($"🔗 Link do boleto: {payment.invoiceUrl}");
+                        Console.WriteLine($"📊 Status: {payment.status}");
+
+                        // Você pode retornar a URL do boleto para mostrar ao usuário
+                        // ou enviar por email
+                    }
+                    // ========== PAGAMENTO COM PIX ==========
+                    else if (dto.TipoPagamentoId == 3)
+                    {
+                        Console.WriteLine("📱 Gerando QR Code PIX...");
+
+                        var paymentRequest = new AsaasPaymentRequest
+                        {
+                            customer = customer.id,
+                            billingType = "PIX",
+                            value = dto.PrecoSelecionado,
+                            dueDate = DateTime.Now.AddDays(1), // 1 dia para pagar via PIX
+                            description = $"ClinicSmart - {dto.PlanoEscolhido} - {dto.PeriodoCobranca}",
+                            externalReference = $"clinicsmart_cpf_{cpfKey}",
+                            creditCard = null,
+                            creditCardHolderInfo = null
+                        };
+
+                        var payment = await _asaasService.CreatePaymentAsync(paymentRequest);
+                        asaasPaymentId = payment.id;
+
+                        Console.WriteLine($"✅ PIX gerado: {asaasPaymentId}");
+                        Console.WriteLine($"🔗 Link do QR Code: {payment.invoiceUrl}");
+                        Console.WriteLine($"📊 Status: {payment.status}");
+
+                        // O Asaas retorna o QR Code e o link para pagamento
+                        // Você pode retornar isso para o frontend mostrar
+                    }
+                    else
+                    {
+                        Console.WriteLine("⚠️ Tipo de pagamento não reconhecido ou dados insuficientes");
+                    }
+                }
+
+                Console.WriteLine($"✅ Asaas OK - Customer: {asaasCustomerId}, Subscription: {asaasSubscriptionId}, Payment: {asaasPaymentId}");
+            }
+            catch (Exception exAsaas)
+            {
+                Console.WriteLine($"⚠️ Erro no Asaas (continuando): {exAsaas.Message}");
+                // Não interrompe o cadastro
+            }
+
+
+            try
+            {
+                Console.WriteLine("\n🏢 Criando estrutura do cliente...");
+
                 // 7.1) Cria a Empresa (matriz)
                 var empresa = new EmpresaModel
                 {
@@ -179,9 +318,9 @@ public class CadastroClienteService : ICadastroClienteInterface
                     QtdeLicencaEmpresaUtilizada = 0,
                     QtdeLicencaUsuarioUtilizada = 0,
                     DataInicio = DateTime.UtcNow,
-                    PeriodoTeste = true,
-                    DataInicioTeste = DateTime.UtcNow,
-                    DataFim = DateTime.UtcNow.AddDays(7),
+                    PeriodoTeste = dto.PeriodoTeste,
+                    DataInicioTeste = dto.PeriodoTeste ? DateTime.UtcNow : (DateTime?)null,
+                    DataFim = dto.PeriodoTeste ? DateTime.UtcNow.AddDays(7) : (DateTime?)null,
                     DatabaseConnectionString = novaStringConexao,
                     Ativo = true,
                     AsaasCustomerId = asaasCustomerId,
@@ -195,7 +334,8 @@ public class CadastroClienteService : ICadastroClienteInterface
                 };
 
                 await db.Empresas.AddAsync(empresa);
-                await db.SaveChangesAsync(); // garante empresa.Id
+                await db.SaveChangesAsync();
+                Console.WriteLine($"✅ Empresa criada: {empresa.Id}");
 
                 // 7.2) Garante papéis
                 async Task GarantirPerfisAsync()
@@ -207,6 +347,7 @@ public class CadastroClienteService : ICadastroClienteInterface
                 await GarantirPerfisAsync();
 
                 // 7.3) Cria usuários padrão
+                Console.WriteLine("👤 Criando usuários...");
                 var userAdminReq = new UserCreateRequest
                 {
                     FirstName = "Admin",
@@ -238,7 +379,9 @@ public class CadastroClienteService : ICadastroClienteInterface
                 if (userCliente != null && !(await userMgr.IsInRoleAsync(userCliente, Perfis.Admin)))
                     await userMgr.AddToRoleAsync(userCliente, Perfis.Admin);
 
-                // 7.4) Vincula usuários à Empresa (EmpresaPadrao = true)
+                Console.WriteLine($"✅ Usuários criados!");
+
+                // 7.4) Vincula usuários à Empresa
                 if (userAdmin != null)
                     db.UsuarioEmpresas.Add(new UsuarioEmpresaModel
                     {
@@ -263,9 +406,9 @@ public class CadastroClienteService : ICadastroClienteInterface
 
                 await db.SaveChangesAsync();
 
-                // 7.5) MODO CONTEXTO: setar flags para criar registros multi-empresa fora do middleware
-                db.VerTodasEmpresas = true;                 // ignora exigência de EmpresaSelecionada
-                db.EmpresaSelecionada = empresa.Id;         // opcional, por consistência
+                // 7.5) Setar flags de contexto
+                db.VerTodasEmpresas = true;
+                db.EmpresaSelecionada = empresa.Id;
                 db.UsuarioAtualId = userAdmin?.Id ?? "system";
 
                 // 7.6) Cria Profissional padrão
@@ -281,6 +424,11 @@ public class CadastroClienteService : ICadastroClienteInterface
 
                 await db.Profissional.AddAsync(profissionalPadrao);
                 await db.SaveChangesAsync();
+                Console.WriteLine($"✅ Profissional criado!");
+
+                Console.WriteLine($"\n✅ ===== CADASTRO CONCLUÍDO! =====");
+                Console.WriteLine($"Empresa ID: {empresa.Id}");
+                Console.WriteLine($"Database: {novoBanco}");
 
                 resposta.Status = true;
                 resposta.Dados = empresa;
@@ -288,12 +436,14 @@ public class CadastroClienteService : ICadastroClienteInterface
             }
             catch (Exception exCriacao)
             {
-                // se falhar depois de criar o banco/clonar template, limpar DB e mapping
+                Console.WriteLine($"❌ Erro ao criar estrutura: {exCriacao.Message}");
+
+                // Limpar recursos
                 try
                 {
                     await DroparBancoSeFalharAsync(masterConnection, novoBanco);
                 }
-                catch { /* best effort */ }
+                catch { }
 
                 await RemoverDataConnectionSeFalharAsync(cpfKey);
 
@@ -302,20 +452,26 @@ public class CadastroClienteService : ICadastroClienteInterface
                 return resposta;
             }
 
-            // 8) E-mail de boas-vindas (best-effort)
+            // 8) E-mail de boas-vindas
             try
             {
+                Console.WriteLine($"📧 Enviando email...");
                 await _mailService.SendEmailAsync(new MailRequest
                 {
                     ToEmail = dto.Email,
                     Subject = "Conta criada com sucesso!",
                     Body = GetHtmlContent(dto.Nome)
                 });
+                Console.WriteLine($"✅ Email enviado!");
             }
-            catch { /* não interrompe o fluxo */ }
+            catch (Exception exMail)
+            {
+                Console.WriteLine($"⚠️ Erro ao enviar email: {exMail.Message}");
+            }
         }
         catch (Exception ex)
         {
+            Console.WriteLine($"💥 Erro geral: {ex.Message}");
             resposta.Status = false;
             resposta.Mensagem = $"Erro: {ex.Message}";
         }

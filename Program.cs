@@ -50,6 +50,8 @@ using WebApiSmartClinic.Services.Status;
 using WebApiSmartClinic.Services.StripeService;
 using WebApiSmartClinic.Services.SubCentroCusto;
 using WebApiSmartClinic.Services.TipoPagamento;
+using Microsoft.AspNetCore.Diagnostics;
+using WebApiSmartClinic.Services.Pacote;
 
 var builder = WebApplication.CreateBuilder(args);
 var services = builder.Services;
@@ -198,6 +200,7 @@ services.AddScoped<IComissaoService, WebApiSmartClinic.Services.ComissaoService>
 builder.Services.AddScoped<IStripeService, StripeService>();
 services.AddScoped<AgendaService>();
 services.AddScoped<IEmpresaPermissaoInterface, EmpresaPermissaoService>();
+builder.Services.AddScoped<IPacoteInterface, PacoteService>();
 
 
 builder.Services.AddHttpClient<IAsaasService, AsaasService>();

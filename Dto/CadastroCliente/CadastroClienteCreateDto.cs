@@ -60,13 +60,30 @@ namespace WebApiSmartClinic.Dto.CadastroCliente
         public int? QtdeLicencaUsuarioPermitida { get; set; }
         public int? QtdeLicencaEmpresaUtilizada { get; set; }
         public int? QtdeLicencaUsuarioUtilizada { get; set; }
+        public int? QtdeParcelas { get; set; }
+        
 
         [JsonIgnore]
         public TipoPagamentoModel? TipoPagamento { get; set; }
 
         public string PeriodoCobranca { get; set; } // "monthly" ou "semiannual"
         public decimal PrecoSelecionado { get; set; }
+        public CreditCardDataDto? DadosCartao { get; set; }
 
+    }
+
+    public class CreditCardDataDto
+    {
+        public string HolderName { get; set; }
+        public string Number { get; set; }
+        public string ExpiryMonth { get; set; }
+        public string ExpiryYear { get; set; }
+        public string Ccv { get; set; }
+
+        // Dados do endereço
+        public string PostalCode { get; set; }
+        public string AddressNumber { get; set; }
+        public string AddressComplement { get; set; }
     }
 
 

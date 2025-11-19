@@ -488,9 +488,10 @@ namespace WebApiSmartClinic.Services.Auth
                     {
                         id = user.Id,
                         email = user.Email,
-                        claims = claims.Select(c => new { type = c.Type, value = c.Value }).ToList(),
+                        claims = claims.Select(c => new { type = c.Type, value = c.Value }),
                         role = roles.FirstOrDefault() ?? string.Empty
-                    }
+                    },
+                    plano = GetPlanoAtual(userKey)
                 }
             };
         }
@@ -547,6 +548,12 @@ namespace WebApiSmartClinic.Services.Auth
                     }
                 }
             };
+        private string GetPlanoAtual(string userKey)
+        {
+            return _context.Empresas
+                .Where(x => x.TitularCPF == userKey)
+                .Select(y => y.PlanoEscolhido)
+                .FirstOrDefault() ?? string.Empty;
         }
 
         private string ConvertBlobToBase64(byte[]? blob)

@@ -1,4 +1,4 @@
-
+﻿
 using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -124,6 +124,8 @@ public class CadastroClienteService : ICadastroClienteInterface
             _connectionStringProvider.SetConnectionString(novaStringConexao);
 
             // 5) Escopo para trabalhar no DB recém criado
+            _connectionStringProvider.SetConnectionString(novaStringConexao);
+
             await using var scope = _scopeFactory.CreateAsyncScope();
             var sp = scope.ServiceProvider;
             var db = sp.GetRequiredService<AppDbContext>();
@@ -302,6 +304,40 @@ public class CadastroClienteService : ICadastroClienteInterface
                 Console.WriteLine("\n🏢 Criando estrutura do cliente...");
 
                 // 7.1) Cria a Empresa (matriz)
+            if (!dto.PeriodoTeste && dto.PrecoSelecionado > 0)
+            {
+                try
+                {
+                    var customerRequest = new AsaasCustomerRequest
+                    {
+                        name = $"{dto.Nome} {dto.Sobrenome}",
+                        email = dto.Email,
+                        phone = LimparTelefone(dto.Celular),
+                        mobilePhone = LimparTelefone(dto.Celular),
+                        cpfCnpj = dto.TitularCPF,
+                        observations = $"ClinicSmart - {dto.PlanoEscolhido} - {dto.PeriodoCobranca}"
+                    };
+                    var customer = await _asaasService.CreateCustomerAsync(customerRequest);
+                    asaasCustomerId = customer.id;
+
+                    var subscriptionRequest = new AsaasSubscriptionRequest
+                    {
+                        customer = customer.id,
+                        billingType = MapearTipoPagamento(dto.TipoPagamentoId ?? 1),
+                        value = dto.PrecoSelecionado,
+                        nextDueDate = DateTime.Now.AddDays(1).ToString("yyyy-MM-dd"),
+                        cycle = dto.PeriodoCobranca == "monthly" ? "MONTHLY" : "SEMIANNUALLY",
+                        description = $"ClinicSmart - {dto.PlanoEscolhido}",
+                        externalReference = $"clinicsmart_cpf_{cpfKey}"
+                    };
+                    var subscription = await _asaasService.CreateSubscriptionAsync(subscriptionRequest);
+                    asaasSubscriptionId = subscription.id;
+                }
+                catch (Exception) { }
+            }
+
+            try
+            {
                 var empresa = new EmpresaModel
                 {
                     Nome = dto.Nome,
@@ -311,10 +347,10 @@ public class CadastroClienteService : ICadastroClienteInterface
                     TitularCPF = dto.TitularCPF,
                     CNPJEmpresaMatriz = dto.CNPJEmpresaMatriz,
                     Especialidade = dto.Especialidade,
-                    PlanoEscolhido = dto.PlanoEscolhido,
+                    PlanoEscolhido = PlanoEscolhidoLp(dto.PrecoSelecionado),
                     TipoPagamentoId = (int)(dto.TipoPagamentoId == null || dto.TipoPagamentoId == 0 ? 1 : dto.TipoPagamentoId),
-                    QtdeLicencaEmpresaPermitida = 1,
-                    QtdeLicencaUsuarioPermitida = 3,
+                    QtdeLicencaEmpresaPermitida = ObterLicencasPermitidas(PlanoEscolhidoLp(dto.PrecoSelecionado)),
+                    QtdeLicencaUsuarioPermitida = ObterLicencasPermitidas(PlanoEscolhidoLp(dto.PrecoSelecionado)),
                     QtdeLicencaEmpresaUtilizada = 0,
                     QtdeLicencaUsuarioUtilizada = 0,
                     DataInicio = DateTime.UtcNow,
@@ -336,8 +372,8 @@ public class CadastroClienteService : ICadastroClienteInterface
                 await db.Empresas.AddAsync(empresa);
                 await db.SaveChangesAsync();
                 Console.WriteLine($"✅ Empresa criada: {empresa.Id}");
+                await db.SaveChangesAsync(); 
 
-                // 7.2) Garante papéis
                 async Task GarantirPerfisAsync()
                 {
                     foreach (var p in new[] { Perfis.Admin, Perfis.Support, Perfis.User })
@@ -411,7 +447,6 @@ public class CadastroClienteService : ICadastroClienteInterface
                 db.EmpresaSelecionada = empresa.Id;
                 db.UsuarioAtualId = userAdmin?.Id ?? "system";
 
-                // 7.6) Cria Profissional padrão
                 var profissionalPadrao = new ProfissionalModel
                 {
                     Email = dto.Email,
@@ -468,6 +503,7 @@ public class CadastroClienteService : ICadastroClienteInterface
             {
                 Console.WriteLine($"⚠️ Erro ao enviar email: {exMail.Message}");
             }
+            catch { }
         }
         catch (Exception ex)
         {
@@ -481,7 +517,6 @@ public class CadastroClienteService : ICadastroClienteInterface
 
     private static string SanitizarNomeBanco(string nome)
     {
-        // permite somente letras, números e underscore (evita injeção em identificadores)
         if (string.IsNullOrWhiteSpace(nome) || !Regex.IsMatch(nome, "^[A-Za-z0-9_]+$"))
             throw new InvalidOperationException("Nome de banco inválido. Use apenas letras, números e underscore.");
         return nome;
@@ -492,7 +527,6 @@ public class CadastroClienteService : ICadastroClienteInterface
         await using var conn = new NpgsqlConnection(masterConnection);
         await conn.OpenAsync();
 
-        // garante que o TEMPLATE não tem conexões abertas
         await using (var kill = conn.CreateCommand())
         {
             kill.CommandText = @"SELECT pg_terminate_backend(pid)
@@ -502,10 +536,8 @@ public class CadastroClienteService : ICadastroClienteInterface
             await kill.ExecuteNonQueryAsync();
         }
 
-        // cria o banco novo a partir do TEMPLATE
         await using (var cmd = conn.CreateCommand())
         {
-            // IMPORTANTE: nomes já estão sanitizados (sem aspas perigosas)
             cmd.CommandText = $@"CREATE DATABASE ""{novoBanco}"" WITH TEMPLATE ""{templateDb}"" OWNER ""{owner}"";";
             await cmd.ExecuteNonQueryAsync();
         }
@@ -516,7 +548,6 @@ public class CadastroClienteService : ICadastroClienteInterface
         await using var conn = new NpgsqlConnection(masterConnection);
         await conn.OpenAsync();
 
-        // derruba conexões no banco alvo
         await using (var kill = conn.CreateCommand())
         {
             kill.CommandText = @"SELECT pg_terminate_backend(pid)
@@ -526,7 +557,6 @@ public class CadastroClienteService : ICadastroClienteInterface
             await kill.ExecuteNonQueryAsync();
         }
 
-        // drop database
         await using (var drop = conn.CreateCommand())
         {
             drop.CommandText = $@"DROP DATABASE IF EXISTS ""{nomeBanco}"";";
@@ -639,7 +669,6 @@ public class CadastroClienteService : ICadastroClienteInterface
         return htmlContent;
     }
 
-    // NOVOS MÉTODOS AUXILIARES
     private string MapearTipoPagamento(int tipoPagamentoId)
     {
         return tipoPagamentoId switch
@@ -656,11 +685,6 @@ public class CadastroClienteService : ICadastroClienteInterface
         return telefone?.Replace("(", "").Replace(")", "").Replace(" ", "").Replace("-", "");
     }
 
-    private string LimparCPF(string cpf)
-    {
-        return cpf?.Replace(".", "").Replace("-", "");
-    }
-
     private int ObterLicencasPermitidas(string plano)
     {
         return plano?.ToLower() switch
@@ -669,6 +693,20 @@ public class CadastroClienteService : ICadastroClienteInterface
             "plus" => 5,
             "premium" => 15,
             _ => 1
+        };
+    }
+
+    public string PlanoEscolhidoLp(decimal precoSelecionado)
+    {
+        return precoSelecionado switch
+        {
+            89.0M => "Basic",
+            149.0M => "Basic",
+            189.0M => "Plus",
+            249.0M => "Plus",
+            269.0M => "Premium",
+            329.0M => "Premium",
+            _ => "Basic"
         };
     }
 }

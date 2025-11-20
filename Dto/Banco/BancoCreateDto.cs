@@ -14,11 +14,11 @@ namespace WebApiSmartClinic.Dto.Banco
         public bool Ativo { get; set; } = true;
 
         // Dados para homologação e emissão de boletos
-        public string CodigoConvenio { get; set; } 
-        public string Carteira { get; set; }
-        public string VariacaoCarteira { get; set; }
-        public string CodigoBeneficiario { get; set; } 
-        public string NumeroContrato { get; set; }
-        public string CodigoTransmissao { get; set; }
+        public string? CodigoConvenio { get; set; } 
+        public string? Carteira { get; set; }
+        public string? VariacaoCarteira { get; set; }
+        public string? CodigoBeneficiario { get; set; } 
+        public string? NumeroContrato { get; set; }
+        public string? CodigoTransmissao { get; set; }
     }
 }

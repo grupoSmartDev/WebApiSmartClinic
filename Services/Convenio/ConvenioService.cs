@@ -165,7 +165,7 @@ public class ConvenioService : IConvenioInterface
 
 
             if (!string.IsNullOrEmpty(registroAvsFiltro))
-                query = query.Where(c => c.Telefone.Contains(registroAvsFiltro));
+                query = query.Where(c => c.RegistroAvs.Contains(registroAvsFiltro));
 
             query = query.OrderBy(x => x.Id);
 

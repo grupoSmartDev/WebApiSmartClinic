@@ -39,7 +39,7 @@ namespace WebApiSmartClinic.Services.Auth
             AppDbContext identityContext,
             IOptions<AppSettings> appSettings,
             IConnectionsService connectionsService,
-            IConnectionStringProvider connectionStringProvider, 
+            IConnectionStringProvider connectionStringProvider,
             DataConnectionContext contextDataConnection,
             IServiceScopeFactory scopeFactory)
         {
@@ -66,14 +66,14 @@ namespace WebApiSmartClinic.Services.Auth
 
             // Define a conexão ANTES de chamar o SignInManager
             _connectionStringProvider.SetConnectionString(conn);
-            
-            
+
+
             using var scope = _scopeFactory.CreateScope();
             var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
             //await dbContext.Database.MigrateAsync();
 
             var migrationPendente = await dbContext.Database.GetPendingMigrationsAsync();
-            
+
             if (migrationPendente.Any())
                 await dbContext.Database.MigrateAsync();
 
@@ -420,9 +420,9 @@ namespace WebApiSmartClinic.Services.Auth
         }
 
         // ----------------------------------------------------
-        // Métodos auxiliares privados (antes ficavam no controller)
+        // Métodos auxiliares privados
         // ----------------------------------------------------
-        // 👇 ADICIONE este método novo (antes do GenerateJwtAsync)
+
         private async Task<string> ObterPlanoUsuarioAsync(string userId)
         {
             try
@@ -446,73 +446,23 @@ namespace WebApiSmartClinic.Services.Auth
             }
         }
 
-        private async Task<object> GenerateJwtAsyncAntigoNaoRemoverAinda(string email, string userKey)
+        private async Task<object> GenerateJwtAsync(string email, string userKey)
         {
             var user = await _userManager.FindByEmailAsync(email);
             var roles = await _userManager.GetRolesAsync(user);
+
+            // Busca o plano do usuário
+            var plano = await ObterPlanoUsuarioAsync(user.Id);
+            Console.WriteLine($"🔍 Plano detectado para {email}: {plano}");
 
             var claims = new List<Claim>
             {
                 new Claim(JwtRegisteredClaimNames.Sub, user.Id),
                 new Claim(JwtRegisteredClaimNames.Email, user.Email),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-                new Claim("UserKey", userKey)
+                new Claim("UserKey", userKey),
+                new Claim("Plano", plano)
             };
-
-            // Adiciona roles
-            claims.AddRange(roles.Select(role => new Claim(ClaimTypes.Role, role)));
-
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_appSettings.JwtSecretKey));
-            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-
-            var token = new JwtSecurityToken(
-                issuer: _appSettings.JwtIssuer,
-                audience: _appSettings.JwtAudience,
-                claims: claims,
-                expires: DateTime.UtcNow.AddHours(_appSettings.JwtExpiresHours),
-                signingCredentials: creds
-            );
-
-            // Só para debug
-            Console.WriteLine($"Token gerado com claims: {string.Join(", ", token.Claims.Select(c => $"{c.Type}: {c.Value}"))}");
-
-            return new
-            {
-                success = true,
-                data = new
-                {
-                    key = userKey,
-                    accessToken = new JwtSecurityTokenHandler().WriteToken(token),
-                    expiresIn = _appSettings.JwtExpiresHours * 3600,
-                    userToken = new
-                    {
-                        id = user.Id,
-                        email = user.Email,
-                        claims = claims.Select(c => new { type = c.Type, value = c.Value }),
-                        role = roles.FirstOrDefault() ?? string.Empty
-                    },
-                    plano = GetPlanoAtual(userKey)
-                }
-            };
-        }
-
-        private async Task<object> GenerateJwtAsync(string email, string userKey)
-        {
-            var user = await _userManager.FindByEmailAsync(email);
-            var roles = await _userManager.GetRolesAsync(user);
-
-            // 👇 NOVO: Busca o plano do usuário
-            var plano = await ObterPlanoUsuarioAsync(user.Id);
-            Console.WriteLine($"🔍 Plano detectado para {email}: {plano}");
-
-            var claims = new List<Claim>
-    {
-        new Claim(JwtRegisteredClaimNames.Sub, user.Id),
-        new Claim(JwtRegisteredClaimNames.Email, user.Email),
-        new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-        new Claim("UserKey", userKey),
-        new Claim("Plano", plano) // 👈 ADICIONA O PLANO AQUI
-    };
 
             // Adiciona roles
             claims.AddRange(roles.Select(role => new Claim(ClaimTypes.Role, role)));
@@ -538,229 +488,7 @@ namespace WebApiSmartClinic.Services.Auth
                     key = userKey,
                     accessToken = new JwtSecurityTokenHandler().WriteToken(token),
                     expiresIn = _appSettings.JwtExpiresHours * 3600,
-                    plano = plano, // 👈 RETORNA O PLANO TAMBÉM
-                    userToken = new
-                    {
-                        id = user.Id,
-                        email = user.Email,
-                        claims = claims.Select(c => new { type = c.Type, value = c.Value }).ToList(),
-                        role = roles.FirstOrDefault() ?? string.Empty
-                    }
-                }
-            };
-        private string GetPlanoAtual(string userKey)
-        {
-            return _context.Empresas
-                .Where(x => x.TitularCPF == userKey)
-                .Select(y => y.PlanoEscolhido)
-                .FirstOrDefault() ?? string.Empty;
-        }
-
-        private async Task<object> GenerateJwtAsync(string email, string userKey)
-        {
-            var user = await _userManager.FindByEmailAsync(email);
-            var roles = await _userManager.GetRolesAsync(user);
-
-            // 👇 NOVO: Busca o plano do usuário
-            var plano = await ObterPlanoUsuarioAsync(user.Id);
-            Console.WriteLine($"🔍 Plano detectado para {email}: {plano}");
-
-            var claims = new List<Claim>
-    {
-        new Claim(JwtRegisteredClaimNames.Sub, user.Id),
-        new Claim(JwtRegisteredClaimNames.Email, user.Email),
-        new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-        new Claim("UserKey", userKey),
-        new Claim("Plano", plano) // 👈 ADICIONA O PLANO AQUI
-    };
-
-            // Adiciona roles
-            claims.AddRange(roles.Select(role => new Claim(ClaimTypes.Role, role)));
-
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_appSettings.JwtSecretKey));
-            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-
-            var token = new JwtSecurityToken(
-                issuer: _appSettings.JwtIssuer,
-                audience: _appSettings.JwtAudience,
-                claims: claims,
-                expires: DateTime.UtcNow.AddHours(_appSettings.JwtExpiresHours),
-                signingCredentials: creds
-            );
-
-            Console.WriteLine($"Token gerado com claims: {string.Join(", ", token.Claims.Select(c => $"{c.Type}: {c.Value}"))}");
-
-            return new
-            {
-                success = true,
-                data = new
-                {
-                    key = userKey,
-                    accessToken = new JwtSecurityTokenHandler().WriteToken(token),
-                    expiresIn = _appSettings.JwtExpiresHours * 3600,
-                    plano = plano, // 👈 RETORNA O PLANO TAMBÉM
-                    userToken = new
-                    {
-                        id = user.Id,
-                        email = user.Email,
-                        claims = claims.Select(c => new { type = c.Type, value = c.Value }).ToList(),
-                        role = roles.FirstOrDefault() ?? string.Empty
-                    }
-                }
-            };
-        }
-
-        private async Task<object> GenerateJwtAsync(string email, string userKey)
-        {
-            var user = await _userManager.FindByEmailAsync(email);
-            var roles = await _userManager.GetRolesAsync(user);
-
-            // 👇 NOVO: Busca o plano do usuário
-            var plano = await ObterPlanoUsuarioAsync(user.Id);
-            Console.WriteLine($"🔍 Plano detectado para {email}: {plano}");
-
-            var claims = new List<Claim>
-    {
-        new Claim(JwtRegisteredClaimNames.Sub, user.Id),
-        new Claim(JwtRegisteredClaimNames.Email, user.Email),
-        new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-        new Claim("UserKey", userKey),
-        new Claim("Plano", plano) // 👈 ADICIONA O PLANO AQUI
-    };
-
-            // Adiciona roles
-            claims.AddRange(roles.Select(role => new Claim(ClaimTypes.Role, role)));
-
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_appSettings.JwtSecretKey));
-            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-
-            var token = new JwtSecurityToken(
-                issuer: _appSettings.JwtIssuer,
-                audience: _appSettings.JwtAudience,
-                claims: claims,
-                expires: DateTime.UtcNow.AddHours(_appSettings.JwtExpiresHours),
-                signingCredentials: creds
-            );
-
-            Console.WriteLine($"Token gerado com claims: {string.Join(", ", token.Claims.Select(c => $"{c.Type}: {c.Value}"))}");
-
-            return new
-            {
-                success = true,
-                data = new
-                {
-                    key = userKey,
-                    accessToken = new JwtSecurityTokenHandler().WriteToken(token),
-                    expiresIn = _appSettings.JwtExpiresHours * 3600,
-                    plano = plano, // 👈 RETORNA O PLANO TAMBÉM
-                    userToken = new
-                    {
-                        id = user.Id,
-                        email = user.Email,
-                        claims = claims.Select(c => new { type = c.Type, value = c.Value }).ToList(),
-                        role = roles.FirstOrDefault() ?? string.Empty
-                    }
-                }
-            };
-        }
-
-        private async Task<object> GenerateJwtAsync(string email, string userKey)
-        {
-            var user = await _userManager.FindByEmailAsync(email);
-            var roles = await _userManager.GetRolesAsync(user);
-
-            // 👇 NOVO: Busca o plano do usuário
-            var plano = await ObterPlanoUsuarioAsync(user.Id);
-            Console.WriteLine($"🔍 Plano detectado para {email}: {plano}");
-
-            var claims = new List<Claim>
-    {
-        new Claim(JwtRegisteredClaimNames.Sub, user.Id),
-        new Claim(JwtRegisteredClaimNames.Email, user.Email),
-        new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-        new Claim("UserKey", userKey),
-        new Claim("Plano", plano) // 👈 ADICIONA O PLANO AQUI
-    };
-
-            // Adiciona roles
-            claims.AddRange(roles.Select(role => new Claim(ClaimTypes.Role, role)));
-
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_appSettings.JwtSecretKey));
-            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-
-            var token = new JwtSecurityToken(
-                issuer: _appSettings.JwtIssuer,
-                audience: _appSettings.JwtAudience,
-                claims: claims,
-                expires: DateTime.UtcNow.AddHours(_appSettings.JwtExpiresHours),
-                signingCredentials: creds
-            );
-
-            Console.WriteLine($"Token gerado com claims: {string.Join(", ", token.Claims.Select(c => $"{c.Type}: {c.Value}"))}");
-
-            return new
-            {
-                success = true,
-                data = new
-                {
-                    key = userKey,
-                    accessToken = new JwtSecurityTokenHandler().WriteToken(token),
-                    expiresIn = _appSettings.JwtExpiresHours * 3600,
-                    plano = plano, // 👈 RETORNA O PLANO TAMBÉM
-                    userToken = new
-                    {
-                        id = user.Id,
-                        email = user.Email,
-                        claims = claims.Select(c => new { type = c.Type, value = c.Value }).ToList(),
-                        role = roles.FirstOrDefault() ?? string.Empty
-                    }
-                }
-            };
-        }
-
-        private async Task<object> GenerateJwtAsync(string email, string userKey)
-        {
-            var user = await _userManager.FindByEmailAsync(email);
-            var roles = await _userManager.GetRolesAsync(user);
-
-            // 👇 NOVO: Busca o plano do usuário
-            var plano = await ObterPlanoUsuarioAsync(user.Id);
-            Console.WriteLine($"🔍 Plano detectado para {email}: {plano}");
-
-            var claims = new List<Claim>
-    {
-        new Claim(JwtRegisteredClaimNames.Sub, user.Id),
-        new Claim(JwtRegisteredClaimNames.Email, user.Email),
-        new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-        new Claim("UserKey", userKey),
-        new Claim("Plano", plano) // 👈 ADICIONA O PLANO AQUI
-    };
-
-            // Adiciona roles
-            claims.AddRange(roles.Select(role => new Claim(ClaimTypes.Role, role)));
-
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_appSettings.JwtSecretKey));
-            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-
-            var token = new JwtSecurityToken(
-                issuer: _appSettings.JwtIssuer,
-                audience: _appSettings.JwtAudience,
-                claims: claims,
-                expires: DateTime.UtcNow.AddHours(_appSettings.JwtExpiresHours),
-                signingCredentials: creds
-            );
-
-            Console.WriteLine($"Token gerado com claims: {string.Join(", ", token.Claims.Select(c => $"{c.Type}: {c.Value}"))}");
-
-            return new
-            {
-                success = true,
-                data = new
-                {
-                    key = userKey,
-                    accessToken = new JwtSecurityTokenHandler().WriteToken(token),
-                    expiresIn = _appSettings.JwtExpiresHours * 3600,
-                    plano = plano, // 👈 RETORNA O PLANO TAMBÉM
+                    plano = plano,
                     userToken = new
                     {
                         id = user.Id,

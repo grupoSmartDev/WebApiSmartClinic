@@ -1,5 +1,4 @@
-﻿
-using System.Text.RegularExpressions;
+﻿using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Npgsql;
@@ -156,7 +155,7 @@ public class CadastroClienteService : ICadastroClienteInterface
                 asaasCustomerId = customer.id;
 
                 // Se NÃO for período de teste E tiver valor
-               if (!dto.PeriodoTeste && dto.PrecoSelecionado > 0)
+                if (!dto.PeriodoTeste && dto.PrecoSelecionado > 0)
                 {
                     // RECORRÊNCIA (Assinatura mensal/semestral)
                     if (dto.PeriodoCobranca == "monthly")
@@ -298,46 +297,12 @@ public class CadastroClienteService : ICadastroClienteInterface
                 // Não interrompe o cadastro
             }
 
-
+            // 7) Criando estrutura do cliente
             try
             {
                 Console.WriteLine("\n🏢 Criando estrutura do cliente...");
 
                 // 7.1) Cria a Empresa (matriz)
-            if (!dto.PeriodoTeste && dto.PrecoSelecionado > 0)
-            {
-                try
-                {
-                    var customerRequest = new AsaasCustomerRequest
-                    {
-                        name = $"{dto.Nome} {dto.Sobrenome}",
-                        email = dto.Email,
-                        phone = LimparTelefone(dto.Celular),
-                        mobilePhone = LimparTelefone(dto.Celular),
-                        cpfCnpj = dto.TitularCPF,
-                        observations = $"ClinicSmart - {dto.PlanoEscolhido} - {dto.PeriodoCobranca}"
-                    };
-                    var customer = await _asaasService.CreateCustomerAsync(customerRequest);
-                    asaasCustomerId = customer.id;
-
-                    var subscriptionRequest = new AsaasSubscriptionRequest
-                    {
-                        customer = customer.id,
-                        billingType = MapearTipoPagamento(dto.TipoPagamentoId ?? 1),
-                        value = dto.PrecoSelecionado,
-                        nextDueDate = DateTime.Now.AddDays(1).ToString("yyyy-MM-dd"),
-                        cycle = dto.PeriodoCobranca == "monthly" ? "MONTHLY" : "SEMIANNUALLY",
-                        description = $"ClinicSmart - {dto.PlanoEscolhido}",
-                        externalReference = $"clinicsmart_cpf_{cpfKey}"
-                    };
-                    var subscription = await _asaasService.CreateSubscriptionAsync(subscriptionRequest);
-                    asaasSubscriptionId = subscription.id;
-                }
-                catch (Exception) { }
-            }
-
-            try
-            {
                 var empresa = new EmpresaModel
                 {
                     Nome = dto.Nome,
@@ -372,8 +337,8 @@ public class CadastroClienteService : ICadastroClienteInterface
                 await db.Empresas.AddAsync(empresa);
                 await db.SaveChangesAsync();
                 Console.WriteLine($"✅ Empresa criada: {empresa.Id}");
-                await db.SaveChangesAsync(); 
 
+                // 7.2) Garantir perfis
                 async Task GarantirPerfisAsync()
                 {
                     foreach (var p in new[] { Perfis.Admin, Perfis.Support, Perfis.User })
@@ -503,7 +468,6 @@ public class CadastroClienteService : ICadastroClienteInterface
             {
                 Console.WriteLine($"⚠️ Erro ao enviar email: {exMail.Message}");
             }
-            catch { }
         }
         catch (Exception ex)
         {

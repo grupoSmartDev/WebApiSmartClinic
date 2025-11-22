@@ -1,13 +1,13 @@
-using Microsoft.EntityFrameworkCore;
-using WebApiSmartClinic.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
-using WebApiSmartClinic.Helpers;
-using Microsoft.Extensions.Options;
-using WebApiSmartClinic.Dto.User;
-using WebApiSmartClinic.Models.Abstractions;
-using System.Linq.Expressions;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
+using Microsoft.Extensions.Options;
+using System.Linq.Expressions;
+using WebApiSmartClinic.Helpers;
+using WebApiSmartClinic.Models;
+using WebApiSmartClinic.Models.Abstractions;
 
 namespace WebApiSmartClinic.Data;
 
@@ -561,6 +561,29 @@ public class AppDbContext : IdentityDbContext<User>
             // Aplica o filtro na entidade
             modelBuilder.Entity(clr).HasQueryFilter(lambda);
         }
+
+
+        var converterDateTime = new ValueConverter<DateTime, DateTime>(
+            v => v.Kind == DateTimeKind.Utc ? v : v.ToUniversalTime(),
+            v => DateTime.SpecifyKind(v, DateTimeKind.Utc));
+
+        var converterNullable = new ValueConverter<DateTime?, DateTime?>(
+            v => v.HasValue ? (v.Value.Kind == DateTimeKind.Utc ? v.Value : v.Value.ToUniversalTime()) : v,
+            v => v.HasValue ? DateTime.SpecifyKind(v.Value, DateTimeKind.Utc) : v);
+
+        foreach (var entityType in modelBuilder.Model.GetEntityTypes())
+        {
+            foreach (var property in entityType.GetProperties().Where(p => p.ClrType == typeof(DateTime) || p.ClrType == typeof(DateTime?)))
+            {
+                if (property.ClrType == typeof(DateTime))
+                    property.SetValueConverter(converterDateTime);
+                else
+                    property.SetValueConverter(converterNullable);
+
+                // opcional: garantir column type compatível
+                property.SetColumnType("timestamp with time zone");
+            }
+        }
     }
 
 
@@ -610,7 +633,7 @@ public class AppDbContext : IdentityDbContext<User>
                     //}
                     if (EmpresaSelecionada is null)
                         throw new InvalidOperationException("Empresa selecionada não definida para criação.");
-                    
+
                     eemp.EmpresaId = EmpresaSelecionada.Value;
                 }
                 else if (entry.State == EntityState.Modified)

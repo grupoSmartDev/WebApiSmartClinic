@@ -9,13 +9,11 @@ using SixLabors.ImageSharp.Formats.Jpeg;
 using SixLabors.ImageSharp.Formats.Png;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
-using System.Security.Cryptography;
 using System.Text;
 using WebApiSmartClinic.Data;
 using WebApiSmartClinic.Dto.User;
 using WebApiSmartClinic.Helpers;
 using WebApiSmartClinic.Models;
-using WebApiSmartClinic.Services.Auth;
 using WebApiSmartClinic.Services.ConnectionsService;
 
 

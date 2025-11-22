@@ -1,7 +1,3 @@
-
-using System.ComponentModel.DataAnnotations;
-using System.Drawing;
-using System.Globalization;
 using WebApiSmartClinic.Models.Abstractions;
 
 namespace WebApiSmartClinic.Models

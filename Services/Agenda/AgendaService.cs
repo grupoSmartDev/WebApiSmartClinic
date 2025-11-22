@@ -1,12 +1,7 @@
-using System.Linq;
-using System.Runtime.Serialization;
 using Microsoft.EntityFrameworkCore;
 using WebApiSmartClinic.Data;
 using WebApiSmartClinic.Dto.Agenda;
-using WebApiSmartClinic.Dto.Financ_Receber;
-using WebApiSmartClinic.Dto.Pacote; // ADICIONADO
 using WebApiSmartClinic.Models;
-using WebApiSmartClinic.Services.Pacote; // ADICIONADO
 
 namespace WebApiSmartClinic.Services.Agenda;
 
@@ -47,7 +42,7 @@ public class AgendaService : IAgendaInterface
     // MODIFICADO: Método Criar agora consome pacote quando status = Concluído
     public async Task<ResponseModel<List<AgendaModel>>> Criar(AgendaCreateDto agendaCreateDto)
     {
-        ResponseModel<List<AgendaModel>> resposta = new ResponseModel<List<AgendaModel>>();
+       ResponseModel<List<AgendaModel>> resposta = new ResponseModel<List<AgendaModel>>();
 
         using (var transaction = await _context.Database.BeginTransactionAsync())
         {

@@ -1,14 +1,10 @@
-using System.Text.RegularExpressions;
-using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using WebApiSmartClinic.Data;
-using WebApiSmartClinic.Helpers;
-using WebApiSmartClinic.Dto.Paciente;
-using WebApiSmartClinic.Models;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
-using Microsoft.AspNetCore.Http.HttpResults;
-using WebApiSmartClinic.Services.Agenda;
 using WebApiSmartClinic.Dto.Agenda;
+using WebApiSmartClinic.Dto.Paciente;
+using WebApiSmartClinic.Helpers;
+using WebApiSmartClinic.Models;
+using WebApiSmartClinic.Services.Agenda;
 
 namespace WebApiSmartClinic.Services.Paciente;
 
@@ -37,10 +33,6 @@ public class PacienteService : IPacienteInterface
         try
         {
             var paciente = await _context.Paciente
-                .Include(p => p.Evolucoes)
-                    .ThenInclude(e => e.Exercicios)
-                .Include(p => p.Evolucoes)
-                    .ThenInclude(e => e.Atividades)
                 .FirstOrDefaultAsync(x => x.Id == idPaciente);
 
             if (paciente == null)
@@ -163,16 +155,16 @@ public class PacienteService : IPacienteInterface
                             DataFimRecorrencia = dataFimRecorrencia,
                             // Use a nova classe DiaRecorrenciaDto
                             DiasRecorrencia = new List<DiaRecorrenciaDto>
-            {
-                new DiaRecorrenciaDto
-                {
-                    DiaSemana = recorrencia.DiaSemana,
-                    HoraInicio = recorrencia.HoraInicio.ToString(),
-                    HoraFim = recorrencia.HoraFim.ToString(),
-                    ProfissionalId = recorrencia.ProfissionalId,
-                    SalaId = recorrencia.SalaId
-                }
-            },
+                            {
+                                new DiaRecorrenciaDto
+                                {
+                                    DiaSemana = recorrencia.DiaSemana,
+                                    HoraInicio = recorrencia.HoraInicio.ToString(),
+                                    HoraFim = recorrencia.HoraFim.ToString(),
+                                    ProfissionalId = recorrencia.ProfissionalId,
+                                    SalaId = recorrencia.SalaId
+                                }
+                            },
                             HoraInicio = recorrencia.HoraInicio.ToString(),
                             HoraFim = recorrencia.HoraFim.ToString(),
                             PacienteId = paciente.Id,
@@ -218,9 +210,6 @@ public class PacienteService : IPacienteInterface
             return resposta;
         }
     }
-
-
-
 
     public async Task<ResponseModel<List<PacienteModel>>> Delete(int idPaciente, int pageNumber = 1, int pageSize = 10)
     {
@@ -274,10 +263,6 @@ public class PacienteService : IPacienteInterface
             {
                 var paciente = await _context.Paciente
                     .Include(p => p.Plano)
-                    .Include(p => p.Evolucoes)
-                        .ThenInclude(e => e.Exercicios)
-                    .Include(p => p.Evolucoes)
-                        .ThenInclude(e => e.Atividades)
                     .FirstOrDefaultAsync(x => x.Id == pacienteEdicaoDto.Id);
 
                 if (paciente == null)
@@ -391,10 +376,6 @@ public class PacienteService : IPacienteInterface
                 await transaction.CommitAsync();
 
                 var query = _context.Paciente
-                    .Include(p => p.Evolucoes)
-                        .ThenInclude(e => e.Exercicios)
-                    .Include(p => p.Evolucoes)
-                        .ThenInclude(e => e.Atividades)
                     .Include(p => p.Plano)
                     .AsQueryable();
 

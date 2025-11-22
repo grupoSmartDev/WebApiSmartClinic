@@ -1,9 +1,8 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using WebApiSmartClinic.Services.Auth;
-using WebApiSmartClinic.Dto.User;
-using WebApiSmartClinic.Helpers;
 using Stripe;
+using WebApiSmartClinic.Dto.User;
+using WebApiSmartClinic.Services.Auth;
 
 namespace WebApiSmartClinic.Controllers
 {

@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Localization;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.Globalization;
@@ -40,6 +39,7 @@ using WebApiSmartClinic.Services.HistoricoTransacao;
 using WebApiSmartClinic.Services.LogUsuario;
 using WebApiSmartClinic.Services.MailService;
 using WebApiSmartClinic.Services.Paciente;
+using WebApiSmartClinic.Services.Pacote;
 using WebApiSmartClinic.Services.Plano;
 using WebApiSmartClinic.Services.PlanoConta;
 using WebApiSmartClinic.Services.Procedimento;
@@ -50,8 +50,6 @@ using WebApiSmartClinic.Services.Status;
 using WebApiSmartClinic.Services.StripeService;
 using WebApiSmartClinic.Services.SubCentroCusto;
 using WebApiSmartClinic.Services.TipoPagamento;
-using Microsoft.AspNetCore.Diagnostics;
-using WebApiSmartClinic.Services.Pacote;
 
 var builder = WebApplication.CreateBuilder(args);
 var services = builder.Services;
@@ -145,7 +143,7 @@ services.AddSwaggerGen(c =>
                 Reference = new OpenApiReference 
                 {
                     Type = ReferenceType.SecurityScheme, 
-                    Id = "Bearer" 
+                    Id = "Bearer"
                 } 
             },
             new string[] {} 

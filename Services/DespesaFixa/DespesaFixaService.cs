@@ -293,7 +293,7 @@ public class DespesaFixaService : IDespesaFixaInterface
                 query = query.Where(i => i.Id == idFiltro.Value);
 
             if (!string.IsNullOrEmpty(descricaoFiltro))
-                query = query.Where(p => p.Descricao.Contains(descricaoFiltro));
+                query = query.Where(p => p.Descricao.ToLower().Contains(descricaoFiltro.ToLower()));
 
 
 

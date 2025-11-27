@@ -86,6 +86,13 @@ public class ProfissaoService : IProfissaoInterface
                 return resposta;
             }
 
+            if (profissao.IsSystemDefault)
+            {
+                resposta.Mensagem = "Não é possível excluir uma profissão padrão do sistema";
+                resposta.Status = false;
+                return resposta;
+            }
+
             var profissional = await _context.Profissional.FirstOrDefaultAsync(x => x.ProfissaoId == idProfissao);
             if (profissional == null)
             {
@@ -102,8 +109,9 @@ public class ProfissaoService : IProfissaoInterface
             var query = _context.Profissao.AsQueryable();
 
             resposta = await PaginationHelper.PaginateAsync(query, pageNumber, pageSize);
-            
-            
+            resposta.Mensagem = "Profissão excluída com sucesso";
+
+
             return resposta;
 
         }

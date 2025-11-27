@@ -8,5 +8,6 @@ namespace WebApiSmartClinic.Dto.Evolucao;
 
 public sealed class EvolucaoEdicaoDto : EvolucaoModel
 {
-    
+    public new List<ExercicioEdicaoDto>? Exercicios { get; set; }
+    public new List<AtividadeEdicaoDto>? Atividades { get; set; }
 }

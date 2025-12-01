@@ -235,7 +235,7 @@ public class CadastroClienteService : ICadastroClienteInterface
                         {
                             customer = customer.id,
                             billingType = "BOLETO",
-                            value = dto.PrecoSelecionado,
+                            value = dto.PeriodoCobranca == "semiannual" ? dto.PrecoSelecionado * 6 : dto.PrecoSelecionado,
                             dueDate = DateTime.Now.AddDays(3), // 3 dias para pagar
                             description = $"ClinicSmart - {dto.PlanoEscolhido} - {dto.PeriodoCobranca}",
                             externalReference = $"clinicsmart_cpf_{cpfKey}",
@@ -262,7 +262,7 @@ public class CadastroClienteService : ICadastroClienteInterface
                         {
                             customer = customer.id,
                             billingType = "PIX",
-                            value = dto.PrecoSelecionado,
+                            value = dto.PeriodoCobranca == "semiannual" ? dto.PrecoSelecionado * 6 : dto.PrecoSelecionado,
                             dueDate = DateTime.Now.AddDays(1), // 1 dia para pagar via PIX
                             description = $"ClinicSmart - {dto.PlanoEscolhido} - {dto.PeriodoCobranca}",
                             externalReference = $"clinicsmart_cpf_{cpfKey}",

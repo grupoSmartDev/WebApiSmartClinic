@@ -27,8 +27,6 @@ namespace WebApiSmartClinic.Controllers
             var userKey = HttpContext.Request.Headers["UserKey"].FirstOrDefault();
             var result = await _authService.LoginAsync(model, userKey);
 
-            // Aqui você decide como retorna a resposta
-            // Exemplo: se "success" está false, retorne 400, se true, retorne 200
             return Ok(result);
         }
 
@@ -46,14 +44,13 @@ namespace WebApiSmartClinic.Controllers
         }
 
         [Authorize(Roles = "Admin,Support")]
-        [HttpGet]
+        [HttpGet("Listar")]
         public async Task<IActionResult> GetAll([FromQuery] int page = 1, [FromQuery] int pageSize = 100, [FromQuery] string? filter = null)
         {
             var result = await _authService.GetAllUsersAsync(page, pageSize, filter);
             return Ok(result);
         }
 
-        //[ClaimsAuthorize("Usuário", "Visualizar")]
         [HttpGet("GetById/{id}")]
         public async Task<IActionResult> GetById([FromRoute] string id)
         {
@@ -61,17 +58,19 @@ namespace WebApiSmartClinic.Controllers
             return Ok(result);
         }
 
-        //[ClaimsAuthorize("Usuário", "Alterar")]
+        [Authorize(Roles = "Admin,Support")]
         [HttpPut("Update/{id}"), DisableRequestSizeLimit]
-        public async Task<IActionResult> Update(string id, UserUpdateRequest model, IFormFile? profilePicture)
+        [Consumes("multipart/form-data")]
+        public async Task<IActionResult> Update(string id, [FromForm] UserUpdateRequest model)
         {
-            var result = await _authService.UpdateUserAsync(id, model, profilePicture, User);
+            var result = await _authService.UpdateUserAsync(id, model, User);
 
             return Ok(result);
         }
 
         [HttpPut("Editar/{id}")]
-        public async Task<IActionResult> Editar([FromRoute] string id, UserUpdateRequest model)
+        [Consumes("multipart/form-data")]
+        public async Task<IActionResult> Editar([FromRoute] string id, [FromForm] UserUpdateRequest model)
         {
             var result = await _authService.Editar(id, model);
             return Ok(result);

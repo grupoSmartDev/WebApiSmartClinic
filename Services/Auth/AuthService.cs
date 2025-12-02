@@ -293,7 +293,7 @@ namespace WebApiSmartClinic.Services.Auth
         }
 
 
-        public async Task<object> UpdateUserAsync(string id, UserUpdateRequest model, IFormFile? profilePicture, ClaimsPrincipal currentUser)
+        public async Task<object> UpdateUserAsync(string id, UserUpdateRequest model, ClaimsPrincipal currentUser)
         {
             string tokenUserId = currentUser.FindFirstValue(ClaimTypes.NameIdentifier)!;
 
@@ -315,29 +315,29 @@ namespace WebApiSmartClinic.Services.Auth
             user.UserName = model.Email;
 
             // Se recebeu imagem de perfil
-            if (profilePicture != null)
-            {
-                long sizeLimitBytes = Convert.ToInt64(_appSettings.UserProfileImageSizeMb) * 1024L * 1024L;
-                if (profilePicture.Length > sizeLimitBytes)
-                {
-                    return new { success = false, error = $"A imagem não pode ser maior que {_appSettings.UserProfileImageSizeMb}MB." };
-                }
+            //if (profilePicture != null)
+            //{
+            //    long sizeLimitBytes = Convert.ToInt64(_appSettings.UserProfileImageSizeMb) * 1024L * 1024L;
+            //    if (profilePicture.Length > sizeLimitBytes)
+            //    {
+            //        return new { success = false, error = $"A imagem não pode ser maior que {_appSettings.UserProfileImageSizeMb}MB." };
+            //    }
 
-                string fileExtension = Path.GetExtension(profilePicture.FileName).ToLowerInvariant();
-                if (fileExtension != ".png" && fileExtension != ".jpeg" && fileExtension != ".jpg" && fileExtension != ".bmp")
-                {
-                    return new { success = false, error = "Somente arquivos PNG, JPEG e BMP são permitidos." };
-                }
+            //    string fileExtension = Path.GetExtension(profilePicture.FileName).ToLowerInvariant();
+            //    if (fileExtension != ".png" && fileExtension != ".jpeg" && fileExtension != ".jpg" && fileExtension != ".bmp")
+            //    {
+            //        return new { success = false, error = "Somente arquivos PNG, JPEG e BMP são permitidos." };
+            //    }
 
-                // Lê o arquivo enviado
-                byte[] profileImageBytes;
-                using (var memoryStream = new MemoryStream())
-                {
-                    await profilePicture.CopyToAsync(memoryStream);
-                    profileImageBytes = memoryStream.ToArray();
-                }
-                user.ProfilePicture = profileImageBytes;
-            }
+            //    // Lê o arquivo enviado
+            //    byte[] profileImageBytes;
+            //    using (var memoryStream = new MemoryStream())
+            //    {
+            //        await profilePicture.CopyToAsync(memoryStream);
+            //        profileImageBytes = memoryStream.ToArray();
+            //    }
+            //    user.ProfilePicture = profileImageBytes;
+            //}
 
             // Se enviou a senha atual, checa e se for correto, altera
             if (!string.IsNullOrWhiteSpace(model.Password))

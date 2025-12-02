@@ -68,11 +68,12 @@ namespace WebApiSmartClinic.Controllers
             return Ok(result);
         }
 
+        [Authorize]
         [HttpPut("Editar/{id}")]
         [Consumes("multipart/form-data")]
         public async Task<IActionResult> Editar([FromRoute] string id, [FromForm] UserUpdateRequest model)
         {
-            var result = await _authService.Editar(id, model);
+            var result = await _authService.Editar(id, model, User);
             return Ok(result);
         }
 

@@ -1,4 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
 
 namespace WebApiSmartClinic.Dto.User;
 
@@ -22,4 +22,9 @@ public class UserUpdateRequest
 
     [Compare("NewPassword", ErrorMessage = "As senhas não conferem")]
     public string? ConfirmNewPassword { get; set; }
+
+    /// <summary>
+    /// Perfil/role selecionado no front (Admin, Support ou User). Opcional para não quebrar fluxos existentes.
+    /// </summary>
+    public string? Role { get; set; }
 }

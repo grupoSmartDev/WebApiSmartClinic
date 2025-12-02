@@ -19,16 +19,11 @@ public class EmpresaPermissaoService : IEmpresaPermissaoInterface
 
     public async Task<bool> UsuarioPodeVerTodasEmpresasAsync(string? usuarioId)
     {
-        // Fallback: usa o usuário atual do DbContext se o parâmetro vier nulo
         usuarioId ??= _db.UsuarioAtualId;
         if (string.IsNullOrWhiteSpace(usuarioId)) return false;
 
-        var user = await _userManager.Users.FirstOrDefaultAsync(u => u.Id == usuarioId);
-        if (user == null) return false;
-
-        var roles = await _userManager.GetRolesAsync(user);
-        // Admin e Support podem enxergar TODAS as empresas do tenant
-        return roles.Contains(Perfis.Admin);
+        var flags = await PermissionHelper.ResolveRolesAsync(_userManager, usuarioId);
+        return flags.EhAdmin;
     }
 
     public async Task<bool> UsuarioTemAcessoEmpresaAsync(string? usuarioId, int empresaId)
@@ -71,9 +66,8 @@ public class EmpresaPermissaoService : IEmpresaPermissaoInterface
     public async Task<bool> UsuarioPodeExcluirAsync(string usuarioId, int empresaId)
     {
         // 1) Papéis que “podem tudo”? Se SIM, devolver true aqui.
-        var user = await _userManager.FindByIdAsync(usuarioId);
-        var roles = await _userManager.GetRolesAsync(user!);
-        if (roles.Contains(Perfis.Admin) || roles.Contains(Perfis.Support))
+        var flags = await PermissionHelper.ResolveRolesAsync(_userManager, usuarioId);
+        if (flags.EhAdmin || flags.EhSupport)
             return true; // se essa for sua regra
 
         // 2) Caso contrário, consulta UsuarioEmpresas

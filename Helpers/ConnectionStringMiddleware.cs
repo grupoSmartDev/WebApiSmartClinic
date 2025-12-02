@@ -62,7 +62,7 @@ public class ConnectionStringMiddleware
             {
 
                 // Verifica se o usuário é Admin ou Support para permitir o acesso a qualquer contexto
-                var isUserAllowedToSwitchContext = context.User.IsInRole("Admin") || context.User.IsInRole("Support");
+                var isUserAllowedToSwitchContext = PermissionHelper.IsSupportOrAdmin(context.User);
 
                 if (isUserAllowedToSwitchContext)
                 {

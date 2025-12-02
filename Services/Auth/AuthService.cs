@@ -197,25 +197,19 @@ namespace WebApiSmartClinic.Services.Auth
 
         public async Task<object> GetUserByIdAsync(string id, ClaimsPrincipal currentUser)
         {
-            // Extrair id do usuário logado, ver se tem permissão
-            string tokenUserId = currentUser.FindFirstValue(ClaimTypes.NameIdentifier)!;
             var user = await _userManager.FindByIdAsync(id);
 
             if (user == null)
                 return new { success = false, error = "Usuário não encontrado." };
 
-            var roles = await _userManager.GetRolesAsync(user);
-            var role = roles.FirstOrDefault() ?? string.Empty;
-
-            bool isSupportOrAdmin = currentUser.IsInRole("Support") || currentUser.IsInRole("Admin");
-
-            // Se o usuário não é o dono do id e não é Support/Admin, não tem acesso
-            if (tokenUserId != id && !isSupportOrAdmin)
+            if (!PermissionHelper.CanManageUser(id, currentUser))
             {
                 return new { success = false, error = "Sem permissão para consultar dados de outro usuário." };
             }
 
-            // Retorna objeto
+            var roles = await _userManager.GetRolesAsync(user);
+            var role = roles.FirstOrDefault() ?? string.Empty;
+
             var userResponse = new UserResponseRequest
             {
                 Id = user.Id,
@@ -229,117 +223,42 @@ namespace WebApiSmartClinic.Services.Auth
             return userResponse;
         }
 
-        public async Task<object> Editar(string id, UserUpdateRequest model)
+        public async Task<object> Editar(string id, UserUpdateRequest model, ClaimsPrincipal currentUser)
         {
             var user = await _userManager.FindByIdAsync(id);
             if (user == null)
                 return new { success = false, error = "Usuário não encontrado." };
 
-            // Atualiza dados
-            user.FirstName = model.FirstName;
-            user.LastName = model.LastName;
-            user.Email = model.Email;
-            user.UserName = model.Email;
-
-            // Se enviou a senha atual, checa e se for correto, altera
-            if (!string.IsNullOrWhiteSpace(model.Password))
+            if (!PermissionHelper.CanManageUser(id, currentUser))
             {
-                var passwordCheck = await _userManager.CheckPasswordAsync(user, model.Password);
-                if (!passwordCheck)
-                {
-                    return new { success = false, error = "Senha atual incorreta." };
-                }
-
-                if (!string.IsNullOrWhiteSpace(model.NewPassword))
-                {
-                    if (!model.NewPassword.Equals(model.ConfirmNewPassword))
-                    {
-                        return new { success = false, error = "Nova senha e confirmação de senha não conferem." };
-                    }
-
-                    var passwordChangeResult = await _userManager.ChangePasswordAsync(user, model.Password, model.NewPassword);
-                    if (!passwordChangeResult.Succeeded)
-                    {
-                        return new { success = false, errors = passwordChangeResult.Errors };
-                    }
-                }
+                return new { success = false, error = "Você não tem permissão para alterar outros usuários." };
             }
 
-            var result = await _userManager.UpdateAsync(user);
-            if (!result.Succeeded)
-                return new { success = false, errors = result.Errors };
-
-            // Recupera a role atual
-            var userRoles = await _userManager.GetRolesAsync(user);
-            var userRole = userRoles.FirstOrDefault() ?? string.Empty;
-
-            // Monta objeto de retorno
-            var userResponse = new UserResponseRequest
-            {
-                Id = user.Id,
-                FirstName = user.FirstName,
-                LastName = user.LastName,
-                Email = user.Email,
-                Role = userRole,
-                UserKey = user.UserKey
-            };
-
-            return new
-            {
-                success = true,
-                message = "Usuário atualizado com sucesso.",
-                user = userResponse
-            };
+            return await AtualizarUsuarioAsync(user, model, currentUser);
         }
 
 
         public async Task<object> UpdateUserAsync(string id, UserUpdateRequest model, ClaimsPrincipal currentUser)
         {
-            string tokenUserId = currentUser.FindFirstValue(ClaimTypes.NameIdentifier)!;
-
             var user = await _userManager.FindByIdAsync(id);
             if (user == null)
                 return new { success = false, error = "Usuário não encontrado." };
 
-            bool isSupportOrAdmin = currentUser.IsInRole("Support") || currentUser.IsInRole("Admin");
-
-            if (tokenUserId != id && !isSupportOrAdmin)
+            if (!PermissionHelper.CanManageUser(id, currentUser))
             {
                 return new { success = false, error = "Você não tem permissão para alterar outros usuários." };
             }
 
-            // Atualiza dados
+            return await AtualizarUsuarioAsync(user, model, currentUser);
+        }
+
+        private async Task<object> AtualizarUsuarioAsync(User user, UserUpdateRequest model, ClaimsPrincipal currentUser)
+        {
             user.FirstName = model.FirstName;
             user.LastName = model.LastName;
             user.Email = model.Email;
             user.UserName = model.Email;
 
-            // Se recebeu imagem de perfil
-            //if (profilePicture != null)
-            //{
-            //    long sizeLimitBytes = Convert.ToInt64(_appSettings.UserProfileImageSizeMb) * 1024L * 1024L;
-            //    if (profilePicture.Length > sizeLimitBytes)
-            //    {
-            //        return new { success = false, error = $"A imagem não pode ser maior que {_appSettings.UserProfileImageSizeMb}MB." };
-            //    }
-
-            //    string fileExtension = Path.GetExtension(profilePicture.FileName).ToLowerInvariant();
-            //    if (fileExtension != ".png" && fileExtension != ".jpeg" && fileExtension != ".jpg" && fileExtension != ".bmp")
-            //    {
-            //        return new { success = false, error = "Somente arquivos PNG, JPEG e BMP são permitidos." };
-            //    }
-
-            //    // Lê o arquivo enviado
-            //    byte[] profileImageBytes;
-            //    using (var memoryStream = new MemoryStream())
-            //    {
-            //        await profilePicture.CopyToAsync(memoryStream);
-            //        profileImageBytes = memoryStream.ToArray();
-            //    }
-            //    user.ProfilePicture = profileImageBytes;
-            //}
-
-            // Se enviou a senha atual, checa e se for correto, altera
             if (!string.IsNullOrWhiteSpace(model.Password))
             {
                 var passwordCheck = await _userManager.CheckPasswordAsync(user, model.Password);
@@ -363,22 +282,41 @@ namespace WebApiSmartClinic.Services.Auth
                 }
             }
 
+            var userRoles = await _userManager.GetRolesAsync(user);
+            var currentRole = userRoles.FirstOrDefault() ?? string.Empty;
+
+            if (!string.IsNullOrWhiteSpace(model.Role) && !string.Equals(model.Role, currentRole, StringComparison.OrdinalIgnoreCase))
+            {
+                if (!PermissionHelper.IsSupportOrAdmin(currentUser))
+                {
+                    return new { success = false, error = "Você não tem permissão para alterar a permissão deste usuário." };
+                }
+
+                if (userRoles.Any())
+                {
+                    await _userManager.RemoveFromRolesAsync(user, userRoles);
+                }
+
+                var roleResult = await _userManager.AddToRoleAsync(user, model.Role);
+                if (!roleResult.Succeeded)
+                {
+                    return new { success = false, errors = roleResult.Errors };
+                }
+
+                currentRole = model.Role;
+            }
+
             var result = await _userManager.UpdateAsync(user);
             if (!result.Succeeded)
                 return new { success = false, errors = result.Errors };
 
-            // Recupera a role atual
-            var userRoles = await _userManager.GetRolesAsync(user);
-            var userRole = userRoles.FirstOrDefault() ?? string.Empty;
-
-            // Monta objeto de retorno
             var userResponse = new UserResponseRequest
             {
                 Id = user.Id,
                 FirstName = user.FirstName,
                 LastName = user.LastName,
                 Email = user.Email,
-                Role = userRole,
+                Role = currentRole,
                 ProfilePictureBase64 = ConvertBlobToBase64(user.ProfilePicture),
                 UserKey = user.UserKey
             };

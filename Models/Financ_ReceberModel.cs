@@ -28,7 +28,7 @@ namespace WebApiSmartClinic.Models
         private DateTime? _DataEmissao;
         public DateTime? DataEmissao
         {
-            get => _DataEmissao?.ToLocalTime();
+            get => _DataEmissao;
             set => _DataEmissao = value.HasValue
                 ? DateTime.SpecifyKind(value.Value.ToUniversalTime(), DateTimeKind.Utc)
                 : null;
@@ -90,7 +90,7 @@ namespace WebApiSmartClinic.Models
         private DateTime? _DataPagamento;
         public DateTime? DataPagamento
         {
-            get => _DataPagamento?.ToLocalTime();
+            get => _DataPagamento;
             set => _DataPagamento = value.HasValue
                 ? DateTime.SpecifyKind(value.Value.ToUniversalTime(), DateTimeKind.Utc)
                 : null;
@@ -98,7 +98,7 @@ namespace WebApiSmartClinic.Models
         private DateTime? _DataVencimento;
         public DateTime? DataVencimento
         {
-            get => _DataVencimento?.ToLocalTime();
+            get => _DataVencimento;
             set => _DataVencimento = value.HasValue
                 ? DateTime.SpecifyKind(value.Value.ToUniversalTime(), DateTimeKind.Utc)
                 : null;

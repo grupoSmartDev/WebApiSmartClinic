@@ -90,7 +90,7 @@ public class Financ_PagarSubModel
     private DateTime? _DataPagamento;
     public DateTime? DataPagamento
     {
-        get => _DataPagamento?.ToLocalTime();
+        get => _DataPagamento;
         set => _DataPagamento = value.HasValue
             ? DateTime.SpecifyKind(value.Value.ToUniversalTime(), DateTimeKind.Utc)
             : null;

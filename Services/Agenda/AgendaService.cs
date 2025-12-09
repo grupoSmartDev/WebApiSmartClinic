@@ -833,9 +833,65 @@ public class AgendaService : IAgendaInterface
 
     }
 
-    public Task<ResponseModel<List<ContadoresDashboard>>> ObterContadoresDashboard(int? profissionalId, DateTime? dataInicio = null, DateTime? dataFim = null)
+    public async Task<ResponseModel<List<ContadoresDashboard>>> ObterContadoresDashboard(int? profissionalId, DateTime? dataInicio = null, DateTime? dataFim = null)
     {
-        throw new NotImplementedException();
+        ResponseModel<List<ContadoresDashboard>> resposta = new ResponseModel<List<ContadoresDashboard>>();
+
+        try
+        {
+            var consultaAgenda = _context.Agenda.Include(a => a.Status).AsQueryable();
+
+            if (dataInicio.HasValue)
+            {
+                consultaAgenda = consultaAgenda.Where(a => a.Data >= dataInicio);
+            }
+
+            if (dataFim.HasValue)
+            {
+                consultaAgenda = consultaAgenda.Where(a => a.Data <= dataFim);
+            }
+
+            if (profissionalId.HasValue && profissionalId > 0)
+            {
+                consultaAgenda = consultaAgenda.Where(a => a.ProfissionalId == profissionalId);
+            }
+
+            var agendas = await consultaAgenda.ToListAsync();
+            var consultaPaciente = _context.Paciente.AsQueryable();
+
+            if (dataInicio.HasValue && dataFim.HasValue)
+            {
+                consultaPaciente = consultaPaciente.Where(p => p.DataCadastro >= dataInicio && p.DataCadastro <= dataFim);
+            }
+
+            int totalAgendas = agendas.Count;
+            int agendasFinalizadas = agendas.Count(a => a.Status?.Status == "Concluído");
+            int agendasFuturas = agendas.Count(a => a.Status?.Legenda == "Não compareceu");
+            int pacientesNoPeriodo = await consultaPaciente.CountAsync();
+
+            var listaContadores = new List<ContadoresDashboard>
+            {
+                new ContadoresDashboard
+                {
+                    TotalAgendas = totalAgendas,
+                    AgendasFinalizadas = agendasFinalizadas,
+                    AgendasFuturas = agendasFuturas,
+                    PacientesNoPeriodo = pacientesNoPeriodo
+                }
+            };
+
+            resposta.Dados = listaContadores;
+            resposta.Mensagem = "Contadores calculados com sucesso";
+            resposta.Status = true;
+
+            return resposta;
+        }
+        catch (Exception ex)
+        {
+            resposta.Mensagem = ex.Message;
+            resposta.Status = false;
+            return resposta;
+        }
     }
 }
 

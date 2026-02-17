@@ -11,4 +11,13 @@ public class DataConnectionContext : DbContext
     }
 
     public DbSet<DataConnections> DataConnection { get; set; }
+
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        base.OnModelCreating(modelBuilder);
+
+        modelBuilder.Entity<DataConnections>()
+            .HasIndex(x => x.Key)
+            .IsUnique();
+    }
 }

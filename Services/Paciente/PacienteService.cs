@@ -33,6 +33,7 @@ public class PacienteService : IPacienteInterface
         try
         {
             var paciente = await _context.Paciente
+                .AsNoTracking()
                 .FirstOrDefaultAsync(x => x.Id == idPaciente);
 
             if (paciente == null)
@@ -404,33 +405,38 @@ public class PacienteService : IPacienteInterface
         try
         {
             var query = _context.Paciente
-           .Include(p => p.Evolucoes)
-               .ThenInclude(e => e.Exercicios)
-           .Include(p => p.Evolucoes)
-               .ThenInclude(e => e.Atividades)
-           .Include(pl => pl.Plano)
-           .Include(p => p.Plano)
-           .Include(p => p.FinancReceber)
-               .ThenInclude(f => f.subFinancReceber)
-               .ThenInclude(f => f.TipoPagamento)
-           .AsQueryable();
-           
+                .Include(p => p.Evolucoes)
+                    .ThenInclude(e => e.Exercicios)
+                .Include(p => p.Evolucoes)
+                    .ThenInclude(e => e.Atividades)
+                .Include(p => p.Plano)
+                .Include(p => p.FinancReceber)
+                    .ThenInclude(f => f.subFinancReceber)
+                    .ThenInclude(f => f.TipoPagamento)
+                .AsSplitQuery()
+                .AsNoTracking()
+                .AsQueryable();
 
-            if (!string.IsNullOrEmpty(idFiltro.ToString()))
+            if (idFiltro.HasValue)
                 query = query.Where(p => p.Id == idFiltro);
 
-            if (!string.IsNullOrEmpty(nomeFiltro))
-                query = query.Where(p => p.Nome.ToLower().Contains(nomeFiltro.ToLower()));
+            if (!string.IsNullOrWhiteSpace(nomeFiltro))
+            {
+                var filtroNome = $"%{nomeFiltro.Trim()}%";
+                query = query.Where(p => p.Nome != null && EF.Functions.ILike(p.Nome, filtroNome));
+            }
 
-            if (!string.IsNullOrEmpty(cpfFiltro))
-                query = query.Where(p => p.Cpf.Trim().Contains(cpfFiltro.Trim()));
+            if (!string.IsNullOrWhiteSpace(cpfFiltro))
+                query = query.Where(p => p.Cpf != null && p.Cpf.Contains(cpfFiltro.Trim()));
 
-            if (!string.IsNullOrEmpty(celularFiltro))
-                query = query.Where(p => p.Celular.Trim().Contains(celularFiltro.Trim()));
+            if (!string.IsNullOrWhiteSpace(celularFiltro))
+                query = query.Where(p => p.Celular != null && p.Celular.Contains(celularFiltro.Trim()));
 
             query = query.OrderBy(x => x.Id);
 
-            resposta = paginar ? await PaginationHelper.PaginateAsync(query, pageNumber, pageSize) : new ResponseModel<List<PacienteModel>> { Dados = await query.ToListAsync() };
+            resposta = paginar
+                ? await PaginationHelper.PaginateAsync(query, pageNumber, pageSize)
+                : new ResponseModel<List<PacienteModel>> { Dados = await query.ToListAsync() };
             resposta.Mensagem = "Todos os Pacientes foram encontrados";
 
             return resposta;
@@ -450,7 +456,10 @@ public class PacienteService : IPacienteInterface
         ResponseModel<PacienteModel> resposta = new ResponseModel<PacienteModel>();
         try
         {
-            var paciente = await _context.Paciente.FirstOrDefaultAsync(x => x.Cpf == cpf);
+            var cpfLimpo = Funcoes.RemoverCaracteres(cpf);
+            var paciente = await _context.Paciente
+                .AsNoTracking()
+                .FirstOrDefaultAsync(x => x.Cpf == cpfLimpo);
 
             if (paciente == null)
             {
@@ -468,8 +477,6 @@ public class PacienteService : IPacienteInterface
             resposta.Status = false;
             resposta.Mensagem = "Erro ao procurar por paciente";
             return resposta;
-            throw;
-
         }
     }
 
@@ -478,13 +485,21 @@ public class PacienteService : IPacienteInterface
         ResponseModel<List<PacienteModel>> resposta = new ResponseModel<List<PacienteModel>>();
         try
         {
+            if (string.IsNullOrWhiteSpace(nome))
+            {
+                resposta.Status = true;
+                resposta.Mensagem = "Informe um nome para pesquisar";
+                return resposta;
+            }
 
-            var paciente = await _context.Paciente.ToListAsync();
-            paciente.Select(
-                n => n.Nome.Contains(nome)
-                );
+            var filtroNome = $"%{nome.Trim()}%";
+            var pacientes = await _context.Paciente
+                .AsNoTracking()
+                .Where(n => n.Nome != null && EF.Functions.ILike(n.Nome, filtroNome))
+                .OrderBy(n => n.Nome)
+                .ToListAsync();
 
-            if (paciente == null)
+            if (pacientes.Count == 0)
             {
                 resposta.Status = true;
                 resposta.Mensagem = "Nenhum paciente com esse nome";
@@ -493,7 +508,7 @@ public class PacienteService : IPacienteInterface
 
             resposta.Status = true;
             resposta.Mensagem = "Pacientes encontrado";
-            resposta.Dados = paciente;
+            resposta.Dados = pacientes;
             return resposta;
         }
         catch (Exception)
@@ -501,7 +516,6 @@ public class PacienteService : IPacienteInterface
             resposta.Status = false;
             resposta.Mensagem = "Erro ao buscar paciente";
             return resposta;
-            throw;
         }
     }
 
@@ -516,17 +530,11 @@ public class PacienteService : IPacienteInterface
             {
                 var cpfLimpo = Funcoes.RemoverCaracteres(pacienteCreateDto.Cpf);
                 var cpfExistente = await _context.Paciente.AnyAsync(p => p.Cpf == cpfLimpo);
-                DateTime? dataFimRecorrencia = null;
 
                 if (cpfExistente)
                 {
                     resposta.Mensagem = "CPF já cadastrado, verifique.";
                     return resposta;
-                }
-
-                if (pacienteCreateDto.DataFimRecorrencia.HasValue)
-                {
-                    dataFimRecorrencia = pacienteCreateDto.DataFimRecorrencia.Value;
                 }
 
                
@@ -547,14 +555,6 @@ public class PacienteService : IPacienteInterface
                 _context.Paciente.Add(paciente);
                 await _context.SaveChangesAsync();
                 await transaction.CommitAsync();
-
-                var query = _context.Paciente
-                    .Include(p => p.Evolucoes)
-                        .ThenInclude(e => e.Exercicios)
-                    .Include(p => p.Evolucoes)
-                        .ThenInclude(e => e.Atividades)
-                    .Include(p => p.Plano)
-                    .AsQueryable();
 
                 resposta.Dados = paciente;
                 resposta.Mensagem = "Paciente criado com sucesso!";

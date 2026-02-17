@@ -28,7 +28,6 @@ namespace WebApiSmartClinic.Services.Auth
         private readonly IConnectionsService _connectionsService;
         private readonly IConnectionStringProvider _connectionStringProvider;
         private readonly IServiceScopeFactory _scopeFactory;
-        private readonly DataConnectionContext _contextDataConnection;
         private const long TamanhoMaximoFotoPerfilEmBytes = 10L * 1024 * 1024; // 10 MB
 
         public AuthService(
@@ -38,7 +37,6 @@ namespace WebApiSmartClinic.Services.Auth
             IOptions<AppSettings> appSettings,
             IConnectionsService connectionsService,
             IConnectionStringProvider connectionStringProvider,
-            DataConnectionContext contextDataConnection,
             IServiceScopeFactory scopeFactory)
         {
             _signInManager = signInManager;
@@ -47,17 +45,13 @@ namespace WebApiSmartClinic.Services.Auth
             _appSettings = appSettings.Value;
             _connectionsService = connectionsService;
             _connectionStringProvider = connectionStringProvider;
-            _contextDataConnection = contextDataConnection;
             _scopeFactory = scopeFactory;
         }
 
         public async Task<object> LoginAsync(UserLoginRequest model, string? userKey)
         {
             // Validações
-            var conn = await _contextDataConnection.DataConnection
-                .Where(c => c.Key == userKey)
-                .Select(c => c.StringConnection)
-                .FirstOrDefaultAsync();
+            var conn = await ResolveConnectionStringAsync(userKey);
 
             if (string.IsNullOrWhiteSpace(conn))
                 return new { success = false, errors = "Banco não encontrado" };
@@ -83,12 +77,6 @@ namespace WebApiSmartClinic.Services.Auth
                 model.RememberMe,
                 lockoutOnFailure: true);
 
-            bool existe = await _contextDataConnection.DataConnection.AnyAsync(c => c.Key == userKey);
-            if (!existe)
-            {
-                return new { success = false, errors = "Database não encontrado" };
-            }
-
             if (!result.Succeeded)
             {
                 // Retorne algo indicando falha (aqui, a título de exemplo):
@@ -104,6 +92,13 @@ namespace WebApiSmartClinic.Services.Auth
             // Se preferir, valide aqui a aceitação dos termos, etc.
             if (!model.AcceptTerms)
                 return new { success = false, error = "É necessário aceitar os termos." };
+            var conn = await ResolveConnectionStringAsync(userKey);
+            if (string.IsNullOrWhiteSpace(conn))
+            {
+                return new { success = false, errors = "Database nao encontrado" };
+            }
+
+            _connectionStringProvider.SetConnectionString(conn);
 
             var user = new User
             {
@@ -116,13 +111,6 @@ namespace WebApiSmartClinic.Services.Auth
             };
 
             var result = await _userManager.CreateAsync(user, model.Password);
-
-            // 1. Verifica se já existe
-            bool existe = await _contextDataConnection.DataConnection.AnyAsync(c => c.Key == userKey);
-            if (!existe)
-            {
-                return new { success = false, errors = "Database não encontrado" };
-            }
 
             // Se o usuário foi criado com sucesso, adiciona role, claims etc.
             if (!result.Succeeded)
@@ -358,6 +346,23 @@ namespace WebApiSmartClinic.Services.Auth
         // ----------------------------------------------------
         // Métodos auxiliares privados
         // ----------------------------------------------------
+
+        private async Task<string?> ResolveConnectionStringAsync(string? userKey)
+        {
+            if (string.IsNullOrWhiteSpace(userKey))
+            {
+                return null;
+            }
+
+            try
+            {
+                return await _connectionsService.GetConnectionsStringByKeyAsync(userKey);
+            }
+            catch (KeyNotFoundException)
+            {
+                return null;
+            }
+        }
 
         private async Task<string> ObterPlanoUsuarioAsync(string userId)
         {

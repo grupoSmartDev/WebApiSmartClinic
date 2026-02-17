@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using WebApiSmartClinic.Data;
 using WebApiSmartClinic.Dto.Agenda;
+using WebApiSmartClinic.Dto.Financ_Receber;
 using WebApiSmartClinic.Models;
 
 namespace WebApiSmartClinic.Services.Agenda;
@@ -19,7 +20,9 @@ public class AgendaService : IAgendaInterface
         ResponseModel<AgendaModel> resposta = new ResponseModel<AgendaModel>();
         try
         {
-            var agenda = await _context.Agenda.FirstOrDefaultAsync(x => x.Id == idAgenda);
+            var agenda = await _context.Agenda
+                .AsNoTracking()
+                .FirstOrDefaultAsync(x => x.Id == idAgenda);
             if (agenda == null)
             {
                 resposta.Mensagem = "Nenhum Agenda encontrado";
@@ -48,6 +51,20 @@ public class AgendaService : IAgendaInterface
         {
             try
             {
+                if (!agendaCreateDto.Data.HasValue)
+                {
+                    resposta.Mensagem = "Data do agendamento eh obrigatoria.";
+                    resposta.Status = false;
+                    return resposta;
+                }
+
+                if (agendaCreateDto.DiasRecorrencia is { Count: > 0 } && !agendaCreateDto.DataFimRecorrencia.HasValue)
+                {
+                    resposta.Mensagem = "Data fim da recorrencia eh obrigatoria.";
+                    resposta.Status = false;
+                    return resposta;
+                }
+
                 List<AgendaModel> agendamentos = new List<AgendaModel>();
 
                 DateTime? dataAtual = agendaCreateDto.Data;
@@ -55,27 +72,7 @@ public class AgendaService : IAgendaInterface
 
                 while (dataAtual <= dataFim)
                 {
-
-                    bool criarAgendamento = false;
-
-                    if (agendaCreateDto.DiasRecorrencia == null)
-                    {
-                        // Se não tem recorrência, cria apenas um agendamento na data original
-                        criarAgendamento = true;
-                    }
-                    else
-                    {
-                        // Verificando se algum dos dias selecionados corresponde ao dia atual
-                        foreach (var diaSemana in agendaCreateDto.DiasRecorrencia)
-                        {
-                            // Verifica se o dia da semana selecionado corresponde ao dia atual
-                            if ((int)diaSemana.DiaSemana == (int)dataAtual.Value.DayOfWeek)
-                            {
-                                criarAgendamento = true;
-                                break;
-                            }
-                        }
-                    }
+                    var criarAgendamento = dataAtual.HasValue && DeveCriarAgendamento(agendaCreateDto, dataAtual.Value);
 
                     if (criarAgendamento)
                     {
@@ -100,74 +97,12 @@ public class AgendaService : IAgendaInterface
                             Avulso = agendaCreateDto.Avulso,
                         };
 
-                        // Processamento das horas
-                        if (TimeSpan.TryParse(agendaCreateDto.HoraInicio, out TimeSpan horaInicio))
-                        {
-                            agenda.HoraInicio = horaInicio;
-                        }
-                        else
-                        {
-                            throw new Exception("Formato de hora inválido para HoraInicio");
-                        }
-
-                        if (TimeSpan.TryParse(agendaCreateDto.HoraFim, out TimeSpan horaFim))
-                        {
-                            agenda.HoraFim = horaFim;
-                        }
-                        else
-                        {
-                            throw new Exception("Formato de hora inválido para HoraFim");
-                        }
+                        agenda.HoraInicio = ParseHorario(agendaCreateDto.HoraInicio, nameof(agendaCreateDto.HoraInicio));
+                        agenda.HoraFim = ParseHorario(agendaCreateDto.HoraFim, nameof(agendaCreateDto.HoraFim));
 
                         if (agendaCreateDto.FinancReceber != null)
                         {
-                            var financ_receber = new Financ_ReceberModel
-                            {
-                                IdOrigem = agendaCreateDto.FinancReceber.IdOrigem ?? 0,
-                                NrDocto = agendaCreateDto.FinancReceber.NrDocto ?? 0,
-                                DataEmissao = agendaCreateDto.FinancReceber.DataEmissao,
-                                ValorOriginal = agendaCreateDto.FinancReceber.ValorOriginal,
-                                ValorPago = agendaCreateDto.FinancReceber.ValorPago,
-                                Valor = agendaCreateDto.FinancReceber.Valor,
-                                Status = agendaCreateDto.FinancReceber.Status,
-                                NotaFiscal = agendaCreateDto.FinancReceber.NotaFiscal,
-                                Descricao = agendaCreateDto.FinancReceber.Descricao,
-                                Parcela = agendaCreateDto.FinancReceber.Parcela,
-                                Classificacao = agendaCreateDto.FinancReceber.Classificacao,
-                                Observacao = agendaCreateDto.FinancReceber.Observacao,
-                                FornecedorId = agendaCreateDto.FinancReceber.FornecedorId,
-                                CentroCustoId = agendaCreateDto.FinancReceber.CentroCustoId,
-                                PacienteId = agendaCreateDto.FinancReceber.PacienteId,
-                                BancoId = agendaCreateDto.FinancReceber.BancoId,
-                                TipoPagamentoId = (int)agendaCreateDto.FinancReceber.TipoPagamentoId,
-                                subFinancReceber = new List<Financ_ReceberSubModel>()
-                            };
-
-                            _context.Financ_Receber.Add(financ_receber);
-                            await _context.SaveChangesAsync();
-
-                            foreach (var parcela in agendaCreateDto.FinancReceber.subFinancReceber)
-                            {
-                                var subItem = new Financ_ReceberSubModel
-                                {
-                                    financReceberId = financ_receber.Id,
-                                    Parcela = parcela.Parcela,
-                                    Valor = parcela.Valor,
-                                    TipoPagamentoId = parcela.TipoPagamentoId,
-                                    FormaPagamentoId = parcela.FormaPagamentoId,
-                                    DataPagamento = parcela.DataPagamento,
-                                    Desconto = parcela.Desconto,
-                                    Juros = parcela.Juros,
-                                    Multa = parcela.Multa,
-                                    DataVencimento = dataAtual,
-                                    Observacao = parcela.Observacao
-                                };
-
-                                financ_receber.subFinancReceber.Add(subItem);
-                            }
-
-                            await _context.SaveChangesAsync();
-                            agenda.FinancReceberId = financ_receber.Id;
+                            agenda.FinancReceber = CriarFinancReceber(agendaCreateDto, dataAtual);
                         }
 
                         _context.Agenda.Add(agenda);
@@ -248,7 +183,7 @@ public class AgendaService : IAgendaInterface
         ResponseModel<List<AgendaModel>> resposta = new ResponseModel<List<AgendaModel>>();
         try
         {
-            var agenda = _context.Agenda.FirstOrDefault(x => x.Id == idAgenda);
+            var agenda = await _context.Agenda.FirstOrDefaultAsync(x => x.Id == idAgenda);
             if (agenda == null)
             {
                 resposta.Mensagem = "Agendamento não encontrado";
@@ -258,7 +193,7 @@ public class AgendaService : IAgendaInterface
             _context.Agenda.Remove(agenda);
             await _context.SaveChangesAsync();
 
-            resposta.Dados = await _context.Agenda.ToListAsync();
+            resposta.Dados = await _context.Agenda.AsNoTracking().ToListAsync();
             resposta.Mensagem = "Agendamento Removido com sucesso!";
             return resposta;
         }
@@ -391,7 +326,7 @@ public class AgendaService : IAgendaInterface
 
                 await transaction.CommitAsync();
 
-                var listaAtualizada = await _context.Agenda.ToListAsync();
+                var listaAtualizada = await _context.Agenda.AsNoTracking().ToListAsync();
                 resposta.Dados = listaAtualizada;
                 resposta.Mensagem = "Agendamento atualizado com sucesso!";
                 return resposta;
@@ -413,6 +348,7 @@ public class AgendaService : IAgendaInterface
         {
             resposta.Dados = await _context.Agenda
                 .Include(a => a.Paciente)
+                .AsNoTracking()
                 .ToListAsync();
             resposta.Mensagem = "Agendamentos listados com sucesso!";
             return resposta;
@@ -434,6 +370,20 @@ public class AgendaService : IAgendaInterface
         {
             try
             {
+                if (!agendaCreateDto.Data.HasValue)
+                {
+                    resposta.Mensagem = "Data do agendamento eh obrigatoria.";
+                    resposta.Status = false;
+                    return resposta;
+                }
+
+                if (agendaCreateDto.DiasRecorrencia is { Count: > 0 } && !agendaCreateDto.DataFimRecorrencia.HasValue)
+                {
+                    resposta.Mensagem = "Data fim da recorrencia eh obrigatoria.";
+                    resposta.Status = false;
+                    return resposta;
+                }
+
                 List<AgendaModel> agendamentos = new List<AgendaModel>();
 
                 DateTime? dataAtual = agendaCreateDto.Data;
@@ -441,27 +391,7 @@ public class AgendaService : IAgendaInterface
 
                 while (dataAtual <= dataFim)
                 {
-
-                    bool criarAgendamento = false;
-
-                    if (agendaCreateDto.DiasRecorrencia == null)
-                    {
-                        // Se não tem recorrência, cria apenas um agendamento na data original
-                        criarAgendamento = true;
-                    }
-                    else
-                    {
-                        // Verificando se algum dos dias selecionados corresponde ao dia atual
-                        foreach (var diaSemana in agendaCreateDto.DiasRecorrencia)
-                        {
-                            // Verifica se o dia da semana selecionado corresponde ao dia atual
-                            if ((int)diaSemana.DiaSemana == (int)dataAtual.Value.DayOfWeek)
-                            {
-                                criarAgendamento = true;
-                                break;
-                            }
-                        }
-                    }
+                    var criarAgendamento = dataAtual.HasValue && DeveCriarAgendamento(agendaCreateDto, dataAtual.Value);
 
                     if (criarAgendamento)
                     {
@@ -486,74 +416,12 @@ public class AgendaService : IAgendaInterface
                             Avulso = agendaCreateDto.Avulso,
                         };
 
-                        // Processamento das horas
-                        if (TimeSpan.TryParse(agendaCreateDto.HoraInicio, out TimeSpan horaInicio))
-                        {
-                            agenda.HoraInicio = horaInicio;
-                        }
-                        else
-                        {
-                            throw new Exception("Formato de hora inválido para HoraInicio");
-                        }
-
-                        if (TimeSpan.TryParse(agendaCreateDto.HoraFim, out TimeSpan horaFim))
-                        {
-                            agenda.HoraFim = horaFim;
-                        }
-                        else
-                        {
-                            throw new Exception("Formato de hora inválido para HoraFim");
-                        }
+                        agenda.HoraInicio = ParseHorario(agendaCreateDto.HoraInicio, nameof(agendaCreateDto.HoraInicio));
+                        agenda.HoraFim = ParseHorario(agendaCreateDto.HoraFim, nameof(agendaCreateDto.HoraFim));
 
                         if (agendaCreateDto.FinancReceber != null)
                         {
-                            var financ_receber = new Financ_ReceberModel
-                            {
-                                IdOrigem = agendaCreateDto.FinancReceber.IdOrigem ?? 0,
-                                NrDocto = agendaCreateDto.FinancReceber.NrDocto ?? 0,
-                                DataEmissao = agendaCreateDto.FinancReceber.DataEmissao,
-                                ValorOriginal = agendaCreateDto.FinancReceber.ValorOriginal,
-                                ValorPago = agendaCreateDto.FinancReceber.ValorPago,
-                                Valor = agendaCreateDto.FinancReceber.Valor,
-                                Status = agendaCreateDto.FinancReceber.Status,
-                                NotaFiscal = agendaCreateDto.FinancReceber.NotaFiscal,
-                                Descricao = agendaCreateDto.FinancReceber.Descricao,
-                                Parcela = agendaCreateDto.FinancReceber.Parcela,
-                                Classificacao = agendaCreateDto.FinancReceber.Classificacao,
-                                Observacao = agendaCreateDto.FinancReceber.Observacao,
-                                FornecedorId = agendaCreateDto.FinancReceber.FornecedorId,
-                                CentroCustoId = agendaCreateDto.FinancReceber.CentroCustoId,
-                                PacienteId = agendaCreateDto.FinancReceber.PacienteId,
-                                BancoId = agendaCreateDto.FinancReceber.BancoId,
-                                TipoPagamentoId = (int)agendaCreateDto.FinancReceber.TipoPagamentoId,
-                                subFinancReceber = new List<Financ_ReceberSubModel>()
-                            };
-
-                            _context.Financ_Receber.Add(financ_receber);
-                            await _context.SaveChangesAsync();
-
-                            foreach (var parcela in agendaCreateDto.FinancReceber.subFinancReceber)
-                            {
-                                var subItem = new Financ_ReceberSubModel
-                                {
-                                    financReceberId = financ_receber.Id,
-                                    Parcela = parcela.Parcela,
-                                    Valor = parcela.Valor,
-                                    TipoPagamentoId = parcela.TipoPagamentoId,
-                                    FormaPagamentoId = parcela.FormaPagamentoId,
-                                    DataPagamento = parcela.DataPagamento,
-                                    Desconto = parcela.Desconto,
-                                    Juros = parcela.Juros,
-                                    Multa = parcela.Multa,
-                                    DataVencimento = dataAtual,
-                                    Observacao = parcela.Observacao
-                                };
-
-                                financ_receber.subFinancReceber.Add(subItem);
-                            }
-
-                            await _context.SaveChangesAsync();
-                            agenda.FinancReceberId = financ_receber.Id;
+                            agenda.FinancReceber = CriarFinancReceber(agendaCreateDto, dataAtual);
                         }
 
                         _context.Agenda.Add(agenda);
@@ -698,7 +566,7 @@ public class AgendaService : IAgendaInterface
 
                 await transaction.CommitAsync();
 
-                var listaAtualizada = await _context.Agenda.ToListAsync();
+                var listaAtualizada = await _context.Agenda.AsNoTracking().ToListAsync();
 
                 resposta.Dados = listaAtualizada;
                 resposta.TotalCount = listaAtualizada.Count();
@@ -720,7 +588,7 @@ public class AgendaService : IAgendaInterface
         ResponseModel<List<AgendaModel>> resposta = new ResponseModel<List<AgendaModel>>();
         try
         {
-            var agendaAlterada = _context.Agenda.FirstOrDefault(a => a.Id == id);
+            var agendaAlterada = await _context.Agenda.FirstOrDefaultAsync(a => a.Id == id);
             if (agendaAlterada == null)
             {
                 resposta.Mensagem = "Agendamento não encontrado";
@@ -736,7 +604,7 @@ public class AgendaService : IAgendaInterface
             //7 Remarcado
             //8 Não compareceu
 
-            var consultaStatus = _context.Status.FirstOrDefaultAsync(s => s.Id == statusNovo);
+            var consultaStatus = await _context.Status.FirstOrDefaultAsync(s => s.Id == statusNovo);
 
             if (consultaStatus == null)
             {
@@ -747,20 +615,14 @@ public class AgendaService : IAgendaInterface
             agendaAlterada.Data = dataNova;
             agendaAlterada.StatusId = statusNovo;
 
-            if (TimeSpan.TryParse(horaInicioNovo, out TimeSpan horaInicio))
-            {
-                agendaAlterada.HoraInicio = horaInicio;
-            }
-            if (TimeSpan.TryParse(horaFimNovo, out TimeSpan horaFim))
-            {
-                agendaAlterada.HoraFim = horaFim;
-            }
+            agendaAlterada.HoraInicio = ParseHorario(horaInicioNovo, nameof(horaInicioNovo));
+            agendaAlterada.HoraFim = ParseHorario(horaFimNovo, nameof(horaFimNovo));
 
 
             _context.Update(agendaAlterada);
             await _context.SaveChangesAsync();
 
-            var listaAtualizada = await _context.Agenda.ToListAsync();
+            var listaAtualizada = await _context.Agenda.AsNoTracking().ToListAsync();
 
             resposta.Dados = listaAtualizada;
             resposta.TotalCount = listaAtualizada.Count();
@@ -786,7 +648,12 @@ public class AgendaService : IAgendaInterface
                 .Include(fp => fp.FinancReceber)
                 .Include(st => st.Status)
                 .Include(p => p.Profissional)
+                .AsSplitQuery()
+                .AsNoTracking()
                 .AsQueryable();
+
+            if (idFiltro.HasValue)
+                query = query.Where(p => p.Id == idFiltro.Value);
 
             if (dataFiltroInicio.HasValue)
             {
@@ -796,19 +663,18 @@ public class AgendaService : IAgendaInterface
 
             if (dataFiltroFim.HasValue)
             {
-
                 dataFiltroFim = DateTime.SpecifyKind(dataFiltroFim.Value, DateTimeKind.Utc);
                 query = query.Where(p => p.Data <= dataFiltroFim);
             }
 
-            if (!string.IsNullOrEmpty(pacienteIdFiltro))
-                query = query.Where(p => p.PacienteId.ToString() == pacienteIdFiltro);
+            if (int.TryParse(pacienteIdFiltro, out var pacienteId))
+                query = query.Where(p => p.PacienteId == pacienteId);
 
-            if (!string.IsNullOrEmpty(profissionalIdFiltro))
-                query = query.Where(p => p.ProfissionalId.ToString() == profissionalIdFiltro);
+            if (int.TryParse(profissionalIdFiltro, out var profissionalIdParsed))
+                query = query.Where(p => p.ProfissionalId == profissionalIdParsed);
 
-            if (!string.IsNullOrEmpty(statusIdFiltro))
-                query = query.Where(p => p.StatusId.ToString() == statusIdFiltro);
+            if (int.TryParse(statusIdFiltro, out var statusId))
+                query = query.Where(p => p.StatusId == statusId);
 
             query = query.OrderBy(a => a.Id)
                 .ThenBy(a => a.Data);
@@ -833,13 +699,87 @@ public class AgendaService : IAgendaInterface
 
     }
 
+    private static bool DeveCriarAgendamento(AgendaCreateDto agendaCreateDto, DateTime dataAtual)
+    {
+        if (agendaCreateDto.DiasRecorrencia is null || agendaCreateDto.DiasRecorrencia.Count == 0)
+        {
+            return true;
+        }
+
+        return agendaCreateDto.DiasRecorrencia.Any(diaSemana => (int)diaSemana.DiaSemana == (int)dataAtual.DayOfWeek);
+    }
+
+    private static TimeSpan ParseHorario(string horario, string campo)
+    {
+        if (TimeSpan.TryParse(horario, out var hora))
+        {
+            return hora;
+        }
+
+        throw new ArgumentException($"Formato de hora invalido para {campo}.");
+    }
+
+    private static Financ_ReceberModel CriarFinancReceber(AgendaCreateDto agendaCreateDto, DateTime? dataVencimentoPadrao)
+    {
+        var financeiro = agendaCreateDto.FinancReceber
+            ?? throw new InvalidOperationException("Informacoes financeiras nao informadas.");
+
+        if (!financeiro.TipoPagamentoId.HasValue)
+        {
+            throw new InvalidOperationException("Tipo de pagamento eh obrigatorio no financeiro.");
+        }
+
+        var financReceber = new Financ_ReceberModel
+        {
+            IdOrigem = financeiro.IdOrigem ?? 0,
+            NrDocto = financeiro.NrDocto ?? 0,
+            DataEmissao = financeiro.DataEmissao,
+            ValorOriginal = financeiro.ValorOriginal,
+            ValorPago = financeiro.ValorPago,
+            Valor = financeiro.Valor,
+            Status = financeiro.Status,
+            NotaFiscal = financeiro.NotaFiscal,
+            Descricao = financeiro.Descricao,
+            Parcela = financeiro.Parcela,
+            Classificacao = financeiro.Classificacao,
+            Observacao = financeiro.Observacao,
+            FornecedorId = financeiro.FornecedorId,
+            CentroCustoId = financeiro.CentroCustoId,
+            PacienteId = financeiro.PacienteId,
+            BancoId = financeiro.BancoId,
+            TipoPagamentoId = financeiro.TipoPagamentoId.Value,
+            subFinancReceber = new List<Financ_ReceberSubModel>()
+        };
+
+        foreach (var parcela in financeiro.subFinancReceber ?? Enumerable.Empty<Financ_ReceberSubCreateDto>())
+        {
+            financReceber.subFinancReceber.Add(new Financ_ReceberSubModel
+            {
+                Parcela = parcela.Parcela,
+                Valor = parcela.Valor,
+                TipoPagamentoId = parcela.TipoPagamentoId,
+                FormaPagamentoId = parcela.FormaPagamentoId,
+                DataPagamento = parcela.DataPagamento,
+                Desconto = parcela.Desconto,
+                Juros = parcela.Juros,
+                Multa = parcela.Multa,
+                DataVencimento = parcela.DataVencimento ?? dataVencimentoPadrao,
+                Observacao = parcela.Observacao
+            });
+        }
+
+        return financReceber;
+    }
+
     public async Task<ResponseModel<List<ContadoresDashboard>>> ObterContadoresDashboard(int? profissionalId, DateTime? dataInicio = null, DateTime? dataFim = null)
     {
         ResponseModel<List<ContadoresDashboard>> resposta = new ResponseModel<List<ContadoresDashboard>>();
 
         try
         {
-            var consultaAgenda = _context.Agenda.Include(a => a.Status).AsQueryable();
+            var consultaAgenda = _context.Agenda
+                .AsNoTracking()
+                .AsQueryable();
 
             if (dataInicio.HasValue)
             {
@@ -856,17 +796,23 @@ public class AgendaService : IAgendaInterface
                 consultaAgenda = consultaAgenda.Where(a => a.ProfissionalId == profissionalId);
             }
 
-            var agendas = await consultaAgenda.ToListAsync();
-            var consultaPaciente = _context.Paciente.AsQueryable();
+            var consultaPaciente = _context.Paciente
+                .AsNoTracking()
+                .AsQueryable();
 
-            if (dataInicio.HasValue && dataFim.HasValue)
+            if (dataInicio.HasValue)
             {
-                consultaPaciente = consultaPaciente.Where(p => p.DataCadastro >= dataInicio && p.DataCadastro <= dataFim);
+                consultaPaciente = consultaPaciente.Where(p => p.DataCadastro >= dataInicio);
             }
 
-            int totalAgendas = agendas.Count;
-            int agendasFinalizadas = agendas.Count(a => a.Status?.Status == "Concluído");
-            int agendasFuturas = agendas.Count(a => a.Status?.Legenda == "Não compareceu");
+            if (dataFim.HasValue)
+            {
+                consultaPaciente = consultaPaciente.Where(p => p.DataCadastro <= dataFim);
+            }
+
+            int totalAgendas = await consultaAgenda.CountAsync();
+            int agendasFinalizadas = await consultaAgenda.CountAsync(a => a.StatusId == 4);
+            int agendasFuturas = await consultaAgenda.CountAsync(a => a.StatusId == 8);
             int pacientesNoPeriodo = await consultaPaciente.CountAsync();
 
             var listaContadores = new List<ContadoresDashboard>
@@ -902,3 +848,4 @@ public class ContadoresDashboard
     public int AgendasFuturas { get; set; }
     public int PacientesNoPeriodo { get; set; }
 }
+

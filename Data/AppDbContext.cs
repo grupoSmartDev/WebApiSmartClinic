@@ -68,7 +68,6 @@ public class AppDbContext : IdentityDbContext<User>
     // public DbSet<EmpresaModel> Empresa { get; set; }
     public DbSet<PlanoContaModel> PlanoConta { get; set; }
     public DbSet<PlanoContaSubModel> PlanoContaSub { get; set; }
-    public DbSet<User> Users { get; set; }
     public DbSet<RecorrenciaPacienteModel> RecorrenciaPaciente { get; set; }
     public DbSet<EmpresaModel> Empresas { get; set; }
     public DbSet<DespesaFixaModel> Despesas { get; set; }

@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Localization;
+using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
@@ -58,9 +59,25 @@ var config = builder.Configuration;
 // AppSettings e JWT
 var appSettingsSection = config.GetSection("AppSettings");
 services.Configure<AppSettings>(appSettingsSection);
-var appSettings = appSettingsSection.Get<AppSettings>();
+var appSettings = appSettingsSection.Get<AppSettings>()
+    ?? throw new InvalidOperationException("Configuração 'AppSettings' não encontrada.");
 var key = Encoding.UTF8.GetBytes(appSettings.JwtSecretKey);
 services.AddProblemDetails();
+services.AddMemoryCache();
+services.AddResponseCompression(options =>
+{
+    options.EnableForHttps = true;
+    options.Providers.Add<BrotliCompressionProvider>();
+    options.Providers.Add<GzipCompressionProvider>();
+});
+services.Configure<BrotliCompressionProviderOptions>(options =>
+{
+    options.Level = System.IO.Compression.CompressionLevel.Fastest;
+});
+services.Configure<GzipCompressionProviderOptions>(options =>
+{
+    options.Level = System.IO.Compression.CompressionLevel.Fastest;
+});
 // Middleware de conexão por tenant
 //services.AddSingleton<IConnectionStringProvider, ConnectionStringProvider>();
 
@@ -107,7 +124,7 @@ services.AddControllers().AddJsonOptions(x =>
     x.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
     x.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
     x.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
-    x.JsonSerializerOptions.WriteIndented = true;
+    x.JsonSerializerOptions.WriteIndented = false;
 });
 
 // Cultura pt-BR
@@ -202,7 +219,6 @@ builder.Services.AddScoped<IPacoteInterface, PacoteService>();
 
 
 builder.Services.AddHttpClient<IAsaasService, AsaasService>();
-builder.Services.AddScoped<IAsaasService, AsaasService>();
 
 //services.AddSingleton<IConnectionStringProvider, ConnectionStringProvider>();
 
@@ -244,6 +260,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+app.UseResponseCompression();
 
 app.UseCors("AllowFrontend");
 

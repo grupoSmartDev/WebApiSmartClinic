@@ -1,7 +1,5 @@
 using WebApiSmartClinic.Helpers;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Linq;
 using WebApiSmartClinic.Data;
 using WebApiSmartClinic.Dto.Financ_Receber;
 using WebApiSmartClinic.Models;
@@ -71,7 +69,7 @@ public class Financ_ReceberService : IFinanc_ReceberInterface
                 subFinancReceber = new List<Financ_ReceberSubModel>()
             };
 
-            
+
 
             _context.Add(financ_receber);
             await _context.SaveChangesAsync();
@@ -292,7 +290,7 @@ public class Financ_ReceberService : IFinanc_ReceberInterface
                 .Include(x => x.subFinancReceber)
                 .AsQueryable();
 
-            if(idFiltro.HasValue)
+            if (idFiltro.HasValue)
                 query = query.Where(i => i.Id == idFiltro.Value);
 
             dataBaseFiltro = "E"; //estou forçando de proposito a ficar assim, para depois ter outros filtros com base na data do filho
@@ -312,7 +310,7 @@ public class Financ_ReceberService : IFinanc_ReceberInterface
 
             query = query.OrderBy(x => x.Id);
 
-            resposta.Dados = paginar ? (await PaginationHelper.PaginateAsync(query, pageNumber, pageSize)).Dados : await query.ToListAsync();
+            resposta = paginar ? (await PaginationHelper.PaginateAsync(query, pageNumber, pageSize)) : new ResponseModel<List<Financ_ReceberModel>> { Dados = await query.ToListAsync() };
             resposta.Mensagem = "Todos os Financ_Receber foram encontrados";
 
             return resposta;
@@ -356,7 +354,7 @@ public class Financ_ReceberService : IFinanc_ReceberInterface
             if (idPaiFiltro == null && idPaiFiltro == null)
             {
 
-                if(dataBaseFiltro == "V")
+                if (dataBaseFiltro == "V")
                 {
                     if (dataFiltroInicio.HasValue)
                     {
@@ -407,15 +405,10 @@ public class Financ_ReceberService : IFinanc_ReceberInterface
             if (parcelasVencidasFiltro)
                 query = query.Where(p => p.DataVencimento <= DateTime.Now && p.DataPagamento == null);
 
-            // Aplica ordenação
             query = query.OrderBy(p => p.financReceberId)
                         .ThenBy(p => p.Parcela);
 
-            // Executa a query com ou sem paginação
-            resposta.Dados = paginar
-                ? (await PaginationHelper.PaginateAsync(query, pageNumber, pageSize)).Dados
-                : await query.ToListAsync();
-
+            resposta = paginar ? await PaginationHelper.PaginateAsync(query, pageNumber, pageSize) : new ResponseModel<List<Financ_ReceberSubModel>> { Dados = await query.ToListAsync() };
             resposta.Mensagem = "Todas as parcelas foram encontradas";
 
             return resposta;

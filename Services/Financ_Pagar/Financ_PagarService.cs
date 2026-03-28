@@ -548,7 +548,7 @@ public class Financ_PagarService : IFinanc_PagarInterface
         try
         {
             var parcelas = await _context.Financ_PagarSub
-                .Where(x => parcelasIds.Contains((int)x.Id) && x.DataPagamento != null)
+                .Where(x => parcelasIds.Contains(x.Id ?? 0) && x.DataPagamento != null)
                 .ToListAsync();
 
             if (!parcelas.Any())

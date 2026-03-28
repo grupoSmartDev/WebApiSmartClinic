@@ -36,7 +36,8 @@ public sealed class ProfissionalController : ControllerBase
     [HttpPost("Criar")]
     public async Task<ActionResult<ResponseModel<List<ProfissionalModel>>>> Criar(ProfissionalCreateDto profissionalCreateDto, int pageNumber = 1, int pageSize = 10)
     {
-        var profissional = await _profissional.Criar(profissionalCreateDto, pageNumber, pageSize);
+        var userKey = HttpContext.Request.Headers["UserKey"].FirstOrDefault();
+        var profissional = await _profissional.Criar(profissionalCreateDto, pageNumber, pageSize, userKey);
 
         return Ok(profissional);
     }

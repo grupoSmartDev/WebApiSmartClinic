@@ -1,17 +1,11 @@
-
-using System.Security.Cryptography;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using Microsoft.IdentityModel.Tokens;
+using System.Reflection;
 using WebApiSmartClinic.Data;
-using WebApiSmartClinic.Dto.Agenda;
 using WebApiSmartClinic.Dto.Profissional;
 using WebApiSmartClinic.Dto.User;
 using WebApiSmartClinic.Helpers;
 using WebApiSmartClinic.Models;
-using WebApiSmartClinic.Services.Agenda;
 using WebApiSmartClinic.Services.Auth;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace WebApiSmartClinic.Services.Profissional;
 
@@ -42,7 +36,7 @@ public class ProfissionalService : IProfissionalInterface
 
             var consultaProfissional = _context.Profissional.Where(x => x.Cpf == profissionalCreateDto.Cpf).ToArray();
 
-            if(!consultaProfissional.Any())
+            if(consultaProfissional.Any())
             {
                 var queryPesquisa = _context.Profissional.AsQueryable();
 
@@ -89,14 +83,15 @@ public class ProfissionalService : IProfissionalInterface
                     ConfirmPassword = "Admin@123",
                     AcceptTerms = true,
                     FirstName = profissionalCreateDto.Nome,
-                    LastName = profissionalCreateDto.Sobrenome,
+                    LastName = profissionalCreateDto.Sobrenome ?? string.Empty,
                 };
 
-                var authService = _serviceProvider.GetRequiredService<AuthService>();
-                var result = await authService.RegisterAsync(userCreateRequest, userKey);
-
-                //var result = await _authService.RegisterAsync(userCreateRequest, userKey);
-                var successProp = result.GetType().GetProperty("success");
+                AuthService authService = _serviceProvider.GetRequiredService<AuthService>();
+                
+                object result = await authService.RegisterAsync(userCreateRequest, userKey);
+                
+                PropertyInfo? successProp = result.GetType().GetProperty("success");
+                
                 bool success = successProp != null && (bool)successProp.GetValue(result, null)!;
 
                 if (!success)
@@ -142,9 +137,8 @@ public class ProfissionalService : IProfissionalInterface
             resposta.Mensagem = "Profissional Encontrado";
             return resposta;
         }
-        catch (Exception ex)
+        catch (Exception)
         {
-
             resposta.Mensagem = "Erro ao buscar Profissional";
             resposta.Status = false;
             return resposta;

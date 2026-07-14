@@ -14,13 +14,6 @@ public sealed class ConnectionStringMiddleware
 
     public async Task Invoke(HttpContext context, IConnectionStringProvider connectionStringProvider, IConnectionsService connectionsService)
     {
-        var endpoint = context.GetEndpoint();
-        if (endpoint?.Metadata?.GetMetadata<IAllowAnonymous>() is not null)
-        {
-            await _next(context);
-            return;
-        }
-
         var userKeyHeader = context.Request.Headers["UserKey"].FirstOrDefault()?.Trim();
 
         if (context.Request.Path.StartsWithSegments("/Auth/login", StringComparison.OrdinalIgnoreCase) ||
@@ -34,6 +27,13 @@ public sealed class ConnectionStringMiddleware
             var connLogin = await connectionsService.GetConnectionsStringByKeyAsync(userKeyHeader);
             connectionStringProvider.SetConnectionString(connLogin);
 
+            await _next(context);
+            return;
+        }
+
+        var endpoint = context.GetEndpoint();
+        if (endpoint?.Metadata?.GetMetadata<IAllowAnonymous>() is not null)
+        {
             await _next(context);
             return;
         }

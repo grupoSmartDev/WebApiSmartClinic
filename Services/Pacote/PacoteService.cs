@@ -440,16 +440,25 @@ namespace WebApiSmartClinic.Services.Pacote
             }
         }
 
-        public async Task<ResponseModel<List<PacoteUsoModel>>> ListarHistoricoUso(int pacotePacienteId)
+        public async Task<ResponseModel<List<PacoteUsoHistoricoDto>>> ListarHistoricoUso(int pacotePacienteId)
         {
-            ResponseModel<List<PacoteUsoModel>> resposta = new ResponseModel<List<PacoteUsoModel>>();
+            ResponseModel<List<PacoteUsoHistoricoDto>> resposta = new ResponseModel<List<PacoteUsoHistoricoDto>>();
             try
             {
+                // Projeção direta (sem Include): traz só Agenda.Data e Agenda.Profissional.Nome,
+                // nunca o ProfissionalModel inteiro (evita expor Password/ChavePix/dados bancários).
                 var historico = await _context.PacotesUsos
-                    .Include(u => u.Agenda)
-                    .Include(u => u.PacienteUtilizado)
                     .Where(u => u.PacotePacienteId == pacotePacienteId && u.Ativo)
                     .OrderByDescending(u => u.DataUso)
+                    .Select(u => new PacoteUsoHistoricoDto
+                    {
+                        Id = u.Id,
+                        DataUso = u.DataUso,
+                        AgendaId = u.AgendaId,
+                        AgendaData = u.Agenda != null ? u.Agenda.Data : null,
+                        ProfissionalNome = u.Agenda != null && u.Agenda.Profissional != null ? u.Agenda.Profissional.Nome : null,
+                        Observacao = u.Observacao
+                    })
                     .ToListAsync();
 
                 resposta.Dados = historico;
@@ -476,9 +485,23 @@ namespace WebApiSmartClinic.Services.Pacote
                         .Include(u => u.PacotePaciente)
                         .FirstOrDefaultAsync(u => u.Id == idUso);
 
+                    // Nota: PacoteUsoModel implementa IEntidadeAuditavel, então o filtro global do
+                    // AppDbContext já exclui automaticamente registros com Ativo == false de QUALQUER
+                    // consulta a _context.PacotesUsos - por isso um "uso" já estornado nunca é
+                    // encontrado aqui, e a causa mais comum de "não encontrado" na prática é
+                    // justamente um estorno duplicado. A checagem explícita de uso.Ativo abaixo é
+                    // apenas defesa em profundidade (ex.: se este método um dia for chamado com
+                    // IgnoreQueryFilters()) e não deve ser removida por parecer redundante.
                     if (uso == null)
                     {
-                        resposta.Mensagem = "Uso não encontrado";
+                        resposta.Mensagem = "Uso não encontrado ou já foi estornado anteriormente";
+                        resposta.Status = false;
+                        return resposta;
+                    }
+
+                    if (!uso.Ativo)
+                    {
+                        resposta.Mensagem = "Este uso já foi estornado anteriormente";
                         resposta.Status = false;
                         return resposta;
                     }

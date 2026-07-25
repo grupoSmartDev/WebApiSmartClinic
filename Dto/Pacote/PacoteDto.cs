@@ -65,4 +65,18 @@
         public int PacienteUtilizadoId { get; set; }
         public string? Observacao { get; set; }
     }
+
+    // ========== HISTÓRICO DE USO ==========
+    // Projeção enxuta: NÃO usar PacoteUsoModel cru aqui. Agenda.Profissional (ProfissionalModel)
+    // não tem nenhum [JsonIgnore] nos campos de senha/PIX/dados bancários - incluir a entidade
+    // completa via .Include(a => a.Profissional) vazaria isso numa tela de histórico de pacote.
+    public class PacoteUsoHistoricoDto
+    {
+        public int Id { get; set; }
+        public DateTime DataUso { get; set; }
+        public int AgendaId { get; set; }
+        public DateTime? AgendaData { get; set; }
+        public string? ProfissionalNome { get; set; }
+        public string? Observacao { get; set; }
+    }
 }

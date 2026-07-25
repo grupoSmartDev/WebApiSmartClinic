@@ -41,7 +41,9 @@ namespace WebApiSmartClinic.Models
         [Required(ErrorMessage = "O procedimento é obrigatório")]
         public int ProcedimentoId { get; set; }
 
-        [JsonIgnore]
+        // Sem [JsonIgnore]: o front (aba Pacotes do paciente, cadastro de pacote) precisa exibir
+        // a descrição do procedimento vinculado. ProcedimentoModel não tem campos sensíveis, e o
+        // ReferenceHandler.IgnoreCycles global (Program.cs) já protege contra ciclo de serialização.
         public ProcedimentoModel? Procedimento { get; set; }
 
         [Required(ErrorMessage = "A quantidade de sessões é obrigatória")]

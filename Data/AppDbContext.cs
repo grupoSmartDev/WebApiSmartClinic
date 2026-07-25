@@ -444,6 +444,16 @@ public class AppDbContext : IdentityDbContext<User>
             .HasForeignKey(a => a.ProfissionalId)
             .OnDelete(DeleteBehavior.Restrict);
 
+        // Relacionamento Agenda -> PacotePaciente: usa PacoteId (coluna real, já lida/escrita
+        // pelo AgendaService) como FK. Sem esta configuração explícita, o EF criava uma shadow
+        // property "PacotePacienteId" para a navegação, nunca preenchida pelo código, deixando
+        // PacoteId sem integridade referencial nenhuma no banco.
+        modelBuilder.Entity<AgendaModel>()
+            .HasOne(a => a.PacotePaciente)
+            .WithMany()
+            .HasForeignKey(a => a.PacoteId)
+            .OnDelete(DeleteBehavior.Restrict);
+
         modelBuilder.Entity<ComissaoCalculadaModel>()
         .HasOne(c => c.Profissional)
         .WithMany(p => p.ComissoesCalculadas)

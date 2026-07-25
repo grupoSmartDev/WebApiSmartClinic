@@ -99,7 +99,7 @@ public sealed class PacoteController : ControllerBase
     }
 
     [HttpGet("ListarHistoricoUso/{pacotePacienteId}")]
-    public async Task<ActionResult<ResponseModel<List<PacoteUsoModel>>>> ListarHistoricoUso(int pacotePacienteId)
+    public async Task<ActionResult<ResponseModel<List<PacoteUsoHistoricoDto>>>> ListarHistoricoUso(int pacotePacienteId)
     {
         var resposta = await _pacoteInterface.ListarHistoricoUso(pacotePacienteId);
         return Ok(resposta);

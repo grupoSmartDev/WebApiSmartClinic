@@ -108,51 +108,11 @@ public class AgendaService : IAgendaInterface
                         _context.Agenda.Add(agenda);
                         await _context.SaveChangesAsync(); // IMPORTANTE: Salvar antes de consumir pacote
 
-                        // ============== NOVO BLOCO: CONSUMO DE PACOTE ==============
                         // Se tem pacote E status é "Concluído" (4), consumir sessão
                         if (agenda.PacoteId.HasValue && agenda.StatusId == 4)
                         {
-                            // Buscar o pacote do paciente
-                            var pacotePaciente = await _context.PacotesPacientes
-                                .FirstOrDefaultAsync(pp => pp.Id == agenda.PacoteId.Value);
-
-                            if (pacotePaciente == null)
-                            {
-                                await transaction.RollbackAsync();
-                                resposta.Mensagem = "Pacote do paciente não encontrado";
-                                resposta.Status = false;
-                                return resposta;
-                            }
-
-                            if (pacotePaciente.QuantidadeDisponivel <= 0)
-                            {
-                                await transaction.RollbackAsync();
-                                resposta.Mensagem = "Pacote não possui sessões disponíveis";
-                                resposta.Status = false;
-                                return resposta;
-                            }
-
-                            // Criar registro de uso
-                            var uso = new PacoteUsoModel
-                            {
-                                PacotePacienteId = pacotePaciente.Id,
-                                AgendaId = agenda.Id,
-                                PacienteUtilizadoId = agenda.PacienteId.Value,
-                                DataUso = DateTime.UtcNow,
-                                Observacao = $"Consumo automático - Agendamento #{agenda.Id} criado como concluído"
-                            };
-
-                            _context.PacotesUsos.Add(uso);
-                            pacotePaciente.QuantidadeUsada++;
-
-                            if (pacotePaciente.QuantidadeDisponivel == 0)
-                            {
-                                pacotePaciente.Status = "Esgotado";
-                            }
-
-                            _context.PacotesPacientes.Update(pacotePaciente);
+                            await ConsumirSessaoPacote(agenda, $"Consumo automático - Agendamento #{agenda.Id} criado como concluído");
                         }
-                        // ============================================================
 
                         agendamentos.Add(agenda);
                     }
@@ -254,75 +214,16 @@ public class AgendaService : IAgendaInterface
                 _context.Agenda.Update(agenda);
                 await _context.SaveChangesAsync();
 
-                // ============== NOVO BLOCO: GERENCIAR CONSUMO/ESTORNO ==============
                 // CENÁRIO 1: Status mudou de OUTRO → CONCLUÍDO e tem pacote
                 if (statusAnterior != 4 && agenda.StatusId == 4 && agenda.PacoteId.HasValue)
                 {
-                    // Buscar o pacote do paciente
-                    var pacotePaciente = await _context.PacotesPacientes
-                        .FirstOrDefaultAsync(pp => pp.Id == agenda.PacoteId.Value);
-
-                    if (pacotePaciente == null)
-                    {
-                        await transaction.RollbackAsync();
-                        resposta.Mensagem = "Pacote do paciente não encontrado";
-                        resposta.Status = false;
-                        return resposta;
-                    }
-
-                    if (pacotePaciente.QuantidadeDisponivel <= 0)
-                    {
-                        await transaction.RollbackAsync();
-                        resposta.Mensagem = "Pacote não possui sessões disponíveis";
-                        resposta.Status = false;
-                        return resposta;
-                    }
-
-                    // Criar registro de uso
-                    var uso = new PacoteUsoModel
-                    {
-                        PacotePacienteId = pacotePaciente.Id,
-                        AgendaId = agenda.Id,
-                        PacienteUtilizadoId = agenda.PacienteId.Value,
-                        DataUso = DateTime.UtcNow,
-                        Observacao = "Consumo na edição - Status alterado para Concluído"
-                    };
-
-                    _context.PacotesUsos.Add(uso);
-                    pacotePaciente.QuantidadeUsada++;
-
-                    if (pacotePaciente.QuantidadeDisponivel == 0)
-                    {
-                        pacotePaciente.Status = "Esgotado";
-                    }
-
-                    _context.PacotesPacientes.Update(pacotePaciente);
+                    await ConsumirSessaoPacote(agenda, "Consumo na edição - Status alterado para Concluído");
                 }
                 // CENÁRIO 2: Status mudou de CONCLUÍDO → OUTRO e tinha pacote
                 else if (statusAnterior == 4 && agenda.StatusId != 4 && pacoteIdAnterior.HasValue)
                 {
-                    // Buscar o uso relacionado a este agendamento
-                    var uso = await _context.PacotesUsos
-                        .Include(u => u.PacotePaciente)
-                        .Where(u => u.AgendaId == agenda.Id && u.Ativo)
-                        .FirstOrDefaultAsync();
-
-                    if (uso != null)
-                    {
-                        uso.PacotePaciente.QuantidadeUsada--;
-
-                        if (uso.PacotePaciente.Status == "Esgotado")
-                        {
-                            uso.PacotePaciente.Status = "Ativo";
-                        }
-
-                        uso.Ativo = false;
-
-                        _context.PacotesUsos.Update(uso);
-                        _context.PacotesPacientes.Update(uso.PacotePaciente);
-                    }
+                    await EstornarSessaoPacote(agenda);
                 }
-                // ==================================================================
 
                 await transaction.CommitAsync();
 
@@ -425,6 +326,15 @@ public class AgendaService : IAgendaInterface
                         }
 
                         _context.Agenda.Add(agenda);
+                        await _context.SaveChangesAsync(); // necessário para obter o Id real antes de consumir o pacote
+
+                        // Se tem pacote E status é "Concluído" (4), consumir sessão
+                        // (bloco que faltava aqui - CriarPeloPlano setava PacoteId mas nunca debitava a sessão)
+                        if (agenda.PacoteId.HasValue && agenda.StatusId == 4)
+                        {
+                            await ConsumirSessaoPacote(agenda, $"Consumo automático - Agendamento #{agenda.Id} criado via plano como concluído");
+                        }
+
                         agendamentos.Add(agenda);
                     }
 
@@ -448,7 +358,6 @@ public class AgendaService : IAgendaInterface
         };
     }
 
-    // MODIFICADO: Método AtualizarStatus agora gerencia consumo/estorno de pacote
     public async Task<ResponseModel<List<AgendaModel>>> AtualizarStatus(int id, int statusNovo)
     {
         ResponseModel<List<AgendaModel>> resposta = new ResponseModel<List<AgendaModel>>();
@@ -494,75 +403,16 @@ public class AgendaService : IAgendaInterface
                 _context.Update(agendaAlterada);
                 await _context.SaveChangesAsync();
 
-                // ============== NOVO BLOCO: GERENCIAR CONSUMO/ESTORNO ==============
                 // Se mudou para "Concluído" (4) E tem pacote, consumir
                 if (statusAnterior != 4 && statusNovo == 4 && agendaAlterada.PacoteId.HasValue)
                 {
-                    // Buscar o pacote do paciente
-                    var pacotePaciente = await _context.PacotesPacientes
-                        .FirstOrDefaultAsync(pp => pp.Id == agendaAlterada.PacoteId.Value);
-
-                    if (pacotePaciente == null)
-                    {
-                        await transaction.RollbackAsync();
-                        resposta.Mensagem = "Pacote do paciente não encontrado";
-                        resposta.Status = false;
-                        return resposta;
-                    }
-
-                    if (pacotePaciente.QuantidadeDisponivel <= 0)
-                    {
-                        await transaction.RollbackAsync();
-                        resposta.Mensagem = "Pacote não possui sessões disponíveis";
-                        resposta.Status = false;
-                        return resposta;
-                    }
-
-                    // Criar registro de uso
-                    var uso = new PacoteUsoModel
-                    {
-                        PacotePacienteId = pacotePaciente.Id,
-                        AgendaId = agendaAlterada.Id,
-                        PacienteUtilizadoId = agendaAlterada.PacienteId.Value,
-                        DataUso = DateTime.UtcNow,
-                        Observacao = "Consumo ao marcar como concluído"
-                    };
-
-                    _context.PacotesUsos.Add(uso);
-                    pacotePaciente.QuantidadeUsada++;
-
-                    if (pacotePaciente.QuantidadeDisponivel == 0)
-                    {
-                        pacotePaciente.Status = "Esgotado";
-                    }
-
-                    _context.PacotesPacientes.Update(pacotePaciente);
+                    await ConsumirSessaoPacote(agendaAlterada, "Consumo ao marcar como concluído");
                 }
                 // Se mudou de "Concluído" (4) para outro E tinha pacote, estornar
                 else if (statusAnterior == 4 && statusNovo != 4 && agendaAlterada.PacoteId.HasValue)
                 {
-                    // Buscar o uso relacionado a este agendamento
-                    var uso = await _context.PacotesUsos
-                        .Include(u => u.PacotePaciente)
-                        .Where(u => u.AgendaId == agendaAlterada.Id && u.Ativo)
-                        .FirstOrDefaultAsync();
-
-                    if (uso != null)
-                    {
-                        uso.PacotePaciente.QuantidadeUsada--;
-
-                        if (uso.PacotePaciente.Status == "Esgotado")
-                        {
-                            uso.PacotePaciente.Status = "Ativo";
-                        }
-
-                        uso.Ativo = false;
-
-                        _context.PacotesUsos.Update(uso);
-                        _context.PacotesPacientes.Update(uso.PacotePaciente);
-                    }
+                    await EstornarSessaoPacote(agendaAlterada);
                 }
-                // ==================================================================
 
                 await transaction.CommitAsync();
 
@@ -697,6 +547,78 @@ public class AgendaService : IAgendaInterface
             return resposta;
         }
 
+    }
+
+    // Consome uma sessão do pacote vinculado ao agendamento (agenda.PacoteId): cria o PacoteUsoModel
+    // e incrementa QuantidadeUsada. Lança InvalidOperationException em caso de erro de negócio -
+    // todos os chamadores estão dentro de uma transação com catch genérico que faz rollback e
+    // reporta ex.Message em resposta.Mensagem, então não é preciso tratar o erro aqui.
+    private async Task ConsumirSessaoPacote(AgendaModel agenda, string observacao)
+    {
+        if (!agenda.PacoteId.HasValue)
+        {
+            return;
+        }
+
+        var pacotePaciente = await _context.PacotesPacientes
+            .FirstOrDefaultAsync(pp => pp.Id == agenda.PacoteId.Value);
+
+        if (pacotePaciente == null)
+        {
+            throw new InvalidOperationException("Pacote do paciente não encontrado");
+        }
+
+        if (pacotePaciente.QuantidadeDisponivel <= 0)
+        {
+            throw new InvalidOperationException("Pacote não possui sessões disponíveis");
+        }
+
+        var uso = new PacoteUsoModel
+        {
+            PacotePacienteId = pacotePaciente.Id,
+            AgendaId = agenda.Id,
+            PacienteUtilizadoId = agenda.PacienteId.Value,
+            DataUso = DateTime.UtcNow,
+            Observacao = observacao
+        };
+
+        _context.PacotesUsos.Add(uso);
+        pacotePaciente.QuantidadeUsada++;
+
+        if (pacotePaciente.QuantidadeDisponivel == 0)
+        {
+            pacotePaciente.Status = "Esgotado";
+        }
+
+        _context.PacotesPacientes.Update(pacotePaciente);
+    }
+
+    // Estorna a sessão de pacote consumida por este agendamento: busca o PacoteUsoModel ativo
+    // vinculado ao AgendaId e reverte QuantidadeUsada/Status. Não faz nada se não houver uso
+    // ativo para estornar (idempotente por natureza - ver EstornarSessaoPacote/PacoteService).
+    private async Task EstornarSessaoPacote(AgendaModel agenda)
+    {
+        var uso = await _context.PacotesUsos
+            .Include(u => u.PacotePaciente)
+            .Where(u => u.AgendaId == agenda.Id && u.Ativo)
+            .FirstOrDefaultAsync();
+
+        if (uso == null)
+        {
+            return;
+        }
+
+        uso.PacotePaciente.QuantidadeUsada--;
+
+        if (uso.PacotePaciente.Status == "Esgotado")
+        {
+            uso.PacotePaciente.Status = "Ativo";
+        }
+
+        uso.Ativo = false;
+
+        _context.PacotesUsos.Update(uso);
+        _context.PacotesPacientes.Update(uso.PacotePaciente);
     }
 
     private static bool DeveCriarAgendamento(AgendaCreateDto agendaCreateDto, DateTime dataAtual)

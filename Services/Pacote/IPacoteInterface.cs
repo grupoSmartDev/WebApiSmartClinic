@@ -21,6 +21,6 @@ public interface IPacoteInterface
 
     // ========== USO DO PACOTE ==========
     Task<ResponseModel<PacoteUsoModel>> ConsumirSessao(PacoteUsoDto pacoteUsoDto);
-    Task<ResponseModel<List<PacoteUsoModel>>> ListarHistoricoUso(int pacotePacienteId);
+    Task<ResponseModel<List<PacoteUsoHistoricoDto>>> ListarHistoricoUso(int pacotePacienteId);
     Task<ResponseModel<string>> EstornarUso(int idUso);
 }

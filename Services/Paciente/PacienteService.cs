@@ -33,6 +33,17 @@ public class PacienteService : IPacienteInterface
         try
         {
             var paciente = await _context.Paciente
+                .Include(p => p.Evolucoes)
+                    .ThenInclude(e => e.Exercicios)
+                .Include(p => p.Evolucoes)
+                    .ThenInclude(e => e.Atividades)
+                .Include(p => p.Plano)
+                .Include(p => p.FinancReceber)
+                    .ThenInclude(f => f.subFinancReceber)
+                    .ThenInclude(f => f.TipoPagamento)
+                .Include(p => p.Convenio)
+                .Include(p => p.Agendamentos)
+                .AsSplitQuery()
                 .AsNoTracking()
                 .FirstOrDefaultAsync(x => x.Id == idPaciente);
 

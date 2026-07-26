@@ -225,6 +225,11 @@ public class AgendaService : IAgendaInterface
                     await EstornarSessaoPacote(agenda);
                 }
 
+                // ConsumirSessaoPacote/EstornarSessaoPacote só modificam o change tracker (Add/Update);
+                // sem este SaveChangesAsync, transaction.CommitAsync() confirma só o que já tinha sido
+                // enviado (o StatusId), e o PacoteUsoModel/QuantidadeUsada nunca chegam ao banco.
+                await _context.SaveChangesAsync();
+
                 await transaction.CommitAsync();
 
                 var listaAtualizada = await _context.Agenda.AsNoTracking().ToListAsync();
@@ -413,6 +418,11 @@ public class AgendaService : IAgendaInterface
                 {
                     await EstornarSessaoPacote(agendaAlterada);
                 }
+
+                // ConsumirSessaoPacote/EstornarSessaoPacote só modificam o change tracker (Add/Update);
+                // sem este SaveChangesAsync, transaction.CommitAsync() confirma só o que já tinha sido
+                // enviado (o StatusId), e o PacoteUsoModel/QuantidadeUsada nunca chegam ao banco.
+                await _context.SaveChangesAsync();
 
                 await transaction.CommitAsync();
 

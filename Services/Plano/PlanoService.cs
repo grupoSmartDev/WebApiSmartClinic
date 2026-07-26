@@ -680,23 +680,45 @@ public class PlanoService : IPlanoInterface
                     return resposta;
                 }
 
+                // Só permite renovar um plano que já venceu (ou sem DataFim definida é tratado
+                // como "ainda vigente", mesma regra usada em PlanoModel.Status).
+                if (!planoAtual.DataFim.HasValue || planoAtual.DataFim.Value >= DateTime.UtcNow)
+                {
+                    resposta.Mensagem = "Este plano ainda está vigente e não pode ser renovado antes do vencimento";
+                    resposta.Status = false;
+                    return resposta;
+                }
+
+                // Buscar o plano-template escolhido para a renovação (pode ser o mesmo plano
+                // de antes ou um diferente - é isso que permite trocar de plano ao renovar,
+                // em vez de sempre copiar os dados do plano que está sendo substituído).
+                var planoModelo = await _context.Plano
+                    .FirstOrDefaultAsync(p => p.Id == renovacaoDto.PlanoModeloId);
+
+                if (planoModelo == null)
+                {
+                    resposta.Mensagem = "Plano selecionado para a renovação não encontrado";
+                    resposta.Status = false;
+                    return resposta;
+                }
+
                 // Inativar o plano atual
                 planoAtual.Ativo = false;
                 planoAtual.DataFim = DateTime.Now;
 
-                // Criar o novo plano com base no atual
+                // Criar o novo plano com base no plano-template selecionado (não no plano atual)
                 var novoPlano = new PlanoModel
                 {
-                    Descricao = renovacaoDto.Descricao ?? planoAtual.Descricao,
-                    TempoMinutos = planoAtual.TempoMinutos,
-                    CentroCustoId = planoAtual.CentroCustoId,
-                    DiasSemana = planoAtual.DiasSemana,
-                    ValorBimestral = planoAtual.ValorBimestral,
-                    ValorMensal = planoAtual.ValorMensal,
-                    ValorTrimestral = planoAtual.ValorTrimestral,
-                    ValorQuadrimestral = planoAtual.ValorQuadrimestral,
-                    ValorSemestral = planoAtual.ValorSemestral,
-                    ValorAnual = planoAtual.ValorAnual,
+                    Descricao = renovacaoDto.Descricao ?? planoModelo.Descricao,
+                    TempoMinutos = planoModelo.TempoMinutos,
+                    CentroCustoId = planoModelo.CentroCustoId,
+                    DiasSemana = planoModelo.DiasSemana,
+                    ValorBimestral = planoModelo.ValorBimestral,
+                    ValorMensal = planoModelo.ValorMensal,
+                    ValorTrimestral = planoModelo.ValorTrimestral,
+                    ValorQuadrimestral = planoModelo.ValorQuadrimestral,
+                    ValorSemestral = planoModelo.ValorSemestral,
+                    ValorAnual = planoModelo.ValorAnual,
                     DataInicio = renovacaoDto.DataInicio,
                     DataFim = renovacaoDto.DataFim,
                     Ativo = true,

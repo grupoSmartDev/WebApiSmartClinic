@@ -10,15 +10,15 @@ namespace WebApiSmartClinic.Dto.Plano;
 public sealed class PlanoCreateDto
 {
 
-    [Required(ErrorMessage = "A descrição é obrigatória.")]
-    [StringLength(255, ErrorMessage = "A descrição deve ter no máximo 255 caracteres.")]
+    [Required(ErrorMessage = "A descriï¿½ï¿½o ï¿½ obrigatï¿½ria.")]
+    [StringLength(255, ErrorMessage = "A descriï¿½ï¿½o deve ter no mï¿½ximo 255 caracteres.")]
     public string Descricao { get; set; } = string.Empty;
 
-    [Required(ErrorMessage = "O tempo em minutos é obrigatório.")]
+    [Required(ErrorMessage = "O tempo em minutos ï¿½ obrigatï¿½rio.")]
     [Range(1, int.MaxValue, ErrorMessage = "O tempo em minutos deve ser maior que zero.")]
     public int TempoMinutos { get; set; }
 
-    [Required(ErrorMessage = "Os dias da semana são obrigatórios.")]
+    [Required(ErrorMessage = "Os dias da semana sï¿½o obrigatï¿½rios.")]
     [Range(1, 7, ErrorMessage = "Os dias da semana devem estar entre 1 e 7.")]
     public int DiasSemana { get; set; }
 
@@ -48,8 +48,8 @@ public sealed class PlanoCreateDto
     
     public Financ_ReceberCreateDto? Financeiro { get; set; }
 
-    [Required(ErrorMessage = "O tipo de mês é obrigatório.")]
-    [StringLength(1, ErrorMessage = "O tipo de mês deve ter apenas um caractere.")]
+    [Required(ErrorMessage = "O tipo de mï¿½s ï¿½ obrigatï¿½rio.")]
+    [StringLength(1, ErrorMessage = "O tipo de mï¿½s deve ter apenas um caractere.")]
     public string TipoMes { get; set; } = string.Empty; // Usado como enum no front-end
     
     public AgendaCreateDto? Agendamento { get; set; }
@@ -59,6 +59,10 @@ public sealed class PlanoCreateDto
 public class PlanoRenovacaoDto
 {
     public int PlanoId { get; set; }
+    // Id do plano-template (PlanoModel sem PacienteId) escolhido para a renovaÃ§Ã£o. O backend
+    // usa os valores atuais desse template (TempoMinutos/DiasSemana/Valor*), nÃ£o os do plano
+    // que estÃ¡ sendo renovado - permite trocar de plano na renovaÃ§Ã£o, nÃ£o sÃ³ a periodicidade.
+    public int PlanoModeloId { get; set; }
     public string Descricao { get; set; }
     public string TipoMes { get; set; }
     public DateTime DataInicio { get; set; }

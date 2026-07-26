@@ -1,5 +1,6 @@
 using System;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json.Serialization;
 using WebApiSmartClinic.Models.Abstractions;
 
@@ -26,15 +27,15 @@ namespace WebApiSmartClinic.Models
         }
         public bool Ativo { get; set; } = true;
 
-        [Required(ErrorMessage = "A descrição é obrigatória.")]
-        [StringLength(255, ErrorMessage = "A descrição deve ter no máximo 255 caracteres.")]
+        [Required(ErrorMessage = "A descriï¿½ï¿½o ï¿½ obrigatï¿½ria.")]
+        [StringLength(255, ErrorMessage = "A descriï¿½ï¿½o deve ter no mï¿½ximo 255 caracteres.")]
         public string Descricao { get; set; } = string.Empty;
 
-        [Required(ErrorMessage = "O tempo em minutos é obrigatório.")]
+        [Required(ErrorMessage = "O tempo em minutos ï¿½ obrigatï¿½rio.")]
         [Range(1, int.MaxValue, ErrorMessage = "O tempo em minutos deve ser maior que zero.")]
         public int TempoMinutos { get; set; }
 
-        [Required(ErrorMessage = "Os dias da semana são obrigatórios.")]
+        [Required(ErrorMessage = "Os dias da semana sï¿½o obrigatï¿½rios.")]
         [Range(1, 7, ErrorMessage = "Os dias da semana devem estar entre 1 e 7.")]
         public int DiasSemana { get; set; }
 
@@ -67,17 +68,32 @@ namespace WebApiSmartClinic.Models
 
         //public bool Ativo { get; set; } = true;
 
+        // Calculado dinamicamente a cada leitura - nunca persistido. "Ativo" (flag de soft-delete/
+        // inativaÃ§Ã£o manual) sÃ³ reflete se o plano foi explicitamente inativado/renovado; um plano
+        // com DataFim no passado continua Ativo=true atÃ© alguÃ©m mexer nele, entÃ£o o status exibido
+        // ao usuÃ¡rio precisa considerar a data, nÃ£o sÃ³ a flag.
+        [NotMapped]
+        public string Status
+        {
+            get
+            {
+                if (!Ativo) return "Inativo";
+                if (DataFim.HasValue && DataFim.Value < DateTime.UtcNow) return "Vencido";
+                return "Ativo";
+            }
+        }
+
         public int? PacienteId { get; set; }
         [JsonIgnore]
         public PacienteModel? Paciente { get; set; }
-        public virtual ICollection<PacientePlanoHistoricoModel> HistoricoPacientes { get; set; } = new List<PacientePlanoHistoricoModel>(); // Histórico de uso
+        public virtual ICollection<PacientePlanoHistoricoModel> HistoricoPacientes { get; set; } = new List<PacientePlanoHistoricoModel>(); // Histï¿½rico de uso
 
         public int? FinanceiroId { get; set; }
         [JsonIgnore]
         public Financ_ReceberModel? Financeiro { get; set; }
 
-        [Required(ErrorMessage = "O tipo de mês é obrigatório.")]
-        [StringLength(1, ErrorMessage = "O tipo de mês deve ter apenas um caractere.")]
+        [Required(ErrorMessage = "O tipo de mï¿½s ï¿½ obrigatï¿½rio.")]
+        [StringLength(1, ErrorMessage = "O tipo de mï¿½s deve ter apenas um caractere.")]
         public string TipoMes { get; set; } = string.Empty;
     }
 }

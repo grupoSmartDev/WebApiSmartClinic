@@ -23,6 +23,12 @@ public class AgendaService : IAgendaInterface
         try
         {
             var agenda = await _context.Agenda
+                .Include(a => a.Paciente)
+                .Include(a => a.Profissional)
+                .Include(a => a.Status)
+                .Include(a => a.FinancReceber)
+                    .ThenInclude(f => f.subFinancReceber)
+                .AsSplitQuery()
                 .AsNoTracking()
                 .FirstOrDefaultAsync(x => x.Id == idAgenda);
             if (agenda == null)

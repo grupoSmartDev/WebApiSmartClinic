@@ -1,4 +1,4 @@
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using WebApiSmartClinic.Data;
 using WebApiSmartClinic.Dto.Agenda;
 using WebApiSmartClinic.Dto.Financ_Receber;
@@ -9,10 +9,12 @@ namespace WebApiSmartClinic.Services.Agenda;
 public class AgendaService : IAgendaInterface
 {
     private readonly AppDbContext _context;
+    private readonly ILogger<AgendaService> _logger;
 
-    public AgendaService(AppDbContext context)
+    public AgendaService(AppDbContext context, ILogger<AgendaService> logger)
     {
         _context = context;
+        _logger = logger;
     }
 
     public async Task<ResponseModel<AgendaModel>> BuscarPorId(int idAgenda)
@@ -130,6 +132,24 @@ public class AgendaService : IAgendaInterface
             catch (Exception ex)
             {
                 await transaction.RollbackAsync();
+                _logger.LogError(
+                    ex,
+                    "Erro ao criar agendamento. Payload: Titulo={Titulo}, Data={Data}, HoraInicio={HoraInicio}, HoraFim={HoraFim}, " +
+                    "PacienteId={PacienteId}, ProfissionalId={ProfissionalId}, SalaId={SalaId}, PacoteId={PacoteId}, " +
+                    "StatusId={StatusId}, Avulso={Avulso}, DataFimRecorrencia={DataFimRecorrencia}, QtdDiasRecorrencia={QtdDiasRecorrencia}",
+                    agendaCreateDto.Titulo,
+                    agendaCreateDto.Data,
+                    agendaCreateDto.HoraInicio,
+                    agendaCreateDto.HoraFim,
+                    agendaCreateDto.PacienteId,
+                    agendaCreateDto.ProfissionalId,
+                    agendaCreateDto.SalaId,
+                    agendaCreateDto.PacoteId,
+                    agendaCreateDto.StatusId,
+                    agendaCreateDto.Avulso,
+                    agendaCreateDto.DataFimRecorrencia,
+                    agendaCreateDto.DiasRecorrencia?.Count ?? 0);
+
                 resposta.Mensagem = $"Erro ao criar agendamento: {ex.Message}";
                 resposta.Status = false;
                 return resposta;

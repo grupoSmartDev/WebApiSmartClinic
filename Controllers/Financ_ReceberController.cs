@@ -70,6 +70,12 @@ public sealed class Financ_ReceberController : ControllerBase
     public async Task<ActionResult<ResponseModel<Financ_ReceberSubModel>>> BaixarParcela(Financ_ReceberSubEdicaoDto financ_receberSubEdicaoDto)
     {
         var resultado = await _financ_receber.BaixarParcela(financ_receberSubEdicaoDto);
+
+        if (!resultado.Status)
+        {
+            return StatusCode(400, resultado);
+        }
+
         return Ok(resultado);
     }
 

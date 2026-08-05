@@ -280,6 +280,7 @@ public class AgendaService : IAgendaInterface
         {
             resposta.Dados = await _context.Agenda
                 .Include(a => a.Paciente)
+                .Where(a => !a.PacienteId.HasValue || _context.Paciente.Any(p => p.Id == a.PacienteId.Value))
                 .AsNoTracking()
                 .ToListAsync();
             resposta.Mensagem = "Agendamentos listados com sucesso!";

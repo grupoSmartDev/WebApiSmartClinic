@@ -242,6 +242,16 @@ public class PacienteService : IPacienteInterface
                 return resposta;
             }
 
+            var temAgendamentos = await _context.Agenda.AnyAsync(a => a.PacienteId == idPaciente);
+            var temFinanceiroPendente = await _context.Financ_Receber.AnyAsync(f => f.PacienteId == idPaciente && f.Status != "Quitado");
+
+            if (temAgendamentos || temFinanceiroPendente)
+            {
+                resposta.Mensagem = "Não é possível excluir o paciente pois possui agendamentos e/ou financeiro vinculados. Inative o paciente ou remova os vínculos primeiro.";
+                resposta.Status = false;
+                return resposta;
+            }
+
             _context.Remove(paciente);
             await _context.SaveChangesAsync();
 

@@ -88,4 +88,11 @@ public sealed class AgendaController : ControllerBase
         var agenda = await _agenda.ListarGeral(pageNumber,pageSize,idFiltro,pacienteIdFiltro,profissionalIdFiltro,statusIdFiltro,dataFiltroInicio,dataFiltroFim,paginar);
         return Ok(agenda);
     }
+
+    [HttpGet("ContadoresPaciente/{pacienteId}")]
+    public async Task<ActionResult<ResponseModel<ContadoresPaciente>>> ContadoresPaciente(int pacienteId)
+    {
+        var contadores = await _agenda.ContadoresPaciente(pacienteId);
+        return Ok(contadores);
+    }
 }

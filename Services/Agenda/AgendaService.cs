@@ -539,6 +539,13 @@ public class AgendaService : IAgendaInterface
                 .AsNoTracking()
                 .AsQueryable();
 
+            // Exclui agendamentos "órfãos": PacienteId aponta para um paciente que
+            // existe mas está inativo (Ativo = false), então o filtro global de
+            // PacienteModel faz o Include acima resolver Paciente como null mesmo
+            // com PacienteId preenchido. Sem isso, esses agendamentos aparecem sem
+            // nome de paciente nas telas que consomem ListarGeral (ex.: calendário).
+            query = query.Where(a => !a.PacienteId.HasValue || a.Paciente != null);
+
             if (idFiltro.HasValue)
                 query = query.Where(p => p.Id == idFiltro.Value);
 
@@ -584,6 +591,34 @@ public class AgendaService : IAgendaInterface
             return resposta;
         }
 
+    }
+
+    public async Task<ResponseModel<ContadoresPaciente>> ContadoresPaciente(int pacienteId)
+    {
+        ResponseModel<ContadoresPaciente> resposta = new ResponseModel<ContadoresPaciente>();
+        try
+        {
+            var query = _context.Agenda
+                .AsNoTracking()
+                .Where(a => a.PacienteId == pacienteId);
+
+            resposta.Dados = new ContadoresPaciente
+            {
+                Total = await query.CountAsync(),
+                Concluidos = await query.CountAsync(a => a.StatusId == 4),
+                Cancelados = await query.CountAsync(a => a.StatusId == 5 || a.StatusId == 6),
+                Agendados = await query.CountAsync(a => a.StatusId == 1 || a.StatusId == 2 || a.StatusId == 3)
+            };
+            resposta.Mensagem = "Contadores calculados com sucesso";
+
+            return resposta;
+        }
+        catch (Exception ex)
+        {
+            resposta.Mensagem = ex.Message;
+            resposta.Status = false;
+            return resposta;
+        }
     }
 
     // Consome uma sessão do pacote vinculado ao agendamento (agenda.PacoteId): cria o PacoteUsoModel
@@ -806,5 +841,13 @@ public class ContadoresDashboard
     public int AgendasFinalizadas { get; set; }
     public int AgendasFuturas { get; set; }
     public int PacientesNoPeriodo { get; set; }
+}
+
+public class ContadoresPaciente
+{
+    public int Total { get; set; }
+    public int Concluidos { get; set; }
+    public int Cancelados { get; set; }
+    public int Agendados { get; set; }
 }
 

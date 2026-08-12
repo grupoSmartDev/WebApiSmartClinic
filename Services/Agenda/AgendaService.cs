@@ -166,27 +166,91 @@ public class AgendaService : IAgendaInterface
 
     public async Task<ResponseModel<List<AgendaModel>>> Delete(int idAgenda)
     {
-        ResponseModel<List<AgendaModel>> resposta = new ResponseModel<List<AgendaModel>>();
+        ResponseModel<List<AgendaModel>> resposta = new();
         try
         {
-            var agenda = await _context.Agenda.FirstOrDefaultAsync(x => x.Id == idAgenda);
+            var agenda = await _context.Agenda
+                .Include(a => a.ComissaoCalculada)
+                .FirstOrDefaultAsync(x => x.Id == idAgenda);
+
             if (agenda == null)
             {
                 resposta.Mensagem = "Agendamento não encontrado";
+                resposta.Status = false;
                 return resposta;
             }
 
+            // REGRA 1 — Bloquear se Concluído
+            if (agenda.StatusId == 4)
+            {
+                resposta.Mensagem = "Não é possível excluir um agendamento já concluído.";
+                resposta.Status = false;
+                return resposta;
+            }
+
+            // REGRA 2 — Bloquear se financeiro pago
+            if (agenda.FinancReceberId != null)
+            {
+                var financeiro = await _context.Financ_Receber
+                    .Include(f => f.subFinancReceber)
+                    .FirstOrDefaultAsync(f => f.Id == agenda.FinancReceberId);
+
+                if (financeiro != null)
+                {
+                    bool temParcelaPaga = financeiro.subFinancReceber?
+                        .Any(s => s.DataPagamento != null) ?? false;
+
+                    if (temParcelaPaga)
+                    {
+                        resposta.Mensagem = "Não é possível excluir um agendamento com financeiro já pago.";
+                        resposta.Status = false;
+                        return resposta;
+                    }
+
+                    // REGRA 3 — Cancelar financeiro não pago (Remove() vira soft delete via SaveChangesAsync)
+                    _context.Financ_Receber.Remove(financeiro);
+                }
+            }
+
+            // REGRA 4 — Estornar sessão do pacote
+            if (agenda.PacoteId != null)
+            {
+                var pacoteUso = await _context.PacotesUsos
+                    .FirstOrDefaultAsync(u => u.AgendaId == agenda.Id && u.Ativo);
+
+                if (pacoteUso != null)
+                {
+                    var pacote = await _context.PacotesPacientes
+                        .FirstOrDefaultAsync(p => p.Id == pacoteUso.PacotePacienteId);
+
+                    if (pacote != null)
+                    {
+                        pacote.QuantidadeUsada = Math.Max(0, pacote.QuantidadeUsada - 1);
+                        if (pacote.Status == "Esgotado" && pacote.QuantidadeUsada < pacote.QuantidadeTotal)
+                            pacote.Status = "Ativo";
+                    }
+
+                    _context.PacotesUsos.Remove(pacoteUso);
+                }
+            }
+
+            // REGRA 5 — Cancelar comissão vinculada (não bloqueia a exclusão)
+            if (agenda.ComissaoCalculada != null)
+            {
+                agenda.ComissaoCalculada.Ativo = false;
+            }
+
+            // Soft delete do agendamento (AppDbContext converte Remove em Ativo=false)
             _context.Agenda.Remove(agenda);
             await _context.SaveChangesAsync();
 
             resposta.Dados = await _context.Agenda.AsNoTracking().ToListAsync();
-            resposta.Mensagem = "Agendamento Removido com sucesso!";
+            resposta.Mensagem = "Agendamento removido com sucesso!";
             return resposta;
         }
         catch (Exception ex)
         {
-
-            resposta.Mensagem = "Erro ao buscar Agenda";
+            resposta.Mensagem = $"Erro ao excluir agendamento: {ex.InnerException?.Message ?? ex.Message}";
             resposta.Status = false;
             return resposta;
         }

@@ -4,7 +4,7 @@ using WebApiSmartClinic.Models;
 
 namespace WebApiSmartClinic.Services.CadastroCliente
 {
-    // Marca “entidades que pertencem a uma empresa”.
+    // Marca ï¿½entidades que pertencem a uma empresaï¿½.
     public interface IEntidadeEmpresa
     {
         int EmpresaId { get; set; }
@@ -15,5 +15,6 @@ namespace WebApiSmartClinic.Services.CadastroCliente
         Task<ResponseModel<List<EmpresaModel>>> Listar();
         Task<ResponseModel<List<EmpresaModel>>> Delete(int idCadastroCliente);
         Task<ResponseModel<EmpresaModel>> Criar(CadastroClienteCreateDto dto);
+        Task<ResponseModel<EmpresaModel>> ReprocessarAsaas(int empresaId);
     }
 }

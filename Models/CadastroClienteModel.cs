@@ -37,7 +37,7 @@ public class EmpresaModel
             ? DateTime.SpecifyKind(value.Value.ToUniversalTime(), DateTimeKind.Utc)
             : null;
     }
-    // Data de Criação
+    // Data de Criaï¿½ï¿½o
     private DateTime _DataCriacao = DateTime.UtcNow;
     public DateTime DataCriacao
     {
@@ -76,6 +76,11 @@ public class EmpresaModel
     public string DatabaseConnectionString { get; set; }
     public string? AsaasCustomerId { get; set; } // ID do customer no Asaas
     public string? AsaasSubscriptionId { get; set; } // ID da subscription no Asaas
+    public string? AsaasPaymentId { get; set; } // ID do payment no Asaas
+    public string? AsaasInvoiceUrl { get; set; } // link boleto/PIX para o cliente pagar
+    public string? AsaasStatus { get; set; } // "Pendente", "Ativo", "Erro"
+    public string? AsaasErroDetalhe { get; set; } // mensagem do erro, para reprocessar
+    public DateTime? AsaasUltimaTentativa { get; set; } // data da Ãºltima tentativa de integraÃ§Ã£o
     public string? PeriodoCobranca { get; set; } // "monthly" ou "semiannual"
     public decimal PrecoSelecionado { get; set; }
     public string? InscricaoEstadual { get; set; }

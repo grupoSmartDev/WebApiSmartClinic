@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using WebApiSmartClinic.Dto.CadastroCliente;
+using WebApiSmartClinic.Helpers;
 using WebApiSmartClinic.Models;
 using WebApiSmartClinic.Services.CadastroCliente;
 
@@ -35,5 +36,13 @@ public sealed class CadastroClienteController : ControllerBase
     {
         var cadastrocliente = await _cadastrocliente.Delete(idCadastroCliente);
         return Ok(cadastrocliente);
+    }
+
+    [Authorize(Roles = Perfis.Admin)]
+    [HttpPost("ReprocessarAsaas/{empresaId}")]
+    public async Task<ActionResult<ResponseModel<EmpresaModel>>> ReprocessarAsaas(int empresaId)
+    {
+        var resultado = await _cadastrocliente.ReprocessarAsaas(empresaId);
+        return Ok(resultado);
     }
 }

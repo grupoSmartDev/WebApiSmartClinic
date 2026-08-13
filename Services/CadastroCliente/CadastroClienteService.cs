@@ -133,6 +133,9 @@ public class CadastroClienteService : ICadastroClienteInterface
             string? asaasCustomerId = null;
             string? asaasSubscriptionId = null;
             string? asaasPaymentId = null;
+            string? asaasInvoiceUrl = null;
+            string? asaasStatus = null;
+            string? asaasErroDetalhe = null;
 
             Console.WriteLine("\n💳 Integrando com Asaas...");
 
@@ -217,6 +220,7 @@ public class CadastroClienteService : ICadastroClienteInterface
 
                         var payment = await _asaasService.CreatePaymentAsync(paymentRequest);
                         asaasPaymentId = payment.id;
+                        asaasInvoiceUrl = payment.invoiceUrl;
 
                         Console.WriteLine($"✅ Pagamento criado: {asaasPaymentId}");
                         Console.WriteLine($"📊 Status: {payment.status}");
@@ -245,6 +249,7 @@ public class CadastroClienteService : ICadastroClienteInterface
 
                         var payment = await _asaasService.CreatePaymentAsync(paymentRequest);
                         asaasPaymentId = payment.id;
+                        asaasInvoiceUrl = payment.invoiceUrl;
 
                         Console.WriteLine($"✅ Boleto gerado: {asaasPaymentId}");
                         Console.WriteLine($"🔗 Link do boleto: {payment.invoiceUrl}");
@@ -272,6 +277,7 @@ public class CadastroClienteService : ICadastroClienteInterface
 
                         var payment = await _asaasService.CreatePaymentAsync(paymentRequest);
                         asaasPaymentId = payment.id;
+                        asaasInvoiceUrl = payment.invoiceUrl;
 
                         Console.WriteLine($"✅ PIX gerado: {asaasPaymentId}");
                         Console.WriteLine($"🔗 Link do QR Code: {payment.invoiceUrl}");
@@ -286,12 +292,16 @@ public class CadastroClienteService : ICadastroClienteInterface
                     }
                 }
 
+                asaasStatus = "Ativo";
                 Console.WriteLine($"✅ Asaas OK - Customer: {asaasCustomerId}, Subscription: {asaasSubscriptionId}, Payment: {asaasPaymentId}");
             }
             catch (Exception exAsaas)
             {
-                Console.WriteLine($"⚠️ Erro no Asaas (continuando): {exAsaas.Message}");
-                // Não interrompe o cadastro
+                // Não interrompe o cadastro — o cliente/banco são criados mesmo assim, mas
+                // ficam marcados como "Pendente" para reprocessar depois (ver ReprocessarAsaas).
+                asaasStatus = "Pendente";
+                asaasErroDetalhe = exAsaas.Message;
+                Console.WriteLine($"⚠️ Asaas falhou (cadastro continua como Pendente): {exAsaas.Message}");
             }
 
             // 7) Criando estrutura do cliente
@@ -323,6 +333,11 @@ public class CadastroClienteService : ICadastroClienteInterface
                     Ativo = true,
                     AsaasCustomerId = asaasCustomerId,
                     AsaasSubscriptionId = asaasSubscriptionId,
+                    AsaasPaymentId = asaasPaymentId,
+                    AsaasInvoiceUrl = asaasInvoiceUrl,
+                    AsaasStatus = asaasStatus,
+                    AsaasErroDetalhe = asaasErroDetalhe,
+                    AsaasUltimaTentativa = DateTime.UtcNow,
                     PeriodoCobranca = dto.PeriodoCobranca,
                     PrecoSelecionado = dto.PrecoSelecionado,
                     DataNascimentoTitular = dto.DataNascimentoTitular,
@@ -457,7 +472,7 @@ public class CadastroClienteService : ICadastroClienteInterface
                 {
                     ToEmail = dto.Email,
                     Subject = "Conta criada com sucesso!",
-                    Body = GetHtmlContent(dto.Nome)
+                    Body = GetHtmlContent(dto.Nome, resposta.Dados?.AsaasInvoiceUrl)
                 });
                 Console.WriteLine($"✅ Email enviado!");
             }
@@ -565,6 +580,122 @@ public class CadastroClienteService : ICadastroClienteInterface
         }
     }
 
+    // Retenta a integração com o Asaas para uma empresa que ficou com AsaasStatus = "Pendente"
+    // (ver Criar). Não reprocessa pagamento com cartão de crédito — os dados do cartão nunca são
+    // persistidos (por segurança), então esse caso exige que o cliente informe os dados de novo.
+    public async Task<ResponseModel<EmpresaModel>> ReprocessarAsaas(int empresaId)
+    {
+        ResponseModel<EmpresaModel> resposta = new ResponseModel<EmpresaModel>();
+
+        try
+        {
+            var empresa = await _context.Empresas.FirstOrDefaultAsync(e => e.Id == empresaId);
+            if (empresa == null)
+            {
+                resposta.Status = false;
+                resposta.Mensagem = "Empresa não encontrada.";
+                return resposta;
+            }
+
+            if (empresa.AsaasStatus != "Pendente")
+            {
+                resposta.Status = false;
+                resposta.Mensagem = $"Empresa não está com integração Asaas pendente (status atual: {empresa.AsaasStatus ?? "sem status"}).";
+                return resposta;
+            }
+
+            string? asaasCustomerId = empresa.AsaasCustomerId;
+            string? asaasSubscriptionId = empresa.AsaasSubscriptionId;
+            string? asaasPaymentId = empresa.AsaasPaymentId;
+            string? asaasInvoiceUrl = empresa.AsaasInvoiceUrl;
+
+            try
+            {
+                if (string.IsNullOrEmpty(asaasCustomerId))
+                {
+                    var customerRequest = new AsaasCustomerRequest
+                    {
+                        name = $"{empresa.Nome} {empresa.Sobrenome}",
+                        email = empresa.Email,
+                        phone = LimparTelefone(empresa.Celular),
+                        mobilePhone = LimparTelefone(empresa.Celular),
+                        cpfCnpj = empresa.TitularCPF,
+                        observations = $"ClinicSmart - {empresa.PlanoEscolhido} - {empresa.PeriodoCobranca}"
+                    };
+                    var customer = await _asaasService.CreateCustomerAsync(customerRequest);
+                    asaasCustomerId = customer.id;
+                }
+
+                if (!empresa.PeriodoTeste && empresa.PrecoSelecionado > 0)
+                {
+                    if (empresa.PeriodoCobranca == "monthly" && string.IsNullOrEmpty(asaasSubscriptionId))
+                    {
+                        var subscriptionRequest = new AsaasSubscriptionRequest
+                        {
+                            customer = asaasCustomerId,
+                            billingType = MapearTipoPagamento(empresa.TipoPagamentoId),
+                            value = empresa.PrecoSelecionado,
+                            nextDueDate = DateTime.Now.AddDays(1).ToString("yyyy-MM-dd"),
+                            cycle = "MONTHLY",
+                            description = $"ClinicSmart - {empresa.PlanoEscolhido}",
+                            externalReference = $"clinicsmart_empresa_{empresa.Id}",
+                            totalValue = empresa.PrecoSelecionado,
+                            installmentCount = "6"
+                        };
+                        var subscription = await _asaasService.CreateSubscriptionAsync(subscriptionRequest);
+                        asaasSubscriptionId = subscription.id;
+                    }
+                    else if (empresa.PeriodoCobranca != "monthly" && string.IsNullOrEmpty(asaasPaymentId) && (empresa.TipoPagamentoId == 2 || empresa.TipoPagamentoId == 3))
+                    {
+                        var paymentRequest = new AsaasPaymentRequest
+                        {
+                            customer = asaasCustomerId,
+                            billingType = empresa.TipoPagamentoId == 3 ? "PIX" : "BOLETO",
+                            value = empresa.PeriodoCobranca == "semiannual" ? empresa.PrecoSelecionado * 6 : empresa.PrecoSelecionado,
+                            dueDate = DateTime.Now.AddDays(empresa.TipoPagamentoId == 3 ? 1 : 3),
+                            description = $"ClinicSmart - {empresa.PlanoEscolhido} - {empresa.PeriodoCobranca}",
+                            externalReference = $"clinicsmart_empresa_{empresa.Id}",
+                            creditCard = null,
+                            creditCardHolderInfo = null
+                        };
+                        var payment = await _asaasService.CreatePaymentAsync(paymentRequest);
+                        asaasPaymentId = payment.id;
+                        asaasInvoiceUrl = payment.invoiceUrl;
+                    }
+                }
+
+                empresa.AsaasCustomerId = asaasCustomerId;
+                empresa.AsaasSubscriptionId = asaasSubscriptionId;
+                empresa.AsaasPaymentId = asaasPaymentId;
+                empresa.AsaasInvoiceUrl = asaasInvoiceUrl;
+                empresa.AsaasStatus = "Ativo";
+                empresa.AsaasErroDetalhe = null;
+            }
+            catch (Exception exAsaas)
+            {
+                empresa.AsaasStatus = "Pendente";
+                empresa.AsaasErroDetalhe = exAsaas.Message;
+            }
+
+            empresa.AsaasUltimaTentativa = DateTime.UtcNow;
+            _context.Empresas.Update(empresa);
+            await _context.SaveChangesAsync();
+
+            resposta.Dados = empresa;
+            resposta.Status = empresa.AsaasStatus == "Ativo";
+            resposta.Mensagem = empresa.AsaasStatus == "Ativo"
+                ? "Integração com Asaas reprocessada com sucesso."
+                : $"Falha ao reprocessar Asaas: {empresa.AsaasErroDetalhe}";
+            return resposta;
+        }
+        catch (Exception ex)
+        {
+            resposta.Status = false;
+            resposta.Mensagem = ex.Message;
+            return resposta;
+        }
+    }
+
     public async Task<ResponseModel<List<EmpresaModel>>> Listar()
     {
         ResponseModel<List<EmpresaModel>> resposta = new ResponseModel<List<EmpresaModel>>();
@@ -587,17 +718,21 @@ public class CadastroClienteService : ICadastroClienteInterface
         }
     }
 
-    private string GetHtmlContent(string nome)
+    private string GetHtmlContent(string nome, string? invoiceUrl)
     {
         string mensagem = $@"Olá {nome}. Seja bem vindo ao Clinc Smart!
 
-        Obrigado, sua senha padrão é Admin@123 e sua chave de acesso é o CPF informado para cadastro. 
+        Obrigado, sua senha padrão é Admin@123 e sua chave de acesso é o CPF informado para cadastro.
 
-        Após o primeiro Login, recomendamos que você altere sua senha. 
+        Após o primeiro Login, recomendamos que você altere sua senha.
 
         Qualquer dúvida, entre em contato com o suporte.
 
         Estamos felizes em ter você na Família Smart.";
+
+        string pagamentoHtml = !string.IsNullOrWhiteSpace(invoiceUrl)
+            ? $@"<p><a href=""{invoiceUrl}"">Clique aqui para realizar o pagamento da sua assinatura</a></p>"
+            : $@"<p>Seu link de pagamento será enviado em breve. Entre em contato com o suporte se não receber.</p>";
 
         string htmlContent = $@"
                 <!DOCTYPE html>
@@ -623,6 +758,7 @@ public class CadastroClienteService : ICadastroClienteInterface
                 <body>
                     <div class=""welcome-message"">
                         <p>{mensagem.Replace("\n", "<br>")}</p>
+                        {pagamentoHtml}
                     </div>
                 </body>
                 </html>";

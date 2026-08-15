@@ -67,9 +67,9 @@ public sealed class Financ_ReceberController : ControllerBase
     }
 
     [HttpPut("BaixarParcela")]
-    public async Task<ActionResult<ResponseModel<Financ_ReceberSubModel>>> BaixarParcela(Financ_ReceberSubEdicaoDto financ_receberSubEdicaoDto)
+    public async Task<ActionResult<ResponseModel<Financ_ReceberSubModel>>> BaixarParcela(BaixarParcelaDto baixarParcelaDto)
     {
-        var resultado = await _financ_receber.BaixarParcela(financ_receberSubEdicaoDto);
+        var resultado = await _financ_receber.BaixarParcela(baixarParcelaDto);
 
         if (!resultado.Status)
         {

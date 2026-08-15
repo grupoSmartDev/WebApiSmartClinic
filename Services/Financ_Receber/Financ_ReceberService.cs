@@ -21,6 +21,8 @@ public class Financ_ReceberService : IFinanc_ReceberInterface
         {
             var financ_receber = await _context.Financ_Receber
                 .Include(f => f.subFinancReceber) // Inclui as parcelas no resultado
+                .Include(f => f.Paciente)
+                .Include(f => f.TipoPagamento)
                 .FirstOrDefaultAsync(x => x.Id == idFinanc_Receber);
 
             if (financ_receber == null)
@@ -169,9 +171,7 @@ public class Financ_ReceberService : IFinanc_ReceberInterface
             financ_receber.NrDocto = financ_receberEdicaoDto.NrDocto;
             financ_receber.DataEmissao = financ_receberEdicaoDto.DataEmissao;
             financ_receber.ValorOriginal = financ_receberEdicaoDto.ValorOriginal;
-            financ_receber.ValorPago = financ_receberEdicaoDto.ValorPago;
             financ_receber.Valor = financ_receberEdicaoDto.Valor;
-            financ_receber.Status = financ_receberEdicaoDto.Status;
             financ_receber.NotaFiscal = financ_receberEdicaoDto.NotaFiscal;
             financ_receber.Descricao = financ_receberEdicaoDto.Descricao;
             financ_receber.Parcela = financ_receberEdicaoDto.Parcela;
@@ -183,27 +183,74 @@ public class Financ_ReceberService : IFinanc_ReceberInterface
             financ_receber.PacienteId = financ_receberEdicaoDto.PacienteId;
             financ_receber.TipoPagamentoId = financ_receberEdicaoDto.TipoPagamentoId;
 
-            _context.Financ_ReceberSub.RemoveRange(financ_receber.subFinancReceber);
-            financ_receber.subFinancReceber.Clear();
-
-            foreach (var parcelaDto in financ_receberEdicaoDto.subFinancReceber)
+            // Atualiza subitens por Id (merge) em vez de apagar tudo e recriar — isso preservava
+            // ValorPago/DataPagamento de parcelas já quitadas, mas o RemoveRange+Clear anterior
+            // apagava esse histórico a cada edição (BUG 1).
+            if (financ_receberEdicaoDto.subFinancReceber != null)
             {
-                var novaParcela = new Financ_ReceberSubModel
+                foreach (var parcelaDto in financ_receberEdicaoDto.subFinancReceber)
                 {
-                    financReceberId = financ_receber.Id,
-                    Parcela = parcelaDto.Parcela,
-                    Valor = parcelaDto.Valor,
-                    FormaPagamentoId = parcelaDto.FormaPagamentoId,
-                    DataPagamento = parcelaDto.DataPagamento,
-                    Desconto = parcelaDto.Desconto,
-                    Juros = parcelaDto.Juros,
-                    Multa = parcelaDto.Multa,
-                    DataVencimento = parcelaDto.DataVencimento,
-                    Observacao = parcelaDto.Observacao
-                };
+                    // Procura se já existe o subitem
+                    var subItemExistente = financ_receber.subFinancReceber
+                        .FirstOrDefault(x => x.Id == parcelaDto.Id);
 
-                financ_receber.subFinancReceber.Add(novaParcela);
+                    if (subItemExistente != null)
+                    {
+                        // Atualiza o item existente (ValorPago NÃO é alterado aqui — só via
+                        // BaixarParcela/EstornarParcela)
+                        subItemExistente.Parcela = parcelaDto.Parcela;
+                        subItemExistente.Valor = parcelaDto.Valor;
+                        subItemExistente.TipoPagamentoId = parcelaDto.TipoPagamentoId;
+                        subItemExistente.FormaPagamentoId = parcelaDto.FormaPagamentoId;
+                        subItemExistente.DataPagamento = parcelaDto.DataPagamento;
+                        subItemExistente.Desconto = parcelaDto.Desconto;
+                        subItemExistente.Juros = parcelaDto.Juros;
+                        subItemExistente.Multa = parcelaDto.Multa;
+                        subItemExistente.DataVencimento = parcelaDto.DataVencimento;
+                        subItemExistente.Observacao = parcelaDto.Observacao;
+                    }
+                    else
+                    {
+                        // Cria novo item se não existir
+                        var novoSubItem = new Financ_ReceberSubModel
+                        {
+                            financReceberId = financ_receber.Id,
+                            Parcela = parcelaDto.Parcela,
+                            Valor = parcelaDto.Valor,
+                            TipoPagamentoId = parcelaDto.TipoPagamentoId,
+                            FormaPagamentoId = parcelaDto.FormaPagamentoId,
+                            DataPagamento = parcelaDto.DataPagamento,
+                            Desconto = parcelaDto.Desconto,
+                            Juros = parcelaDto.Juros,
+                            Multa = parcelaDto.Multa,
+                            DataVencimento = parcelaDto.DataVencimento,
+                            Observacao = parcelaDto.Observacao
+                        };
+                        financ_receber.subFinancReceber.Add(novoSubItem);
+                    }
+                }
+
+                // Remove apenas os itens que não estão mais na lista — tanto do banco quanto da
+                // coleção em memória, para o recálculo de ValorPago logo abaixo não contar uma
+                // parcela que está prestes a ser excluída.
+                var idsParaManterAtivos = financ_receberEdicaoDto.subFinancReceber.Select(x => x.Id).ToList();
+                var itensParaRemover = financ_receber.subFinancReceber
+                    .Where(x => x.Id > 0 && !idsParaManterAtivos.Contains(x.Id))
+                    .ToList();
+
+                foreach (var itemRemover in itensParaRemover)
+                {
+                    _context.Remove(itemRemover);
+                    financ_receber.subFinancReceber.Remove(itemRemover);
+                }
             }
+
+            // Recalcula ValorPago/Status do cabeçalho a partir das parcelas já mescladas acima,
+            // em vez de copiar o que o DTO mandou (BUG 2 — antes ficava fora de sincronia).
+            financ_receber.ValorPago = financ_receber.subFinancReceber.Sum(p => p.ValorPago);
+            financ_receber.Status = financ_receber.ValorPago == 0 ? "Em Aberto"
+                                  : financ_receber.ValorPago >= financ_receber.ValorOriginal ? "Quitado"
+                                  : "Parcial";
 
             await _context.SaveChangesAsync();
 
@@ -288,6 +335,8 @@ public class Financ_ReceberService : IFinanc_ReceberInterface
         {
             var query = _context.Financ_Receber
                 .Include(x => x.subFinancReceber)
+                .Include(x => x.Paciente)
+                .Include(x => x.TipoPagamento)
                 .AsQueryable();
 
             if (idFiltro.HasValue)
@@ -459,13 +508,20 @@ public class Financ_ReceberService : IFinanc_ReceberInterface
                 return resposta;
             }
 
+            // Captura o valor efetivamente pago ANTES de zerar, para estornar do cabeçalho o
+            // que realmente foi creditado (BUG 4 — antes subtraía parcela.Valor, o valor
+            // nominal da parcela, que é maior que o pago em caso de baixa parcial).
+            var valorPagoParcela = parcela.ValorPago;
+
             parcela.DataPagamento = null;
             parcela.ValorPago = 0;
 
             var financReceber = await _context.Financ_Receber.FirstOrDefaultAsync(f => f.Id == parcela.financReceberId);
-            financReceber.ValorPago -= parcela.Valor;
+            financReceber.ValorPago -= valorPagoParcela;
 
-            financReceber.Status = financReceber.ValorPago > 0 ? "Parcial" : "Em Aberto";
+            financReceber.Status = financReceber.ValorPago <= 0 ? "Em Aberto"
+                                  : financReceber.ValorPago >= financReceber.ValorOriginal ? "Quitado"
+                                  : "Parcial";
 
             _context.Update(parcela);
             _context.Update(financReceber);
@@ -483,13 +539,13 @@ public class Financ_ReceberService : IFinanc_ReceberInterface
     }
 
 
-    public async Task<ResponseModel<Financ_ReceberSubModel>> BaixarParcela(Financ_ReceberSubEdicaoDto financ_receberSubEdicaoDto)
+    public async Task<ResponseModel<Financ_ReceberSubModel>> BaixarParcela(BaixarParcelaDto baixarParcelaDto)
     {
         var resposta = new ResponseModel<Financ_ReceberSubModel>();
 
         try
         {
-            var parcela = await _context.Financ_ReceberSub.FirstOrDefaultAsync(p => p.Id == financ_receberSubEdicaoDto.Id);
+            var parcela = await _context.Financ_ReceberSub.FirstOrDefaultAsync(p => p.Id == baixarParcelaDto.Id);
 
             if (parcela == null)
             {
@@ -505,35 +561,38 @@ public class Financ_ReceberService : IFinanc_ReceberInterface
                 return resposta;
             }
 
-            if (financ_receberSubEdicaoDto.ValorPago < parcela.Valor)
+            if (baixarParcelaDto.ValorPago < parcela.Valor)
             {
                 // Gerar nova parcela para o valor residual
-                var valorRestante = parcela.Valor - financ_receberSubEdicaoDto.ValorPago;
+                var valorRestante = parcela.Valor - baixarParcelaDto.ValorPago;
 
                 var novaParcela = new Financ_ReceberSubModel
                 {
                     financReceberId = parcela.financReceberId,
                     Parcela = parcela.Parcela,
                     Valor = valorRestante,
-                    DataVencimento = DateTime.Now.AddMonths(1),
+                    DataVencimento = baixarParcelaDto.DataVencimentoResidual ?? DateTime.UtcNow.AddDays(30),
                     Observacao = " - Gerada automaticamente por pagamento parcial."
                 };
 
                 _context.Add(novaParcela);
             }
-            else if (financ_receberSubEdicaoDto.ValorPago > parcela.Valor)
+            else if (baixarParcelaDto.ValorPago > parcela.Valor)
             {
                 resposta.Mensagem = "Valor pago excede o valor da parcela.";
                 resposta.Status = false;
                 return resposta;
             }
 
-            parcela.ValorPago = financ_receberSubEdicaoDto.ValorPago;
-            parcela.DataPagamento = financ_receberSubEdicaoDto.DataPagamento;
+            parcela.ValorPago = baixarParcelaDto.ValorPago;
+            parcela.DataPagamento = baixarParcelaDto.DataPagamento;
+            parcela.Observacao = baixarParcelaDto.Observacao;
+            parcela.FormaPagamentoId = baixarParcelaDto.FormaPagamentoId;
+            parcela.TipoPagamentoId = baixarParcelaDto.TipoPagamentoId;
 
             // Atualiza o status do pai
             var financReceber = await _context.Financ_Receber.FirstOrDefaultAsync(f => f.Id == parcela.financReceberId);
-            financReceber.ValorPago += financ_receberSubEdicaoDto.ValorPago;
+            financReceber.ValorPago += baixarParcelaDto.ValorPago;
 
             if (financReceber.ValorPago >= financReceber.ValorOriginal)
             {

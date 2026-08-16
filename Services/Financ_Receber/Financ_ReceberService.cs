@@ -71,35 +71,44 @@ public class Financ_ReceberService : IFinanc_ReceberInterface
                 subFinancReceber = new List<Financ_ReceberSubModel>()
             };
 
-
-
-            _context.Add(financ_receber);
-            await _context.SaveChangesAsync();
-
-            // Adicionando subitens (filhos)
-            if (financ_receberCreateDto != null)
+            using var transaction = await _context.Database.BeginTransactionAsync();
+            try
             {
-                foreach (var parcela in financ_receberCreateDto.subFinancReceber)
-                {
-                    var subItem = new Financ_ReceberSubModel
-                    {
-                        financReceberId = financ_receber.Id, // Relaciona com o pai
-                        Parcela = parcela.Parcela,
-                        Valor = parcela.Valor,
-                        FormaPagamentoId = parcela.FormaPagamentoId,
-                        DataPagamento = parcela.DataPagamento,
-                        Desconto = parcela.Desconto,
-                        Juros = parcela.Juros,
-                        Multa = parcela.Multa,
-                        DataVencimento = parcela.DataVencimento,
-                        Observacao = parcela.Observacao
-                    };
+                _context.Add(financ_receber);
+                await _context.SaveChangesAsync();
 
-                    financ_receber.subFinancReceber.Add(subItem);
+                // Adicionando subitens (filhos)
+                if (financ_receberCreateDto != null)
+                {
+                    foreach (var parcela in financ_receberCreateDto.subFinancReceber)
+                    {
+                        var subItem = new Financ_ReceberSubModel
+                        {
+                            financReceberId = financ_receber.Id, // Relaciona com o pai
+                            Parcela = parcela.Parcela,
+                            Valor = parcela.Valor,
+                            FormaPagamentoId = parcela.FormaPagamentoId,
+                            DataPagamento = parcela.DataPagamento,
+                            Desconto = parcela.Desconto,
+                            Juros = parcela.Juros,
+                            Multa = parcela.Multa,
+                            DataVencimento = parcela.DataVencimento,
+                            Observacao = parcela.Observacao
+                        };
+
+                        financ_receber.subFinancReceber.Add(subItem);
+                    }
                 }
+
+                await _context.SaveChangesAsync();
+                await transaction.CommitAsync();
+            }
+            catch
+            {
+                await transaction.RollbackAsync();
+                throw;
             }
 
-            await _context.SaveChangesAsync();
             var query = _context.Financ_Receber
                 .Include(x => x.subFinancReceber)
                 .AsQueryable();
@@ -132,7 +141,23 @@ public class Financ_ReceberService : IFinanc_ReceberInterface
                 return resposta;
             }
 
-            _context.Remove(financ_receber);
+            var temParcelaPaga = financ_receber.subFinancReceber?
+                .Any(s => s.DataPagamento != null) ?? false;
+
+            if (temParcelaPaga)
+            {
+                resposta.Status = false;
+                resposta.Mensagem = "Não é possível excluir uma conta com parcelas já pagas.";
+                return resposta;
+            }
+
+            // Financ_ReceberSubModel não implementa IEntidadeAuditavel (sem soft delete) e a FK
+            // não tem cascade configurado — sem essa remoção explícita, as parcelas ficam órfãs
+            // no banco em vez de serem excluídas junto com o cabeçalho.
+            if (financ_receber.subFinancReceber?.Any() == true)
+                _context.Financ_ReceberSub.RemoveRange(financ_receber.subFinancReceber);
+
+            _context.Financ_Receber.Remove(financ_receber);
             await _context.SaveChangesAsync();
 
             var query = _context.Financ_Receber
@@ -415,7 +440,7 @@ public class Financ_ReceberService : IFinanc_ReceberInterface
 
             //if adicionado para que se tiver id pai ou id filho nao pegar por data. 
 
-            if (idPaiFiltro == null && idPaiFiltro == null)
+            if (idPaiFiltro == null && parcelaNumeroFiltro == null)
             {
 
                 if (dataBaseFiltro == "V")
@@ -658,10 +683,10 @@ public class Financ_ReceberService : IFinanc_ReceberInterface
             if (dataFim.HasValue)
                 query = query.Where(f => f.DataEmissao <= dataFim.Value);
 
-            var total = await query.Where(f => f.Status == "Em Aberto")
+            var total = await query.Where(f => f.Status == "Em Aberto" || f.Status == "Parcial")
                                    .SumAsync(f => f.ValorOriginal - f.ValorPago);
 
-            resposta.Dados = (decimal)total;
+            resposta.Dados = total ?? 0;
             resposta.Mensagem = "Total de recebíveis calculado com sucesso.";
             return resposta;
         }

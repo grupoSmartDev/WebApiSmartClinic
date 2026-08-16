@@ -297,13 +297,17 @@ public class Financ_PagarService : IFinanc_PagarInterface
         }
     }
 
-    public async Task<ResponseModel<List<Financ_PagarModel>>> Listar(int pageNumber = 1, int pageSize = 10, int? codigoFiltro = null, string? descricaoFiltro = null, DateTime? dataEmissaoInicio = null, DateTime? dataEmissaoFim = null,
+    public async Task<ResponseModel<List<Financ_PagarModel>>> Listar(int pageNumber = 1, int pageSize = 10, int? codigoFiltro = null, int? idFiltro = null, string? descricaoFiltro = null, DateTime? dataEmissaoInicio = null, DateTime? dataEmissaoFim = null,
         decimal? valorMinimoFiltro = null, decimal? valorMaximoFiltro = null, int? parcelaNumeroFiltro = null, DateTime? vencimentoInicio = null, DateTime? vencimentoFim = null, bool paginar = true)
     {
         ResponseModel<List<Financ_PagarModel>> resposta = new ResponseModel<List<Financ_PagarModel>>();
 
         try
         {
+            // idFiltro é o nome que o frontend manda por engano em vez de codigoFiltro — aceito
+            // como alias em vez de forçar troca em todos os call sites do Angular.
+            codigoFiltro = codigoFiltro ?? idFiltro;
+
             var query = _context.Financ_Pagar
                 .Include(x => x.subFinancPagar)
                 .AsQueryable();
@@ -394,7 +398,7 @@ public class Financ_PagarService : IFinanc_PagarInterface
         }
     }
 
-    public async Task<ResponseModel<List<Financ_PagarModel>>> ListarAnalitico(int pageNumber = 1, int pageSize = 10, int? codigoFiltro = null, string? descricaoFiltro = null, DateTime? dataEmissaoInicio = null, DateTime? dataEmissaoFim = null,
+    public async Task<ResponseModel<List<Financ_PagarModel>>> ListarAnalitico(int pageNumber = 1, int pageSize = 10, int? codigoFiltro = null, int? idFiltro = null, string? descricaoFiltro = null, DateTime? dataEmissaoInicio = null, DateTime? dataEmissaoFim = null,
         decimal? valorMinimoFiltro = null, decimal? valorMaximoFiltro = null, int? parcelaNumeroFiltro = null, DateTime? vencimentoInicio = null, DateTime? vencimentoFim = null,
         string? dataBaseFiltro = "E", DateTime? dataFiltroInicio = null, DateTime? dataFiltroFim = null, string? statusFiltro = null, bool paginar = true)
     {
@@ -402,6 +406,10 @@ public class Financ_PagarService : IFinanc_PagarInterface
 
         try
         {
+            // idFiltro é o nome que o frontend manda por engano em vez de codigoFiltro — aceito
+            // como alias em vez de forçar troca em todos os call sites do Angular.
+            codigoFiltro = codigoFiltro ?? idFiltro;
+
             var query = _context.Financ_Pagar
                 .Include(x => x.subFinancPagar)
                 .AsQueryable();
@@ -455,7 +463,7 @@ public class Financ_PagarService : IFinanc_PagarInterface
         }
     }
 
-    public async Task<ResponseModel<Financ_PagarModel>> BaixarParcela(int parcelaId, decimal valorPago)
+    public async Task<ResponseModel<Financ_PagarModel>> BaixarParcela(int parcelaId, BaixarParcelaPagarDto dto)
     {
         var resposta = new ResponseModel<Financ_PagarModel>();
         try
@@ -476,10 +484,10 @@ public class Financ_PagarService : IFinanc_PagarInterface
                 return resposta;
             }
 
-            if (valorPago < parcela.Valor)
+            if (dto.ValorPago < parcela.Valor)
             {
                 // Valor pago é menor que o valor da parcela
-                var valorRestante = parcela.Valor - valorPago;
+                var valorRestante = parcela.Valor - dto.ValorPago;
 
                 // Criar uma nova parcela com o valor restante
                 var novaParcela = new Financ_PagarSubModel
@@ -495,15 +503,19 @@ public class Financ_PagarService : IFinanc_PagarInterface
 
                 _context.Financ_PagarSub.Add(novaParcela);
             }
-            else if (valorPago > parcela.Valor)
+            else if (dto.ValorPago > parcela.Valor)
             {
                 resposta.Mensagem = "Valor pago é maior que o valor da parcela.";
                 resposta.Status = false;
                 return resposta;
             }
 
-            parcela.DataPagamento = DateTime.Now;
-            parcela.ValorPago = valorPago;
+            parcela.DataPagamento = dto.DataPagamento.HasValue
+                ? DateTime.SpecifyKind(dto.DataPagamento.Value, DateTimeKind.Utc)
+                : DateTime.UtcNow;
+            parcela.ValorPago = dto.ValorPago;
+            parcela.FormaPagamentoId = dto.FormaPagamentoId ?? parcela.FormaPagamentoId;
+            parcela.TipoPagamentoId = dto.TipoPagamentoId ?? parcela.TipoPagamentoId;
 
             // Recalcula ValorPago/Status do cabeçalho a partir das parcelas
             var financPagar = await _context.Financ_Pagar
@@ -569,6 +581,20 @@ public class Financ_PagarService : IFinanc_PagarInterface
             {
                 parcela.DataPagamento = DateTime.Now;
                 parcela.ValorPago = parcela.Valor;
+            }
+
+            // Recalcula ValorPago/Status do cabeçalho a partir das parcelas
+            var financPagar = await _context.Financ_Pagar
+                .Include(f => f.subFinancPagar)
+                .FirstOrDefaultAsync(f => f.Id == idPai);
+
+            if (financPagar != null)
+            {
+                financPagar.ValorPago = financPagar.subFinancPagar?.Sum(s => s.ValorPago ?? 0) ?? 0;
+                financPagar.Status = financPagar.ValorPago <= 0 ? "Pendente"
+                                   : financPagar.ValorPago >= (financPagar.ValorOriginal ?? 0) ? "Pago"
+                                   : "Parcial";
+                _context.Financ_Pagar.Update(financPagar);
             }
 
             await _context.SaveChangesAsync();
@@ -649,6 +675,28 @@ public class Financ_PagarService : IFinanc_PagarInterface
             {
                 parcela.DataPagamento = null;
                 parcela.ValorPago = 0;
+            }
+
+            // Localiza os cabeçalhos (idPai) a partir das parcelas estornadas — um agrupamento
+            // pode, em tese, reunir parcelas de mais de um Financ_Pagar — e recalcula cada um.
+            var idsPai = parcelas
+                .Where(p => p.financPagarId.HasValue)
+                .Select(p => p.financPagarId!.Value)
+                .Distinct()
+                .ToList();
+
+            var financPagares = await _context.Financ_Pagar
+                .Include(f => f.subFinancPagar)
+                .Where(f => idsPai.Contains(f.Id))
+                .ToListAsync();
+
+            foreach (var financPagar in financPagares)
+            {
+                financPagar.ValorPago = financPagar.subFinancPagar?.Sum(s => s.ValorPago ?? 0) ?? 0;
+                financPagar.Status = financPagar.ValorPago <= 0 ? "Pendente"
+                                   : financPagar.ValorPago >= (financPagar.ValorOriginal ?? 0) ? "Pago"
+                                   : "Parcial";
+                _context.Financ_Pagar.Update(financPagar);
             }
 
             await _context.SaveChangesAsync();

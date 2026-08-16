@@ -16,19 +16,19 @@ public sealed class Financ_PagarController : ControllerBase
     }
 
     [HttpGet("Listar")]
-    public async Task<ActionResult<ResponseModel<List<Financ_PagarModel>>>> Listar([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10, [FromQuery] int? codigoFiltro = null, [FromQuery] string? descricaoFiltro = null, [FromQuery] DateTime? dataEmissaoInicio = null, [FromQuery] DateTime? dataEmissaoFim = null,
+    public async Task<ActionResult<ResponseModel<List<Financ_PagarModel>>>> Listar([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10, [FromQuery] int? codigoFiltro = null, [FromQuery] int? idFiltro = null, [FromQuery] string? descricaoFiltro = null, [FromQuery] DateTime? dataEmissaoInicio = null, [FromQuery] DateTime? dataEmissaoFim = null,
          [FromQuery] decimal? valorMinimoFiltro = null, [FromQuery] decimal? valorMaximoFiltro = null, [FromQuery] int? parcelaNumeroFiltro = null, [FromQuery] DateTime? vencimentoInicio = null, [FromQuery] DateTime? vencimentoFim = null, [FromQuery] bool paginar = true)
     {
-        var financ_pagar = await _financ_pagar.Listar(pageNumber, pageSize, codigoFiltro, descricaoFiltro, dataEmissaoInicio, dataEmissaoFim, valorMinimoFiltro, valorMaximoFiltro, parcelaNumeroFiltro, vencimentoInicio, vencimentoFim, paginar);
+        var financ_pagar = await _financ_pagar.Listar(pageNumber, pageSize, codigoFiltro, idFiltro, descricaoFiltro, dataEmissaoInicio, dataEmissaoFim, valorMinimoFiltro, valorMaximoFiltro, parcelaNumeroFiltro, vencimentoInicio, vencimentoFim, paginar);
         return Ok(financ_pagar);
     }
 
     [HttpGet("ListarAnalitico")]
-    public async Task<ActionResult<ResponseModel<List<Financ_PagarModel>>>> ListarAnalitico([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10, [FromQuery] int? codigoFiltro = null, [FromQuery] string? descricaoFiltro = null, [FromQuery] DateTime? dataEmissaoInicio = null, [FromQuery] DateTime? dataEmissaoFim = null,
+    public async Task<ActionResult<ResponseModel<List<Financ_PagarModel>>>> ListarAnalitico([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10, [FromQuery] int? codigoFiltro = null, [FromQuery] int? idFiltro = null, [FromQuery] string? descricaoFiltro = null, [FromQuery] DateTime? dataEmissaoInicio = null, [FromQuery] DateTime? dataEmissaoFim = null,
          [FromQuery] decimal? valorMinimoFiltro = null, [FromQuery] decimal? valorMaximoFiltro = null, [FromQuery] int? parcelaNumeroFiltro = null, [FromQuery] DateTime? vencimentoInicio = null, [FromQuery] DateTime? vencimentoFim = null,
          [FromQuery] string? dataBaseFiltro = "E", [FromQuery] DateTime? dataFiltroInicio = null, [FromQuery] DateTime? dataFiltroFim = null, [FromQuery] string? statusFiltro = null, [FromQuery] bool paginar = true)
     {
-        var financ_pagar = await _financ_pagar.ListarAnalitico(pageNumber, pageSize, codigoFiltro, descricaoFiltro, dataEmissaoInicio, dataEmissaoFim, valorMinimoFiltro, valorMaximoFiltro, parcelaNumeroFiltro, vencimentoInicio, vencimentoFim, dataBaseFiltro, dataFiltroInicio, dataFiltroFim, statusFiltro, paginar);
+        var financ_pagar = await _financ_pagar.ListarAnalitico(pageNumber, pageSize, codigoFiltro, idFiltro, descricaoFiltro, dataEmissaoInicio, dataEmissaoFim, valorMinimoFiltro, valorMaximoFiltro, parcelaNumeroFiltro, vencimentoInicio, vencimentoFim, dataBaseFiltro, dataFiltroInicio, dataFiltroFim, statusFiltro, paginar);
         return Ok(financ_pagar);
     }
 
@@ -68,9 +68,9 @@ public sealed class Financ_PagarController : ControllerBase
     }
 
     [HttpPost("BaixarParcela/{parcelaId}")]
-    public async Task<ActionResult<ResponseModel<Financ_PagarModel>>> BaixarParcela(int parcelaId, [FromBody] decimal valorPago)
+    public async Task<ActionResult<ResponseModel<Financ_PagarModel>>> BaixarParcela(int parcelaId, [FromBody] BaixarParcelaPagarDto dto)
     {
-        var resultado = await _financ_pagar.BaixarParcela(parcelaId, valorPago);
+        var resultado = await _financ_pagar.BaixarParcela(parcelaId, dto);
         return Ok(resultado);
     }
 

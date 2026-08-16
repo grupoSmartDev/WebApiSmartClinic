@@ -576,6 +576,13 @@ public class Financ_ReceberService : IFinanc_ReceberInterface
                 return resposta;
             }
 
+            if (baixarParcelaDto.ValorPago <= 0)
+            {
+                resposta.Mensagem = "O valor do pagamento deve ser maior que zero.";
+                resposta.Status = false;
+                return resposta;
+            }
+
             if (baixarParcelaDto.ValorPago < parcela.Valor)
             {
                 // Gerar nova parcela para o valor residual
@@ -594,7 +601,7 @@ public class Financ_ReceberService : IFinanc_ReceberInterface
             }
             else if (baixarParcelaDto.ValorPago > parcela.Valor)
             {
-                resposta.Mensagem = "Valor pago excede o valor da parcela.";
+                resposta.Mensagem = $"O valor informado (R$ {baixarParcelaDto.ValorPago:F2}) é maior que o saldo da parcela (R$ {parcela.Valor:F2}).";
                 resposta.Status = false;
                 return resposta;
             }

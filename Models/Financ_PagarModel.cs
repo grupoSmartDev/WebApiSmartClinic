@@ -52,7 +52,7 @@ public class Financ_PagarModel : IEntidadeEmpresa, IEntidadeAuditavel
     public int? CentroCustoId { get; set; } = null; // Relacionamento com a tabela de CentroCusto    
     public CentroCustoModel? CentroCusto { get; set; }
     public BancoModel? Banco { get; set; }
-    public int? BancoId { get; set; } = 0; // Relacionamento com a tabela de Banco
+    public int? BancoId { get; set; } // Relacionamento com a tabela de Banco
     public int? TipoPagamentoId { get; set; }
     public TipoPagamentoModel? TipoPagamento { get; set; }
 

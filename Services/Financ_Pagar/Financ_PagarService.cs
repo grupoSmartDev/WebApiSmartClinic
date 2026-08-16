@@ -22,7 +22,13 @@ public class Financ_PagarService : IFinanc_PagarInterface
         ResponseModel<Financ_PagarModel> resposta = new ResponseModel<Financ_PagarModel>();
         try
         {
-            var financ_pagar = await _context.Financ_Pagar.FirstOrDefaultAsync(x => x.Id == idFinanc_Pagar);
+            var financ_pagar = await _context.Financ_Pagar
+                .Include(f => f.subFinancPagar)
+                .Include(f => f.Fornecedor)
+                .Include(f => f.TipoPagamento)
+                .Include(f => f.CentroCusto)
+                .FirstOrDefaultAsync(x => x.Id == idFinanc_Pagar);
+
             if (financ_pagar == null)
             {
                 resposta.Mensagem = "Nenhum Financ_Pagar encontrado";
@@ -70,33 +76,44 @@ public class Financ_PagarService : IFinanc_PagarInterface
                 TipoPagamentoId = financ_pagarCreateDto.TipoPagamentoId
             };
 
-            _context.Add(financ_pagar);
-            await _context.SaveChangesAsync();
-
-            // Adicionando subitens (filhos)
-            if (financ_pagarCreateDto.subFinancPagar != null && financ_pagarCreateDto.subFinancPagar.Any())
+            using var transaction = await _context.Database.BeginTransactionAsync();
+            try
             {
-                foreach (var parcela in financ_pagarCreateDto.subFinancPagar)
-                {
-                    var subItem = new Financ_PagarSubModel
-                    {
-                        financPagarId = financ_pagar.Id, // Relaciona com o pai
-                        Parcela = parcela.Parcela,
-                        Valor = parcela.Valor,
-                        //TipoPagamentoId = parcela.TipoPagamentoId,
-                        FormaPagamentoId = parcela.FormaPagamentoId,
-                        DataPagamento = parcela.DataPagamento,
-                        Desconto = parcela.Desconto,
-                        Juros = parcela.Juros,
-                        Multa = parcela.Multa,
-                        DataVencimento = parcela.DataVencimento,
-                        Observacao = parcela.Observacao
-                    };
+                _context.Add(financ_pagar);
+                await _context.SaveChangesAsync();
 
-                    _context.Add(subItem);
+                // Adicionando subitens (filhos)
+                if (financ_pagarCreateDto.subFinancPagar != null && financ_pagarCreateDto.subFinancPagar.Any())
+                {
+                    foreach (var parcela in financ_pagarCreateDto.subFinancPagar)
+                    {
+                        var subItem = new Financ_PagarSubModel
+                        {
+                            financPagarId = financ_pagar.Id, // Relaciona com o pai
+                            Parcela = parcela.Parcela,
+                            Valor = parcela.Valor,
+                            //TipoPagamentoId = parcela.TipoPagamentoId,
+                            FormaPagamentoId = parcela.FormaPagamentoId,
+                            DataPagamento = parcela.DataPagamento,
+                            Desconto = parcela.Desconto,
+                            Juros = parcela.Juros,
+                            Multa = parcela.Multa,
+                            DataVencimento = parcela.DataVencimento,
+                            Observacao = parcela.Observacao
+                        };
+
+                        _context.Add(subItem);
+                    }
+
+                    await _context.SaveChangesAsync();
                 }
 
-                await _context.SaveChangesAsync();
+                await transaction.CommitAsync();
+            }
+            catch
+            {
+                await transaction.RollbackAsync();
+                throw;
             }
 
             var query = _context.Financ_Pagar
@@ -123,14 +140,32 @@ public class Financ_PagarService : IFinanc_PagarInterface
 
         try
         {
-            var financ_pagar = await _context.Financ_Pagar.FirstOrDefaultAsync(x => x.Id == idFinanc_Pagar);
+            var financ_pagar = await _context.Financ_Pagar
+                .Include(f => f.subFinancPagar)
+                .FirstOrDefaultAsync(x => x.Id == idFinanc_Pagar);
+
             if (financ_pagar == null)
             {
                 resposta.Mensagem = "Nenhum Financ_Pagar encontrado";
                 return resposta;
             }
 
-            _context.Remove(financ_pagar);
+            var temParcelaPaga = financ_pagar.subFinancPagar?
+                .Any(s => s.DataPagamento != null) ?? false;
+
+            if (temParcelaPaga)
+            {
+                resposta.Status = false;
+                resposta.Mensagem = "Não é possível excluir uma conta com parcelas já pagas.";
+                return resposta;
+            }
+
+            // Financ_PagarSubModel não implementa IEntidadeAuditavel (sem soft delete) e a FK não
+            // tem cascade configurado — sem essa remoção explícita, as parcelas ficam órfãs no banco.
+            if (financ_pagar.subFinancPagar?.Any() == true)
+                _context.Financ_PagarSub.RemoveRange(financ_pagar.subFinancPagar);
+
+            _context.Financ_Pagar.Remove(financ_pagar);
             await _context.SaveChangesAsync();
 
             var query = _context.Financ_Pagar
@@ -170,9 +205,7 @@ public class Financ_PagarService : IFinanc_PagarInterface
             financ_pagar.NrDocto = financ_pagarEdicaoDto.NrDocto;
             financ_pagar.DataEmissao = financ_pagarEdicaoDto.DataEmissao;
             financ_pagar.ValorOriginal = financ_pagarEdicaoDto.ValorOriginal;
-            financ_pagar.ValorPago = financ_pagarEdicaoDto.ValorPago;
             financ_pagar.Valor = financ_pagarEdicaoDto.Valor;
-            financ_pagar.Status = financ_pagarEdicaoDto.Status;
             financ_pagar.NotaFiscal = financ_pagarEdicaoDto.NotaFiscal;
             financ_pagar.Descricao = financ_pagarEdicaoDto.Descricao;
             financ_pagar.Parcela = financ_pagarEdicaoDto.Parcela;
@@ -183,7 +216,7 @@ public class Financ_PagarService : IFinanc_PagarInterface
             financ_pagar.BancoId = financ_pagarEdicaoDto.BancoId;
             financ_pagar.TipoPagamentoId = financ_pagarEdicaoDto.TipoPagamentoId;
 
-            // Atualiza subitens
+            // Atualiza subitens por Id (merge) em vez de apagar tudo e recriar
             if (financ_pagarEdicaoDto.subFinancPagar != null)
             {
                 foreach (var parcelaDto in financ_pagarEdicaoDto.subFinancPagar)
@@ -194,9 +227,9 @@ public class Financ_PagarService : IFinanc_PagarInterface
 
                     if (subItemExistente != null)
                     {
-                        // Atualiza o item existente
+                        // ValorPago NÃO é alterado aqui — só via BaixarParcela/EstornarParcela
                         subItemExistente.Parcela = parcelaDto.Parcela;
-                        subItemExistente.Valor = parcelaDto.Valor;
+                        subItemExistente.Valor = parcelaDto.Valor ?? 0;
                         subItemExistente.TipoPagamentoId = parcelaDto.TipoPagamentoId;
                         subItemExistente.FormaPagamentoId = parcelaDto.FormaPagamentoId;
                         subItemExistente.DataPagamento = parcelaDto.DataPagamento;
@@ -213,7 +246,7 @@ public class Financ_PagarService : IFinanc_PagarInterface
                         {
                             financPagarId = financ_pagar.Id,
                             Parcela = parcelaDto.Parcela,
-                            Valor = parcelaDto.Valor,
+                            Valor = parcelaDto.Valor ?? 0,
                             TipoPagamentoId = parcelaDto.TipoPagamentoId,
                             FormaPagamentoId = parcelaDto.FormaPagamentoId,
                             DataPagamento = parcelaDto.DataPagamento,
@@ -236,8 +269,15 @@ public class Financ_PagarService : IFinanc_PagarInterface
                 foreach (var itemRemover in itensParaRemover)
                 {
                     _context.Remove(itemRemover);
+                    financ_pagar.subFinancPagar.Remove(itemRemover);
                 }
             }
+
+            // Recalcula ValorPago/Status do cabeçalho a partir das parcelas já mescladas acima
+            financ_pagar.ValorPago = financ_pagar.subFinancPagar?.Sum(s => s.ValorPago ?? 0) ?? 0;
+            financ_pagar.Status = financ_pagar.ValorPago <= 0 ? "Pendente"
+                                : financ_pagar.ValorPago >= (financ_pagar.ValorOriginal ?? 0) ? "Pago"
+                                : "Parcial";
 
             await _context.SaveChangesAsync();
 
@@ -355,7 +395,8 @@ public class Financ_PagarService : IFinanc_PagarInterface
     }
 
     public async Task<ResponseModel<List<Financ_PagarModel>>> ListarAnalitico(int pageNumber = 1, int pageSize = 10, int? codigoFiltro = null, string? descricaoFiltro = null, DateTime? dataEmissaoInicio = null, DateTime? dataEmissaoFim = null,
-        decimal? valorMinimoFiltro = null, decimal? valorMaximoFiltro = null, int? parcelaNumeroFiltro = null, DateTime? vencimentoInicio = null, DateTime? vencimentoFim = null, bool paginar = true)
+        decimal? valorMinimoFiltro = null, decimal? valorMaximoFiltro = null, int? parcelaNumeroFiltro = null, DateTime? vencimentoInicio = null, DateTime? vencimentoFim = null,
+        string? dataBaseFiltro = "E", DateTime? dataFiltroInicio = null, DateTime? dataFiltroFim = null, string? statusFiltro = null, bool paginar = true)
     {
         ResponseModel<List<Financ_PagarModel>> resposta = new ResponseModel<List<Financ_PagarModel>>();
 
@@ -381,6 +422,23 @@ public class Financ_PagarService : IFinanc_PagarInterface
                     (!vencimentoInicio.HasValue || p.DataVencimento >= vencimentoInicio) &&
                     (!vencimentoFim.HasValue || p.DataVencimento <= vencimentoFim)
                 ));
+            }
+
+            if (!string.IsNullOrEmpty(statusFiltro))
+                query = query.Where(f => f.Status == statusFiltro);
+
+            // Filtro de período por Emissão/Vencimento/Pagamento (mesmo padrão de Financ_ReceberService.ListarAnalitico)
+            if (codigoFiltro == null && dataFiltroInicio.HasValue && dataFiltroFim.HasValue)
+            {
+                dataFiltroInicio = DateTime.SpecifyKind(dataFiltroInicio.Value, DateTimeKind.Utc);
+                dataFiltroFim = DateTime.SpecifyKind(dataFiltroFim.Value.AddHours(23).AddMinutes(59), DateTimeKind.Utc);
+
+                if (dataBaseFiltro == "E")
+                    query = query.Where(f => f.DataEmissao >= dataFiltroInicio.Value && f.DataEmissao <= dataFiltroFim.Value);
+                else if (dataBaseFiltro == "V")
+                    query = query.Where(f => f.subFinancPagar.Any(s => s.DataVencimento >= dataFiltroInicio.Value && s.DataVencimento <= dataFiltroFim.Value));
+                else if (dataBaseFiltro == "P")
+                    query = query.Where(f => f.subFinancPagar.Any(s => s.DataPagamento >= dataFiltroInicio.Value && s.DataPagamento <= dataFiltroFim.Value));
             }
 
             query = query.OrderBy(x => x.Id);
@@ -447,9 +505,23 @@ public class Financ_PagarService : IFinanc_PagarInterface
             parcela.DataPagamento = DateTime.Now;
             parcela.ValorPago = valorPago;
 
+            // Recalcula ValorPago/Status do cabeçalho a partir das parcelas
+            var financPagar = await _context.Financ_Pagar
+                .Include(f => f.subFinancPagar)
+                .FirstOrDefaultAsync(f => f.Id == parcela.financPagarId);
+
+            if (financPagar != null)
+            {
+                financPagar.ValorPago = financPagar.subFinancPagar?.Sum(s => s.ValorPago ?? 0) ?? 0;
+                financPagar.Status = financPagar.ValorPago <= 0 ? "Pendente"
+                                   : financPagar.ValorPago >= (financPagar.ValorOriginal ?? 0) ? "Pago"
+                                   : "Parcial";
+                _context.Financ_Pagar.Update(financPagar);
+            }
+
             await _context.SaveChangesAsync();
 
-            resposta.Dados = await _context.Financ_Pagar.FirstOrDefaultAsync(x => x.Id == parcela.financPagarId);
+            resposta.Dados = financPagar ?? await _context.Financ_Pagar.FirstOrDefaultAsync(x => x.Id == parcela.financPagarId);
             resposta.Mensagem = "Parcela baixada com sucesso.";
             return resposta;
         }
@@ -528,6 +600,21 @@ public class Financ_PagarService : IFinanc_PagarInterface
 
             parcela.DataPagamento = null;
             parcela.ValorPago = 0;
+
+            // Recalcula ValorPago/Status do cabeçalho a partir do valor realmente pago nas
+            // parcelas restantes (a parcela estornada já está zerada acima, então o Sum já reflete o estorno)
+            var financPagar = await _context.Financ_Pagar
+                .Include(f => f.subFinancPagar)
+                .FirstOrDefaultAsync(f => f.Id == parcela.financPagarId);
+
+            if (financPagar != null)
+            {
+                financPagar.ValorPago = financPagar.subFinancPagar?.Sum(s => s.ValorPago ?? 0) ?? 0;
+                financPagar.Status = financPagar.ValorPago <= 0 ? "Pendente"
+                                   : financPagar.ValorPago >= (financPagar.ValorOriginal ?? 0) ? "Pago"
+                                   : "Parcial";
+                _context.Financ_Pagar.Update(financPagar);
+            }
 
             await _context.SaveChangesAsync();
 

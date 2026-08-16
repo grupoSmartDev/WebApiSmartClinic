@@ -19,15 +19,16 @@ public sealed class Financ_PagarController : ControllerBase
     public async Task<ActionResult<ResponseModel<List<Financ_PagarModel>>>> Listar([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10, [FromQuery] int? codigoFiltro = null, [FromQuery] string? descricaoFiltro = null, [FromQuery] DateTime? dataEmissaoInicio = null, [FromQuery] DateTime? dataEmissaoFim = null,
          [FromQuery] decimal? valorMinimoFiltro = null, [FromQuery] decimal? valorMaximoFiltro = null, [FromQuery] int? parcelaNumeroFiltro = null, [FromQuery] DateTime? vencimentoInicio = null, [FromQuery] DateTime? vencimentoFim = null, [FromQuery] bool paginar = true)
     {
-        var financ_pagar = await _financ_pagar.Listar(pageNumber, pageSize, codigoFiltro, descricaoFiltro, dataEmissaoInicio = null, dataEmissaoFim, valorMinimoFiltro, valorMaximoFiltro, parcelaNumeroFiltro, vencimentoInicio, vencimentoFim, paginar);
+        var financ_pagar = await _financ_pagar.Listar(pageNumber, pageSize, codigoFiltro, descricaoFiltro, dataEmissaoInicio, dataEmissaoFim, valorMinimoFiltro, valorMaximoFiltro, parcelaNumeroFiltro, vencimentoInicio, vencimentoFim, paginar);
         return Ok(financ_pagar);
     }
 
     [HttpGet("ListarAnalitico")]
     public async Task<ActionResult<ResponseModel<List<Financ_PagarModel>>>> ListarAnalitico([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10, [FromQuery] int? codigoFiltro = null, [FromQuery] string? descricaoFiltro = null, [FromQuery] DateTime? dataEmissaoInicio = null, [FromQuery] DateTime? dataEmissaoFim = null,
-         [FromQuery] decimal? valorMinimoFiltro = null, [FromQuery] decimal? valorMaximoFiltro = null, [FromQuery] int? parcelaNumeroFiltro = null, [FromQuery] DateTime? vencimentoInicio = null, [FromQuery] DateTime? vencimentoFim = null, [FromQuery] bool paginar = true)
+         [FromQuery] decimal? valorMinimoFiltro = null, [FromQuery] decimal? valorMaximoFiltro = null, [FromQuery] int? parcelaNumeroFiltro = null, [FromQuery] DateTime? vencimentoInicio = null, [FromQuery] DateTime? vencimentoFim = null,
+         [FromQuery] string? dataBaseFiltro = "E", [FromQuery] DateTime? dataFiltroInicio = null, [FromQuery] DateTime? dataFiltroFim = null, [FromQuery] string? statusFiltro = null, [FromQuery] bool paginar = true)
     {
-        var financ_pagar = await _financ_pagar.ListarAnalitico(pageNumber, pageSize, codigoFiltro, descricaoFiltro, dataEmissaoInicio = null, dataEmissaoFim, valorMinimoFiltro, valorMaximoFiltro, parcelaNumeroFiltro, vencimentoInicio, vencimentoFim, paginar);
+        var financ_pagar = await _financ_pagar.ListarAnalitico(pageNumber, pageSize, codigoFiltro, descricaoFiltro, dataEmissaoInicio, dataEmissaoFim, valorMinimoFiltro, valorMaximoFiltro, parcelaNumeroFiltro, vencimentoInicio, vencimentoFim, dataBaseFiltro, dataFiltroInicio, dataFiltroFim, statusFiltro, paginar);
         return Ok(financ_pagar);
     }
 
@@ -74,12 +75,9 @@ public sealed class Financ_PagarController : ControllerBase
     }
 
     [HttpPost("AgruparParcelas/{idPai}")]
-    public async Task<ActionResult<ResponseModel<string>>> AgruparParcelas(int idPai, [FromBody] dynamic body)
+    public async Task<ActionResult<ResponseModel<string>>> AgruparParcelas(int idPai, [FromBody] AgruparParcelasDto dto)
     {
-        List<int> parcelasFilhasIds = body.ParcelasFilhasIds.ToObject<List<int>>();
-        decimal valorPago = body.ValorPago;
-
-        var resultado = await _financ_pagar.AgruparParcelas(idPai, parcelasFilhasIds, valorPago);
+        var resultado = await _financ_pagar.AgruparParcelas(idPai, dto.ParcelasFilhasIds, dto.ValorPago);
         return Ok(resultado);
     }
 
@@ -112,7 +110,7 @@ public sealed class Financ_PagarController : ControllerBase
 //    Description = "Realiza a baixa de um pagamento, alterando o status para 'Pago' e definindo a data de pagamento como a data atual."
 //)]
 //[SwaggerResponse(200, "Pagamento baixado com sucesso", typeof(ResponseModel<Financ_PagarModel>))]
-//[SwaggerResponse(404, "Pagamento não encontrado")]
+//[SwaggerResponse(404, "Pagamento nï¿½o encontrado")]
 //[SwaggerResponse(500, "Erro interno")]
 //public async Task<IActionResult> BaixarPagamento(int idFinanc_Pagar, decimal valorPago, DateTime? dataPagamento = null)
 //{

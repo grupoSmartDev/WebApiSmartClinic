@@ -499,6 +499,13 @@ public class AppDbContext : IdentityDbContext<User>
             .Property(h => h.ValorPago)
             .HasPrecision(18, 2);
 
+        // Impede duas linhas de PacoteUso para o mesmo agendamento (consumo em duplicidade
+        // por corrida entre requests concorrentes) - complementa o UPDATE condicional em
+        // PacoteService.ConsumirSessao/AgendaService.ConsumirSessaoPacote.
+        modelBuilder.Entity<PacoteUsoModel>()
+            .HasIndex(u => u.AgendaId)
+            .IsUnique();
+
         modelBuilder.Entity<ProfissionalModel>(e =>
         {
             e.HasIndex(p => p.UsuarioId).IsUnique();

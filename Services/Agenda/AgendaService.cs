@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Npgsql;
 using WebApiSmartClinic.Data;
 using WebApiSmartClinic.Dto.Agenda;
 using WebApiSmartClinic.Dto.Financ_Receber;
@@ -133,6 +134,13 @@ public class AgendaService : IAgendaInterface
 
                 resposta.Dados = agendamentos;
                 resposta.Mensagem = "Agendamentos criados com sucesso!";
+                return resposta;
+            }
+            catch (DbUpdateException ex) when (ex.InnerException is PostgresException pg && pg.SqlState == "23505")
+            {
+                await transaction.RollbackAsync();
+                resposta.Status = false;
+                resposta.Mensagem = "Este agendamento já possui uma sessão de pacote registrada.";
                 return resposta;
             }
             catch (Exception ex)
@@ -327,6 +335,13 @@ public class AgendaService : IAgendaInterface
                 resposta.Mensagem = "Agendamento atualizado com sucesso!";
                 return resposta;
             }
+            catch (DbUpdateException ex) when (ex.InnerException is PostgresException pg && pg.SqlState == "23505")
+            {
+                await transaction.RollbackAsync();
+                resposta.Status = false;
+                resposta.Mensagem = "Este agendamento já possui uma sessão de pacote registrada.";
+                return resposta;
+            }
             catch (Exception ex)
             {
                 await transaction.RollbackAsync();
@@ -444,6 +459,13 @@ public class AgendaService : IAgendaInterface
                 resposta.Mensagem = "Agendamentos criados com sucesso!";
                 return resposta;
             }
+            catch (DbUpdateException ex) when (ex.InnerException is PostgresException pg && pg.SqlState == "23505")
+            {
+                await transaction.RollbackAsync();
+                resposta.Status = false;
+                resposta.Mensagem = "Este agendamento já possui uma sessão de pacote registrada.";
+                return resposta;
+            }
             catch (Exception ex)
             {
                 await transaction.RollbackAsync();
@@ -522,6 +544,13 @@ public class AgendaService : IAgendaInterface
                 resposta.Dados = listaAtualizada;
                 resposta.TotalCount = listaAtualizada.Count();
                 resposta.Mensagem = "Agendamento atualizado com sucesso!";
+                return resposta;
+            }
+            catch (DbUpdateException ex) when (ex.InnerException is PostgresException pg && pg.SqlState == "23505")
+            {
+                await transaction.RollbackAsync();
+                resposta.Status = false;
+                resposta.Mensagem = "Este agendamento já possui uma sessão de pacote registrada.";
                 return resposta;
             }
             catch (Exception ex)
@@ -696,37 +725,55 @@ public class AgendaService : IAgendaInterface
             return;
         }
 
-        var pacotePaciente = await _context.PacotesPacientes
-            .FirstOrDefaultAsync(pp => pp.Id == agenda.PacoteId.Value);
+        var pacoteExiste = await _context.PacotesPacientes
+            .AnyAsync(pp => pp.Id == agenda.PacoteId.Value);
 
-        if (pacotePaciente == null)
+        if (!pacoteExiste)
         {
             throw new InvalidOperationException("Pacote do paciente não encontrado");
         }
 
-        if (pacotePaciente.QuantidadeDisponivel <= 0)
+        // UPDATE condicional (concorrência otimista): só afeta a linha se ainda houver saldo
+        // no momento exato do UPDATE no banco - evita duas requisições concorrentes debitarem
+        // a mesma última sessão sem que nenhuma delas veja um erro.
+        var rowsAffected = await _context.PacotesPacientes
+            .Where(pp => pp.Id == agenda.PacoteId.Value
+                      && pp.QuantidadeUsada < pp.QuantidadeTotal)
+            .ExecuteUpdateAsync(s => s.SetProperty(
+                pp => pp.QuantidadeUsada,
+                pp => pp.QuantidadeUsada + 1
+            ));
+
+        if (rowsAffected == 0)
         {
-            throw new InvalidOperationException("Pacote não possui sessões disponíveis");
+            throw new InvalidOperationException(
+                "Pacote não possui sessões disponíveis ou já foi consumido por outro processo.");
+        }
+
+        // Busca o pacote já atualizado pelo UPDATE condicional acima para checar esgotamento
+        var pacotePaciente = await _context.PacotesPacientes
+            .FirstOrDefaultAsync(pp => pp.Id == agenda.PacoteId.Value);
+
+        if (pacotePaciente!.QuantidadeDisponivel == 0)
+        {
+            pacotePaciente.Status = "Esgotado";
+            _context.PacotesPacientes.Update(pacotePaciente);
         }
 
         var uso = new PacoteUsoModel
         {
             PacotePacienteId = pacotePaciente.Id,
             AgendaId = agenda.Id,
-            PacienteUtilizadoId = agenda.PacienteId.Value,
+            PacienteUtilizadoId = agenda.PacienteId ?? 0,
             DataUso = DateTime.UtcNow,
             Observacao = observacao
         };
 
         _context.PacotesUsos.Add(uso);
-        pacotePaciente.QuantidadeUsada++;
-
-        if (pacotePaciente.QuantidadeDisponivel == 0)
-        {
-            pacotePaciente.Status = "Esgotado";
-        }
-
-        _context.PacotesPacientes.Update(pacotePaciente);
+        // Sem SaveChangesAsync aqui de propósito - o Add(uso) só é persistido (e a constraint
+        // única de AgendaId só é checada pelo banco) no SaveChangesAsync final do chamador,
+        // que já está preparado (ver catch de DbUpdateException/23505) para traduzir a exceção
+        // de índice único numa mensagem de negócio.
     }
 
     // Estorna a sessão de pacote consumida por este agendamento: busca o PacoteUsoModel ativo

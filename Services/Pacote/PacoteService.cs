@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Npgsql;
 using WebApiSmartClinic.Data;
 using WebApiSmartClinic.Dto.Pacote;
 using WebApiSmartClinic.Models;
@@ -374,20 +375,31 @@ namespace WebApiSmartClinic.Services.Pacote
             {
                 try
                 {
-                    var pacotePaciente = await _context.PacotesPacientes
-                        .FirstOrDefaultAsync(pp => pp.Id == pacoteUsoDto.PacotePacienteId);
+                    var pacoteExiste = await _context.PacotesPacientes
+                        .AnyAsync(pp => pp.Id == pacoteUsoDto.PacotePacienteId);
 
-                    if (pacotePaciente == null)
+                    if (!pacoteExiste)
                     {
                         resposta.Mensagem = "Pacote do paciente não encontrado";
                         resposta.Status = false;
                         return resposta;
                     }
 
-                    if (pacotePaciente.QuantidadeDisponivel <= 0)
+                    // UPDATE condicional (concorrência otimista): o WHERE só é satisfeito se ainda
+                    // houver saldo no momento exato do UPDATE no banco - se duas requisições
+                    // concorrentes disputarem a última sessão, só uma consegue afetar a linha.
+                    var rowsAffected = await _context.PacotesPacientes
+                        .Where(pp => pp.Id == pacoteUsoDto.PacotePacienteId
+                                  && pp.QuantidadeUsada < pp.QuantidadeTotal)
+                        .ExecuteUpdateAsync(s => s.SetProperty(
+                            pp => pp.QuantidadeUsada,
+                            pp => pp.QuantidadeUsada + 1
+                        ));
+
+                    if (rowsAffected == 0)
                     {
-                        resposta.Mensagem = "Pacote não possui sessões disponíveis";
                         resposta.Status = false;
+                        resposta.Mensagem = "Pacote não possui sessões disponíveis ou já foi consumido por outro processo.";
                         return resposta;
                     }
 
@@ -397,6 +409,16 @@ namespace WebApiSmartClinic.Services.Pacote
                         resposta.Mensagem = "Agendamento não encontrado";
                         resposta.Status = false;
                         return resposta;
+                    }
+
+                    // Busca o pacote já atualizado pelo UPDATE condicional acima para checar esgotamento
+                    var pacotePaciente = await _context.PacotesPacientes
+                        .FirstOrDefaultAsync(pp => pp.Id == pacoteUsoDto.PacotePacienteId);
+
+                    if (pacotePaciente!.QuantidadeDisponivel == 0)
+                    {
+                        pacotePaciente.Status = "Esgotado";
+                        _context.PacotesPacientes.Update(pacotePaciente);
                     }
 
                     var uso = new PacoteUsoModel
@@ -409,14 +431,6 @@ namespace WebApiSmartClinic.Services.Pacote
                     };
 
                     _context.PacotesUsos.Add(uso);
-                    pacotePaciente.QuantidadeUsada++;
-
-                    if (pacotePaciente.QuantidadeDisponivel == 0)
-                    {
-                        pacotePaciente.Status = "Esgotado";
-                    }
-
-                    _context.PacotesPacientes.Update(pacotePaciente);
                     await _context.SaveChangesAsync();
                     await transaction.CommitAsync();
 
@@ -428,6 +442,13 @@ namespace WebApiSmartClinic.Services.Pacote
 
                     resposta.Dados = uso;
                     resposta.Mensagem = "Sessão consumida com sucesso";
+                    return resposta;
+                }
+                catch (DbUpdateException ex) when (ex.InnerException is PostgresException pg && pg.SqlState == "23505")
+                {
+                    await transaction.RollbackAsync();
+                    resposta.Status = false;
+                    resposta.Mensagem = "Este agendamento já possui uma sessão de pacote registrada.";
                     return resposta;
                 }
                 catch (Exception ex)

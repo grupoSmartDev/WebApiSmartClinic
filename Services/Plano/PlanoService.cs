@@ -200,7 +200,7 @@ public class PlanoService : IPlanoInterface
 
             if (paraPaciente)
             {
-               query = query.Where(p => p.Ativo == false);
+               query = query.Where(p => p.PacienteId == null);
             }
 
             query = query.Where(x =>
@@ -512,7 +512,7 @@ public class PlanoService : IPlanoInterface
     private decimal CalcularValorPago(PlanoModel plano)
     {
         // Retorna o valor baseado no tipo de plano
-        return plano.TipoMes switch
+        return plano.TipoMes?.ToUpperInvariant() switch
         {
             "M" => plano.ValorMensal ?? 0,
             "B" => plano.ValorBimestral ?? 0,

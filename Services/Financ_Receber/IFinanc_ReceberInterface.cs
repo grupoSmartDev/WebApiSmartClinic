@@ -29,6 +29,7 @@ namespace WebApiSmartClinic.Services.Financ_Receber
         string? ccFiltro = null,
         DateTime? dataFiltroInicio = null,
         DateTime? dataFiltroFim = null,
+        string? statusFiltro = null,
         bool paginar = true
         );
     }

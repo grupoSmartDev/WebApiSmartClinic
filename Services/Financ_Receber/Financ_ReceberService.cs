@@ -327,6 +327,7 @@ public class Financ_ReceberService : IFinanc_ReceberInterface
         string? ccFiltro = null,
         DateTime? dataFiltroInicio = null,
         DateTime? dataFiltroFim = null,
+        string? statusFiltro = null,
         bool paginar = true
         )
     {
@@ -342,20 +343,34 @@ public class Financ_ReceberService : IFinanc_ReceberInterface
             if (idFiltro.HasValue)
                 query = query.Where(i => i.Id == idFiltro.Value);
 
-            dataBaseFiltro = "E"; //estou forçando de proposito a ficar assim, para depois ter outros filtros com base na data do filho
-
-            //if adicionado para que se tiver um id não levar em consideração a data 
-            if (idFiltro == null)
-            {
-                if (dataBaseFiltro == "E");
-            }
-
-
             if (!string.IsNullOrEmpty(descricaoFiltro))
                 query = query.Where(p => p.Descricao.Contains(descricaoFiltro));
 
-            if (pacienteIdFiltro.HasValue)
+            if (pacienteIdFiltro.HasValue && pacienteIdFiltro > 0)
                 query = query.Where(p => p.PacienteId == pacienteIdFiltro);
+
+            if (!string.IsNullOrEmpty(statusFiltro))
+                query = query.Where(f => f.Status == statusFiltro);
+
+            // Se tiver um id específico, não leva em consideração o filtro de data
+            if (idFiltro == null)
+            {
+                if (dataFiltroInicio.HasValue)
+                    dataFiltroInicio = DateTime.SpecifyKind(dataFiltroInicio.Value, DateTimeKind.Utc);
+
+                if (dataFiltroFim.HasValue)
+                    dataFiltroFim = DateTime.SpecifyKind(dataFiltroFim.Value.AddHours(23).AddMinutes(59), DateTimeKind.Utc);
+
+                if (dataFiltroInicio.HasValue && dataFiltroFim.HasValue)
+                {
+                    if (dataBaseFiltro == "E") // Emissão
+                        query = query.Where(f => f.DataEmissao >= dataFiltroInicio.Value && f.DataEmissao <= dataFiltroFim.Value);
+                    else if (dataBaseFiltro == "V") // Vencimento
+                        query = query.Where(f => f.subFinancReceber.Any(s => s.DataVencimento >= dataFiltroInicio.Value && s.DataVencimento <= dataFiltroFim.Value));
+                    else if (dataBaseFiltro == "P") // Pagamento
+                        query = query.Where(f => f.subFinancReceber.Any(s => s.DataPagamento >= dataFiltroInicio.Value && s.DataPagamento <= dataFiltroFim.Value));
+                }
+            }
 
             query = query.OrderBy(x => x.Id);
 

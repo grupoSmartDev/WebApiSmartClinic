@@ -43,6 +43,43 @@ namespace WebApiSmartClinic.Controllers
             return Ok(result);
         }
 
+        [AllowAnonymous]
+        [HttpPost("solicitar-recuperacao-senha")]
+        public async Task<IActionResult> SolicitarRecuperacaoSenha(
+            [FromBody] SolicitarRecuperacaoSenhaDto dados)
+        {
+            if (!ModelState.IsValid)
+                return ValidationProblem(ModelState);
+
+            var chaveAcesso = HttpContext.Request.Headers["UserKey"].FirstOrDefault();
+            if (string.IsNullOrWhiteSpace(chaveAcesso))
+            {
+                ModelState.AddModelError("UserKey", "A chave de acesso é obrigatória.");
+                return ValidationProblem(ModelState);
+            }
+
+            var resultado = await _authService.SolicitarRecuperacaoSenha(dados, chaveAcesso);
+            return Ok(resultado);
+        }
+
+        [AllowAnonymous]
+        [HttpPost("redefinir-senha")]
+        public async Task<IActionResult> RedefinirSenha([FromBody] RedefinirSenhaDto dados)
+        {
+            if (!ModelState.IsValid)
+                return ValidationProblem(ModelState);
+
+            var chaveAcesso = HttpContext.Request.Headers["UserKey"].FirstOrDefault();
+            if (string.IsNullOrWhiteSpace(chaveAcesso))
+            {
+                ModelState.AddModelError("UserKey", "A chave de acesso é obrigatória.");
+                return ValidationProblem(ModelState);
+            }
+
+            var resultado = await _authService.RedefinirSenha(dados, chaveAcesso);
+            return Ok(resultado);
+        }
+
         [Authorize(Roles = "Admin,Support")]
         [HttpGet("Listar")]
         public async Task<IActionResult> GetAll([FromQuery] int page = 1, [FromQuery] int pageSize = 100, [FromQuery] string? filter = null)

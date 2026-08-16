@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
@@ -10,11 +11,13 @@ using SixLabors.ImageSharp.Formats.Png;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using System.Text.Encodings.Web;
 using WebApiSmartClinic.Data;
 using WebApiSmartClinic.Dto.User;
 using WebApiSmartClinic.Helpers;
 using WebApiSmartClinic.Models;
 using WebApiSmartClinic.Services.ConnectionsService;
+using WebApiSmartClinic.Services.MailService;
 
 
 namespace WebApiSmartClinic.Services.Auth
@@ -28,7 +31,10 @@ namespace WebApiSmartClinic.Services.Auth
         private readonly IConnectionsService _connectionsService;
         private readonly IConnectionStringProvider _connectionStringProvider;
         private readonly IServiceScopeFactory _scopeFactory;
-        private const long TamanhoMaximoFotoPerfilEmBytes = 10L * 1024 * 1024; // 10 MB
+        private readonly IEmailService _servicoEmail;
+        private const long TamanhoMaximoFotoPerfilEmBytes = 10L * 1024 * 1024; // 10 MB -- precisa analisar se está sendo utilizada essa constante, se nn tiver, remover ela.
+        private const string MensagemSolicitacaoRecuperacao = "Se os dados informados estiverem corretos, você receberá um link para criar uma nova senha.";
+        private const string MensagemLinkInvalido = "Este link de recuperação é inválido, já foi utilizado ou expirou.";
 
         public AuthService(
             SignInManager<User> signInManager,
@@ -37,7 +43,8 @@ namespace WebApiSmartClinic.Services.Auth
             IOptions<AppSettings> appSettings,
             IConnectionsService connectionsService,
             IConnectionStringProvider connectionStringProvider,
-            IServiceScopeFactory scopeFactory)
+            IServiceScopeFactory scopeFactory,
+            IEmailService servicoEmail)
         {
             _signInManager = signInManager;
             _userManager = userManager;
@@ -46,6 +53,7 @@ namespace WebApiSmartClinic.Services.Auth
             _connectionsService = connectionsService;
             _connectionStringProvider = connectionStringProvider;
             _scopeFactory = scopeFactory;
+            _servicoEmail = servicoEmail;
         }
 
         public async Task<object> LoginAsync(UserLoginRequest model, string? userKey)
@@ -143,6 +151,113 @@ namespace WebApiSmartClinic.Services.Auth
             // Faz login automático
             await _signInManager.SignInAsync(user, isPersistent: false);
             return await GenerateJwtAsync(model.Email, userKey!);
+        }
+
+        public async Task<object> SolicitarRecuperacaoSenha(
+            SolicitarRecuperacaoSenhaDto dados,
+            string? chaveAcesso)
+        {
+            var conexao = await ResolveConnectionStringAsync(chaveAcesso);
+            if (string.IsNullOrWhiteSpace(conexao))
+            {
+                return new { sucesso = true, mensagem = MensagemSolicitacaoRecuperacao };
+            }
+
+            _connectionStringProvider.SetConnectionString(conexao);
+
+            var usuario = await _userManager.FindByEmailAsync(dados.Email.Trim());
+
+            //deixei a resposta sempre igual, independente se tá certo ou errada, assim se tiver alguem tentando "hackear" ou acessar uma conta q não deveria,
+            //a pessoa nn vai conseguir ir fazendo combinações diferentes até acertar o e-mail certo, chave de acesso certa, etc... 
+            if (usuario is null || !usuario.EmailConfirmed)
+            {
+                return new { sucesso = true, mensagem = MensagemSolicitacaoRecuperacao };
+            }
+
+            var token = await _userManager.GeneratePasswordResetTokenAsync(usuario);
+            var tokenCodificado = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(token));
+            var link = MontarLinkRecuperacaoSenha(usuario.Id, tokenCodificado, chaveAcesso!);
+
+            try
+            {
+                await _servicoEmail.SendEmailAsync(new MailRequest
+                {
+                    ToEmail = usuario.Email!,
+                    Subject = "Recuperação de senha - ClinicSmart",
+                    Body = MontarEmailRecuperacaoSenha(usuario.FirstName, link)
+                });
+            }
+            catch (Exception ex)
+            {
+                // a resposta nn muda pra nn revelar se a conta existe (mesma coisa que a explicação de cima).
+                Console.WriteLine($"Falha ao enviar recuperação de senha: {ex.Message}");
+            }
+
+            return new { sucesso = true, mensagem = MensagemSolicitacaoRecuperacao };
+        }
+
+        public async Task<object> RedefinirSenha(RedefinirSenhaDto dados, string? chaveAcesso)
+        {
+            var conexao = await ResolveConnectionStringAsync(chaveAcesso);
+            if (string.IsNullOrWhiteSpace(conexao))
+            {
+                return new { sucesso = false, erro = MensagemLinkInvalido };
+            }
+
+            _connectionStringProvider.SetConnectionString(conexao);
+
+            var usuario = await _userManager.FindByIdAsync(dados.UsuarioId);
+            if (usuario is null || !string.Equals(usuario.UserKey, chaveAcesso, StringComparison.Ordinal))
+            {
+                return new { sucesso = false, erro = MensagemLinkInvalido };
+            }
+
+            string token;
+            try
+            {
+                token = Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(dados.Token));
+            }
+            catch (FormatException)
+            {
+                return new { sucesso = false, erro = MensagemLinkInvalido };
+            }
+
+            var resultado = await _userManager.ResetPasswordAsync(usuario, token, dados.NovaSenha);
+            if (!resultado.Succeeded)
+            {
+                if (resultado.Errors.Any(erro => erro.Code == "InvalidToken"))
+                {
+                    return new { sucesso = false, erro = MensagemLinkInvalido };
+                }
+
+                return new
+                {
+                    sucesso = false,
+                    erro = "A nova senha não atende aos requisitos de segurança.",
+                    erros = resultado.Errors.Select(erro => erro.Description).ToArray()
+                };
+            }
+
+            try
+            {
+                await _servicoEmail.SendEmailAsync(new MailRequest
+                {
+                    ToEmail = usuario.Email!,
+                    Subject = "Senha alterada - ClinicSmart",
+                    Body = MontarEmailSenhaAlterada(usuario.FirstName)
+                });
+            }
+            catch (Exception ex)
+            {
+                //aqui a senha já foi alterada, essa msg de falha no aviso nn desfaz alteração.
+                Console.WriteLine($"Falha ao enviar confirmação de senha alterada: {ex.Message}");
+            }
+
+            return new
+            {
+                sucesso = true,
+                mensagem = "Senha redefinida com sucesso. Você já pode entrar com a nova senha."
+            };
         }
 
         public async Task<object> GetAllUsersAsync(int page, int pageSize, string? filter)
@@ -346,6 +461,68 @@ namespace WebApiSmartClinic.Services.Auth
         // ----------------------------------------------------
         // Métodos auxiliares privados
         // ----------------------------------------------------
+
+        private string MontarLinkRecuperacaoSenha(
+            string usuarioId,
+            string tokenCodificado,
+            string chaveAcesso)
+        {
+            var urlFrontend = _appSettings.UrlFrontendRecuperacaoSenha.TrimEnd('/');
+            var dadosLink = string.Join('&',
+                $"usuario={Uri.EscapeDataString(usuarioId)}",
+                $"token={Uri.EscapeDataString(tokenCodificado)}",
+                $"chave={Uri.EscapeDataString(chaveAcesso)}");
+
+            return $"{urlFrontend}/redefinir-senha#{dadosLink}";
+        }
+
+        private string MontarEmailRecuperacaoSenha(string? primeiroNome, string link)
+        {
+            var nomeSeguro = HtmlEncoder.Default.Encode(
+                string.IsNullOrWhiteSpace(primeiroNome) ? "Olá" : $"Olá, {primeiroNome.Trim()}");
+            var linkSeguro = HtmlEncoder.Default.Encode(link);
+            var minutosValidade = _appSettings.MinutosValidadeTokenRecuperacaoSenha;
+
+            return $"""
+                <!doctype html>
+                <html lang="pt-BR">
+                <body style="font-family:Arial,sans-serif;color:#263238;line-height:1.5">
+                  <div style="max-width:560px;margin:0 auto;padding:24px">
+                    <h2 style="color:#005946">Recuperação de senha</h2>
+                    <p>{nomeSeguro}.</p>
+                    <p>Recebemos uma solicitação para criar uma nova senha de acesso à ClinicSmart.</p>
+                    <p style="margin:28px 0">
+                      <a href="{linkSeguro}" style="background:#005946;color:#fff;padding:12px 20px;border-radius:24px;text-decoration:none;display:inline-block">
+                        Criar nova senha
+                      </a>
+                    </p>
+                    <p>Este link expira em {minutosValidade} minutos e só pode ser utilizado uma vez.</p>
+                    <p>Se você não solicitou a recuperação, ignore este e-mail. Sua senha continuará a mesma.</p>
+                  </div>
+                </body>
+                </html>
+                """;
+        }
+
+        private static string MontarEmailSenhaAlterada(string? primeiroNome)
+        {
+            var nomeSeguro = HtmlEncoder.Default.Encode(
+                string.IsNullOrWhiteSpace(primeiroNome) ? "Olá" : $"Olá, {primeiroNome.Trim()}");
+
+            return $"""
+                <!doctype html>
+                <html lang="pt-BR">
+                <body style="font-family:Arial,sans-serif;color:#263238;line-height:1.5">
+                  <div style="max-width:560px;margin:0 auto;padding:24px">
+                    <h2 style="color:#005946">Senha alterada</h2>
+                    <p>{nomeSeguro}.</p>
+                    <p>Sua senha de acesso à ClinicSmart foi redefinida com sucesso.</p>
+                    <p>Se você não realizou esta alteração, entre em contato com o suporte imediatamente.</p>
+                  </div>
+                </body>
+                </html>
+                """;
+        }
 
         private async Task<string?> ResolveConnectionStringAsync(string? userKey)
         {

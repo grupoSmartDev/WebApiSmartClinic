@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Localization;
@@ -61,6 +62,29 @@ var appSettingsSection = config.GetSection("AppSettings");
 services.Configure<AppSettings>(appSettingsSection);
 var appSettings = appSettingsSection.Get<AppSettings>()
     ?? throw new InvalidOperationException("Configuração 'AppSettings' não encontrada.");
+
+if (!Uri.TryCreate(appSettings.UrlFrontendRecuperacaoSenha, UriKind.Absolute, out var urlFrontend) ||
+    (urlFrontend.Scheme != Uri.UriSchemeHttp && urlFrontend.Scheme != Uri.UriSchemeHttps))
+{
+    throw new InvalidOperationException("AppSettings:UrlFrontendRecuperacaoSenha deve ser uma URL HTTP/HTTPS absoluta.");
+}
+
+if (appSettings.MinutosValidadeTokenRecuperacaoSenha is < 5 or > 1440)
+{
+    throw new InvalidOperationException(
+        "AppSettings:MinutosValidadeTokenRecuperacaoSenha deve estar entre 5 e 1440 minutos.");
+}
+
+services.Configure<DataProtectionTokenProviderOptions>(opcoes =>
+    opcoes.TokenLifespan = TimeSpan.FromMinutes(appSettings.MinutosValidadeTokenRecuperacaoSenha));
+
+var protecaoDados = services.AddDataProtection().SetApplicationName("WebApiSmartClinic");
+if (!string.IsNullOrWhiteSpace(appSettings.CaminhoChavesProtecaoDados))
+{
+    protecaoDados.PersistKeysToFileSystem(
+        new DirectoryInfo(Path.GetFullPath(appSettings.CaminhoChavesProtecaoDados)));
+}
+
 var key = Encoding.UTF8.GetBytes(appSettings.JwtSecretKey);
 services.AddProblemDetails();
 services.AddMemoryCache();

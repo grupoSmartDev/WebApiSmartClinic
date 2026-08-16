@@ -11,3 +11,9 @@ services:
     restart: always
     environment:
       - ASPNETCORE_ENVIRONMENT=Production
+      - AppSettings__CaminhoChavesProtecaoDados=/app/chaves-protecao-dados
+    volumes:
+      - chaves-protecao-dados-smartclinic:/app/chaves-protecao-dados
+
+volumes:
+  chaves-protecao-dados-smartclinic:

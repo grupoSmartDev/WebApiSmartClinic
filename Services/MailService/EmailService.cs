@@ -7,11 +7,11 @@ namespace WebApiSmartClinic.Services.MailService;
 
 public class EmailService : IEmailService
 {
-    private readonly EmailSettings emailSettings;
+    private readonly EmailSettings configuracaoEmail;
 
     public EmailService(IOptions<EmailSettings> options)
     {
-        this.emailSettings = options.Value;
+        configuracaoEmail = options.Value;
     }
 
     public async Task SendEmailAsync(MailRequest mailRequest)
@@ -19,14 +19,14 @@ public class EmailService : IEmailService
         try
         {
             Console.WriteLine($"\n📧 ===== ENVIANDO EMAIL =====");
-            Console.WriteLine($"De: {emailSettings.Email}");
+            Console.WriteLine($"De: {configuracaoEmail.Email}");
             Console.WriteLine($"Para: {mailRequest.ToEmail}");
             Console.WriteLine($"Assunto: {mailRequest.Subject}");
 
             var email = new MimeMessage();
 
             // Usa o email configurado como remetente
-            var senderAddress = new MailboxAddress(emailSettings.Displayname, emailSettings.Email);
+            var senderAddress = new MailboxAddress(configuracaoEmail.Displayname, configuracaoEmail.Email);
             email.From.Add(senderAddress);
             email.To.Add(MailboxAddress.Parse(mailRequest.ToEmail));
             email.Subject = mailRequest.Subject;
@@ -37,16 +37,16 @@ public class EmailService : IEmailService
 
             using var smtp = new SmtpClient();
 
-            // ⚠️ MUDANÇA AQUI: Porta 465 com SSL (não StartTls)
-            Console.WriteLine($"🔌 Conectando ao {emailSettings.Host}:{emailSettings.Port}...");
+            // O Zoho usa SSL direto na porta 465.
+            Console.WriteLine($"🔌 Conectando ao {configuracaoEmail.Host}:{configuracaoEmail.Port}...");
             await smtp.ConnectAsync(
-                emailSettings.Host,
-                emailSettings.Port,
-                MailKit.Security.SecureSocketOptions.SslOnConnect  // <-- SSL direto!
+                configuracaoEmail.Host,
+                configuracaoEmail.Port,
+                MailKit.Security.SecureSocketOptions.SslOnConnect
             );
 
             Console.WriteLine($"🔐 Autenticando...");
-            await smtp.AuthenticateAsync(emailSettings.Email, emailSettings.Password);
+            await smtp.AuthenticateAsync(configuracaoEmail.Email, configuracaoEmail.Password);
 
             Console.WriteLine($"📤 Enviando...");
             await smtp.SendAsync(email);
@@ -54,6 +54,15 @@ public class EmailService : IEmailService
             await smtp.DisconnectAsync(true);
 
             Console.WriteLine($"✅ Email enviado com sucesso!\n");
+        }
+        catch (SmtpCommandException ex) when (
+            ex.Message.Contains("Relaying disallowed", StringComparison.OrdinalIgnoreCase) ||
+            ex.Message.Contains("Invalid Domain", StringComparison.OrdinalIgnoreCase))
+        {
+            const string mensagem = "O Zoho recusou o domínio do remetente. Verifique se o domínio está ativo no painel do Zoho e se o servidor SMTP corresponde ao plano da conta.";
+
+            Console.WriteLine($"❌ {mensagem}");
+            throw new InvalidOperationException(mensagem, ex);
         }
         catch (Exception ex)
         {

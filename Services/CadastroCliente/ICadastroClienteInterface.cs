@@ -16,5 +16,6 @@ namespace WebApiSmartClinic.Services.CadastroCliente
         Task<ResponseModel<List<EmpresaModel>>> Delete(int idCadastroCliente);
         Task<ResponseModel<EmpresaModel>> Criar(CadastroClienteCreateDto dto);
         Task<ResponseModel<EmpresaModel>> ReprocessarAsaas(int empresaId);
+        Task<ResponseModel<EmpresaModel>> UpgradePlano(UpgradePlanoDto dto);
     }
 }

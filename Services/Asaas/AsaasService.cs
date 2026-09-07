@@ -8,8 +8,11 @@ public interface IAsaasService
 {
     Task<AsaasCustomerResponse> CreateCustomerAsync(AsaasCustomerRequest request);
     Task<AsaasSubscriptionResponse> CreateSubscriptionAsync(AsaasSubscriptionRequest request);
-    Task<AsaasCustomerResponse> GetCustomerByEmailAsync(string email);
+    Task<AsaasCustomerResponse?> GetCustomerByEmailAsync(string email);
+    Task<AsaasCustomerResponse> CreateOrGetCustomerAsync(AsaasCustomerRequest request);
     Task<AsaasPaymentResponse> CreatePaymentAsync(AsaasPaymentRequest request); //pagamento para cartao de credito
+    Task<AsaasPaymentResponse?> GetFirstSubscriptionPaymentAsync(string subscriptionId);
+    Task<bool> CancelarSubscriptionAsync(string subscriptionId);
 }
 
 public class AsaasService : IAsaasService
@@ -93,7 +96,8 @@ public class AsaasService : IAsaasService
             var json = JsonSerializer.Serialize(request, new JsonSerializerOptions
             {
                 PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-                WriteIndented = true
+                WriteIndented = true,
+                DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull
             });
 
             Console.WriteLine($"📤 Request:\n{json}");
@@ -112,6 +116,23 @@ public class AsaasService : IAsaasService
                 });
 
                 Console.WriteLine($"✅ Subscription criada: {subscription.id}");
+
+                // A resposta de criação não traz o link de pagamento — busca o invoiceUrl da 1ª cobrança.
+                if (subscription != null && !string.IsNullOrWhiteSpace(subscription.id))
+                {
+                    try
+                    {
+                        var primeiraCobranca = await GetFirstSubscriptionPaymentAsync(subscription.id);
+                        subscription.invoiceUrl = primeiraCobranca?.invoiceUrl;
+                        if (!string.IsNullOrWhiteSpace(subscription.invoiceUrl))
+                            Console.WriteLine($"🔗 Invoice da 1ª cobrança: {subscription.invoiceUrl}");
+                    }
+                    catch (Exception exInv)
+                    {
+                        Console.WriteLine($"⚠️ Não foi possível obter o invoiceUrl da subscription: {exInv.Message}");
+                    }
+                }
+
                 return subscription;
             }
             else
@@ -133,29 +154,102 @@ public class AsaasService : IAsaasService
         }
     }
 
-    public async Task<AsaasCustomerResponse> GetCustomerByEmailAsync(string email)
+    public async Task<AsaasCustomerResponse?> GetCustomerByEmailAsync(string email)
     {
         try
         {
+            if (string.IsNullOrWhiteSpace(email)) return null;
+
             Console.WriteLine($"🔍 Buscando customer: {email}");
 
-            var response = await _httpClient.GetAsync($"{_baseUrl}/customers?email={Uri.EscapeDataString(email)}");
+            var response = await _httpClient.GetAsync($"{_baseUrl}/customers?email={Uri.EscapeDataString(email)}&limit=1");
             var responseContent = await response.Content.ReadAsStringAsync();
 
             Console.WriteLine($"📥 Response ({response.StatusCode})");
 
-            if (response.IsSuccessStatusCode)
+            if (!response.IsSuccessStatusCode)
             {
-                var result = JsonSerializer.Deserialize<dynamic>(responseContent);
-                return null; // Implementar quando necessário
+                Console.WriteLine($"⚠️ Falha ao buscar customer: {responseContent}");
+                return null;
             }
 
-            return null;
+            var lista = JsonSerializer.Deserialize<AsaasListResponse<AsaasCustomerResponse>>(responseContent, new JsonSerializerOptions
+            {
+                PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+            });
+
+            var customer = lista?.data?.FirstOrDefault();
+            if (customer != null)
+                Console.WriteLine($"✅ Customer encontrado: {customer.id}");
+
+            return customer;
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"💥 Erro: {ex.Message}");
+            Console.WriteLine($"💥 Erro ao buscar customer no Asaas: {ex.Message}");
             return null;
+        }
+    }
+
+    // Evita clientes duplicados no Asaas: reaproveita o customer do mesmo e-mail se já existir.
+    public async Task<AsaasCustomerResponse> CreateOrGetCustomerAsync(AsaasCustomerRequest request)
+    {
+        var existente = await GetCustomerByEmailAsync(request.email);
+        if (existente != null && !string.IsNullOrWhiteSpace(existente.id))
+        {
+            Console.WriteLine($"♻️ Reutilizando customer Asaas: {existente.id}");
+            return existente;
+        }
+
+        return await CreateCustomerAsync(request);
+    }
+
+    // Primeira cobrança gerada por uma subscription — usado para obter o invoiceUrl (link boleto/PIX).
+    public async Task<AsaasPaymentResponse?> GetFirstSubscriptionPaymentAsync(string subscriptionId)
+    {
+        try
+        {
+            if (string.IsNullOrWhiteSpace(subscriptionId)) return null;
+
+            var response = await _httpClient.GetAsync($"{_baseUrl}/subscriptions/{subscriptionId}/payments?limit=1&offset=0");
+            var responseContent = await response.Content.ReadAsStringAsync();
+
+            if (!response.IsSuccessStatusCode)
+            {
+                Console.WriteLine($"⚠️ Falha ao listar cobranças da subscription {subscriptionId}: {responseContent}");
+                return null;
+            }
+
+            var lista = JsonSerializer.Deserialize<AsaasListResponse<AsaasPaymentResponse>>(responseContent, new JsonSerializerOptions
+            {
+                PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+            });
+
+            return lista?.data?.FirstOrDefault();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"💥 Erro ao buscar cobrança da subscription: {ex.Message}");
+            return null;
+        }
+    }
+
+    public async Task<bool> CancelarSubscriptionAsync(string subscriptionId)
+    {
+        try
+        {
+            if (string.IsNullOrWhiteSpace(subscriptionId)) return false;
+
+            var response = await _httpClient.DeleteAsync($"{_baseUrl}/subscriptions/{subscriptionId}");
+            var responseContent = await response.Content.ReadAsStringAsync();
+
+            Console.WriteLine($"🗑️ Cancelar subscription {subscriptionId} ({response.StatusCode}): {responseContent}");
+            return response.IsSuccessStatusCode;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"💥 Erro ao cancelar subscription no Asaas: {ex.Message}");
+            return false;
         }
     }
 

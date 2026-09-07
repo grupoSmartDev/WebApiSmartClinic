@@ -45,4 +45,15 @@ public sealed class CadastroClienteController : ControllerBase
         var resultado = await _cadastrocliente.ReprocessarAsaas(empresaId);
         return Ok(resultado);
     }
+
+    // Restrito a Admin (não [Authorize] genérico como no rascunho original) — esse endpoint
+    // altera plano/cobrança da empresa, um usuário "User"/"Support" do mesmo tenant não deveria
+    // conseguir se auto-promover de plano via chamada direta à API.
+    [Authorize(Roles = Perfis.Admin)]
+    [HttpPost("UpgradePlano")]
+    public async Task<ActionResult<ResponseModel<EmpresaModel>>> UpgradePlano([FromBody] UpgradePlanoDto dto)
+    {
+        var resultado = await _cadastrocliente.UpgradePlano(dto);
+        return Ok(resultado);
+    }
 }

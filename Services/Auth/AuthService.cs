@@ -541,7 +541,7 @@ namespace WebApiSmartClinic.Services.Auth
             }
         }
 
-        private async Task<string> ObterPlanoUsuarioAsync(string userId)
+        private async Task<EmpresaModel?> ObterEmpresaUsuarioAsync(string userId)
         {
             try
             {
@@ -550,17 +550,12 @@ namespace WebApiSmartClinic.Services.Auth
                     .Include(ue => ue.Empresa)
                     .FirstOrDefaultAsync(ue => ue.UsuarioId == userId && ue.EmpresaPadrao);
 
-                if (usuarioEmpresa?.Empresa != null)
-                {
-                    return usuarioEmpresa.Empresa.PlanoEscolhido ?? "Basic";
-                }
-
-                return "Basic"; // Default se não encontrar
+                return usuarioEmpresa?.Empresa;
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Erro ao obter plano: {ex.Message}");
-                return "Basic";
+                Console.WriteLine($"Erro ao obter empresa do usuário: {ex.Message}");
+                return null;
             }
         }
 
@@ -569,8 +564,16 @@ namespace WebApiSmartClinic.Services.Auth
             var user = await _userManager.FindByEmailAsync(email);
             var roles = await _userManager.GetRolesAsync(user);
 
-            // Busca o plano do usuário
-            var plano = await ObterPlanoUsuarioAsync(user.Id);
+            // Busca a empresa (plano/trial) do usuário
+            var empresa = await ObterEmpresaUsuarioAsync(user.Id);
+            var plano = empresa?.PlanoEscolhido ?? "Basic";
+            var periodoTeste = empresa?.PeriodoTeste ?? false;
+            var dataFim = empresa?.DataFim;
+            // EmpresaModel.DataFim é convertido para hora local no getter (ver Models/CadastroClienteModel.cs) —
+            // volta pra UTC aqui antes de comparar com DateTime.UtcNow, senão o cálculo erra pelo offset do servidor.
+            int? diasRestantesTrial = dataFim.HasValue
+                ? Math.Max(0, (int)Math.Ceiling((dataFim.Value.ToUniversalTime() - DateTime.UtcNow).TotalDays))
+                : null;
             Console.WriteLine($"🔍 Plano detectado para {email}: {plano}");
 
             var claims = new List<Claim>
@@ -607,6 +610,9 @@ namespace WebApiSmartClinic.Services.Auth
                     accessToken = new JwtSecurityTokenHandler().WriteToken(token),
                     expiresIn = _appSettings.JwtExpiresHours * 3600,
                     plano = plano,
+                    periodoTeste = periodoTeste,
+                    dataFim = dataFim,
+                    diasRestantesTrial = diasRestantesTrial,
                     userToken = new
                     {
                         id = user.Id,

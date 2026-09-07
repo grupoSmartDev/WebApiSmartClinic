@@ -243,6 +243,7 @@ builder.Services.AddScoped<IPacoteInterface, PacoteService>();
 
 
 builder.Services.AddHttpClient<IAsaasService, AsaasService>();
+builder.Services.AddScoped<WebApiSmartClinic.Services.Asaas.AsaasWebhookService>();
 
 //services.AddSingleton<IConnectionStringProvider, ConnectionStringProvider>();
 

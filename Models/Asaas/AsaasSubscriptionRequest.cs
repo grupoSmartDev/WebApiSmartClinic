@@ -10,7 +10,8 @@ public class AsaasSubscriptionRequest
     public string description { get; set; }
     public string externalReference { get; set; }
     public string? installmentCount { get; set; } // Numero maximo de parcelas
-    public decimal totalValue { get; set; } //valor total 
+    public decimal? installmentValue { get; set; } // Valor de cada parcela (quando parcelado)
+    public decimal totalValue { get; set; } //valor total
     public AsaasCreditCard creditCard { get; set; }
     public AsaasCreditCardHolderInfo creditCardHolderInfo { get; set; }
 }

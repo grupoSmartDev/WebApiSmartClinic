@@ -151,14 +151,17 @@ public class CadastroClienteService : ICadastroClienteInterface
                     cpfCnpj = dto.TitularCPF,
                     observations = $"ClinicSmart - {dto.PlanoEscolhido} - {dto.PeriodoCobranca}"
                 };
-                var customer = await _asaasService.CreateCustomerAsync(customerRequest);
+                var customer = await _asaasService.CreateOrGetCustomerAsync(customerRequest);
                 asaasCustomerId = customer.id;
+
+                // Status da última cobrança avulsa criada (cartão/boleto/PIX), p/ decidir Ativo x Pendente.
+                string? paymentStatus = null;
 
                 // Se NÃO for período de teste E tiver valor
                 if (!dto.PeriodoTeste && dto.PrecoSelecionado > 0)
                 {
                     // RECORRÊNCIA (Assinatura mensal/semestral)
-                    if (dto.PeriodoCobranca == "monthly")
+                    if (dto.PeriodoCobranca == "monthly" || dto.PeriodoCobranca == "semiannual")
                     {
                         Console.WriteLine("🔄 Criando assinatura recorrente...");
 
@@ -166,16 +169,16 @@ public class CadastroClienteService : ICadastroClienteInterface
                         {
                             customer = customer.id,
                             billingType = MapearTipoPagamento(dto.TipoPagamentoId ?? 1),
-                            value = dto.PrecoSelecionado,
+                            value = dto.PeriodoCobranca == "semiannual" ? dto.PrecoSelecionado * 6 : dto.PrecoSelecionado,
                             nextDueDate = DateTime.Now.AddDays(1).ToString("yyyy-MM-dd"),
                             cycle = dto.PeriodoCobranca == "monthly" ? "MONTHLY" : "SEMIANNUALLY",
                             description = $"ClinicSmart - {dto.PlanoEscolhido}",
                             externalReference = $"clinicsmart_cpf_{cpfKey}",
-                            totalValue = dto.PrecoSelecionado,
-                            installmentCount = "6"
+                            totalValue = dto.PeriodoCobranca == "semiannual" ? dto.PrecoSelecionado * 6 : dto.PrecoSelecionado
                         };
                         var subscription = await _asaasService.CreateSubscriptionAsync(subscriptionRequest);
                         asaasSubscriptionId = subscription.id;
+                        asaasInvoiceUrl = subscription.invoiceUrl;
 
                         Console.WriteLine($"✅ Assinatura criada: {asaasSubscriptionId}");
                     }
@@ -221,6 +224,7 @@ public class CadastroClienteService : ICadastroClienteInterface
                         var payment = await _asaasService.CreatePaymentAsync(paymentRequest);
                         asaasPaymentId = payment.id;
                         asaasInvoiceUrl = payment.invoiceUrl;
+                        paymentStatus = payment.status;
 
                         Console.WriteLine($"✅ Pagamento criado: {asaasPaymentId}");
                         Console.WriteLine($"📊 Status: {payment.status}");
@@ -250,6 +254,7 @@ public class CadastroClienteService : ICadastroClienteInterface
                         var payment = await _asaasService.CreatePaymentAsync(paymentRequest);
                         asaasPaymentId = payment.id;
                         asaasInvoiceUrl = payment.invoiceUrl;
+                        paymentStatus = payment.status;
 
                         Console.WriteLine($"✅ Boleto gerado: {asaasPaymentId}");
                         Console.WriteLine($"🔗 Link do boleto: {payment.invoiceUrl}");
@@ -278,6 +283,7 @@ public class CadastroClienteService : ICadastroClienteInterface
                         var payment = await _asaasService.CreatePaymentAsync(paymentRequest);
                         asaasPaymentId = payment.id;
                         asaasInvoiceUrl = payment.invoiceUrl;
+                        paymentStatus = payment.status;
 
                         Console.WriteLine($"✅ PIX gerado: {asaasPaymentId}");
                         Console.WriteLine($"🔗 Link do QR Code: {payment.invoiceUrl}");
@@ -292,8 +298,13 @@ public class CadastroClienteService : ICadastroClienteInterface
                     }
                 }
 
-                asaasStatus = "Ativo";
-                Console.WriteLine($"✅ Asaas OK - Customer: {asaasCustomerId}, Subscription: {asaasSubscriptionId}, Payment: {asaasPaymentId}");
+                // Cartão aprovado na hora → Ativo. Boleto/PIX/Subscription → Pendente (webhook confirma depois).
+                if (paymentStatus == "CONFIRMED")
+                    asaasStatus = "Ativo";
+                else
+                    asaasStatus = "Pendente";
+
+                Console.WriteLine($"✅ Asaas OK - Customer: {asaasCustomerId}, Subscription: {asaasSubscriptionId}, Payment: {asaasPaymentId}, Status: {asaasStatus}");
             }
             catch (Exception exAsaas)
             {
@@ -686,6 +697,198 @@ public class CadastroClienteService : ICadastroClienteInterface
             resposta.Mensagem = empresa.AsaasStatus == "Ativo"
                 ? "Integração com Asaas reprocessada com sucesso."
                 : $"Falha ao reprocessar Asaas: {empresa.AsaasErroDetalhe}";
+            return resposta;
+        }
+        catch (Exception ex)
+        {
+            resposta.Status = false;
+            resposta.Mensagem = ex.Message;
+            return resposta;
+        }
+    }
+
+    // Tabelas de preço — devem ficar sincronizadas com o card de planos (planos-config.component.ts)
+    // e com o upgrade-plano-modal.component.ts do frontend.
+    private static readonly Dictionary<string, decimal> PrecoMensalPorPlano = new()
+    {
+        ["Basic"] = 149.00m,
+        ["Plus"] = 249.00m,
+        ["Premium"] = 329.00m
+    };
+
+    // Total do semestre (Basic = 6x 89,00 | Plus = 6x 189,00 | Premium = 6x 269,00).
+    private static readonly Dictionary<string, decimal> PrecoSemestralPorPlano = new()
+    {
+        ["Basic"] = 534.00m,
+        ["Plus"] = 1134.00m,
+        ["Premium"] = 1614.00m
+    };
+
+    private const string CicloMensal = "MONTHLY";
+    // Valor documentado do enum de ciclo do Asaas. O briefing pedia "SEMIANNUAL"; mantido aqui
+    // como constante isolada para ajuste rápido caso a conta do Asaas espere outro literal.
+    private const string CicloSemestral = "SEMIANNUALLY";
+
+    // Gera a ASSINATURA no Asaas (mensal = ciclo MONTHLY; semestral = ciclo SEMIANNUALLY).
+    // O plano NÃO é liberado aqui — só quando o webhook PAYMENT_CONFIRMED/PAYMENT_RECEIVED
+    // chega (AsaasWebhookService). Aqui apenas guardamos os ids do Asaas e AsaasStatus = "Pendente".
+    public async Task<ResponseModel<EmpresaModel>> UpgradePlano(UpgradePlanoDto dto)
+    {
+        var resposta = new ResponseModel<EmpresaModel>();
+
+        try
+        {
+            if (dto == null || string.IsNullOrWhiteSpace(dto.NovoPlano) || !PrecoMensalPorPlano.ContainsKey(dto.NovoPlano))
+            {
+                resposta.Status = false;
+                resposta.Mensagem = "Plano inválido.";
+                return resposta;
+            }
+
+            var periodo = (dto.Periodo ?? "mensal").Trim().ToLowerInvariant();
+            if (periodo != "mensal" && periodo != "semestral")
+            {
+                resposta.Status = false;
+                resposta.Mensagem = "Período inválido. Use 'mensal' ou 'semestral'.";
+                return resposta;
+            }
+
+            var tipoPagamento = (dto.TipoPagamento ?? "").Trim().ToUpperInvariant();
+            if (tipoPagamento != "PIX" && tipoPagamento != "BOLETO" && tipoPagamento != "CREDIT_CARD")
+            {
+                resposta.Status = false;
+                resposta.Mensagem = "Forma de pagamento inválida. Use PIX, BOLETO ou CREDIT_CARD.";
+                return resposta;
+            }
+
+            // A empresa é a do tenant logado (EmpresaContextoMiddleware já resolveu),
+            // nunca um id vindo do cliente — evita upgrade de uma empresa de outro tenant.
+            var empresaId = _context.EmpresaSelecionada;
+            if (!empresaId.HasValue)
+            {
+                resposta.Status = false;
+                resposta.Mensagem = "Nenhuma empresa selecionada.";
+                return resposta;
+            }
+
+            var empresa = await _context.Empresas.FirstOrDefaultAsync(e => e.Id == empresaId.Value);
+            if (empresa == null)
+            {
+                resposta.Status = false;
+                resposta.Mensagem = "Empresa não encontrada.";
+                return resposta;
+            }
+
+            bool semestral = periodo == "semestral";
+            decimal valorMensal = PrecoMensalPorPlano[dto.NovoPlano];
+            decimal valorCobranca = semestral ? PrecoSemestralPorPlano[dto.NovoPlano] : valorMensal;
+
+            // A Key do tenant (== DataConnections.Key) é o CPF do titular, do mesmo jeito que o Criar grava.
+            // O webhook usa esse externalReference para achar o banco do tenant.
+            var cpfKey = (empresa.TitularCPF ?? "").Trim();
+
+            // 1) Customer (reaproveita se já existir no Asaas)
+            try
+            {
+                var customer = await _asaasService.CreateOrGetCustomerAsync(new AsaasCustomerRequest
+                {
+                    name = $"{empresa.Nome} {empresa.Sobrenome}",
+                    email = empresa.Email,
+                    phone = LimparTelefone(empresa.Celular),
+                    mobilePhone = LimparTelefone(empresa.Celular),
+                    cpfCnpj = empresa.TitularCPF,
+                    observations = $"ClinicSmart - {dto.NovoPlano} - {periodo}"
+                });
+                empresa.AsaasCustomerId = customer.id;
+            }
+            catch (Exception exCustomer)
+            {
+                resposta.Status = false;
+                resposta.Mensagem = $"Falha ao criar/consultar cliente no Asaas: {exCustomer.Message}";
+                return resposta;
+            }
+
+            // 2) Assinatura
+            var subscriptionRequest = new AsaasSubscriptionRequest
+            {
+                customer = empresa.AsaasCustomerId,
+                billingType = tipoPagamento,
+                value = valorCobranca,
+                nextDueDate = DateTime.UtcNow.AddDays(1).ToString("yyyy-MM-dd"),
+                cycle = semestral ? CicloSemestral : CicloMensal,
+                description = $"SmartClinic - Plano {dto.NovoPlano} {(semestral ? "Semestral" : "Mensal")}",
+                externalReference = $"clinicsmart_cpf_{cpfKey}",
+                totalValue = valorCobranca
+            };
+
+            if (semestral)
+            {
+                subscriptionRequest.installmentCount = "6";
+                subscriptionRequest.installmentValue = Math.Round(valorCobranca / 6m, 2);
+            }
+
+            if (tipoPagamento == "CREDIT_CARD")
+            {
+                if (dto.DadosCartao == null)
+                {
+                    resposta.Status = false;
+                    resposta.Mensagem = "Dados do cartão são obrigatórios para pagamento com cartão.";
+                    return resposta;
+                }
+
+                subscriptionRequest.creditCard = new AsaasCreditCard
+                {
+                    holderName = dto.DadosCartao.HolderName,
+                    number = dto.DadosCartao.Number?.Replace(" ", "").Replace("-", ""),
+                    expiryMonth = dto.DadosCartao.ExpiryMonth,
+                    expiryYear = dto.DadosCartao.ExpiryYear,
+                    ccv = dto.DadosCartao.Ccv
+                };
+                subscriptionRequest.creditCardHolderInfo = new AsaasCreditCardHolderInfo
+                {
+                    name = $"{empresa.Nome} {empresa.Sobrenome}",
+                    email = empresa.Email,
+                    cpfCnpj = empresa.TitularCPF?.Replace(".", "").Replace("-", ""),
+                    postalCode = dto.DadosCartao.PostalCode?.Replace("-", ""),
+                    addressNumber = dto.DadosCartao.AddressNumber,
+                    phone = LimparTelefone(empresa.Celular)
+                };
+            }
+
+            AsaasSubscriptionResponse subscription;
+            try
+            {
+                subscription = await _asaasService.CreateSubscriptionAsync(subscriptionRequest);
+            }
+            catch (Exception exAsaas)
+            {
+                empresa.AsaasStatus = "Erro";
+                empresa.AsaasErroDetalhe = exAsaas.Message;
+                empresa.AsaasUltimaTentativa = DateTime.UtcNow;
+                _context.Empresas.Update(empresa);
+                await _context.SaveChangesAsync();
+
+                resposta.Status = false;
+                resposta.Mensagem = $"Falha ao gerar assinatura no Asaas: {exAsaas.Message}";
+                return resposta;
+            }
+
+            // 3) Persiste só os identificadores do Asaas — plano/DataFim/PeriodoTeste seguem inalterados
+            //    até o webhook confirmar o pagamento.
+            empresa.AsaasSubscriptionId = subscription?.id;
+            empresa.AsaasInvoiceUrl = subscription?.invoiceUrl;
+            empresa.AsaasStatus = "Pendente";
+            empresa.AsaasErroDetalhe = null;
+            empresa.AsaasUltimaTentativa = DateTime.UtcNow;
+            empresa.PeriodoCobranca = semestral ? "semiannual" : "monthly";
+            empresa.PrecoSelecionado = valorMensal;
+
+            _context.Empresas.Update(empresa);
+            await _context.SaveChangesAsync();
+
+            resposta.Dados = empresa;
+            resposta.Status = true;
+            resposta.Mensagem = "Assinatura gerada. O plano será liberado automaticamente após a confirmação do pagamento.";
             return resposta;
         }
         catch (Exception ex)

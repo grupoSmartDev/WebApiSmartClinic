@@ -63,6 +63,45 @@ public class EmpresaContextoMiddleware
         if (db.EmpresaSelecionada is null && !string.IsNullOrEmpty(usuarioId))
             db.EmpresaSelecionada = await permissao.ObterEmpresaPadraoAsync(usuarioId);
 
+        // Bloqueio por trial expirado / conta suspensa — não se aplica a Admin/Support
+        // (precisam continuar acessando para dar suporte/reprocessar cobrança de um tenant bloqueado)
+        // nem a requisições sem empresa resolvida (ex.: login, ainda anônimo).
+        if (!ehAdmin && !ehSupport && db.EmpresaSelecionada.HasValue)
+        {
+            var empresa = await db.Empresas.AsNoTracking()
+                .FirstOrDefaultAsync(e => e.Id == db.EmpresaSelecionada.Value);
+
+            if (empresa != null)
+            {
+                if (empresa.PeriodoTeste && empresa.DataFim.HasValue
+                    && empresa.DataFim.Value.ToUniversalTime() < DateTime.UtcNow)
+                {
+                    ctx.Response.StatusCode = 402; // Payment Required
+                    ctx.Response.ContentType = "application/json";
+                    await ctx.Response.WriteAsJsonAsync(new
+                    {
+                        status = false,
+                        mensagem = "Período de teste encerrado. Faça upgrade do seu plano para continuar.",
+                        codigo = "TRIAL_EXPIRADO"
+                    });
+                    return;
+                }
+
+                if (!empresa.Ativo)
+                {
+                    ctx.Response.StatusCode = 403;
+                    ctx.Response.ContentType = "application/json";
+                    await ctx.Response.WriteAsJsonAsync(new
+                    {
+                        status = false,
+                        mensagem = "Conta suspensa. Entre em contato com o suporte.",
+                        codigo = "CONTA_SUSPENSA"
+                    });
+                    return;
+                }
+            }
+        }
+
         int? profissionalAtualId = null;
 
         if (ehUser)

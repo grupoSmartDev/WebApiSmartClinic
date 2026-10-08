@@ -81,6 +81,12 @@ public class AppDbContext : IdentityDbContext<User>
     public DbSet<PacoteModel> Pacotes { get; set; }
     public DbSet<PacotePacienteModel> PacotesPacientes { get; set; }
     public DbSet<PacoteUsoModel> PacotesUsos { get; set; }
+
+    // CRM
+    public DbSet<LeadModel> Leads { get; set; }
+    public DbSet<FollowUpModel> FollowUps { get; set; }
+    public DbSet<EtapaFunilModel> EtapasFunil { get; set; }
+    public DbSet<CampanhaModel> Campanhas { get; set; }
     // Tipos a ignorar no filtro global (Identity, agregadores globais, etc.)
     private static readonly HashSet<string> _tiposIgnorados = new(StringComparer.Ordinal)
     {
@@ -506,6 +512,67 @@ public class AppDbContext : IdentityDbContext<User>
             .HasIndex(u => u.AgendaId)
             .IsUnique();
 
+        // ===================== CRM =====================
+        modelBuilder.Entity<LeadModel>(e =>
+        {
+            e.HasOne(l => l.EtapaFunil)
+             .WithMany()
+             .HasForeignKey(l => l.EtapaFunilId)
+             .OnDelete(DeleteBehavior.Restrict);
+
+            e.HasOne(l => l.Campanha)
+             .WithMany()
+             .HasForeignKey(l => l.CampanhaId)
+             .OnDelete(DeleteBehavior.Restrict);
+
+            e.HasOne(l => l.Profissional)
+             .WithMany()
+             .HasForeignKey(l => l.ProfissionalId)
+             .OnDelete(DeleteBehavior.Restrict);
+
+            e.HasOne<PacienteModel>()
+             .WithMany()
+             .HasForeignKey(l => l.PacienteId)
+             .OnDelete(DeleteBehavior.Restrict);
+
+            e.HasMany(l => l.FollowUps)
+             .WithOne(f => f.Lead)
+             .HasForeignKey(f => f.LeadId)
+             .OnDelete(DeleteBehavior.Cascade);
+
+            e.HasIndex(l => l.EtapaFunilId);
+            e.HasIndex(l => l.Telefone);
+        });
+
+        modelBuilder.Entity<FollowUpModel>(e =>
+        {
+            e.HasOne(f => f.EtapaFunil)
+             .WithMany()
+             .HasForeignKey(f => f.EtapaFunilId)
+             .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        // Etapas fixas do funil: EmpresaId = 0 (globais, compartilhadas entre empresas).
+        // DataCriacao fixa para o seed ser determinístico (senão toda migration nova regeraria o HasData).
+        var dataSeedCrm = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+        modelBuilder.Entity<EtapaFunilModel>().HasData(
+            new EtapaFunilModel { Id = 1, EmpresaId = 0, Nome = "Novo Lead", Ordem = 1, Cor = "#6B7280", IsFixa = true, Ativo = true, DataCriacao = dataSeedCrm },
+            new EtapaFunilModel { Id = 2, EmpresaId = 0, Nome = "D0", Ordem = 2, Cor = "#3B82F6", IsFixa = true, Ativo = true, DataCriacao = dataSeedCrm,
+                ScriptSugerido = "Olá [Nome]! Vi que você se interessou..." },
+            new EtapaFunilModel { Id = 3, EmpresaId = 0, Nome = "D1", Ordem = 3, Cor = "#3B82F6", IsFixa = true, Ativo = true, DataCriacao = dataSeedCrm },
+            new EtapaFunilModel { Id = 4, EmpresaId = 0, Nome = "D2", Ordem = 4, Cor = "#3B82F6", IsFixa = true, Ativo = true, DataCriacao = dataSeedCrm },
+            new EtapaFunilModel { Id = 5, EmpresaId = 0, Nome = "D5", Ordem = 5, Cor = "#F59E0B", IsFixa = true, Ativo = true, DataCriacao = dataSeedCrm },
+            new EtapaFunilModel { Id = 6, EmpresaId = 0, Nome = "D10", Ordem = 6, Cor = "#F59E0B", IsFixa = true, Ativo = true, DataCriacao = dataSeedCrm },
+            new EtapaFunilModel { Id = 7, EmpresaId = 0, Nome = "D15", Ordem = 7, Cor = "#EF4444", IsFixa = true, Ativo = true, DataCriacao = dataSeedCrm },
+            new EtapaFunilModel { Id = 8, EmpresaId = 0, Nome = "Contato Feito", Ordem = 8, Cor = "#8B5CF6", IsFixa = true, Ativo = true, DataCriacao = dataSeedCrm },
+            new EtapaFunilModel { Id = 9, EmpresaId = 0, Nome = "Agendamento Marcado", Ordem = 9, Cor = "#06B6D4", IsFixa = true, Ativo = true, DataCriacao = dataSeedCrm },
+            new EtapaFunilModel { Id = 10, EmpresaId = 0, Nome = "Compareceu", Ordem = 10, Cor = "#10B981", IsFixa = true, Ativo = true, DataCriacao = dataSeedCrm },
+            new EtapaFunilModel { Id = 11, EmpresaId = 0, Nome = "Proposta Enviada", Ordem = 11, Cor = "#F97316", IsFixa = true, Ativo = true, DataCriacao = dataSeedCrm },
+            new EtapaFunilModel { Id = 12, EmpresaId = 0, Nome = "Fechamento", Ordem = 12, Cor = "#84CC16", IsFixa = true, Ativo = true, DataCriacao = dataSeedCrm },
+            new EtapaFunilModel { Id = 13, EmpresaId = 0, Nome = "Ganho", Ordem = 13, Cor = "#22C55E", IsFixa = true, Ativo = true, DataCriacao = dataSeedCrm },
+            new EtapaFunilModel { Id = 14, EmpresaId = 0, Nome = "Perdido", Ordem = 14, Cor = "#EF4444", IsFixa = true, Ativo = true, DataCriacao = dataSeedCrm }
+        );
+
         modelBuilder.Entity<ProfissionalModel>(e =>
         {
             e.HasIndex(p => p.UsuarioId).IsUnique();
@@ -544,7 +611,16 @@ public class AppDbContext : IdentityDbContext<User>
             var empEq = Expression.Equal(
                                 EfProp<int>(e, nameof(IEntidadeEmpresa.EmpresaId)),
                                 Expression.Property(empSel, "Value"));                       // e.EmpresaId == EmpresaSelecionada.Value
-            var condEmpresa = Expression.OrElse(verTodas, Expression.AndAlso(empHas, empEq));
+            Expression condEmpresa = Expression.OrElse(verTodas, Expression.AndAlso(empHas, empEq));
+
+            // Etapas do funil: as fixas (EmpresaId = 0) são globais e visíveis para todas as empresas
+            if (clr == typeof(EtapaFunilModel))
+            {
+                var empGlobal = Expression.Equal(
+                                    EfProp<int>(e, nameof(IEntidadeEmpresa.EmpresaId)),
+                                    Expression.Constant(EtapaFunilModel.EmpresaGlobal));
+                condEmpresa = Expression.OrElse(condEmpresa, empGlobal);
+            }
 
             // ---- Ativo = true
             var condAtivo = Expression.Equal(

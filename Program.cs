@@ -241,6 +241,12 @@ services.AddScoped<AgendaService>();
 services.AddScoped<IEmpresaPermissaoInterface, EmpresaPermissaoService>();
 builder.Services.AddScoped<IPacoteInterface, PacoteService>();
 
+// CRM
+services.AddScoped<WebApiSmartClinic.Services.CRM.ILeadInterface, WebApiSmartClinic.Services.CRM.LeadService>();
+services.AddScoped<WebApiSmartClinic.Services.CRM.IFollowUpInterface, WebApiSmartClinic.Services.CRM.FollowUpService>();
+services.AddScoped<WebApiSmartClinic.Services.CRM.IEtapaFunilInterface, WebApiSmartClinic.Services.CRM.EtapaFunilService>();
+services.AddScoped<WebApiSmartClinic.Services.CRM.ICampanhaInterface, WebApiSmartClinic.Services.CRM.CampanhaService>();
+
 
 builder.Services.AddHttpClient<IAsaasService, AsaasService>();
 builder.Services.AddScoped<WebApiSmartClinic.Services.Asaas.AsaasWebhookService>();

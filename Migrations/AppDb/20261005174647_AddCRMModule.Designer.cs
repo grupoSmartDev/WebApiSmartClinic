@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using WebApiSmartClinic.Data;
@@ -11,9 +12,11 @@ using WebApiSmartClinic.Data;
 namespace WebApiSmartClinic.Migrations.AppDb
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20261005174647_AddCRMModule")]
+    partial class AddCRMModule
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -652,7 +655,7 @@ namespace WebApiSmartClinic.Migrations.AppDb
                         {
                             Id = 1,
                             Ativo = true,
-                            DataCriacao = new DateTime(2026, 10, 6, 21, 9, 13, 213, DateTimeKind.Utc).AddTicks(3204),
+                            DataCriacao = new DateTime(2026, 10, 5, 17, 46, 45, 878, DateTimeKind.Utc).AddTicks(1951),
                             EmpresaId = 0,
                             IsSystemDefault = true,
                             Nome = "Geral"
@@ -705,7 +708,7 @@ namespace WebApiSmartClinic.Migrations.AppDb
                         {
                             Id = 1,
                             Ativo = true,
-                            DataCriacao = new DateTime(2026, 10, 6, 21, 9, 13, 213, DateTimeKind.Utc).AddTicks(3068),
+                            DataCriacao = new DateTime(2026, 10, 5, 17, 46, 45, 878, DateTimeKind.Utc).AddTicks(1770),
                             Descricao = "Geral - Receita",
                             EmpresaId = 1,
                             IsSystemDefault = true,
@@ -715,7 +718,7 @@ namespace WebApiSmartClinic.Migrations.AppDb
                         {
                             Id = 2,
                             Ativo = true,
-                            DataCriacao = new DateTime(2026, 10, 6, 21, 9, 13, 213, DateTimeKind.Utc).AddTicks(3072),
+                            DataCriacao = new DateTime(2026, 10, 5, 17, 46, 45, 878, DateTimeKind.Utc).AddTicks(1776),
                             Descricao = "Geral - Despesa",
                             EmpresaId = 1,
                             IsSystemDefault = true,
@@ -909,7 +912,7 @@ namespace WebApiSmartClinic.Migrations.AppDb
                         {
                             Id = 1,
                             Ativo = true,
-                            DataCriacao = new DateTime(2026, 10, 6, 21, 9, 13, 213, DateTimeKind.Utc).AddTicks(2629),
+                            DataCriacao = new DateTime(2026, 10, 5, 17, 46, 45, 878, DateTimeKind.Utc).AddTicks(1088),
                             EmpresaId = 1,
                             IsSystemDefault = true,
                             Nome = "Conselho Regional de Fisioterapia e Terapia Ocupacional",
@@ -919,7 +922,7 @@ namespace WebApiSmartClinic.Migrations.AppDb
                         {
                             Id = 2,
                             Ativo = true,
-                            DataCriacao = new DateTime(2026, 10, 6, 21, 9, 13, 213, DateTimeKind.Utc).AddTicks(2632),
+                            DataCriacao = new DateTime(2026, 10, 5, 17, 46, 45, 878, DateTimeKind.Utc).AddTicks(1092),
                             EmpresaId = 1,
                             IsSystemDefault = true,
                             Nome = "Conselho Federal de Psicologia",
@@ -985,7 +988,7 @@ namespace WebApiSmartClinic.Migrations.AppDb
                         {
                             Id = 1,
                             Ativo = true,
-                            DataCriacao = new DateTime(2026, 10, 6, 21, 9, 13, 213, DateTimeKind.Utc).AddTicks(3031),
+                            DataCriacao = new DateTime(2026, 10, 5, 17, 46, 45, 878, DateTimeKind.Utc).AddTicks(1732),
                             Email = "email@email.com",
                             EmpresaId = 1,
                             IsSystemDefault = true,
@@ -2041,13 +2044,7 @@ namespace WebApiSmartClinic.Migrations.AppDb
                         .HasMaxLength(50)
                         .HasColumnType("character varying(50)");
 
-                    b.Property<bool>("Concluido")
-                        .HasColumnType("boolean");
-
                     b.Property<DateTime?>("DataAlteracao")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<DateTime?>("DataConclusao")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<DateTime>("DataContato")
@@ -2137,7 +2134,7 @@ namespace WebApiSmartClinic.Migrations.AppDb
                         {
                             Id = 1,
                             Ativo = true,
-                            DataCriacao = new DateTime(2026, 10, 6, 21, 9, 13, 213, DateTimeKind.Utc).AddTicks(2908),
+                            DataCriacao = new DateTime(2026, 10, 5, 17, 46, 45, 878, DateTimeKind.Utc).AddTicks(1589),
                             Descricao = "Dinheiro",
                             EmpresaId = 1,
                             IsSystemDefault = true,
@@ -2147,7 +2144,7 @@ namespace WebApiSmartClinic.Migrations.AppDb
                         {
                             Id = 2,
                             Ativo = true,
-                            DataCriacao = new DateTime(2026, 10, 6, 21, 9, 13, 213, DateTimeKind.Utc).AddTicks(2910),
+                            DataCriacao = new DateTime(2026, 10, 5, 17, 46, 45, 878, DateTimeKind.Utc).AddTicks(1595),
                             Descricao = "Cartão de Crédito",
                             EmpresaId = 1,
                             IsSystemDefault = true,
@@ -2157,7 +2154,7 @@ namespace WebApiSmartClinic.Migrations.AppDb
                         {
                             Id = 3,
                             Ativo = true,
-                            DataCriacao = new DateTime(2026, 10, 6, 21, 9, 13, 213, DateTimeKind.Utc).AddTicks(2911),
+                            DataCriacao = new DateTime(2026, 10, 5, 17, 46, 45, 878, DateTimeKind.Utc).AddTicks(1596),
                             Descricao = "Cartão de Débito",
                             EmpresaId = 1,
                             IsSystemDefault = true,
@@ -2167,7 +2164,7 @@ namespace WebApiSmartClinic.Migrations.AppDb
                         {
                             Id = 4,
                             Ativo = true,
-                            DataCriacao = new DateTime(2026, 10, 6, 21, 9, 13, 213, DateTimeKind.Utc).AddTicks(2912),
+                            DataCriacao = new DateTime(2026, 10, 5, 17, 46, 45, 878, DateTimeKind.Utc).AddTicks(1597),
                             Descricao = "Boleto",
                             EmpresaId = 1,
                             IsSystemDefault = true,
@@ -2177,7 +2174,7 @@ namespace WebApiSmartClinic.Migrations.AppDb
                         {
                             Id = 5,
                             Ativo = true,
-                            DataCriacao = new DateTime(2026, 10, 6, 21, 9, 13, 213, DateTimeKind.Utc).AddTicks(2913),
+                            DataCriacao = new DateTime(2026, 10, 5, 17, 46, 45, 878, DateTimeKind.Utc).AddTicks(1597),
                             Descricao = "Pix",
                             EmpresaId = 1,
                             IsSystemDefault = true,
@@ -2187,7 +2184,7 @@ namespace WebApiSmartClinic.Migrations.AppDb
                         {
                             Id = 6,
                             Ativo = true,
-                            DataCriacao = new DateTime(2026, 10, 6, 21, 9, 13, 213, DateTimeKind.Utc).AddTicks(2914),
+                            DataCriacao = new DateTime(2026, 10, 5, 17, 46, 45, 878, DateTimeKind.Utc).AddTicks(1599),
                             Descricao = "Depósito",
                             EmpresaId = 1,
                             IsSystemDefault = true,
@@ -3004,7 +3001,7 @@ namespace WebApiSmartClinic.Migrations.AppDb
                             Id = 1,
                             Ativo = true,
                             Codigo = "1",
-                            DataCriacao = new DateTime(2026, 10, 6, 21, 9, 13, 213, DateTimeKind.Utc).AddTicks(3112),
+                            DataCriacao = new DateTime(2026, 10, 5, 17, 46, 45, 878, DateTimeKind.Utc).AddTicks(1826),
                             EmpresaId = 1,
                             Inativo = false,
                             IsSystemDefault = true,
@@ -3016,7 +3013,7 @@ namespace WebApiSmartClinic.Migrations.AppDb
                             Id = 2,
                             Ativo = true,
                             Codigo = "2",
-                            DataCriacao = new DateTime(2026, 10, 6, 21, 9, 13, 213, DateTimeKind.Utc).AddTicks(3117),
+                            DataCriacao = new DateTime(2026, 10, 5, 17, 46, 45, 878, DateTimeKind.Utc).AddTicks(1831),
                             EmpresaId = 1,
                             Inativo = false,
                             IsSystemDefault = true,
@@ -3028,7 +3025,7 @@ namespace WebApiSmartClinic.Migrations.AppDb
                             Id = 3,
                             Ativo = true,
                             Codigo = "3",
-                            DataCriacao = new DateTime(2026, 10, 6, 21, 9, 13, 213, DateTimeKind.Utc).AddTicks(3119),
+                            DataCriacao = new DateTime(2026, 10, 5, 17, 46, 45, 878, DateTimeKind.Utc).AddTicks(1833),
                             EmpresaId = 1,
                             Inativo = false,
                             IsSystemDefault = true,
@@ -3040,7 +3037,7 @@ namespace WebApiSmartClinic.Migrations.AppDb
                             Id = 4,
                             Ativo = true,
                             Codigo = "4",
-                            DataCriacao = new DateTime(2026, 10, 6, 21, 9, 13, 213, DateTimeKind.Utc).AddTicks(3120),
+                            DataCriacao = new DateTime(2026, 10, 5, 17, 46, 45, 878, DateTimeKind.Utc).AddTicks(1834),
                             EmpresaId = 1,
                             Inativo = false,
                             IsSystemDefault = true,
@@ -3280,7 +3277,7 @@ namespace WebApiSmartClinic.Migrations.AppDb
                         {
                             Id = 1,
                             Ativo = true,
-                            DataCriacao = new DateTime(2026, 10, 6, 21, 9, 13, 213, DateTimeKind.Utc).AddTicks(2813),
+                            DataCriacao = new DateTime(2026, 10, 5, 17, 46, 45, 878, DateTimeKind.Utc).AddTicks(1357),
                             Descricao = "Administrador(a)",
                             EmpresaId = 1,
                             IsSystemDefault = true
@@ -3289,7 +3286,7 @@ namespace WebApiSmartClinic.Migrations.AppDb
                         {
                             Id = 2,
                             Ativo = true,
-                            DataCriacao = new DateTime(2026, 10, 6, 21, 9, 13, 213, DateTimeKind.Utc).AddTicks(2816),
+                            DataCriacao = new DateTime(2026, 10, 5, 17, 46, 45, 878, DateTimeKind.Utc).AddTicks(1358),
                             Descricao = "Psicólogo(a)",
                             EmpresaId = 1,
                             IsSystemDefault = true
@@ -3298,7 +3295,7 @@ namespace WebApiSmartClinic.Migrations.AppDb
                         {
                             Id = 3,
                             Ativo = true,
-                            DataCriacao = new DateTime(2026, 10, 6, 21, 9, 13, 213, DateTimeKind.Utc).AddTicks(2817),
+                            DataCriacao = new DateTime(2026, 10, 5, 17, 46, 45, 878, DateTimeKind.Utc).AddTicks(1360),
                             Descricao = "Fisioterapeuta",
                             EmpresaId = 1,
                             IsSystemDefault = true
@@ -3307,7 +3304,7 @@ namespace WebApiSmartClinic.Migrations.AppDb
                         {
                             Id = 4,
                             Ativo = true,
-                            DataCriacao = new DateTime(2026, 10, 6, 21, 9, 13, 213, DateTimeKind.Utc).AddTicks(2817),
+                            DataCriacao = new DateTime(2026, 10, 5, 17, 46, 45, 878, DateTimeKind.Utc).AddTicks(1361),
                             Descricao = "Dentista",
                             EmpresaId = 1,
                             IsSystemDefault = true
@@ -3316,7 +3313,7 @@ namespace WebApiSmartClinic.Migrations.AppDb
                         {
                             Id = 5,
                             Ativo = true,
-                            DataCriacao = new DateTime(2026, 10, 6, 21, 9, 13, 213, DateTimeKind.Utc).AddTicks(2819),
+                            DataCriacao = new DateTime(2026, 10, 5, 17, 46, 45, 878, DateTimeKind.Utc).AddTicks(1362),
                             Descricao = "Médico",
                             EmpresaId = 1,
                             IsSystemDefault = true
@@ -3536,7 +3533,7 @@ namespace WebApiSmartClinic.Migrations.AppDb
                             Id = 1,
                             Ativo = true,
                             Capacidade = 10,
-                            DataCriacao = new DateTime(2026, 10, 6, 21, 9, 13, 213, DateTimeKind.Utc).AddTicks(2989),
+                            DataCriacao = new DateTime(2026, 10, 5, 17, 46, 45, 878, DateTimeKind.Utc).AddTicks(1690),
                             EmpresaId = 1,
                             IsSystemDefault = true,
                             Nome = "Principal",
@@ -3597,7 +3594,7 @@ namespace WebApiSmartClinic.Migrations.AppDb
                             Id = 1,
                             Ativo = true,
                             Cor = "#4B89DC",
-                            DataCriacao = new DateTime(2026, 10, 6, 21, 9, 13, 213, DateTimeKind.Utc).AddTicks(2863),
+                            DataCriacao = new DateTime(2026, 10, 5, 17, 46, 45, 878, DateTimeKind.Utc).AddTicks(1411),
                             EmpresaId = 1,
                             IsSystemDefault = true,
                             Legenda = "Agendamento realizado com sucesso!",
@@ -3608,7 +3605,7 @@ namespace WebApiSmartClinic.Migrations.AppDb
                             Id = 2,
                             Ativo = true,
                             Cor = "#3498DB",
-                            DataCriacao = new DateTime(2026, 10, 6, 21, 9, 13, 213, DateTimeKind.Utc).AddTicks(2865),
+                            DataCriacao = new DateTime(2026, 10, 5, 17, 46, 45, 878, DateTimeKind.Utc).AddTicks(1413),
                             EmpresaId = 1,
                             IsSystemDefault = true,
                             Legenda = "Confirmado",
@@ -3619,7 +3616,7 @@ namespace WebApiSmartClinic.Migrations.AppDb
                             Id = 3,
                             Ativo = true,
                             Cor = "#5D9CEC",
-                            DataCriacao = new DateTime(2026, 10, 6, 21, 9, 13, 213, DateTimeKind.Utc).AddTicks(2866),
+                            DataCriacao = new DateTime(2026, 10, 5, 17, 46, 45, 878, DateTimeKind.Utc).AddTicks(1415),
                             EmpresaId = 1,
                             IsSystemDefault = true,
                             Legenda = "Em atendimento",
@@ -3630,7 +3627,7 @@ namespace WebApiSmartClinic.Migrations.AppDb
                             Id = 4,
                             Ativo = true,
                             Cor = "#2ECC71",
-                            DataCriacao = new DateTime(2026, 10, 6, 21, 9, 13, 213, DateTimeKind.Utc).AddTicks(2868),
+                            DataCriacao = new DateTime(2026, 10, 5, 17, 46, 45, 878, DateTimeKind.Utc).AddTicks(1416),
                             EmpresaId = 1,
                             IsSystemDefault = true,
                             Legenda = "Concluído",
@@ -3641,7 +3638,7 @@ namespace WebApiSmartClinic.Migrations.AppDb
                             Id = 5,
                             Ativo = true,
                             Cor = "#E74C3C",
-                            DataCriacao = new DateTime(2026, 10, 6, 21, 9, 13, 213, DateTimeKind.Utc).AddTicks(2869),
+                            DataCriacao = new DateTime(2026, 10, 5, 17, 46, 45, 878, DateTimeKind.Utc).AddTicks(1417),
                             EmpresaId = 1,
                             IsSystemDefault = true,
                             Legenda = "Cancelado pelo paciente",
@@ -3652,7 +3649,7 @@ namespace WebApiSmartClinic.Migrations.AppDb
                             Id = 6,
                             Ativo = true,
                             Cor = "#E57373",
-                            DataCriacao = new DateTime(2026, 10, 6, 21, 9, 13, 213, DateTimeKind.Utc).AddTicks(2870),
+                            DataCriacao = new DateTime(2026, 10, 5, 17, 46, 45, 878, DateTimeKind.Utc).AddTicks(1418),
                             EmpresaId = 1,
                             IsSystemDefault = true,
                             Legenda = "Cancelado pela clínica",
@@ -3663,7 +3660,7 @@ namespace WebApiSmartClinic.Migrations.AppDb
                             Id = 7,
                             Ativo = true,
                             Cor = "#F9A825",
-                            DataCriacao = new DateTime(2026, 10, 6, 21, 9, 13, 213, DateTimeKind.Utc).AddTicks(2872),
+                            DataCriacao = new DateTime(2026, 10, 5, 17, 46, 45, 878, DateTimeKind.Utc).AddTicks(1420),
                             EmpresaId = 1,
                             IsSystemDefault = true,
                             Legenda = "Remarcado",
@@ -3674,7 +3671,7 @@ namespace WebApiSmartClinic.Migrations.AppDb
                             Id = 8,
                             Ativo = true,
                             Cor = "#E67E22",
-                            DataCriacao = new DateTime(2026, 10, 6, 21, 9, 13, 213, DateTimeKind.Utc).AddTicks(2873),
+                            DataCriacao = new DateTime(2026, 10, 5, 17, 46, 45, 878, DateTimeKind.Utc).AddTicks(1421),
                             EmpresaId = 1,
                             IsSystemDefault = true,
                             Legenda = "Não compareceu",
@@ -3809,7 +3806,7 @@ namespace WebApiSmartClinic.Migrations.AppDb
                         {
                             Id = 1,
                             Ativo = true,
-                            DataCriacao = new DateTime(2026, 10, 6, 21, 9, 13, 213, DateTimeKind.Utc).AddTicks(2948),
+                            DataCriacao = new DateTime(2026, 10, 5, 17, 46, 45, 878, DateTimeKind.Utc).AddTicks(1650),
                             Descricao = "À Vista",
                             EmpresaId = 1,
                             IsSystemDefault = true
@@ -3818,7 +3815,7 @@ namespace WebApiSmartClinic.Migrations.AppDb
                         {
                             Id = 2,
                             Ativo = true,
-                            DataCriacao = new DateTime(2026, 10, 6, 21, 9, 13, 213, DateTimeKind.Utc).AddTicks(2952),
+                            DataCriacao = new DateTime(2026, 10, 5, 17, 46, 45, 878, DateTimeKind.Utc).AddTicks(1651),
                             Descricao = "Parcelado",
                             EmpresaId = 1,
                             IsSystemDefault = true
@@ -3827,7 +3824,7 @@ namespace WebApiSmartClinic.Migrations.AppDb
                         {
                             Id = 3,
                             Ativo = true,
-                            DataCriacao = new DateTime(2026, 10, 6, 21, 9, 13, 213, DateTimeKind.Utc).AddTicks(2953),
+                            DataCriacao = new DateTime(2026, 10, 5, 17, 46, 45, 878, DateTimeKind.Utc).AddTicks(1652),
                             Descricao = "Convênio",
                             EmpresaId = 1,
                             IsSystemDefault = true
@@ -3836,7 +3833,7 @@ namespace WebApiSmartClinic.Migrations.AppDb
                         {
                             Id = 4,
                             Ativo = true,
-                            DataCriacao = new DateTime(2026, 10, 6, 21, 9, 13, 213, DateTimeKind.Utc).AddTicks(2954),
+                            DataCriacao = new DateTime(2026, 10, 5, 17, 46, 45, 878, DateTimeKind.Utc).AddTicks(1653),
                             Descricao = "Recorrente",
                             EmpresaId = 1,
                             IsSystemDefault = true
